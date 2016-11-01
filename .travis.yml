@@ -1,0 +1,44 @@
+#sudo: false
+
+language: cpp
+
+matrix:
+    include:
+        - python: 2
+          env: PYTHON=2 ROOT=5
+#        - python: 2
+#          env: PYTHON=2 ROOT=6
+#        - python: 3
+#          env: PYTHON=3 ROOT=5
+#        - python: 3
+#          env: PYTHON=3 ROOT=6
+
+install:
+  # Conda
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then wget -nv http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; fi
+  
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - which gcc
+  - gcc --version
+  - which clang
+  - clang --version
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a # Useful for debugging any issues with conda
+  - conda config --add channels http://conda.anaconda.org/NLeSC  
+  - conda config --set show_channel_urls yes
+  - conda create -q -n testenv python=${PYTHON} root=${ROOT}
+  - export CONDA_ENV_PATH=$HOME/miniconda/envs/testenv
+  - source activate testenv
+  #- conda uninstall --force --yes -q sqlite libpng libx11 jpeg libtiff
+  - root -b -q
+
+before_script:
+  - mkdir -p DSRhoYield/obj
+
+script:
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoYield && make
+  #- python tests/test_root.py
+  #- python tests/test_stl.py

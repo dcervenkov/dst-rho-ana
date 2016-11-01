@@ -1,0 +1,238 @@
+#!/bin/bash -f
+
+function usage_message {
+    echo "ERROR: Arguments incorrectly supplied."
+    echo
+    echo "USAGE: ${0} Queue Channel expXX Event_Type Data_Type Stream_No"
+    echo "where XX = 07, 09, 11, 13, 15, 17, 19, 21, 23, 25, 27, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 55, 61, 63, 65"
+    echo "OR"
+    echo "expXX = all"
+    echo "AND/OR"
+    echo "Event_Type = all"
+    echo "AND/OR"
+    echo "Stream_No = all"
+}
+
+QUEUE=${1}
+CHANNEL=${2}
+EXP=${3}
+EVENTTYPE=${4}
+DATATYPE=${5}
+STREAM=${6}
+SCRIPT="./skim.script"
+
+# Check arguments
+if [ $# != 6 ]; then
+	usage_message
+    exit -1
+fi
+if [ ${EXP} != exp07 -a ${EXP} != exp09 -a ${EXP} != exp11 -a ${EXP} != exp13 -a ${EXP} != exp15 -a ${EXP} != exp17 -a ${EXP} != exp19 -a ${EXP} != exp21 -a ${EXP} != exp23 -a ${EXP} != exp25 -a ${EXP} != exp27 -a ${EXP} != exp31 -a ${EXP} != exp33 -a ${EXP} != exp35 -a ${EXP} != exp37 -a ${EXP} != exp39 -a ${EXP} != exp41 -a ${EXP} != exp43 -a ${EXP} != exp45 -a ${EXP} != exp47 -a ${EXP} != exp49 -a ${EXP} != exp51 -a ${EXP} != exp55 -a ${EXP} != exp61 -a ${EXP} != exp63 -a ${EXP} != exp65 -a ${EXP} != all ]; then
+	usage_message
+    exit -1
+fi
+
+if [ ${EVENTTYPE} = all ]; then
+	for EVENTTYPE in evtgen-charged evtgen-charm evtgen-mixed evtgen-uds; do 
+		${0} ${QUEUE} ${CHANNEL} ${EXP} ${EVENTTYPE} ${DATATYPE} ${STREAM}
+	done
+	exit 0
+fi
+
+# Not *all* really, because I usually run stream 0 manually to check that everything is working
+# and I will not be using the streams 6 - 9 because 6 are enough and uds and charm don't have 
+# streams 6 - 9 anyway
+if [ ${STREAM} = all ]; then
+	for STREAMNO in 1 2 3 4 5; do 
+		${0} ${QUEUE} ${CHANNEL} ${EXP} ${EVENTTYPE} ${DATATYPE} ${STREAMNO}
+	done
+	exit 0
+fi
+
+if [ ${EXP} = all ]; then
+	for EXPNO in 07 09 11 13 15 17 19 21 23 25 27 31 33 35 37 39 41 43 45 47 49 51 55 61 63 65; do 
+		${0} ${QUEUE} ${CHANNEL} exp${EXPNO} ${EVENTTYPE} ${DATATYPE} ${STREAM}
+	done
+	exit 0
+fi
+
+
+if [ ${EXP} = exp07 -o ${EXP} = exp09 -o ${EXP} = exp11 -o ${EXP} = exp13 -o ${EXP} = exp15 -o ${EXP} = exp17 -o ${EXP} = exp19 -o ${EXP} = exp21 -o ${EXP} = exp23 -o ${EXP} = exp25 -o ${EXP} = exp27 ]; then
+	let 'STREAM = STREAM + 10'
+	SVD="svd1"
+else
+	SVD="svd2"
+fi
+
+OUTPUTDIR="../${SVD}/${CHANNEL}/${DATATYPE}_${EVENTTYPE}"
+if [ ! -d "${OUTPUTDIR}" ]; then
+	mkdir -p "${OUTPUTDIR}"
+fi
+
+
+let exp_MIN=1
+# Experiment Database
+
+# Exp65
+if [ ${EXP} = exp65 ]
+    then
+    let exp_MAX=900
+fi
+
+# Exp63
+if [ ${EXP} = exp63 ]
+    then
+    let exp_MAX=800
+fi
+
+# Exp61
+if [ ${EXP} = exp61 ]
+    then
+    let exp_MAX=1300
+fi
+
+# Exp55
+if [ ${EXP} = exp55 ]
+    then
+    let exp_MAX=1800
+fi
+
+# Exp51
+if [ ${EXP} = exp51 ]
+    then
+    let exp_MAX=1900
+fi
+
+# Exp49
+if [ ${EXP} = exp49 ]
+    then
+    let exp_MAX=1000
+fi
+
+# Exp47
+if [ ${EXP} = exp47 ]
+    then
+    let exp_MAX=900
+fi
+
+# Exp45
+if [ ${EXP} = exp45 ]
+    then
+    let exp_MAX=500
+fi
+
+# Exp43
+if [ ${EXP} = exp43 ]
+    then
+    let exp_MAX=1200
+fi
+
+# Exp41
+if [ ${EXP} = exp41 ]
+    then
+    let exp_MAX=1300
+fi
+
+# Exp39
+if [ ${EXP} = exp39 ]
+    then
+    let exp_MAX=1400
+fi
+
+# Exp37
+if [ ${EXP} = exp37 ]
+    then
+    let exp_MAX=2000
+fi
+
+# Exp35
+if [ ${EXP} = exp35 ]
+    then
+    let exp_MAX=700
+fi
+
+# Exp33
+if [ ${EXP} = exp33 ]
+    then
+    let exp_MAX=900
+fi
+
+# Exp31
+if [ ${EXP} = exp31 ]
+    then
+    let exp_MAX=1800
+fi
+
+# Exp27
+if [ ${EXP} = exp27 ]
+    then
+    let exp_MAX=1700
+fi
+
+# Exp25
+if [ ${EXP} = exp25 ]
+    then
+    let exp_MAX=2200
+fi
+
+# Exp23
+if [ ${EXP} = exp23 ]
+    then
+    let exp_MAX=700
+fi
+
+# Exp21
+if [ ${EXP} = exp21 ]
+    then
+    let exp_MAX=400
+fi
+
+# Exp19
+if [ ${EXP} = exp19 ]
+    then
+    let exp_MAX=1800
+fi
+
+# Exp17
+if [ ${EXP} = exp17 ]
+    then
+    let exp_MAX=1000
+fi
+
+# Exp15
+if [ ${EXP} = exp15 ]
+    then
+    let exp_MAX=1500
+fi
+
+# Exp13
+if [ ${EXP} = exp13 ]
+    then
+    let exp_MAX=1700
+fi
+
+# Exp11
+if [ ${EXP} = exp11 ]
+    then
+    let exp_MAX=1400
+fi
+
+# Exp09
+if [ ${EXP} = exp09 ]
+    then
+    let exp_MAX=1300
+fi
+
+# Exp07
+if [ ${EXP} = exp07 ]
+    then
+    let exp_MAX=2900
+fi
+
+while [ $exp_MIN -lt $exp_MAX ]; do
+	let RUNSTART=exp_MIN
+	let RUNEND=exp_MIN+99
+	let exp_MIN=exp_MIN+100
+	bsub -q $1 ${SCRIPT} ${SVD} ${CHANNEL} ${EXP} ${RUNSTART} ${RUNEND} ${EVENTTYPE} ${DATATYPE} ${STREAM}
+done
+
+exit 0

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+HOST="ipnp29"
+
+echo "Sending files to ${HOST}..."
+
+cd ../hbook/D0Kpi
+for CHANNEL in "D0Kpi" "D0Kpipi0" "D0K3pi"; do
+	cd ../${CHANNEL}
+	for STREAM in `seq 0 5`; do
+		HOSTDIR="bin/belle/DSRhoYield/data/${CHANNEL}/stream${STREAM}"
+		rsync DSRhoSkim_svd{1,2}_on_resonance_evtgen-*_s*${STREAM}.root ${HOST}:${HOSTDIR}/.  
+	done
+done
+echo "All done."

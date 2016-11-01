@@ -1,0 +1,14 @@
+#!/bin/bash
+
+for DIR in ../log/D0K*; do
+	OLDDIR="old$(date +'%y%m%d')"
+	mkdir $DIR/$OLDDIR
+	mv $DIR/*.log $DIR/$OLDDIR
+done
+
+for DIR in ../hbook/D0K*; do
+	OLDDIR="old$(date +'%y%m%d')"
+	mkdir $DIR/$OLDDIR
+	rm -f $DIR/*.hbook
+	mv $DIR/*.root $DIR/$OLDDIR
+done

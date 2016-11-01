@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for CHANNEL in Kpi Kpipi0 K3pi; do
+	./DSRhoEfficiency ../DSRhoSens/DSRhoFit/data/D0${CHANNEL}/dataset_D0${CHANNEL} ../DSRhoPeek/data/signal_1M/DSRho-mdst_D0${CHANNEL}_1M.root plots/${CHANNEL}
+done
+

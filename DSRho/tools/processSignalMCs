@@ -1,0 +1,19 @@
+#!/bin/bash
+
+bsub -q s ./processMdst.script mdst_D0Kpi_svd1 D0Kpi
+bsub -q s ./processMdst.script mdst_D0Kpi_svd2 D0Kpi
+
+bsub -q s ./processMdst.script mdst_D0Kpipi0_svd1 D0Kpipi0
+bsub -q s ./processMdst.script mdst_D0Kpipi0_svd2 D0Kpipi0
+
+bsub -q s ./processMdst.script mdst_D0K3pi_svd1 D0K3pi
+bsub -q s ./processMdst.script mdst_D0K3pi_svd2 D0K3pi
+
+#bsub -q s ./processMdst.script mdst_D0Kpi_1M_svd1 D0Kpi
+#bsub -q s ./processMdst.script mdst_D0Kpi_1M_svd2 D0Kpi
+#
+#bsub -q s ./processMdst.script mdst_D0Kpipi0_1M_svd1 D0Kpipi0
+#bsub -q s ./processMdst.script mdst_D0Kpipi0_1M_svd2 D0Kpipi0
+#
+#bsub -q s ./processMdst.script mdst_D0K3pi_1M_svd1 D0K3pi
+#bsub -q s ./processMdst.script mdst_D0K3pi_1M_svd2 D0K3pi

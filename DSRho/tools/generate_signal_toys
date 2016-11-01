@@ -1,0 +1,57 @@
+#!/bin/bash
+
+START=16
+END=100
+BATCHSIZE=13
+
+function wait_for_bjobs {
+	echo "Waiting for bjobs to finish"
+	JOBS=$(bjobs 2>&1 | tail -n1)
+	while [ "$JOBS" != "No unfinished job found" ];  do
+		sleep 5
+		JOBS=$(bjobs 2>&1 | tail -n1)
+	done
+	echo "bjobs finished"
+}
+
+function process_batch {
+	BATCHSTART=$1
+	BATCHEND=$2
+
+	cd ~/DSRho/mcproduzh/gsim
+	for i in $(seq $BATCHSTART $BATCHEND); do
+		./runGsimReco.csh ../evtgen/gen/D0Kpi_r001_${i}/ 
+	done
+
+	echo "gsim-ing batch $BATCHSTART - $BATCHEND"
+	wait_for_bjobs
+
+	cd ~/DSRho/DSRho/tools
+	for i in $(seq $BATCHSTART $BATCHEND); do
+		bsub -q s ./processMdst.script mdst_D0Kpi_r001_${i} D0Kpi
+	done
+
+	echo "DSRho-ing batch $BATCHSTART - $BATCHEND"
+	wait_for_bjobs
+
+	cd ~/DSRho/mcproduzh/gsim
+	for i in $(seq $BATCHSTART $BATCHEND); do
+		rm -rf {mdst,log,hbook}_D0Kpi_r001_${i}
+	done
+}
+
+let "BATCHES = (END - START)/BATCHSIZE"
+
+for BATCHNO in $(seq $BATCHES); do
+	echo "Batch $BATCHNO"
+	let "BATCHSTART = START + (BATCHNO-1)*BATCHSIZE"
+	let "BATCHEND = BATCHSTART + BATCHSIZE - 1"
+	process_batch $BATCHSTART $BATCHEND
+done
+
+let "LASTSTART = BATCHES * BATCHSIZE + START"
+if [ $LASTSTART -le $END ]; then
+	let "BATCHES = BATCHES + 1"
+	echo "Batch $BATCHES"
+	process_batch $LASTSTART $END
+fi

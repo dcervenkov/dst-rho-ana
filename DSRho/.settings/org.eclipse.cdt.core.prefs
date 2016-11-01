@@ -1,0 +1,12 @@
+eclipse.preferences.version=1
+environment/project/0.1797914047/BELLE_RUN_DIR/delimiter=\:
+environment/project/0.1797914047/BELLE_RUN_DIR/operation=append
+environment/project/0.1797914047/BELLE_RUN_DIR/value=/belle/belle/b20091203_2126/x86_64-unknown-linux-gnu/opt
+environment/project/0.1797914047/BELLE_TOP_DIR/delimiter=\:
+environment/project/0.1797914047/BELLE_TOP_DIR/operation=append
+environment/project/0.1797914047/BELLE_TOP_DIR/value=/belle/belle/b20091203_2126
+environment/project/0.1797914047/ROOTSYS/delimiter=\:
+environment/project/0.1797914047/ROOTSYS/operation=append
+environment/project/0.1797914047/ROOTSYS/value=${HOME}/bin/belle/rootsys
+environment/project/0.1797914047/append=true
+environment/project/0.1797914047/appendContributed=true

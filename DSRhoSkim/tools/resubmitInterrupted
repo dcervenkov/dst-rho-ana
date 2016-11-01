@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+
+import sys
+import subprocess
+import glob
+
+script = "./skim.script"
+# Resubmit in the 'long' queue, because failures are often caused by time-outs
+queue = "l"
+lsf = "bsub -q"
+
+if len(sys.argv) < 2:
+	print "ERROR: Missing arguments"
+	print "USAGE: " + sys.argv[0] + " DIR(S)..."
+	sys.exit(1)
+
+for directory in sys.argv[1:]:
+	print directory
+	logFiles = glob.glob(directory + "/*.log")
+	logFiles.sort()
+
+	badLogFiles = []
+	for log in logFiles:
+		terminated = False
+		if not 'terminate' in open(log).read():
+			badLogFiles.append(log)
+
+	jobs = []
+
+	for log in badLogFiles:
+		prefix,svd,channel,types,filename = log.split("/")	
+		dataType,eventType = types.rsplit("_",1)
+		basename,exp,run,stream = filename.split("_")
+		runStart,runEnd = run.split("-")
+		runStart = runStart.lstrip('r')
+		runEnd = runEnd.lstrip('r')
+		stream = stream.lstrip('s')
+		stream = stream.replace('.log','')
+
+		job = " ".join([lsf,queue,script,svd,channel,exp,runStart,runEnd,eventType,dataType,stream])
+		jobs.append(job)
+
+	for job in jobs:
+		print job
+
+	print "Bad logfiles: {:d}/{:d}".format(len(badLogFiles), len(logFiles))
+	while len(badLogFiles):
+		answer = raw_input("Do you want to submit these jobs? [Y/n] ")
+		if answer == "" or answer == "Y" or answer == "y":
+			print "Submitting..."
+			for job in jobs:
+				subprocess.call(job,shell=True)
+			break
+		elif answer == "n":
+			print "Aborting..."
+			break
+

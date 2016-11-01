@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [[ $# -ne 1 ]];  then
+	echo "ERROR: Wrong number of arguments."
+	echo "USAGE: ${0} channel"
+	exit -1
+fi
+
+CHANNEL=${1}
+
+HOST="ipnp29"
+HOSTDIR="bin/belle/DSRhoPeek/data/${CHANNEL}/mc"
+RESULTSDIR="../hbook/${CHANNEL}"
+
+cd ${RESULTSDIR}
+
+for FILE in *.hbook; do
+	h2root ${FILE}
+done
+
+for TYPE in "charged" "charm" "mixed" "uds"; do
+	hadd DSRhoSkim_svd1_on_resonance_evtgen-${TYPE}_sall.root DSRhoSkim_svd1_on_resonance_evtgen-${TYPE}_s1[0-9]*.root
+	hadd DSRhoSkim_svd2_on_resonance_evtgen-${TYPE}_sall.root DSRhoSkim_svd2_on_resonance_evtgen-${TYPE}_s[0-9]*.root
+done
+
+echo "Sending files to ${HOST}..."
+rsync *sall.root ${HOST}:${HOSTDIR}/.
+echo "All done."

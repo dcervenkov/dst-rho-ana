@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# If no argument is supplied download/upload to ipnp29
+# else to the supplied hostname
+if [ -z "$1" ]; then
+    HOSTNAME="ipnp29"
+else
+    HOSTNAME=$1
+fi
+
+echo "Establishing connection to $HOSTNAME..." && rsync -uv $HOSTNAME:'bin/belle/DSRho/*.{cc,h}' . && make && echo "Running..." && ./RunSignalMC.csh && h2root hbook/DSRho-signalMC.hbook hbook/DSRho-signalMC.root && scp hbook/DSRho-signalMC.root $HOSTNAME:bin/belle/DSRhoPeek/data/.

@@ -1,0 +1,8 @@
+/**
+ *	@mainpage The mainpage documentation
+ *
+ *	This program fits the signal and background yield of the B0->(D*->D0pi)(rho->pipi0) process
+ *	for 3 separate channels: D0->Kpi, Kpipi0 and K3pi.
+ *
+ */
+

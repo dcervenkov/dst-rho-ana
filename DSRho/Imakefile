@@ -1,0 +1,53 @@
+#
+# Imakefile
+#
+
+TARGET1 = dsrhomodule.so
+OBJS1 = DSRhoModule.o UserInfo.o myutils.o geninfo.o ksfwmoments.o printTree.o Continuum.o constants.o 
+BUILD_TOP_DIR    = $(BELLE_RUN_DIR)
+RELATIVE_TOP_DIR = $(BELLE_TOP_DIR)
+BELLE_INC_DIR    = $(BELLE_TOP_DIR)/include
+BOOST_INC_DIR    = /usr/local/include/boost-1_37
+BBSTABLE         = $(BELLE_TOP_DIR)/src/config/panther/bbstable
+
+include $(BELLE_TOP_DIR)/src/config/Makefile.panther
+
+BELLE_LIB = -lip -lkid -lmdst -lparticle -lhelix -lbenergy -lbelleCLHEP -leid -ltagv -lhamlet -lexkfitter
+PANTHER_LIB = -L$(BELLE_RUN_DIR)/lib/so -lpanther
+ROOT_LIB = -L$(ROOTSYS)/lib -lTMVA 
+#EXTRA_LIB =
+.SUFFIXES: .c .cc .so
+
+LIBS = -L. $(PANTHER_LIB) $(BELLE_LIB) $(ROOT_LIB) #$(EXTRA_LIB)
+INCS = -I. -I$(MY_TOP_DIR)/include -I$(BELLE_INC_DIR) -I$(BOOST_INC_DIR) -I$(ROOTSYS)/include
+CC  = gcc
+CXX = g++
+OPT = -g
+CFLAGS   = $(OPT) -DHEP_SHORT_NAMES -DBELLE_SHORT_NAMES -DDSTXX_NOINLINE -fPIC
+CXXFLAGS = $(OPT) -DHEP_SHORT_NAMES -DBELLE_SHORT_NAMES -DDSTXX_NOINLINE -fPIC -Wall -Wno-non-virtual-dtor
+SOFLAGS  = $(OPT) -shared -Wl,-export-dynamic
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCS) -o $@ $<
+
+.c.o:
+	$(CXX) -c $(CFLAGS) $(INCS) -o $@ $<
+
+# ------------------------------------------------------------------------
+
+$(TARGET1): $(OBJS1)
+	$(CXX) $(SOFLAGS) -o $@ $(OBJS1) $(LIBS)
+
+all:: $(TARGET1)
+
+clean::
+	rm -f Makefile Makefile.bak *.root *.mdst
+	rm -f $(OBJS1)
+
+svnclean::
+	rm -f Makefile Makefile.bak
+	rm -f *.root *.mdst
+	rm -f $(OBJS1)
+	rm -rf hbk/ index/
+	rm -f *.hbk *.index
+	rm -f $(TARGET1)

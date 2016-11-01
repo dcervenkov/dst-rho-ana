@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for CHANNEL in "D0Kpi" "D0Kpipi0" "D0K3pi"; do
+	for STREAM in $(seq 0 5); do
+		mkdir -p plots/${CHANNEL}/stream${STREAM}
+		./DSRhoYield ../DSRhoPeek/data/${CHANNEL}/mc data/${CHANNEL}/stream${STREAM} plots/${CHANNEL}/stream${STREAM}
+	done
+done

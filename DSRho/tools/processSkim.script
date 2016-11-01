@@ -1,0 +1,56 @@
+#! /bin/tcsh -f
+
+if ( $#argv != 4 ) then
+	echo "ERROR: Wrong number of arguments."
+	echo "USAGE: ${0} channel index-file hbook-file log-file"
+	exit -1
+endif
+
+set CHANNEL=${1}
+set INDEXPATH=${2}
+set HBOOKPATH=${3}
+set LOGPATH=${4}
+set BASENAME=`basename $INDEXPATH .index`
+
+if (! -e ${INDEXPATH}) then
+	echo "ERROR: File '${INDEXPATH}' doesn't exist."
+	exit 2
+endif
+
+if (${BASENAME} =~ *svd2*) then
+	set SVD="svd2"
+	setenv USE_GRAND_REPROCESS_DATA 1
+else
+	set SVD="svd1"
+endif
+
+setenv BASF_NPROCESS 0
+source /sw/belle/local/etc/cshrc_general
+source /home/belle/dcervenk/Env/cshrc.post
+
+
+basf <<EOD >& ${LOGPATH}
+
+path create main
+path create Analysis
+
+module register fix_mdst dsrhomodule
+path add_module main fix_mdst
+path add_module Analysis dsrhomodule 
+
+path add_condition main >:0:Analysis
+path add_condition main =<:0:KILL
+
+module put_parameter dsrhomodule channel\\${CHANNEL}
+module put_parameter dsrhomodule svd\\${SVD}
+
+initialize
+
+histogram define ${HBOOKPATH}
+
+// run over MC
+process_event ${INDEXPATH} 0
+
+terminate
+
+EOD

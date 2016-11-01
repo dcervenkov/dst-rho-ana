@@ -1,0 +1,67 @@
+#! /bin/tcsh -f
+
+#
+# Skim MC and produce an index file
+#
+
+if ( $#argv != 8 ) then
+        echo "ERROR: 8 arguments not supplied."
+        echo "USAGE: ${0} svdX Channel expXX Run_Start Run_End Event_Type Data_Type Stream_No"
+        exit -1
+endif
+
+set BASENAME="DSRhoSkim"
+set MODULENAME="dsrhoskimmodule"
+
+set SVD=${1}
+set CHANNEL=${2}
+set EXP=${3}
+set EXPNO=`echo "${EXP}" | sed s/exp//`
+set RUNSTART=${4}
+set RUNEND=${5}
+set EVENTTYPE=${6}
+set DATATYPE=${7}
+set STREAM=${8}
+
+cd /home/belle/dcervenk/DSRho/DSRhoSkim/${SVD}/${CHANNEL}
+
+if (${SVD} == "svd2") then
+	setenv USE_GRAND_REPROCESS_DATA 1
+endif
+setenv BASF_NPROCESS 0
+source /sw/belle/local/etc/cshrc_general
+source /home/belle/dcervenk/Env/cshrc.post
+
+
+basf << EOF >& ${DATATYPE}_${EVENTTYPE}/${BASENAME}_${EXP}_r${RUNSTART}-r${RUNEND}_s${STREAM}.log
+
+module register fix_mdst ${MODULENAME} user_index
+
+path create main
+path create correct
+path create continue
+
+path add_module main fix_mdst
+module put_parameter fix_mdst Scale_error\1
+
+path add_condition main =<:0:KILL
+path add_condition main >:0:correct
+
+path add_module correct ${MODULENAME} user_index
+
+path add_condition correct =<:0:KILL
+path add_condition correct >:0:continue
+
+initialize
+
+output open ${DATATYPE}_${EVENTTYPE}/${BASENAME}_${EXP}_r${RUNSTART}-r${RUNEND}_s${STREAM}.index
+
+histogram define ${DATATYPE}_${EVENTTYPE}/${BASENAME}_${EXP}_r${RUNSTART}-r${RUNEND}_s${STREAM}.hbook
+
+process_url http://bweb3/montecarlo.php?ex=${EXPNO}&rs=${RUNSTART}&re=${RUNEND}&ty=${EVENTTYPE}&dt=${DATATYPE}&bl=caseB&st=${STREAM}
+
+terminate
+
+EOF
+
+exit 0

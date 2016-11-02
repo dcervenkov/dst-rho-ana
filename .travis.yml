@@ -24,8 +24,8 @@ before_install:
   - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/panther_manager.h.patch
   - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/Panther_String.h.patch
   - cat ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h
-  - patch ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h panther_manager.h.patch
-  - patch ${BELLE_TOP_DIR}/src/util/panther/panther/Panther_String.h Panther_String.h.patch
+  - sudo patch --verbose ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h panther_manager.h.patch
+  - sudo patch --verbose ${BELLE_TOP_DIR}/src/util/panther/panther/Panther_String.h Panther_String.h.patch
   - cat ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h
 
 install:

@@ -10,7 +10,6 @@
 #include "RooPlot.h"
 #include "RooFitResult.h"
 
-#include "Minuit2/Minuit2Minimizer.h"
 #include "TPluginManager.h"
 #include "TMath.h"
 #include "TIterator.h"

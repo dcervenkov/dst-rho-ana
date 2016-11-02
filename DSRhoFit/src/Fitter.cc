@@ -104,7 +104,7 @@ Fitter::~Fitter() {
 
 void Fitter::Fit() {
 	numFitParameters = (parameters->selectByAttrib("Constant", kFALSE))->getSize();
-	result = pdf->fitTo(*dataSet, RooFit::Save(), RooFit::Timer(true), RooFit::Minimizer("Minuit2"),
+	result = pdf->fitTo(*dataSet, RooFit::Save(), RooFit::Timer(true),
 			RooFit::Minos(false), RooFit::Hesse(false), RooFit::Strategy(1), RooFit::NumCPU(4));
 
 	const TMatrixDSym& cor = result->correlationMatrix();

@@ -37,4 +37,14 @@
 */doc/html/*
 *.db
 DSRhoPeek/svd*/*
-DSRho/Makefile # Makefile is generated from Imakefile
+DSRho/Makefile
+DSRhoSkim/Makefile
+
+# Executable files
+DSRhoCPFit/DSRhoCPFit
+DSRhoEfficiency/DSRhoEfficiency
+DSRhoFit/DSRhoFit
+DSRhoLifetime/DSRhoLifetime
+DSRhoPeek/DSRhoPeek
+DSRhoYield/DSRhoYield
+

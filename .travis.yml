@@ -32,12 +32,12 @@ before_install:
   - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/TagV.cc.patch
   - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/TagV.h.patch
 
-  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/kvertexfitter.cc kvertexfitter.cc.patch
-  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/kvertexfitter.h kvertexfitter.h.patch
+  - sudo patch ${BELLE_TOP_DIR}/src/anal/kfitter/src/kvertexfitter.cc kvertexfitter.cc.patch
+  - sudo patch ${BELLE_TOP_DIR}/src/anal/kfitter/kfitter/kvertexfitter.h kvertexfitter.h.patch
   - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h panther_manager.h.patch
   - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/Panther_String.h Panther_String.h.patch
-  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/TagV.cc TagV.cc.patch
-  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/TagV.h TagV.h.patch
+  - sudo patch ${BELLE_TOP_DIR}/src/anal/tagv/src/TagV.cc TagV.cc.patch
+  - sudo patch ${BELLE_TOP_DIR}/src/anal/tagv/tagv/TagV.h TagV.h.patch
 
 install:
   # Conda
@@ -58,7 +58,6 @@ install:
   - conda create -q -n testenv python=${PYTHON} root=${ROOT}
   - export CONDA_ENV_PATH=$HOME/miniconda/envs/testenv
   - source activate testenv
-  #- conda uninstall --force --yes -q sqlite libpng libx11 jpeg libtiff
   - root -b -q
 
 before_script:

@@ -55,6 +55,7 @@ before_script:
 
 script:
   #- cd ${TRAVIS_BUILD_DIR}/DSRhoYield && make
+  - cd ${TRAVIS_BUILD_DIR}/DSRho && xmkmf && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoSkim && xmkmf && make
   #- python tests/test_root.py
   #- python tests/test_stl.py

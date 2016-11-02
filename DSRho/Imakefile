@@ -24,7 +24,7 @@ CC  = gcc
 CXX = g++
 OPT = -g
 CFLAGS   = $(OPT) -DHEP_SHORT_NAMES -DBELLE_SHORT_NAMES -DDSTXX_NOINLINE -fPIC
-CXXFLAGS = $(OPT) -DHEP_SHORT_NAMES -DBELLE_SHORT_NAMES -DDSTXX_NOINLINE -fPIC -Wall -Wno-non-virtual-dtor -std=c++11
+CXXFLAGS = $(OPT) -DHEP_SHORT_NAMES -DBELLE_SHORT_NAMES -DDSTXX_NOINLINE -fPIC -Wall -Wno-non-virtual-dtor
 SOFLAGS  = $(OPT) -shared -Wl,-export-dynamic
 
 .cc.o:

@@ -1,4 +1,7 @@
 # dst-rho-ana
+
+[![Build Status](https://travis-ci.org/dcervenkov/dst-rho-ana.svg?branch=master)](https://travis-ci.org/dcervenkov/dst-rho-ana)
+
 This is a collection of software tools used to perform a time-dependent angular CP violation study of the B → D* + ρ decay. 
 
 ### DSRho

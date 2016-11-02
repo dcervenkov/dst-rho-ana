@@ -26,7 +26,7 @@ before_install:
   - cat ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h
   - patch ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h panther_manager.h.patch
   - patch ${BELLE_TOP_DIR}/src/util/panther/panther/Panther_String.h Panther_String.h.patch
-  - ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h
+  - cat ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h
 
 install:
   # Conda

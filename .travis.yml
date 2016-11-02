@@ -6,12 +6,12 @@ matrix:
     include:
         - python: 2
           env: PYTHON=2 ROOT=5
-        - python: 2
-          env: PYTHON=2 ROOT=6
-        - python: 3
-          env: PYTHON=3 ROOT=5
-        - python: 3
-          env: PYTHON=3 ROOT=6
+#        - python: 2
+#          env: PYTHON=2 ROOT=6
+#        - python: 3
+#          env: PYTHON=3 ROOT=5
+#        - python: 3
+#          env: PYTHON=3 ROOT=6
 
 before_install:
   - sudo apt-get -qq update
@@ -23,8 +23,10 @@ before_install:
   - export BELLE_RUN_DIR=/belle/belle/b20091203_2126/x86_64-unknown-linux-gnu/opt
   - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/panther_manager.h.patch
   - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/Panther_String.h.patch
+  - cat ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h
   - patch ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h panther_manager.h.patch
   - patch ${BELLE_TOP_DIR}/src/util/panther/panther/Panther_String.h Panther_String.h.patch
+  - ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h
 
 install:
   # Conda

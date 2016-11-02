@@ -6,27 +6,38 @@ matrix:
     include:
         - python: 2
           env: PYTHON=2 ROOT=5
-#        - python: 2
-#          env: PYTHON=2 ROOT=6
-#        - python: 3
-#          env: PYTHON=3 ROOT=5
-#        - python: 3
-#          env: PYTHON=3 ROOT=6
+        - python: 2
+          env: PYTHON=2 ROOT=6
+        - python: 3
+          env: PYTHON=3 ROOT=5
+        - python: 3
+          env: PYTHON=3 ROOT=6
 
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y xutils-dev libboost-all-dev
+
+  # Download and install Belle libraries
   - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/belle-b20091203-2126_11061-2_amd64.deb
   - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/belle-cernlib2006_2006-9_amd64.deb
   - sudo dpkg -i *.deb
   - export BELLE_TOP_DIR=/belle/belle/b20091203_2126
   - export BELLE_RUN_DIR=/belle/belle/b20091203_2126/x86_64-unknown-linux-gnu/opt
+
+  # Download and apply patches (the deb packages contain old library versions)
+  - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/kvertexfitter.cc.patch
+  - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/kvertexfitter.h.patch
   - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/panther_manager.h.patch
   - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/Panther_String.h.patch
-  - cat ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h
-  - sudo patch --verbose ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h panther_manager.h.patch
-  - sudo patch --verbose ${BELLE_TOP_DIR}/src/util/panther/panther/Panther_String.h Panther_String.h.patch
-  - cat ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h
+  - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/TagV.cc.patch
+  - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/TagV.h.patch
+
+  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/kvertexfitter.cc kvertexfitter.cc.patch
+  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/kvertexfitter.h kvertexfitter.h.patch
+  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h panther_manager.h.patch
+  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/Panther_String.h Panther_String.h.patch
+  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/TagV.cc TagV.cc.patch
+  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/TagV.h TagV.h.patch
 
 install:
   # Conda
@@ -51,11 +62,19 @@ install:
   - root -b -q
 
 before_script:
+  - mkdir -p DSRhoCPFit/obj
+  - mkdir -p DSRhoEfficiency/obj
+  - mkdir -p DSRhoFit/obj
+  - mkdir -p DSRhoLifetime/obj
+  - mkdir -p DSRhoPeek/obj
   - mkdir -p DSRhoYield/obj
 
 script:
-  #- cd ${TRAVIS_BUILD_DIR}/DSRhoYield && make
   - cd ${TRAVIS_BUILD_DIR}/DSRho && xmkmf && make
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit && make
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoEfficiency && make
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoFit && make
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoLifetime && make
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoPeek && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoSkim && xmkmf && make
-  #- python tests/test_root.py
-  #- python tests/test_stl.py
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoYield && make

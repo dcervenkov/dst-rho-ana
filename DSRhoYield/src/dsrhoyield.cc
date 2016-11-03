@@ -1,6 +1,6 @@
 /**
  *  @file    dsrhoyield.cc
- *  @author  Daniel Cervenkov, cervenkov@ipnp.mff.cuni.cz
+ *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
  *  @date    2015-07-16
  *
  *  @brief Main file

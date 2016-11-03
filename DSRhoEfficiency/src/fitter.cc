@@ -1,6 +1,6 @@
 /**
  *  @file    fitter.cc
- *  @author  Daniel Cervenkov, cervenkov@ipnp.mff.cuni.cz
+ *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
  *  @date    2015-07-31
  *
  *  @brief This class performs the yield fitting itself as well as plotting

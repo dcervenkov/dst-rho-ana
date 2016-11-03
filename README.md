@@ -37,7 +37,7 @@ Time-dependent non-angular fitter that can be used to extract B lifetime. It inc
 This small tool reads in the ROOT file created by the DSRho module for (usually generic) MC and creates plots of all the variables with overlaid components (signal, good D & bad ρ, etc.). Several python scripts that can be used to generate publication quality plots are also included. 
 
 ### DSRhoSkim
-A BASF module that goes through the whole Belle dataset and preselects data for the main analysis module. Does reconstruction and a few very simple cuts.
+A BASF module that goes through the whole Belle dataset and preselects data for the main analysis module. It does reconstruction and a few very simple cuts.
 
 ### DSRhoYield
 This program performs a 1D Mbc fit to extract signal yield from data. It first fixes signal, self-cross-feed and background shapes and some ratios from generic MC. We introduce a smearing parameter when fitting data to account for MC vs. data differences in Mbc resolution

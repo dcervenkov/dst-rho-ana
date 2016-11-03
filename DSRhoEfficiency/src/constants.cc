@@ -1,6 +1,6 @@
 /**
  *  @file    constants.h
- *  @author  Daniel Cervenkov, cervenkov@ipnp.mff.cuni.cz
+ *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
  *  @date    2015-11-24
  *
  *  @brief Holds all the constants required by the program

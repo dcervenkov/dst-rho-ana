@@ -1,6 +1,6 @@
 /**
  *  @file    dsrhocpfit.h
- *  @author  Daniel Cervenkov, cervenkov@ipnp.mff.cuni.cz
+ *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
  *  @date    2016-06-24
  *
  *  @brief Main header

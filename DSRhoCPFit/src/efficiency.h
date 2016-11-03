@@ -1,6 +1,6 @@
 /**
  *  @file    efficiency.cc
- *  @author  Daniel Cervenkov, cervenkov@ipnp.mff.cuni.cz
+ *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
  *  @date    2016-01-22
  *
  *  @brief Class that calculates efficiency (detector acceptance) from a model for a set of parameters

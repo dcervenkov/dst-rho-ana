@@ -31,6 +31,8 @@
 *.out
 *.app
 
+data
+
 */data*/*
 */plots*/*
 */results*/*

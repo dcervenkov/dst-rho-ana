@@ -1,6 +1,6 @@
 /**
  *  @file    dsrholifetime.cc
- *  @author  Daniel Cervenkov, cervenkov@ipnp.mff.cuni.cz
+ *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
  *  @date    2016-04-05
  *
  *  @brief Main file

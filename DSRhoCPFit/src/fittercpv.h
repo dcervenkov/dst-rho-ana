@@ -1,14 +1,14 @@
 /**
- *  @file    fitter.h
+ *  @file    fittercpv.h
  *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
- *  @date    2015-07-31
+ *  @date    2016-11-03
  *
  *  @brief This class performs the yield fitting itself as well as plotting
  *
  */
 
-#ifndef FITTERLIFETIME_H_
-#define FITTERLIFETIME_H_
+#ifndef FITTERCPV_H_
+#define FITTERCPV_H_
 
 // ROOT includes
 #include "TCanvas.h"
@@ -18,10 +18,10 @@
 // Local includes
 #include "constants.h"
 
-class FitterLifetime {
+class FitterCPV {
 public:
-	FitterLifetime();
-	virtual ~FitterLifetime();
+	FitterCPV();
+	virtual ~FitterCPV();
 
 	void PlotVar(RooRealVar& var, const RooAbsData&) const;
 	void PlotWithPull(const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf, const char* title = "") const;
@@ -119,4 +119,4 @@ private:
 
 };
 
-#endif /* FITTERLIFETIME_H_ */
+#endif /* FITTERCPV_H_ */

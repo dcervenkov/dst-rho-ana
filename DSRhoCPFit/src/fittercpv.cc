@@ -1,16 +1,15 @@
 /**
- *  @file    fitterlifetime.cc
+ *  @file    fittercpv.cc
  *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
- *  @date    2016-04-05
+ *  @date    2016-11-03
  *
  *  @brief Class that performs the CP fit itself as well as plotting
  *
  */
 
-#include <dtcppdf.h>
-#include "fitterlifetime.h"
+#include "fittercpv.h"
 
-// BASF includes
+// Belle includes
 #include "tatami/tatami.h"
 
 // ROOT includes
@@ -38,8 +37,9 @@
 
 // Local includes
 #include "constants.h"
+#include "dtcppdf.h"
 
-FitterLifetime::FitterLifetime() {
+FitterCPV::FitterCPV() {
 	thetat_ = new RooRealVar( "thetat", "thetat", 0, constants::pi );
 	thetab_ = new RooRealVar( "thetab", "thetab", 0, constants::pi );
 	phit_ = new RooRealVar( "phit", "phit", -constants::pi, constants::pi );
@@ -154,7 +154,7 @@ FitterLifetime::FitterLifetime() {
 
 }
 
-FitterLifetime::~FitterLifetime() {
+FitterCPV::~FitterCPV() {
 	if(output_file_) {
 		if(output_file_->IsOpen()) {
 			output_file_->Close();
@@ -166,7 +166,7 @@ FitterLifetime::~FitterLifetime() {
  * Make a simple plot of a variable and save it to a file
  * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
  */
-void FitterLifetime::PlotVar(RooRealVar& var, const RooAbsData& data) const {
+void FitterCPV::PlotVar(RooRealVar& var, const RooAbsData& data) const {
 	TCanvas* canvas = new TCanvas(var.GetName(), var.GetTitle(), 500, 500);
 
 	double range_min;
@@ -187,7 +187,7 @@ void FitterLifetime::PlotVar(RooRealVar& var, const RooAbsData& data) const {
 }
 
 // TODO: Remove/refactor
-void FitterLifetime::Test() {
+void FitterCPV::Test() {
 	// vars with phiweak = phiweak
 //	double par_input[] = {
 //			0.269,
@@ -522,7 +522,7 @@ void FitterLifetime::Test() {
 
 }
 
-void FitterLifetime::Toy() {
+void FitterCPV::Toy() {
 	// vars with phiweak = phiweak + pi, r = 0.01
 	double par_input[] = {
 			0.269,
@@ -789,7 +789,7 @@ void FitterLifetime::Toy() {
  * @param pdf PDF to use for plotting and pull calculation
  * @param title [optional] Title for the y-axis
  */
-void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data, const RooAbsPdf& pdf, const char* title) const {
+void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, const RooAbsPdf& pdf, const char* title) const {
 	TString name = pdf.GetName();
 	name += "_";
 	name += var.GetName();
@@ -875,7 +875,7 @@ void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
  * @param position_top Should the box be displayed at the top or bottom of the plot
  * @param position_left Should the box be displayed at the left or right of the plot
  */
-TPaveText* FitterLifetime::CreateStatBox(const double chi2, const bool position_top, const bool position_left) const {
+TPaveText* FitterCPV::CreateStatBox(const double chi2, const bool position_top, const bool position_left) const {
 	// If no fit result exists return a null pointer
 	if (!result_) {
 		printf("WARNING: No result exists, can't create stat box!\n");
@@ -925,7 +925,7 @@ TPaveText* FitterLifetime::CreateStatBox(const double chi2, const bool position_
 /**
  * Construct and return a cut string common for all for categories
  */
-TString FitterLifetime::GetCommonCutsString() const{
+TString FitterCPV::GetCommonCutsString() const{
 	TString common_cuts("evmcflag==1&&vrusable==1&&vtusable==1&&");
 	common_cuts += "((vrchi2/vrndf)<";
 	common_cuts += constants::cuts::sig_vtx_h;
@@ -955,7 +955,7 @@ TString FitterLifetime::GetCommonCutsString() const{
  * @param file_path Path to the ROOT file
  * @param num_events [optional] Maximum number of events to use (0 to read all)
  */
-void FitterLifetime::ReadInFile(const char* file_path, const int& num_events) {
+void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
 	TFile* input_file = new TFile(file_path);
 	TTree* input_tree = dynamic_cast<TTree*>(input_file->Get("h2000"));
 
@@ -1041,7 +1041,7 @@ void FitterLifetime::ReadInFile(const char* file_path, const int& num_events) {
 /**
  * Set the directory to which to ouput plots
  */
-void FitterLifetime::SetOutputDir(const char* output_dir) {
+void FitterCPV::SetOutputDir(const char* output_dir) {
 	gEnv->SetValue("Canvas.PrintDirectory", output_dir);
 	printf("print dir: %s\n",gEnv->GetValue("Canvas.PrintDirectory","not found"));
 	if (make_plots_) {

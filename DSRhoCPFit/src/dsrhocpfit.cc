@@ -14,7 +14,7 @@
 #include <getopt.h>
 
 // Local includes
-#include "fitterlifetime.h"
+#include "fittercpv.h"
 #include "tools.h"
 #include "colors.h"
 #include "constants.h"
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
 	tools::SetupPlotStyle();
 	colors::setColors();
 
-	FitterLifetime fitter;
+	FitterCPV fitter;
 
 	if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
 	if (options.make_plots_set) fitter.SetMakePlots(options.make_plots);

@@ -61,14 +61,6 @@ install:
   - source activate testenv
   - root -b -q
 
-before_script:
-  - mkdir -p DSRhoCPFit/obj
-  - mkdir -p DSRhoEfficiency/obj
-  - mkdir -p DSRhoFit/obj
-  - mkdir -p DSRhoLifetime/obj
-  - mkdir -p DSRhoPeek/obj
-  - mkdir -p DSRhoYield/obj
-
 script:
   - cd ${TRAVIS_BUILD_DIR}/DSRho && xmkmf && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit && make

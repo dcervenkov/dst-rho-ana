@@ -24,8 +24,11 @@ all:: $(TARGET)
 $(TARGET): $(OBJ_FILES)
 	g++ -o $@ $^ $(LD_FLAGS) $(ROOT_LIBS) $(BELLE_LIBS) $(CERN_LIBS)
 
-obj/%.o: src/%.cc
+obj/%.o: src/%.cc | obj
 	g++ $(CXX_FLAGS) $(INCS) $(BELLE_INCS) $(ROOT_FLAGS) -c -MMD -o $@ $<
+
+obj:
+	mkdir obj
 
 clean::
 	rm -f $(OBJ_FILES) $(DEP_FILES) $(TARGET)

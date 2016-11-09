@@ -34,6 +34,7 @@
 #include "RooHistPdf.h"
 #include "RooSimultaneous.h"
 #include "RooCategory.h"
+#include "RooRandom.h"
 
 // Local includes
 #include "constants.h"
@@ -333,247 +334,6 @@ void FitterCPV::Test() {
 	a0a.setConstant();
 	ata.setConstant();
 
-//	xp.setConstant();
-//	x0.setConstant();
-//	xt.setConstant();
-//
-//	yp.setConstant();
-//	y0.setConstant();
-//	yt.setConstant();
-//
-//	xpb.setConstant();
-//	x0b.setConstant();
-//	xtb.setConstant();
-//
-//	ypb.setConstant();
-//	y0b.setConstant();
-//	ytb.setConstant();
-
-
-	DtCPPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", true, perfect_tagging_,
-			*thetat_,
-			*thetab_,
-			*phit_,
-
-			ap,
-			apa,
-			a0,
-			ata,
-			xp,
-			x0,
-			xt,
-			yp,
-			y0,
-			yt,
-
-			*tagwtag_,
-			*dt_,
-			*tau_,
-			*dm_,
-			*expmc_,
-			*expno_,
-			*shcosthb_,
-			*benergy_,
-			*mbc_,
-			*vrntrk_,
-			*vrzerr_,
-			*vrchi2_,
-			*vrndf_,
-			*vtntrk_,
-			*vtzerr_,
-			*vtchi2_,
-			*vtndf_,
-			*vtistagl_);
-
-	DtCPPDF mixing_pdf_ab("mixing_pdf_ab", "mixing_pdf_ab", true, perfect_tagging_,
-			*thetat_,
-			*thetab_,
-			*phit_,
-
-			ap,
-			apa,
-			a0,
-			ata,
-			xpb,
-			x0b,
-			xtb,
-			ypb,
-			y0b,
-			ytb,
-
-			*tagwtag_,
-			*dt_,
-			*tau_,
-			*dm_,
-			*expmc_,
-			*expno_,
-			*shcosthb_,
-			*benergy_,
-			*mbc_,
-			*vrntrk_,
-			*vrzerr_,
-			*vrchi2_,
-			*vrndf_,
-			*vtntrk_,
-			*vtzerr_,
-			*vtchi2_,
-			*vtndf_,
-			*vtistagl_);
-
-	DtCPPDF mixing_pdf_b("mixing_pdf_b", "mixing_pdf_b", false, perfect_tagging_,
-			*thetat_,
-			*thetab_,
-			*phit_,
-
-			ap,
-			apa,
-			a0,
-			ata,
-			xp,
-			x0,
-			xt,
-			yp,
-			y0,
-			yt,
-
-			*tagwtag_,
-			*dt_,
-			*tau_,
-			*dm_,
-			*expmc_,
-			*expno_,
-			*shcosthb_,
-			*benergy_,
-			*mbc_,
-			*vrntrk_,
-			*vrzerr_,
-			*vrchi2_,
-			*vrndf_,
-			*vtntrk_,
-			*vtzerr_,
-			*vtchi2_,
-			*vtndf_,
-			*vtistagl_);
-
-	DtCPPDF mixing_pdf_bb("mixing_pdf_bb", "mixing_pdf_bb", false, perfect_tagging_,
-			*thetat_,
-			*thetab_,
-			*phit_,
-
-			ap,
-			apa,
-			a0,
-			ata,
-			xpb,
-			x0b,
-			xtb,
-			ypb,
-			y0b,
-			ytb,
-
-			*tagwtag_,
-			*dt_,
-			*tau_,
-			*dm_,
-			*expmc_,
-			*expno_,
-			*shcosthb_,
-			*benergy_,
-			*mbc_,
-			*vrntrk_,
-			*vrzerr_,
-			*vrchi2_,
-			*vrndf_,
-			*vtntrk_,
-			*vtzerr_,
-			*vtchi2_,
-			*vtndf_,
-			*vtistagl_);
-
-	RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
-	sim_pdf.addPdf(mixing_pdf_a, "a");
-	sim_pdf.addPdf(mixing_pdf_ab, "ab");
-	sim_pdf.addPdf(mixing_pdf_b, "b");
-	sim_pdf.addPdf(mixing_pdf_bb, "bb");
-
-	dt_->setRange("dtFitRange", -15, 15);
-
-	tau_->setConstant(true);
-	dm_->setConstant(true);
-
-	if (do_mixing_fit_) {
-	result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_), RooFit::Minimizer("Minuit2"),
-			RooFit::Range("dtFitRange"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-
-		if (make_plots_) {
-			RooDataSet* dataset_a = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
-			PlotWithPull(*dt_, *dataset_a, mixing_pdf_a);
-
-			RooDataSet* dataset_b = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
-			PlotWithPull(*dt_, *dataset_b, mixing_pdf_b);
-
-			RooDataSet* dataset_ab = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
-			PlotWithPull(*dt_, *dataset_ab, mixing_pdf_ab);
-
-			RooDataSet* dataset_bb = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
-			PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
-		}
-	}
-
-}
-
-void FitterCPV::Toy() {
-	// vars with phiweak = phiweak + pi, r = 0.01
-	double par_input[] = {
-			0.269,
-			0.56,
-			0.941,
-			3.11,
-
-			0.00816649, // xp
-			0.00532961, // x0
-			0.00829682, // xt
-			-0.00659988, // yp
-			-0.0084614,  // y0
-			+0.00373802, // yt
-
-			-0.0102141,  // xpb
-			-0.00845715, // x0b
-			-0.00587413, // xtb
-			+0.00243354, // ypb
-			+0.00533635, // y0b
-			-0.00695015  // ytb
-	};
-
-	RooRealVar ap ("ap","ap", par_input[0],0,0.5);
-	RooRealVar apa("apa","apa", par_input[1],0,1);
-	RooRealVar a0 ("a0","a0", par_input[2],0.8,1);
-	RooRealVar a0a("a0a","a0a",0);
-	RooFormulaVar at("at","sqrt(1-ap*ap-a0*a0)",RooArgSet(ap,a0));
-	RooRealVar ata("ata","ata", par_input[3],2,4);
-
-	RooRealVar xp ("xp","xp",par_input[4],-0.2,0.2);
-	RooRealVar x0 ("x0","x0",par_input[5],-0.2,0.2);
-	RooRealVar xt ("xt","xt",par_input[6],-0.2,0.2);
-
-	RooRealVar yp ("yp","yp",par_input[7],-0.2,0.2);
-	RooRealVar y0 ("y0","y0",par_input[8],-0.2,0.2);
-	RooRealVar yt ("yt","yt",par_input[9],-0.2,0.2);
-
-	RooRealVar xpb("xpb","xpb",par_input[10],-0.2,0.2);
-	RooRealVar x0b("x0b","x0b",par_input[11],-0.2,0.2);
-	RooRealVar xtb("xtb","xtb",par_input[12],-0.2,0.2);
-
-	RooRealVar ypb("ypb","ypb",par_input[13],-0.2,0.2);
-	RooRealVar y0b("y0b","y0b",par_input[14],-0.2,0.2);
-	RooRealVar ytb("ytb","ytb",par_input[15],-0.2,0.2);
-
-	ap.setConstant();
-	apa.setConstant();
-	a0.setConstant();
-	a0a.setConstant();
-	ata.setConstant();
-
 	xp.setConstant();
 	x0.setConstant();
 	xt.setConstant();
@@ -589,6 +349,7 @@ void FitterCPV::Toy() {
 	ypb.setConstant();
 	y0b.setConstant();
 	ytb.setConstant();
+
 
 	DtCPPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", true, perfect_tagging_,
 			*thetat_,
@@ -741,43 +502,289 @@ void FitterCPV::Toy() {
 //	tau_->setConstant(true);
 	dm_->setConstant(true);
 
-//	if (do_mixing_fit_) {
-//	result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_), RooFit::Minimizer("Minuit2"),
-//			RooFit::Range("dtFitRange"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-//
-//		if (make_plots_) {
-//			RooDataSet* dataset_a = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
-//			PlotWithPull(*dt_, *dataset_a, mixing_pdf_a);
-//
-//			RooDataSet* dataset_b = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
-//			PlotWithPull(*dt_, *dataset_b, mixing_pdf_b);
-//
-//			RooDataSet* dataset_ab = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
-//			PlotWithPull(*dt_, *dataset_ab, mixing_pdf_ab);
-//
-//			RooDataSet* dataset_bb = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
-//			PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
-//		}
-//	}
+	if (do_mixing_fit_) {
+	result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_), RooFit::Minimizer("Minuit2"),
+			RooFit::Range("dtFitRange"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+
+		if (make_plots_) {
+			RooDataSet* dataset_a = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
+			PlotWithPull(*dt_, *dataset_a, mixing_pdf_a);
+
+			RooDataSet* dataset_b = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
+			PlotWithPull(*dt_, *dataset_b, mixing_pdf_b);
+
+			RooDataSet* dataset_ab = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
+			PlotWithPull(*dt_, *dataset_ab, mixing_pdf_ab);
+
+			RooDataSet* dataset_bb = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
+			PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
+		}
+	}
+
+}
+
+void FitterCPV::GenerateDataset(const int num_events) {
+	printf("INFO: Generating dataset with %i events...\n", num_events);
+
+	// vars with phiweak = phiweak + pi, r = 0.01
+	double par_input[] = {
+			0.269,
+			0.56,
+			0.941,
+			3.11,
+
+			0.00816649, // xp
+			0.00532961, // x0
+			0.00829682, // xt
+			-0.00659988, // yp
+			-0.0084614,  // y0
+			+0.00373802, // yt
+
+			-0.0102141,  // xpb
+			-0.00845715, // x0b
+			-0.00587413, // xtb
+			+0.00243354, // ypb
+			+0.00533635, // y0b
+			-0.00695015  // ytb
+	};
+
+	RooRealVar ap ("ap","ap", par_input[0],0,0.5);
+	RooRealVar apa("apa","apa", par_input[1],0,1);
+	RooRealVar a0 ("a0","a0", par_input[2],0.8,1);
+	RooRealVar a0a("a0a","a0a",0);
+	RooFormulaVar at("at","sqrt(1-ap*ap-a0*a0)",RooArgSet(ap,a0));
+	RooRealVar ata("ata","ata", par_input[3],2,4);
+
+	RooRealVar xp ("xp","xp",par_input[4],-0.2,0.2);
+	RooRealVar x0 ("x0","x0",par_input[5],-0.2,0.2);
+	RooRealVar xt ("xt","xt",par_input[6],-0.2,0.2);
+
+	RooRealVar yp ("yp","yp",par_input[7],-0.2,0.2);
+	RooRealVar y0 ("y0","y0",par_input[8],-0.2,0.2);
+	RooRealVar yt ("yt","yt",par_input[9],-0.2,0.2);
+
+	RooRealVar xpb("xpb","xpb",par_input[10],-0.2,0.2);
+	RooRealVar x0b("x0b","x0b",par_input[11],-0.2,0.2);
+	RooRealVar xtb("xtb","xtb",par_input[12],-0.2,0.2);
+
+	RooRealVar ypb("ypb","ypb",par_input[13],-0.2,0.2);
+	RooRealVar y0b("y0b","y0b",par_input[14],-0.2,0.2);
+	RooRealVar ytb("ytb","ytb",par_input[15],-0.2,0.2);
+
+	DtCPPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", true, perfect_tagging_,
+			*thetat_,
+			*thetab_,
+			*phit_,
+
+			ap,
+			apa,
+			a0,
+			ata,
+			xp,
+			x0,
+			xt,
+			yp,
+			y0,
+			yt,
+
+			*tagwtag_,
+			*dt_,
+			*tau_,
+			*dm_,
+			*expmc_,
+			*expno_,
+			*shcosthb_,
+			*benergy_,
+			*mbc_,
+			*vrntrk_,
+			*vrzerr_,
+			*vrchi2_,
+			*vrndf_,
+			*vtntrk_,
+			*vtzerr_,
+			*vtchi2_,
+			*vtndf_,
+			*vtistagl_);
+
+	DtCPPDF mixing_pdf_ab("mixing_pdf_ab", "mixing_pdf_ab", true, perfect_tagging_,
+			*thetat_,
+			*thetab_,
+			*phit_,
+
+			ap,
+			apa,
+			a0,
+			ata,
+			xpb,
+			x0b,
+			xtb,
+			ypb,
+			y0b,
+			ytb,
+
+			*tagwtag_,
+			*dt_,
+			*tau_,
+			*dm_,
+			*expmc_,
+			*expno_,
+			*shcosthb_,
+			*benergy_,
+			*mbc_,
+			*vrntrk_,
+			*vrzerr_,
+			*vrchi2_,
+			*vrndf_,
+			*vtntrk_,
+			*vtzerr_,
+			*vtchi2_,
+			*vtndf_,
+			*vtistagl_);
+
+	DtCPPDF mixing_pdf_b("mixing_pdf_b", "mixing_pdf_b", false, perfect_tagging_,
+			*thetat_,
+			*thetab_,
+			*phit_,
+
+			ap,
+			apa,
+			a0,
+			ata,
+			xp,
+			x0,
+			xt,
+			yp,
+			y0,
+			yt,
+
+			*tagwtag_,
+			*dt_,
+			*tau_,
+			*dm_,
+			*expmc_,
+			*expno_,
+			*shcosthb_,
+			*benergy_,
+			*mbc_,
+			*vrntrk_,
+			*vrzerr_,
+			*vrchi2_,
+			*vrndf_,
+			*vtntrk_,
+			*vtzerr_,
+			*vtchi2_,
+			*vtndf_,
+			*vtistagl_);
+
+	DtCPPDF mixing_pdf_bb("mixing_pdf_bb", "mixing_pdf_bb", false, perfect_tagging_,
+			*thetat_,
+			*thetab_,
+			*phit_,
+
+			ap,
+			apa,
+			a0,
+			ata,
+			xpb,
+			x0b,
+			xtb,
+			ypb,
+			y0b,
+			ytb,
+
+			*tagwtag_,
+			*dt_,
+			*tau_,
+			*dm_,
+			*expmc_,
+			*expno_,
+			*shcosthb_,
+			*benergy_,
+			*mbc_,
+			*vrntrk_,
+			*vrzerr_,
+			*vrchi2_,
+			*vrndf_,
+			*vtntrk_,
+			*vtzerr_,
+			*vtchi2_,
+			*vtndf_,
+			*vtistagl_);
+
 
 	dt_->setRange(-15, 15);
+
 	RooArgSet varsToGenerate (*dt_, *thetat_, *thetab_, *phit_);
+	RooArgSet varsToAdd(
+			*tagwtag_,
+			*expmc_,
+			*expno_,
+			*shcosthb_,
+			*benergy_,
+			*mbc_,
+			*vrntrk_,
+			*vrzerr_,
+			*vrchi2_);
+	varsToAdd.add(*vrndf_);
+	varsToAdd.add(*vtntrk_);
+	varsToAdd.add(*vtzerr_);
+	varsToAdd.add(*vtchi2_);
+	varsToAdd.add(*vtndf_);
+	varsToAdd.add(*vtistagl_);
 
-	RooAbsPdf::GenSpec* genSpec = mixing_pdf_a.prepareMultiGen(varsToGenerate, RooFit::NumEvents(10000));
-	RooDataSet* new_dataset = mixing_pdf_a.generate(*genSpec);
+	RooRandom::randomGenerator()->SetSeed(0);
 
-	PlotVar(*dt_, *new_dataset);
-	PlotVar(*thetat_, *new_dataset);
-	PlotVar(*thetab_, *new_dataset);
-	PlotVar(*phit_, *new_dataset);
+    /// For some reason this is the generated fraction of favored decays, have to check why
+    const double frac_fav = 0.812;
+    const double frac_sup = 1 - frac_fav;
+
+    const int num_fav = num_events*frac_fav/2.0;
+    const int num_sup = num_events*frac_sup/2.0;
+
+	RooAbsPdf::GenSpec* genSpec_a = mixing_pdf_a.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_fav));
+	RooAbsPdf::GenSpec* genSpec_ab = mixing_pdf_ab.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_fav));
+	RooAbsPdf::GenSpec* genSpec_b = mixing_pdf_b.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_sup));
+	RooAbsPdf::GenSpec* genSpec_bb = mixing_pdf_bb.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_sup));
+
+	RooDataSet* dataset;
+
+	RooDataSet* dataset_a = mixing_pdf_a.generate(*genSpec_a);
+	decaytype_->setLabel("a");
+	dataset_a->addColumn(*decaytype_);
+	dataset = (RooDataSet*)dataset_a->Clone();
+	delete dataset_a;
+	printf("INFO: 1/4 decay type ready.\n");
+
+	RooDataSet* dataset_ab = mixing_pdf_ab.generate(*genSpec_ab);
+	decaytype_->setLabel("ab");
+	dataset_ab->addColumn(*decaytype_);
+	dataset->append(*dataset_ab);
+	delete dataset_ab;
+	printf("INFO: 2/4 decay types ready.\n");
+
+	RooDataSet* dataset_b = mixing_pdf_b.generate(*genSpec_b);
+	decaytype_->setLabel("b");
+	dataset_b->addColumn(*decaytype_);
+	dataset->append(*dataset_b);
+	delete dataset_b;
+	printf("INFO: 3/4 decay types ready.\n");
+
+	RooDataSet* dataset_bb = mixing_pdf_bb.generate(*genSpec_bb);
+	decaytype_->setLabel("bb");
+	dataset_bb->addColumn(*decaytype_);
+	dataset->append(*dataset_bb);
+	delete dataset_bb;
+	printf("INFO: 4/4 decay types ready.\n");
+
+	dataset->addColumns(varsToAdd);
+
+	dataset_ = dataset;
+
+//	return dataset;
 
 //	result_ = mixing_pdf_a.fitTo(*new_dataset, RooFit::ConditionalObservables(conditional_vars_argset_),
 //			RooFit::Minimizer("Minuit2"), RooFit::Hesse(false), RooFit::Minos(false),
 //			RooFit::Range("dtFitRange"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-
-
-	dataset_->Print();
-	new_dataset->Print();
 }
 
 /**

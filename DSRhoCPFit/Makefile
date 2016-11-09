@@ -11,9 +11,11 @@ CXX_FLAGS := -std=c++11 -g -Wall -Wno-non-virtual-dtor
 ROOT_FLAGS := $(shell root-config --cflags)
 ROOT_LIBS := $(shell root-config --libs) -lRooFitCore -lRooFit
 INCS := -Isrc
-BELLE_INCS := -I/belle/belle/b20091203_2126/include
-BELLE_LIBS := -L/belle/belle/b20091203_2126/x86_64-unknown-linux-gnu/opt/lib -ltatami -lbelleutil
-CERN_LIBS := -L/belle/cern/2006/lib64 -lmathlib
+
+BELLE_LIB_DIR ?= /belle
+BELLE_INCS := -I$(BELLE_LIB_DIR)/belle/b20091203_2126/include
+BELLE_LIBS := -L$(BELLE_LIB_DIR)/belle/b20091203_2126/x86_64-unknown-linux-gnu/opt/lib -ltatami -lbelleutil
+CERN_LIBS := -L$(BELLE_LIB_DIR)/cern/2006/lib64 -lmathlib
 
 .PHONY: all clean
 

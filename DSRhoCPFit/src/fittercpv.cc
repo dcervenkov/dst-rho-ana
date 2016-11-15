@@ -35,6 +35,7 @@
 #include "RooSimultaneous.h"
 #include "RooCategory.h"
 #include "RooRandom.h"
+#include "RooTreeDataStore.h"
 
 // Local includes
 #include "constants.h"
@@ -49,9 +50,9 @@ FitterCPV::FitterCPV() {
 	vrvtxz_ = new RooRealVar( "vrvtxz", "vrvtxz", -10, 10 );
 	vrerr6_ = new RooRealVar( "vrerr6", "vrerr6", -1, 1 );
 	vrchi2_ = new RooRealVar( "vrchi2", "vrchi2", 0, 10000000 );
-	vreffxi_ = new RooRealVar( "vreffxi", "vreffxi", 0, 10000000 );
+//	vreffxi_ = new RooRealVar( "vreffxi", "vreffxi", 0, 10000000 );
 	vrndf_ = new RooRealVar( "vrndf", "vrndf", 0, 100 );
-	vreffndf_ = new RooRealVar( "vreffndf", "vreffndf", 0, 100 );
+//	vreffndf_ = new RooRealVar( "vreffndf", "vreffndf", 0, 100 );
 	vrntrk_ = new RooRealVar( "vrntrk", "vrntrk", 0, 100 );
 
 	vtusable_ = new RooRealVar( "vtusable", "vtusable", 1 );
@@ -112,9 +113,9 @@ FitterCPV::FitterCPV() {
 	conditional_vars_.push_back(&vrvtxz_);
 	conditional_vars_.push_back(&vrerr6_);
 	conditional_vars_.push_back(&vrchi2_);
-	conditional_vars_.push_back(&vreffxi_);
+//	conditional_vars_.push_back(&vreffxi_);
 	conditional_vars_.push_back(&vrndf_);
-	conditional_vars_.push_back(&vreffndf_);
+//	conditional_vars_.push_back(&vreffndf_);
 	conditional_vars_.push_back(&vrntrk_);
 
 	conditional_vars_.push_back(&vtusable_);
@@ -523,29 +524,51 @@ void FitterCPV::Test() {
 
 }
 
-void FitterCPV::GenerateDataset(const int num_events) {
+void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
 	printf("INFO: Generating dataset with %i events...\n", num_events);
 
-	// vars with phiweak = phiweak + pi, r = 0.01
+//	// vars with phiweak = phiweak + pi, r = 0.01
+//	double par_input[] = {
+//			0.269,
+//			0.56,
+//			0.941,
+//			3.11,
+//
+//			0.00816649, // xp
+//			0.00532961, // x0
+//			0.00829682, // xt
+//			-0.00659988, // yp
+//			-0.0084614,  // y0
+//			+0.00373802, // yt
+//
+//			-0.0102141,  // xpb
+//			-0.00845715, // x0b
+//			-0.00587413, // xtb
+//			+0.00243354, // ypb
+//			+0.00533635, // y0b
+//			-0.00695015  // ytb
+//	};
+
+	// vars with phiweak = phiweak + pi, r = 0.10
 	double par_input[] = {
 			0.269,
 			0.56,
 			0.941,
 			3.11,
 
-			0.00816649, // xp
-			0.00532961, // x0
-			0.00829682, // xt
-			-0.00659988, // yp
-			-0.0084614,  // y0
-			+0.00373802, // yt
+			0.0816649, // xp
+			0.0532961, // x0
+			0.0829682, // xt
+			-0.0659988, // yp
+			-0.084614,  // y0
+			+0.0373802, // yt
 
-			-0.0102141,  // xpb
-			-0.00845715, // x0b
-			-0.00587413, // xtb
-			+0.00243354, // ypb
-			+0.00533635, // y0b
-			-0.00695015  // ytb
+			-0.102141,  // xpb
+			-0.0845715, // x0b
+			-0.0587413, // xtb
+			+0.0243354, // ypb
+			+0.0533635, // y0b
+			-0.0695015  // ytb
 	};
 
 	RooRealVar ap ("ap","ap", par_input[0],0,0.5);
@@ -731,6 +754,10 @@ void FitterCPV::GenerateDataset(const int num_events) {
 	varsToAdd.add(*vtchi2_);
 	varsToAdd.add(*vtndf_);
 	varsToAdd.add(*vtistagl_);
+	varsToAdd.add(*evmcflag_);
+	varsToAdd.add(*tagqr_);
+	varsToAdd.add(*vrusable_);
+	varsToAdd.add(*vtusable_);
 
 	RooRandom::randomGenerator()->SetSeed(0);
 
@@ -741,44 +768,100 @@ void FitterCPV::GenerateDataset(const int num_events) {
     const int num_fav = num_events*frac_fav/2.0;
     const int num_sup = num_events*frac_sup/2.0;
 
+    printf("INFO: Creating GenSpecs...\n");
 	RooAbsPdf::GenSpec* genSpec_a = mixing_pdf_a.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_fav));
+    printf("INFO: 1/4 GenSpecs ready\n");
 	RooAbsPdf::GenSpec* genSpec_ab = mixing_pdf_ab.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_fav));
+    printf("INFO: 2/4 GenSpecs ready\n");
 	RooAbsPdf::GenSpec* genSpec_b = mixing_pdf_b.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_sup));
+    printf("INFO: 3/4 GenSpecs ready\n");
 	RooAbsPdf::GenSpec* genSpec_bb = mixing_pdf_bb.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_sup));
+    printf("INFO: 4/4 GenSpecs ready\n");
 
+	RooAbsData::setDefaultStorageType(RooAbsData::Tree);
 	RooDataSet* dataset;
+	TString filename;
 
-	RooDataSet* dataset_a = mixing_pdf_a.generate(*genSpec_a);
-	decaytype_->setLabel("a");
-	dataset_a->addColumn(*decaytype_);
-	dataset = (RooDataSet*)dataset_a->Clone();
-	delete dataset_a;
-	printf("INFO: 1/4 decay type ready.\n");
+	RooRealVar btagmcli("btagmcli", "btagmcli", -511, 511);
+	RooRealVar brecflav("brecflav", "brecflav", -1, 1);
 
-	RooDataSet* dataset_ab = mixing_pdf_ab.generate(*genSpec_ab);
-	decaytype_->setLabel("ab");
-	dataset_ab->addColumn(*decaytype_);
-	dataset->append(*dataset_ab);
-	delete dataset_ab;
-	printf("INFO: 2/4 decay types ready.\n");
+	for (int i = 1; i <= num_toys; i++) {
+	//	RooDataSet* dataset_a = mixing_pdf_a.generate(varsToGenerate, RooFit::NumEvents(num_fav));
+		RooDataSet* dataset_a = mixing_pdf_a.generate(*genSpec_a);
+		decaytype_->setLabel("a");
+		dataset_a->addColumn(*decaytype_);
+		brecflav.setVal(1);
+		btagmcli.setVal(-511);
+		dataset_a->addColumn(brecflav);
+		dataset_a->addColumn(btagmcli);
+		dataset = (RooDataSet*)dataset_a->Clone();
+		delete dataset_a;
+		printf("INFO: 1/4 decay type ready.\n");
 
-	RooDataSet* dataset_b = mixing_pdf_b.generate(*genSpec_b);
-	decaytype_->setLabel("b");
-	dataset_b->addColumn(*decaytype_);
-	dataset->append(*dataset_b);
-	delete dataset_b;
-	printf("INFO: 3/4 decay types ready.\n");
+	//	RooDataSet* dataset_ab = mixing_pdf_ab.generate(varsToGenerate, RooFit::NumEvents(num_fav));
+		RooDataSet* dataset_ab = mixing_pdf_ab.generate(*genSpec_ab);
+		decaytype_->setLabel("ab");
+		dataset_ab->addColumn(*decaytype_);
+		brecflav.setVal(-1);
+		btagmcli.setVal(511);
+		dataset_ab->addColumn(brecflav);
+		dataset_ab->addColumn(btagmcli);
+		dataset->append(*dataset_ab);
+		delete dataset_ab;
+		printf("INFO: 2/4 decay types ready.\n");
 
-	RooDataSet* dataset_bb = mixing_pdf_bb.generate(*genSpec_bb);
-	decaytype_->setLabel("bb");
-	dataset_bb->addColumn(*decaytype_);
-	dataset->append(*dataset_bb);
-	delete dataset_bb;
-	printf("INFO: 4/4 decay types ready.\n");
+	//	RooDataSet* dataset_b = mixing_pdf_b.generate(varsToGenerate, RooFit::NumEvents(num_sup));
+		RooDataSet* dataset_b = mixing_pdf_b.generate(*genSpec_b);
+		decaytype_->setLabel("b");
+		dataset_b->addColumn(*decaytype_);
+		brecflav.setVal(1);
+		btagmcli.setVal(511);
+		dataset_b->addColumn(brecflav);
+		dataset_b->addColumn(btagmcli);
+		dataset->append(*dataset_b);
+		delete dataset_b;
+		printf("INFO: 3/4 decay types ready.\n");
 
-	dataset->addColumns(varsToAdd);
+	//	RooDataSet* dataset_bb = mixing_pdf_bb.generate(varsToGenerate, RooFit::NumEvents(num_sup));
+		RooDataSet* dataset_bb = mixing_pdf_bb.generate(*genSpec_bb);
+		decaytype_->setLabel("bb");
+		dataset_bb->addColumn(*decaytype_);
+		brecflav.setVal(-1);
+		btagmcli.setVal(-511);
+		dataset_bb->addColumn(brecflav);
+		dataset_bb->addColumn(btagmcli);
+		dataset->append(*dataset_bb);
+		delete dataset_bb;
+		printf("INFO: 4/4 decay types ready.\n");
 
-	dataset_ = dataset;
+		dataset->addColumns(varsToAdd);
+
+		dt_formula_ = new RooFormulaVar( "dt", "#Deltat [ps]", "(vrvtxz-vtvtxz)/(0.425*0.0299792458)", RooArgSet(*vrvtxz_, *vtvtxz_));
+		vrzerr_formula_ = new RooFormulaVar( "vrzerr", "#sigma z_{rec} [cm]", "sqrt(vrerr6)", RooArgSet(*vrerr6_));
+		vtzerr_formula_ = new RooFormulaVar( "vtzerr", "#sigma z_{tag} [cm]", "sqrt(vterr6)", RooArgSet(*vterr6_));
+
+		RooFormulaVar vrvtxz("vrvtxz", "dt*(0.425*0.0299792458/2)", *dt_);
+		RooFormulaVar vtvtxz("vtvtxz", "-dt*(0.425*0.0299792458/2)", *dt_);
+		RooFormulaVar vrerr6("vrerr6", "vrzerr^2", *vrzerr_);
+		RooFormulaVar vterr6("vterr6", "vtzerr^2", *vtzerr_);
+
+		dataset->addColumns(RooArgList(vrvtxz, vtvtxz, vrerr6, vterr6));
+
+		const TTree& tree = ((RooTreeDataStore*)dataset->store())->tree();
+		TTree* new_tree = static_cast<TTree*>(tree.Clone("h2000"));
+
+		filename = "test_";
+		filename += i;
+		filename += ".root";
+		TFile f(filename,"RECREATE");
+		new_tree->Write();
+		f.Close();
+
+		delete dataset;
+		//dataset_ = dataset;
+	}
+
+
 
 //	return dataset;
 
@@ -965,6 +1048,7 @@ TString FitterCPV::GetCommonCutsString() const{
 void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
 	TFile* input_file = new TFile(file_path);
 	TTree* input_tree = dynamic_cast<TTree*>(input_file->Get("h2000"));
+//	TTree* input_tree = dynamic_cast<TTree*>(input_file->Get("mixing_pdf_aData"));
 
 	if (num_events) {
 		TTree* temp_tree = input_tree;
@@ -1043,6 +1127,8 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
 	for (RooRealVar** var : dataset_vars_) {
 		*var = static_cast<RooRealVar*>(vars->find((*var)->GetName()));
 	}
+
+	dataset_->get(1)->Print("v");
 }
 
 /**

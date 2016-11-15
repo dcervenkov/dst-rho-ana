@@ -53,9 +53,9 @@ int main(int argc, char* argv[]) {
 	}
 	fitter.SetOutputDir(output_dir);
 
-//	fitter.Test();
-	fitter.GenerateDataset(10000);
 	fitter.Test();
+//	fitter.GenerateToys(10000, 10);
+//	fitter.Test();
 
 	return 0;
 }

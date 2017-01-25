@@ -388,11 +388,16 @@ Double_t DtCPPDF::evaluate() const {
 	}
 
 
-
-//	double alpha = 1;
-
-//	return Belle::AddOutlier(expno, dt, pdf, vrntrk, vtntrk, dtres_param,
-//			nnorm, constants::cut_dt_low, constants::cut_dt_high, alpha);
+	// This is extremely dumb, as I calculate the normalization, normalize
+	// the PDF (inside AddOutlier) and then de-normalize it, only to calculate
+	// the normalization later in analyticalIntegral again. Don't have time to
+	// fix the dumbness now.
+	// TODO: Fix dumbness
+	double alpha = 1;
+	double nnorm = analyticalIntegral(12);
+	pdf = Belle::AddOutlier(expno, dt, pdf, vrntrk, vtntrk, dtres_param,
+			nnorm, constants::cuts::dt_low, constants::cuts::dt_high, alpha);
+	return pdf*nnorm;
 
 //	return Belle::AddOutlierWithBkg((int) expno, dt, 1, pdf, pdf, (int) vrntrk, (int) vtntrk, dtres_param,
 //			nnorm / alpha, nnorm / alpha, constants::cut_dt_low, constants::cut_dt_high, alpha, 1);
@@ -424,6 +429,8 @@ Int_t DtCPPDF::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, co
 //	if(matchArgs(allVars,analVars,thb,tht)) return 9;
 //	if(matchArgs(allVars,analVars,tht,phit)) return 10;
 //	if(matchArgs(allVars,analVars,thb,phit)) return 11;
+
+	if(matchArgs(allVars,analVars,dt)) return 12;
 
 //	printf(" ******************************* DBG: Analytical integral not found!\n");
 
@@ -602,6 +609,14 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
 		case 11: // Int[g,{thb,phit}]
 			return 8.*constants::pi/3*((Ap2+A02)*sin(tht)*sin(tht) + 2*At2*cos(tht)*cos(tht))*sin(tht);
 
+		case 12: // Int[g,{dt}]
+			return (nAp2*2*sin(tht)*sin(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)*sin(phit)+\
+							nAt2*2*cos(tht)*cos(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)+\
+							nA02*4*sin(tht)*sin(tht)*sin(tht)*cos(thb)*cos(thb)*sin(thb)*cos(phit)*cos(phit)+\
+							sqrt(2)*nAp0r*sin(tht)*sin(tht)*sin(tht)*sin(2*thb)*sin(thb)*sin(2*phit)-\
+							sqrt(2)*nA0ti*sin(2*tht)*sin(tht)*sin(2*thb)*sin(thb)*cos(phit)-\
+							2*nApti*sin(2*tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)) * eff.GetEfficiency(tht, thb, phit);
+
 		default:
 			return 0;
 		}
@@ -626,7 +641,7 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
 }
 
 bool DtCPPDF::IsTimeIntegrated(int code) const {
-    if (code == 1 || (code >= 3 && code <= 8)) {
+    if (code == 1 || (code >= 3 && code <= 8) || code == 12) {
     	return true;
     } else {
     	return false;

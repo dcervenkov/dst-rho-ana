@@ -81,9 +81,9 @@ public:
 	RooRealVar* vrvtxz_;
 	RooRealVar* vrerr6_;
 	RooRealVar* vrchi2_;
-	RooRealVar* vreffxi_;
+//	RooRealVar* vreffxi_;
 	RooRealVar* vrndf_;
-	RooRealVar* vreffndf_;
+//	RooRealVar* vreffndf_;
 	RooRealVar* vrntrk_;
 
 	RooRealVar* vtusable_;

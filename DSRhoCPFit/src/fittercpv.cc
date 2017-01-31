@@ -214,49 +214,49 @@ void FitterCPV::Test() {
 //	};
 
 
-	// vars with phiweak = phiweak + pi, r = 0.10
+	//// vars with phiweak = phiweak + pi, r = 0.10
+	//double par_input[] = {
+	//		0.269,
+	//		0.56,
+	//		0.941,
+	//		3.11,
+
+	//		0.0816649, // xp
+	//		0.0532961, // x0
+	//		0.0829682, // xt
+	//		-0.0659988, // yp
+	//		-0.084614,  // y0
+	//		+0.0373802, // yt
+
+	//		-0.102141,  // xpb
+	//		-0.0845715, // x0b
+	//		-0.0587413, // xtb
+	//		+0.0243354, // ypb
+	//		+0.0533635, // y0b
+	//		-0.0695015  // ytb
+	//};
+
+	// vars with phiweak = phiweak + pi, r = 0.01
 	double par_input[] = {
 			0.269,
 			0.56,
 			0.941,
 			3.11,
 
-			0.0816649, // xp
-			0.0532961, // x0
-			0.0829682, // xt
-			-0.0659988, // yp
-			-0.084614,  // y0
-			+0.0373802, // yt
+			0.00816649, // xp
+			0.00532961, // x0
+			0.00829682, // xt
+			-0.00659988, // yp
+			-0.0084614,  // y0
+			+0.00373802, // yt
 
-			-0.102141,  // xpb
-			-0.0845715, // x0b
-			-0.0587413, // xtb
-			+0.0243354, // ypb
-			+0.0533635, // y0b
-			-0.0695015  // ytb
+			-0.0102141,  // xpb
+			-0.00845715, // x0b
+			-0.00587413, // xtb
+			+0.00243354, // ypb
+			+0.00533635, // y0b
+			-0.00695015  // ytb
 	};
-
-//	// vars with phiweak = phiweak + pi, r = 0.01
-//	double par_input[] = {
-//			0.269,
-//			0.56,
-//			0.941,
-//			3.11,
-//
-//			0.00816649, // xp
-//			0.00532961, // x0
-//			0.00829682, // xt
-//			-0.00659988, // yp
-//			-0.0084614,  // y0
-//			+0.00373802, // yt
-//
-//			-0.0102141,  // xpb
-//			-0.00845715, // x0b
-//			-0.00587413, // xtb
-//			+0.00243354, // ypb
-//			+0.00533635, // y0b
-//			-0.00695015  // ytb
-//	};
 
 //	// vars with phiweak = phiweak + pi, x,y=0
 //	double par_input[] = {
@@ -335,21 +335,21 @@ void FitterCPV::Test() {
 	a0a.setConstant();
 	ata.setConstant();
 
-	xp.setConstant();
-	x0.setConstant();
-	xt.setConstant();
+	//xp.setConstant();
+	//x0.setConstant();
+	//xt.setConstant();
 
-	yp.setConstant();
-	y0.setConstant();
-	yt.setConstant();
+	//yp.setConstant();
+	//y0.setConstant();
+	//yt.setConstant();
 
-	xpb.setConstant();
-	x0b.setConstant();
-	xtb.setConstant();
+	//xpb.setConstant();
+	//x0b.setConstant();
+	//xtb.setConstant();
 
-	ypb.setConstant();
-	y0b.setConstant();
-	ytb.setConstant();
+	//ypb.setConstant();
+	//y0b.setConstant();
+	//ytb.setConstant();
 
 
 	DtCPPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", true, perfect_tagging_,
@@ -500,12 +500,13 @@ void FitterCPV::Test() {
 
 	dt_->setRange("dtFitRange", -15, 15);
 
-//	tau_->setConstant(true);
+	tau_->setConstant(true);
 	dm_->setConstant(true);
 
 	if (do_mixing_fit_) {
-	result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_), RooFit::Minimizer("Minuit2"),
+		result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_), RooFit::Minimizer("Minuit2"),
 			RooFit::Range("dtFitRange"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+		result_->Print();
 
 		if (make_plots_) {
 			RooDataSet* dataset_a = static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
@@ -527,49 +528,49 @@ void FitterCPV::Test() {
 void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
 	printf("INFO: Generating dataset with %i events...\n", num_events);
 
-//	// vars with phiweak = phiweak + pi, r = 0.01
-//	double par_input[] = {
-//			0.269,
-//			0.56,
-//			0.941,
-//			3.11,
-//
-//			0.00816649, // xp
-//			0.00532961, // x0
-//			0.00829682, // xt
-//			-0.00659988, // yp
-//			-0.0084614,  // y0
-//			+0.00373802, // yt
-//
-//			-0.0102141,  // xpb
-//			-0.00845715, // x0b
-//			-0.00587413, // xtb
-//			+0.00243354, // ypb
-//			+0.00533635, // y0b
-//			-0.00695015  // ytb
-//	};
-
-	// vars with phiweak = phiweak + pi, r = 0.10
+	// vars with phiweak = phiweak + pi, r = 0.01
 	double par_input[] = {
 			0.269,
 			0.56,
 			0.941,
 			3.11,
 
-			0.0816649, // xp
-			0.0532961, // x0
-			0.0829682, // xt
-			-0.0659988, // yp
-			-0.084614,  // y0
-			+0.0373802, // yt
+			0.00816649, // xp
+			0.00532961, // x0
+			0.00829682, // xt
+			-0.00659988, // yp
+			-0.0084614,  // y0
+			+0.00373802, // yt
 
-			-0.102141,  // xpb
-			-0.0845715, // x0b
-			-0.0587413, // xtb
-			+0.0243354, // ypb
-			+0.0533635, // y0b
-			-0.0695015  // ytb
+			-0.0102141,  // xpb
+			-0.00845715, // x0b
+			-0.00587413, // xtb
+			+0.00243354, // ypb
+			+0.00533635, // y0b
+			-0.00695015  // ytb
 	};
+
+//	// vars with phiweak = phiweak + pi, r = 0.10
+//	double par_input[] = {
+//			0.269,
+//			0.56,
+//			0.941,
+//			3.11,
+//
+//			0.0816649, // xp
+//			0.0532961, // x0
+//			0.0829682, // xt
+//			-0.0659988, // yp
+//			-0.084614,  // y0
+//			+0.0373802, // yt
+//
+//			-0.102141,  // xpb
+//			-0.0845715, // x0b
+//			-0.0587413, // xtb
+//			+0.0243354, // ypb
+//			+0.0533635, // y0b
+//			-0.0695015  // ytb
+//	};
 
 	RooRealVar ap ("ap","ap", par_input[0],0,0.5);
 	RooRealVar apa("apa","apa", par_input[1],0,1);

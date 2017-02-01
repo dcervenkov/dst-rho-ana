@@ -13,6 +13,7 @@
 #include "TROOT.h"
 #include "TColor.h"
 #include "TStyle.h"
+#include "RVersion.h"
 
 namespace colors {
 
@@ -50,7 +51,12 @@ void setColors(){
 		color->SetRGB(pastelColors[i][0]/255., pastelColors[i][1]/255., pastelColors[i][2]/255.);
 	}
 
+// Check if we are running a newer version of ROOT which has Viridis palette
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,6,0)
 	gStyle->SetPalette(kViridis);
+#else
+	gStyle->SetPalette(56);
+#endif
 }
 
 } // namespace colors

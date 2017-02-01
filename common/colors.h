@@ -1,8 +1,10 @@
-/*
- * Colors.h
+/**
+ *  @file    colors.h
+ *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
+ *  @date    2014-08-27
  *
- *  Created on: Aug 27, 2014
- *      Author: cervenkov
+ *  @brief File defining perceptually equidistant colors
+ *
  */
 
 #ifndef COLORS_H_
@@ -14,7 +16,7 @@
 
 namespace colors {
 
-double pastelColors[8][3] = {
+const double pastelColors[8][3] = {
 		{114,147,203},
 		{225,151, 76},
 		{132,186, 91},
@@ -25,7 +27,7 @@ double pastelColors[8][3] = {
 		{204,194, 16},
 };
 
-double saturatedColors[8][3] = {
+const double saturatedColors[8][3] = {
 		{ 57,106,177},
 		{218,124, 48},
 		{ 62,150, 81},
@@ -36,6 +38,11 @@ double saturatedColors[8][3] = {
 		{148,139, 61},
 };
 
+/**
+ * Replace the first 8 default ROOT colors with 8 perceptually equidistant
+ * colors suitable for plotting. Replace the default 'colz' palette by a 
+ * perceptually uniform one.
+ */
 void setColors(){
 	TColor *color;
 	for (int i = 0; i < 8; ++i) {
@@ -43,8 +50,7 @@ void setColors(){
 		color->SetRGB(pastelColors[i][0]/255., pastelColors[i][1]/255., pastelColors[i][2]/255.);
 	}
 
-	// Rainbow color map in linear scale for 2D histograms; see https://root.cern.ch/rainbow-color-map
-	gStyle->SetPalette(55);
+	gStyle->SetPalette(kViridis);
 }
 
 } // namespace colors

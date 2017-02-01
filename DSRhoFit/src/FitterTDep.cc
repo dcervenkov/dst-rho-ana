@@ -10,7 +10,6 @@
 #include "RooPlot.h"
 #include "RooFitResult.h"
 
-#include "TPluginManager.h"
 #include "TMath.h"
 #include "TIterator.h"
 #include "TLine.h"
@@ -101,7 +100,6 @@ FitterTDep::FitterTDep(Double_t* outer_par_input) :
 }
 
 FitterTDep::~FitterTDep() {
-	delete gPluginMgr;
 	delete thb;
 	delete tht;
 	delete phit;

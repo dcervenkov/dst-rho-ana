@@ -39,5 +39,8 @@ This small tool reads in the ROOT file created by the DSRho module for (usually 
 ### DSRhoSkim
 A BASF module that goes through the whole Belle dataset and preselects data for the main analysis module. It does reconstruction and a few very simple cuts.
 
+### DSRhoTMVATraining
+Adapted TMVA tutorial code used to train continuum suppression classifiers.
+
 ### DSRhoYield
 This program performs a 1D Mbc fit to extract signal yield from data. It first fixes signal, self-cross-feed and background shapes and some ratios from generic MC. We introduce a smearing parameter when fitting data to account for MC vs. data differences in Mbc resolution

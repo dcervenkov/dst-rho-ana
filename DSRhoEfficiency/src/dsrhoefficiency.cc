@@ -39,6 +39,10 @@ int main(int argc, char* argv[]) {
 	fitter.thetab_.setBins(40);
 	fitter.phit_.setBins(40);
 
+	fitter.PlotVar(fitter.dt_);
+	fitter.FitEfficiency(fitter.dt_);
+	fitter.PlotEfficiency(fitter.dt_, false, false);
+
 	fitter.PlotVar(fitter.thetat_);
 	fitter.FitEfficiency(fitter.thetat_);
 	fitter.PlotEfficiency(fitter.thetat_, true, false);
@@ -54,9 +58,18 @@ int main(int argc, char* argv[]) {
 	fitter.PlotVars2D(fitter.thetab_, fitter.thetat_);
 	fitter.PlotVars2D(fitter.thetat_, fitter.phit_);
 	fitter.PlotVars2D(fitter.thetab_, fitter.phit_);
+
+	fitter.PlotVars2D(fitter.dt_, fitter.thetat_);
+	fitter.PlotVars2D(fitter.dt_, fitter.thetab_);
+	fitter.PlotVars2D(fitter.dt_, fitter.phit_);
+
 	fitter.PlotEfficiency2D(fitter.thetab_, fitter.thetat_);
 	fitter.PlotEfficiency2D(fitter.thetat_, fitter.phit_);
 	fitter.PlotEfficiency2D(fitter.thetab_, fitter.phit_);
+
+	fitter.PlotEfficiency2D(fitter.dt_, fitter.thetat_);
+	fitter.PlotEfficiency2D(fitter.dt_, fitter.thetab_);
+	fitter.PlotEfficiency2D(fitter.dt_, fitter.phit_);
 
 	return 0;
 }

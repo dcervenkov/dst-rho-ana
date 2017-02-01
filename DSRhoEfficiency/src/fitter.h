@@ -18,6 +18,7 @@
 #include "RooCategory.h"
 #include "RooExtendPdf.h"
 #include "RooGenericPdf.h"
+#include "RooFormulaVar.h"
 
 // Local includes
 #include "constants.h"
@@ -35,11 +36,15 @@ public:
 	RooRealVar thetat_ { "thetat", "#theta_{t} [rad]", 0, kPi };
 	RooRealVar thetab_ { "thetab", "#theta_{b} [rad]", 0.5, 2.95 };
 	RooRealVar phit_ { "phit", "#phi_{t} [rad]", -kPi, kPi };
-	RooRealVar dt_ { "dt", "dt", 0 };
+	RooRealVar dt_ { "dt", "dt", -15, +15 };
 	RooCategory dec_type_ { "dec_type", "dec_type" };
 	RooRealVar evmcflag_ { "evmcflag", "evmcflag", -100, 100 };
 
 private:
+	RooRealVar vrvtxz_ { "vrvtxz", "vrvtxz", 0 };
+	RooRealVar vtvtxz_ { "vtvtxz", "vtvtxz", 0 };
+	RooFormulaVar dt_formula_ {"dt", "#Deltat [ps]", "(vrvtxz-vtvtxz)/(0.425*0.0299792458)", RooArgSet(vrvtxz_, vtvtxz_)};
+
 	TPaveText* CreateStatBox(double chi2, bool position_top = true, bool position_left = true);
 
 	RooDataSet* evtgen_dataset_ = NULL;

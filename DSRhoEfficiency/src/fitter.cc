@@ -47,7 +47,9 @@ Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const cha
 
 	TFile* gsim_file = new TFile(gsim_filepath);
 	TTree* gsim_tree = dynamic_cast<TTree*>(gsim_file->Get("h2000"));
-	gsim_dataset_ = new RooDataSet("gsim_dataset", "gsim dataset", gsim_tree, RooArgSet(thetat_, thetab_, phit_, evmcflag_), "evmcflag==1");
+	gsim_dataset_ = new RooDataSet("gsim_dataset", "gsim dataset", gsim_tree, RooArgSet(thetat_, thetab_, phit_, vrvtxz_, vtvtxz_, evmcflag_), "evmcflag==1");
+	// Add calculated dt to the dataset
+	gsim_dataset_->addColumn(dt_formula_);
 	delete gsim_tree;
 	gsim_file->Close();
 
@@ -226,7 +228,6 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
 
 	canvas_eff_->SetRightMargin(0.14);
 
-	gStyle->SetPalette(56);
 	eff_histo->SetTitle("");
 	eff_histo->SetMinimum(0);
 	eff_histo->SetMaximum(0.35);

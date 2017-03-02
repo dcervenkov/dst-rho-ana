@@ -46,6 +46,8 @@ data
 DSRhoPeek/svd*/*
 DSRho/Makefile
 DSRhoSkim/Makefile
+panther2TTree/Makefile
+printTree/Makefile
 
 # Executable files
 DSRhoCPFit/DSRhoCPFit

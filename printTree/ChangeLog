@@ -1,0 +1,17 @@
+v1r0
+----
+
+Almost original configuration taken fron Frederic (just CJ and new Upsilon(4S) PID 300553  added
+
+v1r1
+----
+* removed unnecessary files from CVS. To compile go to configdirectory, type: 
+  "autoconf ; ./configure ; cd .. ; make"
+* added cleanup.csh script
+* relocated and adjusted the print_tree.csh script (now under run)
+* added these release notes
+
+v1r2
+----
+* changed and simplified the compilation toolchain. To compile, run:
+  "xmkmf; make"

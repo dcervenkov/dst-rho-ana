@@ -44,3 +44,9 @@ Adapted TMVA tutorial code used to train continuum suppression classifiers.
 
 ### DSRhoYield
 This program performs a 1D Mbc fit to extract signal yield from data. It first fixes signal, self-cross-feed and background shapes and some ratios from generic MC. We introduce a smearing parameter when fitting data to account for MC vs. data differences in Mbc resolution
+
+### panther2TTree
+A tool to convert `hbook` files to `ROOT` files. It's a one to one conversion, ntuple field names are preserved.
+
+### printTree
+Allows you to print the decay tree of chosen event(s) in a human-friendly format.

@@ -17,7 +17,7 @@ PANTHER_LIB = -L$(BELLE_RUN_DIR)/lib/so -lpanther
 .SUFFIXES: .c .cc .so
 
 LIBS = -L. $(PANTHER_LIB) $(BELLE_LIB) #$(EXTRA_LIB)
-INCS = -I. -I$(MY_TOP_DIR)/include -I$(BELLE_INC_DIR)
+INCS = -I. -I$(BELLE_INC_DIR)
 
 CC  = gcc
 CXX = g++

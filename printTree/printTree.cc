@@ -5,7 +5,7 @@
 #include "basf/module_descr.h"
 
 #include <cstring>
-#include "include/printTree.h"
+#include "printTree.h"
 #include <iostream>
 #include <iomanip>
 #include <strings.h>

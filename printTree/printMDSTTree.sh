@@ -6,7 +6,7 @@ if ( "$#" != "4" ) then
 endif
 
 source /sw/belle/local/etc/cshrc_general
-setenv BASF_MODULE_DIR ./bin:$BASF_MODULE_DIR
+setenv BASF_MODULE_DIR .:$BASF_MODULE_DIR
 
 # Parameters
 set mdst="$1"

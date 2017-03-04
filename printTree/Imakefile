@@ -2,11 +2,8 @@
 # Imakefile
 #
 
-SRCDIR = src
-BINDIR = bin
-TARGET1 = $(BINDIR)/printtreemodule.so
-OBJS1 = $(SRCDIR)/printTree.o
-
+TARGET1 = printtreemodule.so
+OBJS1 = printTree.o
 BUILD_TOP_DIR    = $(BELLE_RUN_DIR)
 RELATIVE_TOP_DIR = $(BELLE_TOP_DIR)
 BELLE_INC_DIR    = $(BELLE_TOP_DIR)/include

@@ -36,6 +36,9 @@
 */.cproject
 */.settings
 
+# VS Code files
+*/.vscode
+
 data
 
 */data*/*

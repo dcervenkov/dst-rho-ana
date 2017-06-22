@@ -11,19 +11,17 @@
 #define TOOLS_H_
 
 // ROOT includes
+#include "RooArgList.h"
 #include "TChain.h"
 #include "TPaveText.h"
-#include "RooArgList.h"
 
 namespace tools {
 
 std::vector<TString> GetListOfFiles(const char* dir, const char* ext);
 TChain* ReadDataFromDir(const char* dir);
 void SetupPlotStyle();
-TPaveText* CreateStatBox(double chi2, RooArgList* results = NULL, bool position_top = true, bool position_left = true);
-
+TPaveText* CreateStatBox(double chi2, RooArgList* results = NULL, bool position_top = true,
+                         bool position_left = true);
 }
-
-
 
 #endif /* TOOLS_H_ */

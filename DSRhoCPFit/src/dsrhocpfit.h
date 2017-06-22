@@ -15,6 +15,8 @@ struct fitter_options {
 	bool num_CPUs_set;
 	bool do_mixing_fit;
 	bool do_mixing_fit_set;
+	char* fix;
+	bool fix_set;
 	bool make_plots;
 	bool make_plots_set;
 	int num_events;

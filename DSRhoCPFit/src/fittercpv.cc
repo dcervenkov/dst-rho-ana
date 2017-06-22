@@ -9,6 +9,10 @@
 
 #include "fittercpv.h"
 
+// Standard includes
+#include <sstream>
+#include <string>
+
 // Belle includes
 #include "tatami/tatami.h"
 
@@ -41,22 +45,45 @@
 #include "constants.h"
 #include "dtcppdf.h"
 
-FitterCPV::FitterCPV() {
-	thetat_ = new RooRealVar( "thetat", "thetat", 0, constants::pi );
-	thetab_ = new RooRealVar( "thetab", "thetab", 0, constants::pi );
-	phit_ = new RooRealVar( "phit", "phit", -constants::pi, constants::pi );
+FitterCPV::FitterCPV(double* par_input) {
+	ap_  = new RooRealVar("ap","ap", par_input[0],0,0.5);
+	apa_ = new RooRealVar("apa","apa", par_input[1],0,1);
+	a0_  = new RooRealVar("a0","a0", par_input[2],0.8,1);
+	a0a_ = new RooRealVar("a0a","a0a",0);
+	at_  = new RooFormulaVar("at","sqrt(1-ap*ap-a0*a0)",RooArgSet(*ap_,*a0_));
+	ata_ = new RooRealVar("ata","ata", par_input[3],2,4);
 
-	vrusable_ = new RooRealVar( "vrusable", "vrusable", 0, 1 );
-	vrvtxz_ = new RooRealVar( "vrvtxz", "vrvtxz", -10, 10 );
-	vrerr6_ = new RooRealVar( "vrerr6", "vrerr6", -1, 1 );
-	vrchi2_ = new RooRealVar( "vrchi2", "vrchi2", 0, 10000000 );
-//	vreffxi_ = new RooRealVar( "vreffxi", "vreffxi", 0, 10000000 );
-	vrndf_ = new RooRealVar( "vrndf", "vrndf", 0, 100 );
-//	vreffndf_ = new RooRealVar( "vreffndf", "vreffndf", 0, 100 );
-	vrntrk_ = new RooRealVar( "vrntrk", "vrntrk", 0, 100 );
+	xp_ = new RooRealVar("xp","xp",par_input[4],-0.2,0.2);
+	x0_ = new RooRealVar("x0","x0",par_input[5],-0.2,0.2);
+	xt_ = new RooRealVar("xt","xt",par_input[6],-0.2,0.2);
 
-	vtusable_ = new RooRealVar( "vtusable", "vtusable", 1 );
-	vtvtxz_ = new RooRealVar( "vtvtxz", "vtvtxz", -10, 10 );
+	yp_ = new RooRealVar("yp","yp",par_input[7],-0.2,0.2);
+	y0_ = new RooRealVar("y0","y0",par_input[8],-0.2,0.2);
+	yt_ = new RooRealVar("yt","yt",par_input[9],-0.2,0.2);
+
+	xpb_ = new RooRealVar("xpb","xpb",par_input[10],-0.2,0.2);
+	x0b_ = new RooRealVar("x0b","x0b",par_input[11],-0.2,0.2);
+	xtb_ = new RooRealVar("xtb","xtb",par_input[12],-0.2,0.2);
+
+	ypb_ = new RooRealVar("ypb","ypb",par_input[13],-0.2,0.2);
+	y0b_ = new RooRealVar("y0b","y0b",par_input[14],-0.2,0.2);
+	ytb_ = new RooRealVar("ytb","ytb",par_input[15],-0.2,0.2);
+
+	thetat_ = new RooRealVar("thetat", "thetat", 0, constants::pi);
+	thetab_ = new RooRealVar("thetab", "thetab", 0, constants::pi);
+	phit_   = new RooRealVar("phit", "phit", -constants::pi, constants::pi);
+
+	vrusable_ = new RooRealVar( "vrusable", "vrusable", 0, 1);
+	vrvtxz_ = new RooRealVar( "vrvtxz", "vrvtxz", -10, 10);
+	vrerr6_ = new RooRealVar( "vrerr6", "vrerr6", -1, 1);
+	vrchi2_ = new RooRealVar( "vrchi2", "vrchi2", 0, 10000000);
+//	vreffxi_ = new RooRealVar( "vreffxi", "vreffxi", 0, 10000000);
+	vrndf_ = new RooRealVar( "vrndf", "vrndf", 0, 100);
+//	vreffndf_ = new RooRealVar( "vreffndf", "vreffndf", 0, 100);
+	vrntrk_ = new RooRealVar( "vrntrk", "vrntrk", 0, 100);
+
+	vtusable_ = new RooRealVar( "vtusable", "vtusable", 1);
+	vtvtxz_ = new RooRealVar( "vtvtxz", "vtvtxz", -10, 10);
 	vtchi2_ = new RooRealVar( "vtchi2", "vtchi2", 1.6 );
 	vtndf_ = new RooRealVar( "vtndf", "vtndf", 4 );
 	vterr6_ = new RooRealVar( "vterr6", "vterr6", -1, 1 );
@@ -132,6 +159,22 @@ FitterCPV::FitterCPV() {
 	dataset_vars_.push_back(&thetab_);
 	dataset_vars_.push_back(&phit_);
 
+	parameters_.push_back(&ap_);
+	parameters_.push_back(&apa_);
+	parameters_.push_back(&a0_);
+	parameters_.push_back(&ata_);
+	parameters_.push_back(&xp_);
+	parameters_.push_back(&x0_);
+	parameters_.push_back(&xt_);
+	parameters_.push_back(&yp_);
+	parameters_.push_back(&y0_);
+	parameters_.push_back(&yt_);
+	parameters_.push_back(&xpb_);
+	parameters_.push_back(&x0b_);
+	parameters_.push_back(&xtb_);
+	parameters_.push_back(&ypb_);
+	parameters_.push_back(&y0b_);
+	parameters_.push_back(&ytb_);
 
 	// The variables present in the ntuple are added to an RooArgSet that will be needed
 	// when we create a RooDataSet from the input_tree
@@ -142,6 +185,10 @@ FitterCPV::FitterCPV() {
 	// TODO: Comments
 	for(auto var : dataset_vars_) {
 		dataset_vars_argset_.add(**var);
+	}
+
+	for(auto par : parameters_) {
+		parameters_argset_.add(**par);
 	}
 
 	num_CPUs_ = 1;
@@ -190,183 +237,22 @@ void FitterCPV::PlotVar(RooRealVar& var, const RooAbsData& data) const {
 
 // TODO: Remove/refactor
 void FitterCPV::Test() {
-	// vars with phiweak = phiweak
-//	double par_input[] = {
-//			0.269,
-//			0.56,
-//			0.941,
-//			3.11,
-//
-//			0.0816649,
-//			0.0532961,
-//			0.0829682,
-//			0.0659988,
-//			0.084614,
-//			-0.0373802,
-//
-//			-0.102141,
-//			-0.0845715,
-//			-0.0587413,
-//			-0.0243354,
-//			-0.0533635,
-//			0.0695015
-//
-//	};
-
-
-	//// vars with phiweak = phiweak + pi, r = 0.10
-	//double par_input[] = {
-	//		0.269,
-	//		0.56,
-	//		0.941,
-	//		3.11,
-
-	//		0.0816649, // xp
-	//		0.0532961, // x0
-	//		0.0829682, // xt
-	//		-0.0659988, // yp
-	//		-0.084614,  // y0
-	//		+0.0373802, // yt
-
-	//		-0.102141,  // xpb
-	//		-0.0845715, // x0b
-	//		-0.0587413, // xtb
-	//		+0.0243354, // ypb
-	//		+0.0533635, // y0b
-	//		-0.0695015  // ytb
-	//};
-
-	// vars with phiweak = phiweak + pi, r = 0.01
-	double par_input[] = {
-			0.269,
-			0.56,
-			0.941,
-			3.11,
-
-			0.00816649, // xp
-			0.00532961, // x0
-			0.00829682, // xt
-			-0.00659988, // yp
-			-0.0084614,  // y0
-			+0.00373802, // yt
-
-			-0.0102141,  // xpb
-			-0.00845715, // x0b
-			-0.00587413, // xtb
-			+0.00243354, // ypb
-			+0.00533635, // y0b
-			-0.00695015  // ytb
-	};
-
-//	// vars with phiweak = phiweak + pi, x,y=0
-//	double par_input[] = {
-//			0.269,
-//			0.56,
-//			0.941,
-//			3.11,
-//
-//			0, // xp
-//			0, // x0
-//			0, // xt
-//			0, // yp
-//			0, // y0
-//			0, // yt
-//
-//			0, // xpb
-//			0, // x0b
-//			0, // xtb
-//			0, // ypb
-//			0, // y0b
-//			0  // ytb
-//	};
-
-	RooRealVar ap ("ap","ap", par_input[0],0,0.5);
-	RooRealVar apa("apa","apa", par_input[1],0,1);
-	RooRealVar a0 ("a0","a0", par_input[2],0.8,1);
-	RooRealVar a0a("a0a","a0a",0);
-	RooFormulaVar at("at","sqrt(1-ap*ap-a0*a0)",RooArgSet(ap,a0));
-	RooRealVar ata("ata","ata", par_input[3],2,4);
-
-	RooRealVar xp ("xp","xp",par_input[4],-0.2,0.2);
-	RooRealVar x0 ("x0","x0",par_input[5],-0.2,0.2);
-	RooRealVar xt ("xt","xt",par_input[6],-0.2,0.2);
-
-	RooRealVar yp ("yp","yp",par_input[7],-0.2,0.2);
-	RooRealVar y0 ("y0","y0",par_input[8],-0.2,0.2);
-	RooRealVar yt ("yt","yt",par_input[9],-0.2,0.2);
-
-	RooRealVar xpb("xpb","xpb",par_input[10],-0.2,0.2);
-	RooRealVar x0b("x0b","x0b",par_input[11],-0.2,0.2);
-	RooRealVar xtb("xtb","xtb",par_input[12],-0.2,0.2);
-
-	RooRealVar ypb("ypb","ypb",par_input[13],-0.2,0.2);
-	RooRealVar y0b("y0b","y0b",par_input[14],-0.2,0.2);
-	RooRealVar ytb("ytb","ytb",par_input[15],-0.2,0.2);
-
-//	printf("DBG: Test\n");
-//	printf("ap  = %f\n"
-//		"apa = %f\n"
-//		"a0  = %f\n"
-//		"a0a = %f\n"
-//		"at  = %f\n"
-//		"ata = %f\n"
-//		"xp  = %f\n"
-//		"x0  = %f\n"
-//		"xt  = %f\n"
-//		"yp  = %f\n"
-//		"y0  = %f\n"
-//		"yt  = %f\n",
-//		(double) ap.getVal(),
-//		(double) apa.getVal(),
-//		(double) a0.getVal(),
-//		(double) a0a.getVal(),
-//		(double) at.getVal(),
-//		(double) ata.getVal(),
-//		(double) xp.getVal(),
-//		(double) x0.getVal(),
-//		(double) xt.getVal(),
-//		(double) yp.getVal(),
-//		(double) y0.getVal(),
-//		(double) yt.getVal());
-
-	ap.setConstant();
-	apa.setConstant();
-	a0.setConstant();
-	a0a.setConstant();
-	ata.setConstant();
-
-	//xp.setConstant();
-	//x0.setConstant();
-	//xt.setConstant();
-
-	//yp.setConstant();
-	//y0.setConstant();
-	//yt.setConstant();
-
-	//xpb.setConstant();
-	//x0b.setConstant();
-	//xtb.setConstant();
-
-	//ypb.setConstant();
-	//y0b.setConstant();
-	//ytb.setConstant();
-
 
 	DtCPPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", true, perfect_tagging_,
 			*thetat_,
 			*thetab_,
 			*phit_,
 
-			ap,
-			apa,
-			a0,
-			ata,
-			xp,
-			x0,
-			xt,
-			yp,
-			y0,
-			yt,
+			*ap_,
+			*apa_,
+			*a0_,
+			*ata_,
+			*xp_,
+			*x0_,
+			*xt_,
+			*yp_,
+			*y0_,
+			*yt_,
 
 			*tagwtag_,
 			*dt_,
@@ -392,16 +278,16 @@ void FitterCPV::Test() {
 			*thetab_,
 			*phit_,
 
-			ap,
-			apa,
-			a0,
-			ata,
-			xpb,
-			x0b,
-			xtb,
-			ypb,
-			y0b,
-			ytb,
+			*ap_,
+			*apa_,
+			*a0_,
+			*ata_,
+			*xpb_,
+			*x0b_,
+			*xtb_,
+			*ypb_,
+			*y0b_,
+			*ytb_,
 
 			*tagwtag_,
 			*dt_,
@@ -427,16 +313,16 @@ void FitterCPV::Test() {
 			*thetab_,
 			*phit_,
 
-			ap,
-			apa,
-			a0,
-			ata,
-			xp,
-			x0,
-			xt,
-			yp,
-			y0,
-			yt,
+			*ap_,
+			*apa_,
+			*a0_,
+			*ata_,
+			*xp_,
+			*x0_,
+			*xt_,
+			*yp_,
+			*y0_,
+			*yt_,
 
 			*tagwtag_,
 			*dt_,
@@ -462,16 +348,16 @@ void FitterCPV::Test() {
 			*thetab_,
 			*phit_,
 
-			ap,
-			apa,
-			a0,
-			ata,
-			xpb,
-			x0b,
-			xtb,
-			ypb,
-			y0b,
-			ytb,
+			*ap_,
+			*apa_,
+			*a0_,
+			*ata_,
+			*xpb_,
+			*x0b_,
+			*xtb_,
+			*ypb_,
+			*y0b_,
+			*ytb_,
 
 			*tagwtag_,
 			*dt_,
@@ -1143,3 +1029,33 @@ void FitterCPV::SetOutputDir(const char* output_dir) {
 	}
 }
 
+/**
+ * Fix requested parameters.
+ */
+bool FitterCPV::FixParameters(const char* pars) {
+    std::string input = pars;
+    std::istringstream ss(input);
+    std::string token;
+    std::vector<std::string> par_vector;
+
+    while (std::getline(ss, token, ',')) {
+        par_vector.push_back(token);
+    }
+
+    RooRealVar* rooPar = 0;
+    for (auto par : par_vector) {
+        bool par_not_found = true;
+        TIterator* parIter = parameters_argset_.createIterator();
+        while ((rooPar = (RooRealVar*)parIter->Next())) {
+            if (rooPar->GetName() == par) {
+                rooPar->setConstant();
+                par_not_found = false;
+            }
+        }
+        if (par_not_found) {
+            printf("ERROR: Parameter %s doesn't exist.\n", par.c_str());
+            return true;
+        }
+    }
+    return false;
+}

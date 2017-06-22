@@ -20,7 +20,7 @@
 
 class FitterCPV {
 public:
-	FitterCPV();
+	FitterCPV(double* par_input);
 	virtual ~FitterCPV();
 
 	void PlotVar(RooRealVar& var, const RooAbsData&) const;
@@ -45,7 +45,30 @@ public:
 
 	void ReadInFile(const char* file_path, const int& num_events = 0);
 	void SetOutputDir(const char* output_dir);
+	bool FixParameters(const char* pars);
 
+	RooRealVar* ap_;
+	RooRealVar* apa_;
+	RooRealVar* a0_;
+	RooRealVar* a0a_;
+	RooFormulaVar* at_;
+	RooRealVar* ata_;
+
+	RooRealVar* xp_;
+	RooRealVar* x0_;
+	RooRealVar* xt_;
+
+	RooRealVar* yp_;
+	RooRealVar* y0_;
+	RooRealVar* yt_;
+
+	RooRealVar* xpb_;
+	RooRealVar* x0b_;
+	RooRealVar* xtb_;
+
+	RooRealVar* ypb_;
+	RooRealVar* y0b_;
+	RooRealVar* ytb_;
 
 	RooRealVar* thetat_;
 	RooRealVar* thetab_;
@@ -103,8 +126,10 @@ private:
 
 	std::vector<RooRealVar**>conditional_vars_;
 	std::vector<RooRealVar**>dataset_vars_;
+	std::vector<RooRealVar**>parameters_;
 	RooArgSet conditional_vars_argset_;
 	RooArgSet dataset_vars_argset_;
+	RooArgSet parameters_argset_;
 
 	RooDataSet* dataset_ = NULL;
 	RooFitResult* result_ = NULL;

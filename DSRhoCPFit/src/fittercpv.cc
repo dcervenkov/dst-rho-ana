@@ -10,6 +10,8 @@
 #include "fittercpv.h"
 
 // Standard includes
+#include <array>
+#include <boost/filesystem.hpp>
 #include <sstream>
 #include <string>
 
@@ -45,7 +47,7 @@
 #include "constants.h"
 #include "dtcppdf.h"
 
-FitterCPV::FitterCPV(double* par_input) {
+FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     ap_ = new RooRealVar("ap", "ap", par_input[0], 0, 0.5);
     apa_ = new RooRealVar("apa", "apa", par_input[1], 0, 1);
     a0_ = new RooRealVar("a0", "a0", par_input[2], 0.8, 1);
@@ -178,6 +180,9 @@ FitterCPV::FitterCPV(double* par_input) {
     parameters_.push_back(&ypb_);
     parameters_.push_back(&y0b_);
     parameters_.push_back(&ytb_);
+
+    // Make a copy of the input parameters for saving results, etc.
+    par_input_ = par_input;
 
     // The variables present in the ntuple are added to an RooArgSet that will be needed
     // when we create a RooDataSet from the input_tree
@@ -793,17 +798,22 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     }
 
     dataset_->get(1)->Print("v");
+
+    // Set the current directory back to the one for writing (ugly ROOT stuff)
+    output_file_->cd();
 }
 
 /**
  * Set the directory to which to ouput plots
  */
-void FitterCPV::SetOutputDir(const char* output_dir) {
-    gEnv->SetValue("Canvas.PrintDirectory", output_dir);
-    printf("print dir: %s\n", gEnv->GetValue("Canvas.PrintDirectory", "not found"));
-    if (make_plots_) {
-        output_file_ = new TFile(TString(output_dir) + "/plots.root", "RECREATE");
+void FitterCPV::SetPlotDir(const char* plot_dir) {
+    make_plots_ = true;
+    if (!boost::filesystem::is_directory(plot_dir)) {
+        boost::filesystem::create_directories(plot_dir);
     }
+    gEnv->SetValue("Canvas.PrintDirectory", plot_dir);
+    printf("print dir: %s\n", gEnv->GetValue("Canvas.PrintDirectory", "not found"));
+    output_file_ = new TFile(TString(plot_dir) + "/plots.root", "RECREATE");
 }
 
 /**
@@ -836,3 +846,104 @@ bool FitterCPV::FixParameters(const char* pars) {
     }
     return false;
 }
+
+
+/**
+ * Save results and initial values into a file.
+ */
+ bool FitterCPV::SaveResults(const char* file) {
+     // const RooArgSet* args = dataSet->get();
+     // RooPlot* frame = 0;
+
+     const int numParameters = 54;
+     double* parameters = new double[numParameters];
+
+     FILE* pFile;
+     pFile = fopen(file, "w");
+     if (pFile == NULL) {
+         printf("ERROR: couldn't open file %s for writing!\n", file);
+         delete[] parameters;
+         return 1;
+     }
+
+     parameters[0] = par_input_[0];
+     parameters[1] = ap_->getVal();
+     parameters[2] = ap_->getError();
+     parameters[3] = par_input_[1];
+     parameters[4] = apa_->getVal();
+     parameters[5] = apa_->getError();
+     parameters[6] = par_input_[2];
+     parameters[7] = a0_->getVal();
+     parameters[8] = a0_->getError();
+     parameters[9] = 0;
+     parameters[10] = a0a_->getVal();
+     parameters[11] = a0a_->getError();
+     parameters[12] = sqrt(1 - par_input_[0] * par_input_[0] - par_input_[2] * par_input_[2]);
+     parameters[13] = at_->getVal();
+     parameters[14] = at_->getPropagatedError(*result_);
+     parameters[15] = par_input_[3];
+     parameters[16] = ata_->getVal();
+     parameters[17] = ata_->getError();
+
+     parameters[18] = par_input_[4];
+     parameters[19] = xp_->getVal();
+     parameters[20] = xp_->getError();
+     parameters[21] = par_input_[5];
+     parameters[22] = x0_->getVal();
+     parameters[23] = x0_->getError();
+     parameters[24] = par_input_[6];
+     parameters[25] = xt_->getVal();
+     parameters[26] = xt_->getError();
+     parameters[27] = par_input_[7];
+     parameters[28] = yp_->getVal();
+     parameters[29] = yp_->getError();
+     parameters[30] = par_input_[8];
+     parameters[31] = y0_->getVal();
+     parameters[32] = y0_->getError();
+     parameters[33] = par_input_[9];
+     parameters[34] = yt_->getVal();
+     parameters[35] = yt_->getError();
+
+     parameters[36] = par_input_[10];
+     parameters[37] = xp_->getVal();
+     parameters[38] = xp_->getError();
+     parameters[39] = par_input_[11];
+     parameters[40] = x0_->getVal();
+     parameters[41] = x0_->getError();
+     parameters[42] = par_input_[12];
+     parameters[43] = xt_->getVal();
+     parameters[44] = xt_->getError();
+     parameters[45] = par_input_[13];
+     parameters[46] = yp_->getVal();
+     parameters[47] = yp_->getError();
+     parameters[48] = par_input_[14];
+     parameters[49] = y0_->getVal();
+     parameters[50] = y0_->getError();
+     parameters[51] = par_input_[15];
+     parameters[52] = yt_->getVal();
+     parameters[53] = yt_->getError();
+
+     Int_t separators[] = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2,
+                           0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2,
+                           0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2};
+
+     for (Int_t i = 0; i < numParameters; i++) {
+         /// These parameters can be both positive and negative therefore the
+         /// added + in front of positive numbers keeps the columns aligned
+         if (i >= 18 && (i - 20) % 3 != 0) {
+             fprintf(pFile, "%+.5f ", parameters[i]);
+         } else {
+             fprintf(pFile, "%.5f ", parameters[i]);
+         }
+         if (i == numParameters - 1) continue;
+         if (separators[i] == 1)
+             fprintf(pFile, "| ");
+         else if (separators[i] == 2)
+             fprintf(pFile, "|| ");
+     }
+     fprintf(pFile, "\n");
+     fclose(pFile);
+     delete[] parameters;
+
+     return 0;
+ }

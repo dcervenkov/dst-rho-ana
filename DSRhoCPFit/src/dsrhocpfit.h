@@ -17,8 +17,8 @@ struct fitter_options {
     bool do_mixing_fit_set;
     char* fix;
     bool fix_set;
-    bool make_plots;
-    bool make_plots_set;
+    char* plot_dir;
+    bool plot_dir_set;
     int num_events;
     bool num_events_set;
     bool perfect_tagging;

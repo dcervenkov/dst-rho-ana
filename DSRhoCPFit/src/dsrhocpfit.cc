@@ -10,6 +10,7 @@
 #include "dsrhocpfit.h"
 
 // Standard includes
+#include <array>
 #include <getopt.h>
 #include <stdio.h>
 
@@ -38,10 +39,9 @@ int main(int argc, char* argv[]) {
     /// This is so I have to change only the next block if I change the
     /// ordering, etc. of arguments
     const char* file_path = optionless_argv[1];
-    const char* output_dir = optionless_argv[2];
-    const int numPars = optionless_argc - 3;
-    double par_input[numPars];
-    for (Int_t i = 0; i < numPars; i++) {
+    const char* results_path = optionless_argv[2];
+    std::array<double, 16> par_input;
+    for (size_t i = 0; i < par_input.size(); i++) {
         par_input[i] = atof(optionless_argv[i + 3]);
     }
 
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
     FitterCPV fitter(par_input);
 
     if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
-    if (options.make_plots_set) fitter.SetMakePlots(options.make_plots);
+    if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
     if (options.do_mixing_fit_set) fitter.SetDoMixingFit(options.do_mixing_fit);
     if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
     if (options.fix_set) {
@@ -65,11 +65,11 @@ int main(int argc, char* argv[]) {
     } else {
         fitter.ReadInFile(file_path);
     }
-    fitter.SetOutputDir(output_dir);
 
     fitter.Test();
     //  fitter.GenerateToys(10000, 10);
     //  fitter.Test();
+    fitter.SaveResults(results_path);
 
     return 0;
 }
@@ -98,11 +98,11 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"fix", required_argument, 0, 'x'},
         {"mixing", no_argument, 0, 'm'},
         {"perfecttag", no_argument, 0, 't'},
-        {"plot", no_argument, 0, 'p'},
+        {"plot", required_argument, 0, 'p'},
         {"help", no_argument, 0, 'h'},
         {NULL, no_argument, NULL, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:e:x:plmth", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:e:x:p:lmth", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -122,8 +122,8 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.fix_set = true;
                 break;
             case 'p':
-                options.make_plots = true;
-                options.make_plots_set = true;
+                options.plot_dir = optarg;
+                options.plot_dir_set = true;
                 break;
             case 'm':
                 options.do_mixing_fit = true;
@@ -142,7 +142,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-h, --help              display this text and exit\n");
                 printf("-m, --mixing            make a mixing fit\n");
                 printf("-t, --perfecttag        use MC info to get perfect tagging\n");
-                printf("-p, --plot              create lifetime/mixing plots\n");
+                printf("-p, --plot=PLOT_DIR     create lifetime/mixing plots\n");
                 exit(0);
                 break;
             default:

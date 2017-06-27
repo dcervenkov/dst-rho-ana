@@ -10,6 +10,9 @@
 #ifndef FITTERCPV_H_
 #define FITTERCPV_H_
 
+// Standard includes
+#include <array>
+
 // ROOT includes
 #include "RooRealVar.h"
 #include "TCanvas.h"
@@ -20,7 +23,7 @@
 
 class FitterCPV {
    public:
-    FitterCPV(double* par_input);
+    FitterCPV(std::array<double, 16> par_input);
     virtual ~FitterCPV();
 
     void PlotVar(RooRealVar& var, const RooAbsData&) const;
@@ -45,8 +48,9 @@ class FitterCPV {
     int GetPerfectTagging() const { return perfect_tagging_; };
 
     void ReadInFile(const char* file_path, const int& num_events = 0);
-    void SetOutputDir(const char* output_dir);
+    void SetPlotDir(const char* output_dir);
     bool FixParameters(const char* pars);
+    bool SaveResults(const char* file);
 
     RooRealVar* ap_;
     RooRealVar* apa_;
@@ -131,6 +135,8 @@ class FitterCPV {
     RooArgSet conditional_vars_argset_;
     RooArgSet dataset_vars_argset_;
     RooArgSet parameters_argset_;
+
+    std::array<double, 16> par_input_;
 
     RooDataSet* dataset_ = NULL;
     RooFitResult* result_ = NULL;

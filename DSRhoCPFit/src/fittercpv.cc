@@ -800,7 +800,9 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     dataset_->get(1)->Print("v");
 
     // Set the current directory back to the one for writing (ugly ROOT stuff)
-    output_file_->cd();
+    if (output_file_) {
+        output_file_->cd();
+    }
 }
 
 /**

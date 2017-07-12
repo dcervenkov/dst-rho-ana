@@ -907,23 +907,23 @@ bool FitterCPV::FixParameters(const char* pars) {
      parameters[35] = yt_->getError();
 
      parameters[36] = par_input_[10];
-     parameters[37] = xp_->getVal();
-     parameters[38] = xp_->getError();
+     parameters[37] = xpb_->getVal();
+     parameters[38] = xpb_->getError();
      parameters[39] = par_input_[11];
-     parameters[40] = x0_->getVal();
-     parameters[41] = x0_->getError();
+     parameters[40] = x0b_->getVal();
+     parameters[41] = x0b_->getError();
      parameters[42] = par_input_[12];
-     parameters[43] = xt_->getVal();
-     parameters[44] = xt_->getError();
+     parameters[43] = xtb_->getVal();
+     parameters[44] = xtb_->getError();
      parameters[45] = par_input_[13];
-     parameters[46] = yp_->getVal();
-     parameters[47] = yp_->getError();
+     parameters[46] = ypb_->getVal();
+     parameters[47] = ypb_->getError();
      parameters[48] = par_input_[14];
-     parameters[49] = y0_->getVal();
-     parameters[50] = y0_->getError();
+     parameters[49] = y0b_->getVal();
+     parameters[50] = y0b_->getError();
      parameters[51] = par_input_[15];
-     parameters[52] = yt_->getVal();
-     parameters[53] = yt_->getError();
+     parameters[52] = ytb_->getVal();
+     parameters[53] = ytb_->getError();
 
      Int_t separators[] = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2,
                            0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2,

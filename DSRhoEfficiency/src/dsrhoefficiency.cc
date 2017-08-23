@@ -40,8 +40,6 @@ int main(int argc, char* argv[]) {
 	fitter.phit_.setBins(40);
 
 	fitter.PlotVar(fitter.dt_);
-	fitter.FitEfficiency(fitter.dt_);
-	fitter.PlotEfficiency(fitter.dt_, false, false);
 
 	fitter.PlotVar(fitter.thetat_);
 	fitter.FitEfficiency(fitter.thetat_);

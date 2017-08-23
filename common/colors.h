@@ -52,7 +52,7 @@ void setColors(){
 	}
 
 // Check if we are running a newer version of ROOT which has Viridis palette
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,6,0)
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
 	gStyle->SetPalette(kViridis);
 #else
 	gStyle->SetPalette(56);

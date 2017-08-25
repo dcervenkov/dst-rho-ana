@@ -20,15 +20,16 @@
 #include "tools.h"
 
 int main(int argc, char* argv[]) {
-	if (argc != 4){
+	if (argc != 5){
 		printf("ERROR: Wrong number of arguments.\n");
-		printf("Usage: DSRhoEfficiency EVTGEN-FILE GSIM-FILE OUTPUT-DIR\n");
+		printf("Usage: DSRhoEfficiency MODEL-NUM EVTGEN-FILE GSIM-FILE OUTPUT-DIR\n");
 		return 2;
 	}
 
-	const char* evtgen_filepath = argv[1];
-	const char* gsim_filepath = argv[2];
-	const char* output_dir = argv[3];
+	const int model_num = strtol(argv[1], NULL, 10);
+	const char* evtgen_filepath = argv[2];
+	const char* gsim_filepath = argv[3];
+	const char* output_dir = argv[4];
 
 	tools::SetupPlotStyle();
 	colors::setColors();
@@ -38,6 +39,8 @@ int main(int argc, char* argv[]) {
 	fitter.thetat_.setBins(40);
 	fitter.thetab_.setBins(40);
 	fitter.phit_.setBins(40);
+
+	fitter.SetEfficiencyModel(model_num);
 
 	fitter.PlotVar(fitter.dt_);
 

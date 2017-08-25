@@ -135,13 +135,13 @@ void Fitter::PlotEfficiency(RooRealVar& var, bool plot_model, bool legend_positi
 	}
 
 	if (var == thetat_) {
-		model_ = &thetat_model_e_;
+		model_ = thetat_model_e_;
 		efficiency_ = &efficiency_thetat_;
 	} else if (var == thetab_) {
-		model_ = &thetab_model_e_;
+		model_ = thetab_model_e_;
 		efficiency_ = &efficiency_thetab_;
 	} else if (var == phit_) {
-		model_ = &phit_model_e_;
+		model_ = phit_model_e_;
 		efficiency_ = &efficiency_phit_;
 	}
 
@@ -250,7 +250,7 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
 	canvas_eff_->Write();
 	canvas_eff_->SaveAs(format);
 
-	RooProdPdf efficiency_3D ("efficiency_3D", "efficiency_3D", RooArgList(thetat_model_, thetab_model_, phit_model_));
+	RooProdPdf efficiency_3D ("efficiency_3D", "efficiency_3D", RooArgList(*thetat_model_e_, *thetab_model_e_, *phit_model_e_));
 	RooDataHist* efficiency_pdf_binned = efficiency_3D.generateBinned(RooArgSet(thetat_, thetab_, phit_), eff_histo->Integral(), kTRUE);
 	TH2D* pdf_eff_histo = static_cast<TH2D*>(efficiency_pdf_binned->createHistogram("pdf_eff_histo", var1, RooFit::YVar(var2)));
 
@@ -331,13 +331,13 @@ void Fitter::FitEfficiency(RooRealVar& var) {
 
 	if (var == thetat_) {
 		efficiency_ = &efficiency_thetat_;
-		model_ = &thetat_model_e_;
+		model_ = thetat_model_e_;
 	} else if (var == thetab_) {
 		efficiency_ = &efficiency_thetab_;
-		model_ = &thetab_model_e_;
+		model_ = thetab_model_e_;
 	} else if (var == phit_) {
 		efficiency_ = &efficiency_phit_;
-		model_ = &phit_model_e_;
+		model_ = phit_model_e_;
 	}
 
 	RooDataHist* eff_hist = new RooDataHist(name, name, var, eff_histo);
@@ -391,4 +391,24 @@ TPaveText* Fitter::CreateStatBox(double chi2, bool position_top, bool position_l
 	snprintf(line, 1000, "#chi^{2} = %.2f\n", chi2);
 	stat_box->AddText(line);
 	return stat_box;
+}
+
+void Fitter::SetEfficiencyModel(const int model_num) {
+	switch(model_num) {
+	case 1 : 
+		thetat_model_e_ = &thetat_model1_e_;
+		thetab_model_e_ = &thetab_model1_e_;
+		phit_model_e_ = &phit_model1_e_;
+		break;
+	case 2 : 
+		thetat_model_e_ = &thetat_model2_e_;
+		thetab_model_e_ = &thetab_model2_e_;
+		phit_model_e_ = &phit_model2_e_;
+		break;
+	case 3 : 
+		thetat_model_e_ = &thetat_model3_e_;
+		thetab_model_e_ = &thetab_model3_e_;
+		phit_model_e_ = &phit_model3_e_;
+		break;
+	}
 }

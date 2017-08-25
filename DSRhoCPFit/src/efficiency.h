@@ -12,6 +12,7 @@
 
 // ROOT includes
 #include "RooRealVar.h"
+#include "RooFormulaVar.h"
 #include "RooChebychev.h"
 #include "RooPolynomial.h"
 #include "RooGaussian.h"
@@ -25,7 +26,7 @@ class Efficiency {
 public:
 	Efficiency();
 	virtual ~Efficiency();
-	double GetEfficiency(double thetat, double thetab, double phit) const;
+	double GetEfficiency(double thetat, double thetab, double phit, int efficiency_model) const;
 
 protected:
 	RooRealVar* thetat_ = new RooRealVar{"thetat", "#theta_{t}", 0, constants::pi };
@@ -100,6 +101,13 @@ protected:
 
 	double GetModel3Efficiency() const { return model3_thetat_.getVal() * model3_thetab_.getVal() * model3_phit_.getVal(); }
 
+    RooRealVar model4_thetat_p1_{"model4_thetat_p1", "p_{1}", 0};
+    RooRealVar model4_thetat_p2_{"model4_thetat_p2", "p_{2}", 0.107};
+    RooFormulaVar thetat_plus_pi2{"thetat_plus_pi2", "thetat + pi/2", "thetat - 1.571", RooArgSet(*thetat_)};
+    RooPolynomial model4_thetat_{"model4_thetat", "model4_thetat", thetat_plus_pi2, RooArgList{model4_thetat_p1_, model4_thetat_p2_}};
+
+	double GetModel4Efficiency() const { return model4_thetat_.getVal() * model2_thetab_.getVal() * model2_phit_.getVal(); }
+	
 };
 
 #endif /* EFFICIENCY_H_ */

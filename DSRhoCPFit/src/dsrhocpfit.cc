@@ -51,6 +51,11 @@ int main(int argc, char* argv[]) {
     FitterCPV fitter(par_input);
 
     if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
+    if (options.efficiency_model_set) {
+        fitter.SetEfficiencyModel(options.efficiency_model);
+    } else {
+        fitter.SetEfficiencyModel(1);
+    }
     if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
     if (options.do_mixing_fit_set) fitter.SetDoMixingFit(options.do_mixing_fit);
     if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
@@ -94,15 +99,16 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     int c;
     struct option long_options[] = {
         {"cpus", required_argument, 0, 'c'},
+        {"efficiency-model", required_argument, 0, 'f'},
         {"events", required_argument, 0, 'e'},
         {"fix", required_argument, 0, 'x'},
         {"mixing", no_argument, 0, 'm'},
-        {"perfecttag", no_argument, 0, 't'},
+        {"perfect-tag", no_argument, 0, 't'},
         {"plot", required_argument, 0, 'p'},
         {"help", no_argument, 0, 'h'},
         {NULL, no_argument, NULL, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:e:x:p:lmth", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:f:e:x:p:lmth", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -112,6 +118,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'c':
                 options.num_CPUs = atoi(optarg);
                 options.num_CPUs_set = true;
+                break;
+            case 'f':
+                options.efficiency_model = atoi(optarg);
+                options.efficiency_model_set = true;
                 break;
             case 'e':
                 options.num_events = atoi(optarg);
@@ -136,13 +146,14 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'h':
                 printf("Usage: %s [OPTION]... INPUT-FILE OUTPUT_DIR\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
-                printf("-c, --cpus=NUM_CPUS     number of CPU cores to use for fitting and plotting\n");
-                printf("-e, --events=NUM_EVENTS number of events to be imported from the input file\n");
-                printf("-x, --fix=ARG1,ARG2,... fix specified argument(s) to input values in the fit\n");
-                printf("-h, --help              display this text and exit\n");
-                printf("-m, --mixing            make a mixing fit\n");
-                printf("-t, --perfecttag        use MC info to get perfect tagging\n");
-                printf("-p, --plot=PLOT_DIR     create lifetime/mixing plots\n");
+                printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
+                printf("-f, --efficiency-model=MODEL_NUM number of CPU cores to use for fitting and plotting\n");
+                printf("-e, --events=NUM_EVENTS          number of events to be imported from the input file\n");
+                printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit\n");
+                printf("-h, --help                       display this text and exit\n");
+                printf("-m, --mixing                     make a mixing fit\n");
+                printf("-t, --perfecttag                 use MC info to get perfect tagging\n");
+                printf("-p, --plot=PLOT_DIR              create lifetime/mixing plots\n");
                 exit(0);
                 break;
             default:

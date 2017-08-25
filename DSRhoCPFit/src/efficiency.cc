@@ -20,12 +20,20 @@ Efficiency::~Efficiency() {
 /**
  * Return the actual efficiency value for the supplied parameters
  */
-double Efficiency::GetEfficiency(double thetat, double thetab, double phit) const {
+double Efficiency::GetEfficiency(double thetat, double thetab, double phit, int efficiency_model) const {
 	thetat_->setVal(thetat);
 	thetab_->setVal(thetab);
 	phit_->setVal(phit);
 
-//	return GetModel1Efficiency();
-//	return GetModel2Efficiency();
-	return GetModel3Efficiency();
+	switch (efficiency_model) {
+		case 1:
+			return GetModel1Efficiency();
+		case 2:
+			return GetModel2Efficiency();
+		case 3:
+			return GetModel3Efficiency();
+		case 4:
+			return GetModel4Efficiency();
+	}
+	return 0;
 }

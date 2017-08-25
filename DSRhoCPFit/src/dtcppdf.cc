@@ -23,7 +23,7 @@
 
 //ClassImp(DtCPPDF)
 
-DtCPPDF::DtCPPDF(const char *name, const char *title, bool _CKM_favored, bool _perfect_tagging,
+DtCPPDF::DtCPPDF(const char *name, const char *title, bool _CKM_favored, bool _perfect_tagging, int _efficiency_model,
 		RooAbsReal& _tht,
 		RooAbsReal& _thb,
 		RooAbsReal& _phit,
@@ -90,6 +90,7 @@ DtCPPDF::DtCPPDF(const char *name, const char *title, bool _CKM_favored, bool _p
 			vtndf("vtndf","vtndf",this,_vtndf),
 			vtistagl("vtistagl","vtistagl",this,_vtistagl),
 
+			efficiency_model(_efficiency_model),
 			mixing(true),
 			CKM_favored(_CKM_favored),
 			perfect_tagging(_perfect_tagging)
@@ -201,6 +202,7 @@ DtCPPDF::DtCPPDF(const DtCPPDF& other, const char* name) :
 			vtndf("vtndf",this,other.vtndf),
 			vtistagl("vtistagl",this,other.vtistagl),
 
+			efficiency_model(other.efficiency_model),
 			mixing(other.mixing),
 			CKM_favored(other.CKM_favored),
 			perfect_tagging(other.perfect_tagging)
@@ -332,7 +334,7 @@ Double_t DtCPPDF::evaluate() const {
 							sqrt(2)*A0ti*sin(2*tht)*sin(tht)*sin(2*thb)*sin(thb)*cos(phit)-\
 							2*Apti*sin(2*tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit));
 
-		pdf = value * eff.GetEfficiency(tht, thb, phit);
+		pdf = value * eff.GetEfficiency(tht, thb, phit, efficiency_model);
 
 //		printf("DBG: value = %f, pdf = %f\n", value, pdf);
 
@@ -615,7 +617,7 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
 							nA02*4*sin(tht)*sin(tht)*sin(tht)*cos(thb)*cos(thb)*sin(thb)*cos(phit)*cos(phit)+\
 							sqrt(2)*nAp0r*sin(tht)*sin(tht)*sin(tht)*sin(2*thb)*sin(thb)*sin(2*phit)-\
 							sqrt(2)*nA0ti*sin(2*tht)*sin(tht)*sin(2*thb)*sin(thb)*cos(phit)-\
-							2*nApti*sin(2*tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)) * eff.GetEfficiency(tht, thb, phit);
+							2*nApti*sin(2*tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)) * eff.GetEfficiency(tht, thb, phit, efficiency_model);
 
 		default:
 			return 0;
@@ -707,30 +709,30 @@ double DtCPPDF::GetDeltaWTag(int expno, int rbin, bool mc) const {
 
 Double_t DtCPPDF::f1(const double * vars) {
 	Double_t val = 2 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]) * sin(vars[2]);
-	return val * eff.GetEfficiency(vars[0], vars[1], vars[2]);
+	return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
 Double_t DtCPPDF::f2(const double * vars) {
 	Double_t val = 2 * cos(vars[0]) * cos(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]);
-	return val * eff.GetEfficiency(vars[0], vars[1], vars[2]);
+	return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
 Double_t DtCPPDF::f3(const double * vars) {
 	Double_t val = 4 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * cos(vars[1]) * cos(vars[1]) * sin(vars[1]) * cos(vars[2]) * cos(vars[2]);
-	return val * eff.GetEfficiency(vars[0], vars[1], vars[2]);
+	return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
 Double_t DtCPPDF::f4(const double * vars) {
 	Double_t val = sqrt(2) * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * sin(2 * vars[2]);
-	return val * eff.GetEfficiency(vars[0], vars[1], vars[2]);
+	return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
 Double_t DtCPPDF::f5(const double * vars) {
 	Double_t val = sqrt(2) * sin(2 * vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * cos(vars[2]);
-	return val * eff.GetEfficiency(vars[0], vars[1], vars[2]);
+	return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
 Double_t DtCPPDF::f6(const double * vars) {
 	Double_t val = 2 * sin(2 * vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]);
-	return val * eff.GetEfficiency(vars[0], vars[1], vars[2]);
+	return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }

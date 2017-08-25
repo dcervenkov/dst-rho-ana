@@ -23,6 +23,8 @@ struct fitter_options {
     bool num_events_set;
     bool perfect_tagging;
     bool perfect_tagging_set;
+    int efficiency_model;
+    bool efficiency_model_set;
 };
 
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,

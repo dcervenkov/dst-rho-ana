@@ -35,6 +35,9 @@ class FitterCPV {
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
     int GetNumCPUs() { return num_CPUs_; };
 
+    void SetEfficiencyModel(const int& efficiency_model) { efficiency_model_ = efficiency_model; };
+    int GetEfficiencyModel() { return efficiency_model_; };
+
     void SetDoLifetimeFit(const bool& do_lifetime_fit) { do_lifetime_fit_ = do_lifetime_fit; };
     int GetDoLifetimeFit() const { return do_lifetime_fit_; };
 
@@ -144,6 +147,7 @@ class FitterCPV {
     TFile* output_file_ = NULL;
 
     int num_CPUs_;
+    int efficiency_model_;
     bool do_lifetime_fit_;
     bool do_mixing_fit_;
     bool make_plots_;

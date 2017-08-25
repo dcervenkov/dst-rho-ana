@@ -18,9 +18,6 @@ namespace tools {
 std::vector<TString> GetListOfFiles(const char* dir, const char* ext);
 TChain* ReadDataFromDir(const char* dir);
 void SetupPlotStyle();
-
 }
-
-
 
 #endif /* TOOLS_H_ */

@@ -10,10 +10,10 @@
 #ifndef COLORS_H_
 #define COLORS_H_
 
-#include "TROOT.h"
-#include "TColor.h"
-#include "TStyle.h"
 #include "RVersion.h"
+#include "TColor.h"
+#include "TROOT.h"
+#include "TStyle.h"
 
 namespace colors {
 

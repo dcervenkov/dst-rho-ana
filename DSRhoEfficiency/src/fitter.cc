@@ -427,5 +427,10 @@ void Fitter::SetEfficiencyModel(const int model_num) {
             thetab_model_e_ = &thetab_model3_e_;
             phit_model_e_ = &phit_model3_e_;
             break;
+        case 4:
+            thetat_model_e_ = &thetat_model4_e_;
+            thetab_model_e_ = &thetab_model3_e_;
+            phit_model_e_ = &phit_model2_e_;
+            break;
     }
 }

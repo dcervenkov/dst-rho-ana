@@ -72,10 +72,10 @@ class Fitter {
     RooExtendPdf* phit_model_e_;
 
     // Model 1
-    RooRealVar model1_thetat_p0_{"model1_thetat_p0", "p_{0}", -0.056};
-    RooRealVar model1_thetat_p1_{"model1_thetat_p1", "p_{1}", 0.119};
-    RooRealVar model1_thetat_p2_{"model1_thetat_p2", "p_{2}", -0.038};
-    RooRealVar model1_thetat_p3_{"model1_thetat_p3", "p_{3}", 0.025};
+    RooRealVar model1_thetat_p0_{"model1_thetat_p0", "p_{0}", -0.056, -10, +10};
+    RooRealVar model1_thetat_p1_{"model1_thetat_p1", "p_{1}", 0.119, -10, +10};
+    RooRealVar model1_thetat_p2_{"model1_thetat_p2", "p_{2}", -0.038, -10, +10};
+    RooRealVar model1_thetat_p3_{"model1_thetat_p3", "p_{3}", 0.025, -10, +10};
     RooChebychev model1_thetat_{
         "thetat_model", "thetat_model", thetat_,
         RooArgList(model1_thetat_p0_, model1_thetat_p1_, model1_thetat_p2_, model1_thetat_p3_)};
@@ -83,9 +83,9 @@ class Fitter {
     RooExtendPdf thetat_model1_e_{"thetat_model1_e", "thetat_model1_e", model1_thetat_,
                                   n_thetat_model1_};
 
-    RooRealVar model1_thetab_p0_{"model1_thetab_p0", "p_{0}", 0.089};
-    RooRealVar model1_thetab_p1_{"model1_thetab_p1", "p_{1}", -0.358};
-    RooRealVar model1_thetab_p2_{"model1_thetab_p2", "p_{2}", -0.024};
+    RooRealVar model1_thetab_p0_{"model1_thetab_p0", "p_{0}", 0.089, -10, +10};
+    RooRealVar model1_thetab_p1_{"model1_thetab_p1", "p_{1}", -0.358, -10, +10};
+    RooRealVar model1_thetab_p2_{"model1_thetab_p2", "p_{2}", -0.024, -10, +10};
     RooChebychev model1_thetab_{
         "model1_thetab", "model1_thetab", thetab_,
         RooArgList(model1_thetab_p0_, model1_thetab_p1_, model1_thetab_p2_)};
@@ -93,12 +93,12 @@ class Fitter {
     RooExtendPdf thetab_model1_e_{"thetab_model1_e", "thetab_model1_e", model1_thetab_,
                                   n_thetab_model1_};
 
-    RooRealVar model1_phit_p0_{"model1_phit_p0", "p_{0}", 0.020};
-    RooRealVar model1_phit_p1_{"model1_phit_p1", "p_{1}", 0.045};
-    RooRealVar model1_phit_p2_{"model1_phit_p2", "p_{2}", 0.003};
-    RooRealVar model1_phit_p3_{"model1_phit_p3", "p_{3}", -0.060};
-    RooRealVar model1_phit_p4_{"model1_phit_p4", "p_{4}", -0.043};
-    RooRealVar model1_phit_p5_{"model1_phit_p5", "p_{5}", 0.058};
+    RooRealVar model1_phit_p0_{"model1_phit_p0", "p_{0}", 0.020, -10, +10};
+    RooRealVar model1_phit_p1_{"model1_phit_p1", "p_{1}", 0.045, -10, +10};
+    RooRealVar model1_phit_p2_{"model1_phit_p2", "p_{2}", 0.003, -10, +10};
+    RooRealVar model1_phit_p3_{"model1_phit_p3", "p_{3}", -0.060, -10, +10};
+    RooRealVar model1_phit_p4_{"model1_phit_p4", "p_{4}", -0.043, -10, +10};
+    RooRealVar model1_phit_p5_{"model1_phit_p5", "p_{5}", 0.058, -10, +10};
     RooChebychev model1_phit_{"phit_model", "phit_model", phit_,
                               RooArgList(model1_phit_p0_, model1_phit_p1_, model1_phit_p2_,
                                          model1_phit_p3_, model1_phit_p4_, model1_phit_p5_)};
@@ -111,9 +111,9 @@ class Fitter {
     RooExtendPdf thetat_model2_e_{"thetat_model2_e", "thetat_model2_e", model2_thetat_,
                                   n_thetat_model2_};
 
-    RooRealVar model2_thetab_p0_{"model2_thetab_p0", "p_{0}", 0.089};
-    RooRealVar model2_thetab_p1_{"model2_thetab_p1", "p_{1}", -0.358};
-    RooRealVar model2_thetab_p2_{"model2_thetab_p2", "p_{2}", -0.024};
+    RooRealVar model2_thetab_p0_{"model2_thetab_p0", "p_{0}", 0.089, -10, +10};
+    RooRealVar model2_thetab_p1_{"model2_thetab_p1", "p_{1}", -0.358, -10, +10};
+    RooRealVar model2_thetab_p2_{"model2_thetab_p2", "p_{2}", -0.024, -10, +10};
     RooChebychev model2_thetab_{
         "model2_thetab", "model2_thetab", thetab_,
         RooArgList(model2_thetab_p0_, model2_thetab_p1_, model2_thetab_p2_)};
@@ -121,20 +121,20 @@ class Fitter {
     RooExtendPdf thetab_model2_e_{"thetab_model2_e", "thetab_model2_e", model2_thetab_,
                                   n_thetab_model2_};
 
-    RooRealVar model2_phit_p1_{"model2_phit_p1", "p_{1}", 0.007};
-    RooRealVar model2_phit_p2_{"model2_phit_p2", "p_{2}", 0.088};
-    RooRealVar model2_phit_gaus1_mean_{"model2_phit_gaus1_mean", "#mu_{1}", -1.467};
-    RooRealVar model2_phit_gaus1_sigma_{"model2_phit_gaus1_sigma", "#sigma_{1}", 0.429};
-    RooRealVar model2_phit_gaus2_mean_{"model2_phit_gaus2_mean", "#mu_{2}", 1.851};
-    RooRealVar model2_phit_gaus2_sigma_{"model2_phit_gaus2_sigma", "#sigma_{2}", 0.368};
+    RooRealVar model2_phit_p1_{"model2_phit_p1", "p_{1}", 0.007, -10, +10};
+    RooRealVar model2_phit_p2_{"model2_phit_p2", "p_{2}", 0.088, -10, +10};
+    RooRealVar model2_phit_gaus1_mean_{"model2_phit_gaus1_mean", "#mu_{1}", -1.467, -10, +10};
+    RooRealVar model2_phit_gaus1_sigma_{"model2_phit_gaus1_sigma", "#sigma_{1}", 0.429, -10, +10};
+    RooRealVar model2_phit_gaus2_mean_{"model2_phit_gaus2_mean", "#mu_{2}", 1.851, -10, +10};
+    RooRealVar model2_phit_gaus2_sigma_{"model2_phit_gaus2_sigma", "#sigma_{2}", 0.368, -10, +10};
     RooChebychev model2_phit_cheb_{"model2_phit_cheb", "model2_phit_cheb", phit_,
                                    RooArgList(model2_phit_p1_, model2_phit_p2_)};
     RooGaussian model2_phit_gaus1_{"model2_phit_gaus1", "model2_phit_gaus1", phit_,
                                    model2_phit_gaus1_mean_, model2_phit_gaus1_sigma_};
     RooGaussian model2_phit_gaus2_{"model2_phit_gaus2", "model2_phit_gaus2", phit_,
                                    model2_phit_gaus2_mean_, model2_phit_gaus2_sigma_};
-    RooRealVar model2_f_phit_gaus1_{"model2_f_phit_gaus1", "f_{G_{1}}", 0.039};
-    RooRealVar model2_f_phit_gaus2_{"model2_f_phit_gaus2", "f_{G_{2}}", 0.038};
+    RooRealVar model2_f_phit_gaus1_{"model2_f_phit_gaus1", "f_{G_{1}}", 0.039, -10, +10};
+    RooRealVar model2_f_phit_gaus2_{"model2_f_phit_gaus2", "f_{G_{2}}", 0.038, -10, +10};
     RooAddPdf model2_phit_{"model2_phit", "model2_phit",
                            RooArgList(model2_phit_gaus1_, model2_phit_gaus2_, model2_phit_cheb_),
                            RooArgList(model2_f_phit_gaus1_, model2_f_phit_gaus2_)};
@@ -147,9 +147,9 @@ class Fitter {
     RooExtendPdf thetat_model3_e_{"thetat_model3_e", "thetat_model3_e", thetat_model3_,
                                   n_thetat_model3_};
 
-    RooRealVar thetab_model3_p0_{"thetab_model3_p0", "p_{0}", 0.089, -100, 100};
-    RooRealVar thetab_model3_p1_{"thetab_model3_p1", "p_{1}", -0.358, -100, 100};
-    RooRealVar thetab_model3_p2_{"thetab_model3_p2", "p_{2}", -0.024, -100, 100};
+    RooRealVar thetab_model3_p0_{"thetab_model3_p0", "p_{0}", 0.089, -10, 10};
+    RooRealVar thetab_model3_p1_{"thetab_model3_p1", "p_{1}", -0.358, -10, 10};
+    RooRealVar thetab_model3_p2_{"thetab_model3_p2", "p_{2}", -0.024, -10, 10};
     RooChebychev thetab_model3_{
         "thetab_model3", "thetab_model3", thetab_,
         RooArgList(thetab_model3_p0_, thetab_model3_p1_, thetab_model3_p2_)};
@@ -166,6 +166,16 @@ class Fitter {
         RooArgSet(phit_, f_phit_gaus_, phit_gaus_mean_, phit_gaus_sigma_)};
     RooRealVar n_phit_model3_{"n_phit_model3", "n_{#phi}_{t}", 0, 100000};
     RooExtendPdf phit_model3_e_{"phit_model3_e", "phit_model3_e", phit_model3_, n_phit_model3_};
+
+    // Model 4
+    RooRealVar model4_thetat_p0_{"model4_thetat_p0", "p_{0}", -0.056, -10, +10};
+    RooRealVar model4_thetat_p1_{"model4_thetat_p1", "p_{1}", 0};
+    RooRealVar model4_thetat_p2_{"model4_thetat_p2", "p_{2}", -0.038, -10, +10};
+    RooFormulaVar thetat_plus_pi2{"thetat_plus_pi2", "thetat + pi/2", "thetat - 1.571", RooArgSet(thetat_)};
+    RooPolynomial thetat_model4_{"thetat_model4", "thetat_model4", thetat_plus_pi2, RooArgList{model4_thetat_p1_, model4_thetat_p2_}};
+    RooRealVar n_thetat_model4_{"n_thetat_model4", "n_{#theta_{t}}", 0, 100000};
+    RooExtendPdf thetat_model4_e_{"thetat_model4_e", "thetat_model4_e", thetat_model4_,
+                                  n_thetat_model4_};
 
     RooAbsPdf* model_ = NULL;
 

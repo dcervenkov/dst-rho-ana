@@ -20,7 +20,8 @@ double Efficiency::GetEfficiency(double thetat, double thetab, double phit) cons
 	thetab_->setVal(thetab);
 	phit_->setVal(phit);
 
-//	return GetModel1Efficiency();
+	return GetModel1Efficiency();
 //	return GetModel2Efficiency();
-	return GetModel3Efficiency();
+//	return GetModel3Efficiency();
+//	return GetModel4Efficiency();
 }

@@ -235,6 +235,10 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
 
     printf("Correlation %s : %s is %f\n", var1.GetName(), var2.GetName(),
            eff_histo->GetCorrelationFactor());
+    
+    // This clone must happen before Draw() of eff_histo, otherwise problems
+    // with eff_pull_histo color legend range occur.
+    TH2* eff_pull_histo = dynamic_cast<TH2*>(eff_histo->Clone("eff_pull_histo"));
 
     TString name = "eff_";
     name += var1.GetName();
@@ -291,7 +295,6 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
     canvas_eff_->Write();
     canvas_eff_->SaveAs(format);
 
-    TH2* eff_pull_histo = dynamic_cast<TH2*>(eff_histo->Clone("eff_pull_histo"));
     eff_pull_histo->Add(pdf_eff_histo, -1);
 
     TH2* eff_errors_histo = dynamic_cast<TH2*>(eff_histo->Clone("eff_errors_histo"));
@@ -313,6 +316,8 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
         }
     }
 
+    eff_pull_histo->SetTitle("");
+    eff_pull_histo->GetZaxis()->SetTitle();
     eff_pull_histo->SetMinimum(-0.04);
     eff_pull_histo->SetMaximum(0.04);
     eff_pull_histo->SetOption("colz");

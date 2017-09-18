@@ -22,6 +22,12 @@
 #include "RooRealVar.h"
 #include "TCanvas.h"
 
+// Meerkat includes
+#include "AdaptiveKernelDensity.hh"
+#include "BinnedKernelDensity.hh"
+#include "KernelDensity.hh"
+#include "CombinedPhaseSpace.hh"
+
 // Local includes
 #include "constants.h"
 
@@ -30,12 +36,19 @@ class Fitter {
     Fitter(const char* evtgen_filepath, const char* gsim_filepath, const char* output_dir);
     virtual ~Fitter();
     void PlotVar(RooRealVar& var);
+    void PlotVar(RooRealVar& var, RooDataHist& data1, RooDataHist& data2);
     void PlotVars2D(RooRealVar& var1, RooRealVar& var2);
+    void PlotVars2D(RooRealVar& var1, RooRealVar& var2, RooDataHist& data1,
+                    RooDataHist& data2);
     void PlotEfficiency(RooRealVar& var, bool plot_model = true, bool legend_position_top = true,
                         bool legend_position_left = true);
     void PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2);
     void FitEfficiency(RooRealVar& var);
     void SetEfficiencyModel(const int model_num);
+
+    void ProcessBinnedEfficiency();
+    void ProcessKDEEfficiency();
+    void Process1DKDEEfficiency();
 
     RooRealVar thetat_{"thetat", "#theta_{t} [rad]", 0, kPi};
     RooRealVar thetab_{"thetab", "#theta_{b} [rad]", 0.5, 2.95};
@@ -45,6 +58,21 @@ class Fitter {
     RooRealVar evmcflag_{"evmcflag", "evmcflag", -100, 100};
 
    private:
+    TH3F* GetBinned3DEfficiency();
+    TTree* Histogram2TTree(TH3F* histo);
+    TH1D* ProjectDensityTo1D(BinnedKernelDensity pdf, CombinedPhaseSpace phasespace, const int vat_num);
+    TH2D* ProjectDensityTo2D(BinnedKernelDensity pdf, CombinedPhaseSpace phasespace, const int vat_num);
+    TH3F* SimulateEfficiency(AdaptiveKernelDensity pdf, const RooDataSet* dataset);
+    TH3F* SimulateEfficiencyDummy(TH3F* eff, const RooDataSet* dataset);
+    TH3F* Create3DHisto(const RooDataSet* dataset);
+    TH3F* DensityToHisto(AdaptiveKernelDensity pdf, CombinedPhaseSpace phasespace);
+    void MirrorDataAtEdges(RooDataSet* data);
+    double* GetMirror(double vals[], const int var_num);
+    double* GetMirror(double vals[], const int var_num1, const int var_num2);
+    double* GetMirror(double vals[], const int var_num1, const int var_num2, const int var_num3);
+    int CloseToEdge(double vals[], const int var_num);
+    void EnlargeVarRanges(const double margin);
+
     RooRealVar vrvtxz_{"vrvtxz", "vrvtxz", 0};
     RooRealVar vtvtxz_{"vtvtxz", "vtvtxz", 0};
     RooFormulaVar dt_formula_{"dt", "#Deltat [ps]", "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
@@ -70,6 +98,9 @@ class Fitter {
     RooExtendPdf* thetat_model_e_;
     RooExtendPdf* thetab_model_e_;
     RooExtendPdf* phit_model_e_;
+
+    RooRealVar* vars_ [3] = {&thetat_, &thetab_, &phit_};
+    RooRealVar orig_vars_ [3] = {thetat_, thetab_, phit_};
 
     // Model 1
     RooRealVar model1_thetat_p0_{"model1_thetat_p0", "p_{0}", -0.056, -10, +10};
@@ -176,6 +207,8 @@ class Fitter {
     RooRealVar n_thetat_model4_{"n_thetat_model4", "n_{#theta_{t}}", 0, 100000};
     RooExtendPdf thetat_model4_e_{"thetat_model4_e", "thetat_model4_e", thetat_model4_,
                                   n_thetat_model4_};
+
+
 
     RooAbsPdf* model_ = NULL;
 

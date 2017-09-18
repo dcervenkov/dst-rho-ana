@@ -10,7 +10,7 @@
 #include "efficiency.h"
 
 Efficiency::Efficiency() {
-	// TODO Auto-generated constructor stub
+	binned_efficiency = new BinnedDensity("binned_efficiency", &phasespace, "efficiency");
 }
 
 Efficiency::~Efficiency() {
@@ -34,6 +34,17 @@ double Efficiency::GetEfficiency(double thetat, double thetab, double phit, int 
 			return GetModel3Efficiency();
 		case 4:
 			return GetModel4Efficiency();
+		case 5:
+			std::vector<Double_t> coords(3);
+			coords[0] = thetat;
+			coords[1] = thetab;
+			coords[2] = phit;
+			// printf("EFFDBG: model4 = %f, model5 = %f\n", GetModel4Efficiency(), binned_efficiency->density(coords));
+			double eff = binned_efficiency->density(coords);
+			if (eff == 0) {
+				eff = GetModel4Efficiency();
+			}
+			return eff;
 	}
 	return 0;
 }

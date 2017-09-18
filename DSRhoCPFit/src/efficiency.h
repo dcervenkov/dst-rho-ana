@@ -19,6 +19,11 @@
 #include "RooAddPdf.h"
 #include "RooGenericPdf.h"
 
+// Meerkat includes
+#include "BinnedDensity.hh"
+#include "OneDimPhaseSpace.hh"
+#include "CombinedPhaseSpace.hh"
+
 // Local includes
 #include "constants.h"
 
@@ -107,6 +112,13 @@ protected:
     RooPolynomial model4_thetat_{"model4_thetat", "model4_thetat", thetat_plus_pi2, RooArgList{model4_thetat_p1_, model4_thetat_p2_}};
 
 	double GetModel4Efficiency() const { return model4_thetat_.getVal() * model2_thetab_.getVal() * model2_phit_.getVal(); }
+
+    OneDimPhaseSpace phasespace_thetat{"phasespace_thetat", thetat_->getMin(), thetat_->getMax()};
+    OneDimPhaseSpace phasespace_thetab{"phasespace_thetab", thetab_->getMin(), thetab_->getMax()};
+    OneDimPhaseSpace phasespace_phit{"phasespace_phit", phit_->getMin(), phit_->getMax()};
+    CombinedPhaseSpace phasespace{"phasespace", &phasespace_thetat, &phasespace_thetab,
+                                  &phasespace_phit};
+	BinnedDensity* binned_efficiency;
 	
 };
 

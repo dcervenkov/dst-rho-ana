@@ -35,31 +35,35 @@ int main(int argc, char* argv[]) {
 
     Fitter fitter(evtgen_filepath, gsim_filepath, output_dir);
 
-    fitter.thetat_.setBins(40);
-    fitter.thetab_.setBins(40);
-    fitter.phit_.setBins(40);
+    fitter.thetat_.setBins(50);
+    fitter.thetab_.setBins(50);
+    fitter.phit_.setBins(50);
 
-    fitter.SetEfficiencyModel(model_num);
+    // fitter.Process1DKDEEfficiency();
+    fitter.ProcessKDEEfficiency();
+    // fitter.ProcessBinnedEfficiency();
 
-    fitter.PlotVar(fitter.thetat_);
-    fitter.FitEfficiency(fitter.thetat_);
-    fitter.PlotEfficiency(fitter.thetat_, true, false);
+    // fitter.SetEfficiencyModel(model_num);
 
-    fitter.PlotVar(fitter.thetab_);
-    fitter.FitEfficiency(fitter.thetab_);
-    fitter.PlotEfficiency(fitter.thetab_, true, false);
+    // fitter.PlotVar(fitter.thetat_);
+    // fitter.FitEfficiency(fitter.thetat_);
+    // fitter.PlotEfficiency(fitter.thetat_, true, false);
 
-    fitter.PlotVar(fitter.phit_);
-    fitter.FitEfficiency(fitter.phit_);
-    fitter.PlotEfficiency(fitter.phit_, true, false);
+    // fitter.PlotVar(fitter.thetab_);
+    // fitter.FitEfficiency(fitter.thetab_);
+    // fitter.PlotEfficiency(fitter.thetab_, true, false);
 
-    fitter.PlotVars2D(fitter.thetat_, fitter.thetab_);
-    fitter.PlotVars2D(fitter.thetat_, fitter.phit_);
-    fitter.PlotVars2D(fitter.thetab_, fitter.phit_);
+    // fitter.PlotVar(fitter.phit_);
+    // fitter.FitEfficiency(fitter.phit_);
+    // fitter.PlotEfficiency(fitter.phit_, true, false);
 
-    fitter.PlotEfficiency2D(fitter.thetat_, fitter.thetab_);
-    fitter.PlotEfficiency2D(fitter.thetat_, fitter.phit_);
-    fitter.PlotEfficiency2D(fitter.thetab_, fitter.phit_);
+    // fitter.PlotVars2D(fitter.thetat_, fitter.thetab_);
+    // fitter.PlotVars2D(fitter.thetat_, fitter.phit_);
+    // fitter.PlotVars2D(fitter.thetab_, fitter.phit_);
+
+    // fitter.PlotEfficiency2D(fitter.thetat_, fitter.thetab_);
+    // fitter.PlotEfficiency2D(fitter.thetat_, fitter.phit_);
+    // fitter.PlotEfficiency2D(fitter.thetab_, fitter.phit_);
 
     return 0;
 }

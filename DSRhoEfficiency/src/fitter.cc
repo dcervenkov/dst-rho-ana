@@ -30,6 +30,7 @@
 #include "TTree.h"
 
 // Local includes
+#include "colors.h"
 #include "constants.h"
 
 Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const char* output_dir) {
@@ -316,6 +317,7 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
         }
     }
 
+    gStyle->SetPalette(kLightTemperature);
     eff_pull_histo->SetTitle("");
     eff_pull_histo->GetZaxis()->SetTitle();
     eff_pull_histo->SetMinimum(-0.04);
@@ -331,8 +333,7 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
 
     canvas_eff_->Write();
     canvas_eff_->SaveAs(format);
-
-    //	canvas_eff_->SetRightMargin(0.05);
+    colors::setColors();
 
     delete eff_histo;
     delete gsim_histo;

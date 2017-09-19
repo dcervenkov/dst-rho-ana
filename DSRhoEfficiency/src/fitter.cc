@@ -19,6 +19,7 @@
 #include "RooPlot.h"
 #include "RooProdPdf.h"
 #include "RooRealVar.h"
+#include "RVersion.h"
 #include "TAxis.h"
 #include "TCanvas.h"
 #include "TEnv.h"
@@ -317,7 +318,12 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
         }
     }
 
-    gStyle->SetPalette(kLightTemperature);
+// Check if we are running a newer version of ROOT which has new palettes
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,4,0)
+	gStyle->SetPalette(kLightTemperature);
+#else
+	gStyle->SetPalette(87);
+#endif
     eff_pull_histo->SetTitle("");
     eff_pull_histo->GetZaxis()->SetTitle();
     eff_pull_histo->SetMinimum(-0.04);

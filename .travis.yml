@@ -2,18 +2,6 @@ dist: trusty
 
 language: cpp
 
-matrix:
-    include:
-        - python: 2
-          env: PYTHON=2 ROOT=5
-        # ROOT 6 requires c++11 which is not included in the gcc on KEKCC
-        #- python: 2
-        #  env: PYTHON=2 ROOT=6
-        - python: 3
-          env: PYTHON=3 ROOT=5
-        #- python: 3
-        #  env: PYTHON=3 ROOT=6
-
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y xutils-dev libboost-all-dev
@@ -46,19 +34,20 @@ install:
   
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - which gcc
-  - gcc --version
-  - which clang
-  - clang --version
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a # Useful for debugging any issues with conda
   - conda config --add channels http://conda.anaconda.org/NLeSC  
   - conda config --set show_channel_urls yes
-  - conda create -q -n testenv python=${PYTHON} root=${ROOT}
-  - export CONDA_ENV_PATH=$HOME/miniconda/envs/testenv
-  - source activate testenv
+
+  - conda create -q -n root5env python=3 root=5
+# - export CONDA_ENV_PATH=$HOME/miniconda/envs/testenv
+  - source activate root5env
+  - conda install icu=54.1 # Downgrade icu from version requiring newer libgcc than available
+  - root -b -q
+
+  - conda create -q -n root6env python=3 root=6
+  - source activate root6env
   - conda install icu=54.1 # Downgrade icu from version requiring newer libgcc than available
   - root -b -q
 
@@ -72,13 +61,16 @@ install:
   - export ROOT_INCLUDE_PATH=$HOME/bin/belle/packages/Meerkat/inc
 
 script:
+  - source activate root5env
   - cd ${TRAVIS_BUILD_DIR}/DSRho && xmkmf && make
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoSkim && xmkmf && make
+  - cd ${TRAVIS_BUILD_DIR}/panther2TTree && xmkmf && make
+  - cd ${TRAVIS_BUILD_DIR}/printTree && xmkmf && make
+
+  - source activate root6env
   - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoEfficiency && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoFit && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoLifetime && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoPeek && make
-  - cd ${TRAVIS_BUILD_DIR}/DSRhoSkim && xmkmf && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoYield && make
-  - cd ${TRAVIS_BUILD_DIR}/panther2TTree && xmkmf && make
-  - cd ${TRAVIS_BUILD_DIR}/printTree && xmkmf && make

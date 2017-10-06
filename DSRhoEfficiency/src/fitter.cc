@@ -9,7 +9,7 @@
 
 #include "fitter.h"
 
-// Local includes
+// Standard includes
 #include <algorithm>
 
 // ROOT includes

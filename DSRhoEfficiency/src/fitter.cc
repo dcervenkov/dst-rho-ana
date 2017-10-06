@@ -9,6 +9,9 @@
 
 #include "fitter.h"
 
+// Local includes
+#include <algorithm>
+
 // ROOT includes
 #include "RooDataHist.h"
 #include "RooDataSet.h"
@@ -240,7 +243,7 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
     
     // This clone must happen before Draw() of eff_histo, otherwise problems
     // with eff_pull_histo color legend range occur.
-    TH2* eff_pull_histo = dynamic_cast<TH2*>(eff_histo->Clone("eff_pull_histo"));
+    TH2* eff_pull_histo = dynamic_cast<TH2*>(gsim_histo->Clone("eff_pull_histo"));
 
     TString name = "eff_";
     name += var1.GetName();
@@ -297,23 +300,14 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
     canvas_eff_->Write();
     canvas_eff_->SaveAs(format);
 
-    eff_pull_histo->Add(pdf_eff_histo, -1);
-
-    TH2* eff_errors_histo = dynamic_cast<TH2*>(eff_histo->Clone("eff_errors_histo"));
-    eff_errors_histo->Reset();
-    for (int i = 1; i <= eff_histo->GetNbinsX(); i++) {
-        for (int j = 1; j <= eff_histo->GetNbinsY(); j++) {
-            eff_errors_histo->SetBinContent(i, j, gsim_histo->GetBinError(i, j));
-        }
-    }
-
-    eff_pull_histo->Divide(eff_errors_histo);
-
-    // Whiten bins with too few data entries
-    for (int i = 1; i <= eff_histo->GetNbinsX(); i++) {
-        for (int j = 1; j <= eff_histo->GetNbinsY(); j++) {
-            if (eff_histo->GetBinContent(i, j) == 0) {
-                eff_pull_histo->SetBinContent(i, j, -1000);
+    // We are not using eff_pull_histo->Add(pdf_eff_histo, -1) because we want
+    // to skip bins which are empty in gsim_histo.
+    for (int i = 1; i <= eff_pull_histo->GetNbinsX(); i++) {
+        for (int j = 1; j <= eff_pull_histo->GetNbinsY(); j++) {
+            if (eff_pull_histo->GetBinContent(i, j) != 0) {
+                const double eff = eff_histo->GetBinContent(i, j);
+                const double pdf = pdf_eff_histo->GetBinContent(i, j);
+                eff_pull_histo->SetBinContent(i, j, eff - pdf);
             }
         }
     }
@@ -326,16 +320,17 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
 #endif
     eff_pull_histo->SetTitle("");
     eff_pull_histo->GetZaxis()->SetTitle();
-    eff_pull_histo->SetMinimum(-0.04);
-    eff_pull_histo->SetMaximum(0.04);
-    eff_pull_histo->SetOption("colz");
+    const double max = std::max(-eff_pull_histo->GetMinimum(), eff_pull_histo->GetMaximum());
+    eff_pull_histo->SetMinimum(-max);
+    eff_pull_histo->SetMaximum(max);
+    eff_pull_histo->SetOption("colz 1");
     eff_pull_histo->Draw();
     eff_pull_histo->Write();
 
     canvas_eff_->SetName(TString(var1.GetName()) + "_" + TString(var2.GetName()) +
-                         "_eff_pull_canvas");
+                         "_eff_residual_canvas");
     canvas_eff_->SetTitle(TString(var1.GetTitle()) + "_" + TString(var2.GetName()) +
-                          " eff pull canvas");
+                          " eff residual canvas");
 
     canvas_eff_->Write();
     canvas_eff_->SaveAs(format);
@@ -346,7 +341,6 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
     delete evtgen_histo;
     delete stat_box;
     delete eff_pull_histo;
-    delete eff_errors_histo;
 }
 
 void Fitter::FitEfficiency(RooRealVar& var) {

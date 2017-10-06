@@ -53,11 +53,11 @@ int main(int argc, char* argv[]) {
     fitter.FitEfficiency(fitter.phit_);
     fitter.PlotEfficiency(fitter.phit_, true, false);
 
-    fitter.PlotVars2D(fitter.thetab_, fitter.thetat_);
+    fitter.PlotVars2D(fitter.thetat_, fitter.thetab_);
     fitter.PlotVars2D(fitter.thetat_, fitter.phit_);
     fitter.PlotVars2D(fitter.thetab_, fitter.phit_);
 
-    fitter.PlotEfficiency2D(fitter.thetab_, fitter.thetat_);
+    fitter.PlotEfficiency2D(fitter.thetat_, fitter.thetab_);
     fitter.PlotEfficiency2D(fitter.thetat_, fitter.phit_);
     fitter.PlotEfficiency2D(fitter.thetab_, fitter.phit_);
 

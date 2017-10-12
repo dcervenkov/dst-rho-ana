@@ -95,45 +95,34 @@ void Fitter::MirrorDataAtEdges(RooDataSet* data) {
     int num_added = 0;
     const int num_entries = data->numEntries();
     for (int evt = 0; evt < num_entries; evt++) {
-        // for (int evt = 0; evt < 1000; evt++) {
-        // if (evt % 10000 == 0) {
-        //     printf("Mirror processed %i events of %i\n", evt, num_entries);
-        // }
         const RooArgSet* row = data->get(evt);
         double vals[3] = {row->getRealValue("thetat"), row->getRealValue("thetab"),
                           row->getRealValue("phit")};
-        // delete row;
-
         for (int var_num1 = 0; var_num1 < 3; var_num1++) {
             if (CloseToEdge(vals, var_num1)) {
-                double* mirror_vals = GetMirror(vals, var_num1);
+                double* mirror_vals = GetMirrorVals(vals, var_num1);
                 *vars_[0] = mirror_vals[0];
                 *vars_[1] = mirror_vals[1];
                 *vars_[2] = mirror_vals[2];
-                // printf("1 org: %f %f %f, new: %f, %f, %f\n", vals[0], vals[1], vals[2],
-                //        mirror_vals[0], mirror_vals[1], mirror_vals[2]);
                 delete[] mirror_vals;
                 data->add(RooArgSet(*vars_[0], *vars_[1], *vars_[2]));
                 num_added++;
                 for (int var_num2 = var_num1 + 1; var_num2 < 3; var_num2++) {
                     if (CloseToEdge(vals, var_num2)) {
-                        double* mirror_vals = GetMirror(vals, var_num1, var_num2);
+                        double* mirror_vals = GetMirrorVals(vals, var_num1, var_num2);
                         *vars_[0] = mirror_vals[0];
                         *vars_[1] = mirror_vals[1];
                         *vars_[2] = mirror_vals[2];
-                        // printf("2 org: %f %f %f, new: %f, %f, %f\n", vals[0], vals[1], vals[2],
-                        //        mirror_vals[0], mirror_vals[1], mirror_vals[2]);
                         delete[] mirror_vals;
                         data->add(RooArgSet(*vars_[0], *vars_[1], *vars_[2]));
                         num_added++;
                         for (int var_num3 = var_num2 + 1; var_num3 < 3; var_num3++) {
                             if (CloseToEdge(vals, var_num3)) {
-                                double* mirror_vals = GetMirror(vals, var_num1, var_num2, var_num3);
+                                double* mirror_vals =
+                                    GetMirrorVals(vals, var_num1, var_num2, var_num3);
                                 *vars_[0] = mirror_vals[0];
                                 *vars_[1] = mirror_vals[1];
                                 *vars_[2] = mirror_vals[2];
-                                // printf("3 org: %f %f %f, new: %f, %f, %f\n", vals[0], vals[1],
-                                //        vals[2], mirror_vals[0], mirror_vals[1], mirror_vals[2]);
                                 delete[] mirror_vals;
                                 data->add(RooArgSet(*vars_[0], *vars_[1], *vars_[2]));
                                 num_added++;
@@ -147,7 +136,7 @@ void Fitter::MirrorDataAtEdges(RooDataSet* data) {
     printf("DBG: Added %i mirrored datapoints.\n", num_added);
 }
 
-double* Fitter::GetMirror(double vals[], const int var_num) {
+double* Fitter::GetMirrorVals(double vals[], const int var_num) {
     const double min = orig_vars_[var_num].getMin();
     const double max = orig_vars_[var_num].getMax();
     double* new_vals = new double[3];
@@ -165,18 +154,18 @@ double* Fitter::GetMirror(double vals[], const int var_num) {
     return new_vals;
 }
 
-double* Fitter::GetMirror(double vals[], const int var_num1, const int var_num2) {
-    double* new_vals1 = GetMirror(vals, var_num1);
-    double* new_vals2 = GetMirror(new_vals1, var_num2);
+double* Fitter::GetMirrorVals(double vals[], const int var_num1, const int var_num2) {
+    double* new_vals1 = GetMirrorVals(vals, var_num1);
+    double* new_vals2 = GetMirrorVals(new_vals1, var_num2);
     delete[] new_vals1;
     return new_vals2;
 }
 
-double* Fitter::GetMirror(double vals[], const int var_num1, const int var_num2,
-                          const int var_num3) {
-    double* new_vals1 = GetMirror(vals, var_num1);
-    double* new_vals2 = GetMirror(new_vals1, var_num2);
-    double* new_vals3 = GetMirror(new_vals2, var_num3);
+double* Fitter::GetMirrorVals(double vals[], const int var_num1, const int var_num2,
+                              const int var_num3) {
+    double* new_vals1 = GetMirrorVals(vals, var_num1);
+    double* new_vals2 = GetMirrorVals(new_vals1, var_num2);
+    double* new_vals3 = GetMirrorVals(new_vals2, var_num3);
     delete[] new_vals1;
     delete[] new_vals2;
     return new_vals3;
@@ -195,136 +184,137 @@ int Fitter::CloseToEdge(double vals[], const int var_num) {
     return 0;
 }
 
-void Fitter::PlotVar(RooRealVar& var) {
-    if (canvas_var_) delete canvas_var_;
-    canvas_var_ = new TCanvas(TString(var.GetName()) + "_canvas",
-                              TString(var.GetTitle()) + " canvas", 500, 500);
-    if (plot_var_) delete plot_var_;
-    plot_var_ = var.frame();
-
-    evtgen_dataset_->plotOn(plot_var_);
-    gsim_dataset_->plotOn(plot_var_, RooFit::MarkerColor(2), RooFit::LineColor(2));
-    plot_var_->Draw();
-
-    plot_var_->SetTitle("");
-    plot_var_->GetXaxis()->SetTitle(TString(var.GetTitle()));
-    plot_var_->GetYaxis()->SetTitle("");
-
-    canvas_var_->Write();
-    canvas_var_->SaveAs(format);
+void Fitter::PlotVar(const RooRealVar& var) const {
+    RooDataHist evtgen_datahist("evtgen_datahist", "evtgen_datahist", RooArgSet(var),
+                                *evtgen_dataset_);
+    RooDataHist gsim_datahist("gsim_datahist", "gsim_datahist", RooArgSet(var), *gsim_dataset_);
+    PlotVar(var, evtgen_datahist, gsim_datahist, false);
 }
 
-void Fitter::PlotVar(RooRealVar& var, RooDataHist& data1, RooDataHist& data2) {
-    if (canvas_var_) delete canvas_var_;
-    canvas_var_ = new TCanvas(
+void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist& data2,
+                     const bool draw_pull) const {
+    TCanvas canvas(
         TString(var.GetName()) + "_" + TString(data1.GetName()) + "_" + TString(data2.GetName()),
         TString(var.GetTitle()) + " canvas", 500, 500);
-    if (plot_var_) delete plot_var_;
-    plot_var_ = var.frame();
+
+    RooPlot* plot = var.frame();
 
     TPad* pad_var;
     TPad* pad_pull;
-
-    pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
-    pad_pull = new TPad("pad_pull", "pad_pull", 0, 0, 1, 0.25);
+    if (draw_pull) {
+        pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
+        pad_var->SetBottomMargin(0.0);
+        pad_pull = new TPad("pad_pull", "pad_pull", 0, 0, 1, 0.25);
+        pad_pull->Draw();
+        plot->GetXaxis()->SetTitle("");
+        plot->GetXaxis()->SetLabelSize(0);
+        // This line makes sure the 0 is not drawn as it would overlap with the lower
+        // pad
+        plot->GetYaxis()->SetRangeUser(0.001, plot->GetMaximum());
+    } else {
+        pad_var = new TPad("pad_var", "pad_var", 0, 0, 1, 1);
+    }
     pad_var->Draw();
-    pad_pull->Draw();
-
     pad_var->cd();
-    pad_var->SetBottomMargin(0.0);
     pad_var->SetLeftMargin(0.12);
 
-    data1.plotOn(plot_var_, RooFit::DataError(RooAbsData::None));
-    data2.plotOn(plot_var_, RooFit::MarkerColor(2), RooFit::LineColor(2), RooFit::DataError(RooAbsData::None));
+    data1.plotOn(plot, RooFit::DataError(RooAbsData::None));
+    data2.plotOn(plot, RooFit::MarkerColor(2), RooFit::LineColor(2),
+                 RooFit::DataError(RooAbsData::None));
 
-    plot_var_->SetTitle("");
-    plot_var_->GetYaxis()->SetTitle("");
-    plot_var_->GetXaxis()->SetTitle("");
-    plot_var_->GetXaxis()->SetLabelSize(0);
+    plot->SetTitle("");
+    plot->GetYaxis()->SetTitle("");
+    plot->GetYaxis()->SetTitleOffset(1.60);
+    plot->Draw();
 
-    // This line makes sure the 0 is not drawn as it would overlap with the lower
-    // pad
-    plot_var_->GetYaxis()->SetRangeUser(0.001, plot_var_->GetMaximum());
-    plot_var_->GetYaxis()->SetTitleOffset(1.60);
-    plot_var_->Draw();
+    if (draw_pull) {
+        pad_pull->cd();
+        pad_pull->SetTopMargin(0.0);
+        pad_pull->SetBottomMargin(0.35);
+        pad_pull->SetLeftMargin(0.12);
 
-    pad_pull->cd();
-    pad_pull->SetTopMargin(0.0);
-    pad_pull->SetBottomMargin(0.35);
-    pad_pull->SetLeftMargin(0.12);
+        // Create a new frame to draw the pull distribution and add the distribution
+        // to the frame
+        RooPlot* plot_pull = var.frame(RooFit::Title("Pull Distribution"));
+        plot_pull->SetTitle("");
 
-    // Create a new frame to draw the pull distribution and add the distribution
-    // to the frame
-    RooPlot* plot_var_pull_ = var.frame(RooFit::Title("Pull Distribution"));
-    plot_var_pull_->SetTitle("");
+        TH1* data1_histo = data1.createHistogram("data1", var);
+        TH1* data2_histo = data2.createHistogram("data2", var);
+        TH1* pull_histo = dynamic_cast<TH1*>(data1_histo->Clone("pull_histo"));
 
-    TH1* data1_histo = data1.createHistogram("data1", var);
-    TH1* data2_histo = data2.createHistogram("data2", var);
-    TH1* pull_histo = dynamic_cast<TH1*>(data1_histo->Clone("pull_histo"));
+        double p1;
+        double p2;
+        for (int i = 1; i <= pull_histo->GetNbinsX(); i++) {
+            p1 = data1_histo->GetBinContent(i);
+            p2 = data2_histo->GetBinContent(i);
+            // pull_histo->SetBinContent(i, p1 / p2);
+            pull_histo->SetBinContent(i, p1 - p2);
+            // pull_histo->SetBinContent(i, (p1 - p2) / std::sqrt((p1 + p2) / 2));
+        }
+        RooHist* hpull = new RooHist(*pull_histo);
 
-    double p1;
-    double p2;
-    for (int i = 1; i <= pull_histo->GetNbinsX(); i++) {
-        p1 = data1_histo->GetBinContent(i);
-        p2 = data2_histo->GetBinContent(i);
-        // pull_histo->SetBinContent(i, p1 / p2);
-        pull_histo->SetBinContent(i, p1 - p2);
-        // pull_histo->SetBinContent(i, (p1 - p2) / std::sqrt((p1 + p2) / 2));
-    }
-    RooHist* hpull = new RooHist(*pull_histo);
+        hpull->SetFillColor(kGray);
+        // The only working way to get rid of error bars; HIST draw option doesn't
+        // work with RooPlot
+        for (int i = 0; i < hpull->GetN(); i++) {
+            hpull->SetPointError(i, 0, 0, 0, 0);
+        }
+        plot_pull->addPlotable(hpull, "B");
+        // We plot again without bars, so the points are not half covered by
+        // bars as in case of "BP" draw option. We need to create and plot a
+        // clone, because the ROOT object ownership is transfered to the RooPlot
+        // by addPlotable().
+        // If we just added the hpull twice, we would get a segfault.
+        RooHist* hpull_clone = dynamic_cast<RooHist*>(hpull->Clone());
+        // We plot again without bars, so the points are not half covered by bars
+        plot_pull->addPlotable(hpull_clone, "P");
 
-    hpull->SetFillColor(kGray);
-    // The only working way to get rid of error bars; HIST draw option doesn't
-    // work with RooPlot
-    for (int i = 0; i < hpull->GetN(); i++) {
-        hpull->SetPointError(i, 0, 0, 0, 0);
-    }
-    plot_var_pull_->addPlotable(hpull, "B");
-    // We plot again without bars, so the points are not half covered by
-    // bars as in case of "BP" draw option. We need to create and plot a
-    // clone, because the ROOT object ownership is transfered to the RooPlot
-    // by addPlotable().
-    // If we just added the hpull twice, we would get a segfault.
-    RooHist* hpull_clone = dynamic_cast<RooHist*>(hpull->Clone());
-    // We plot again without bars, so the points are not half covered by bars
-    plot_var_pull_->addPlotable(hpull_clone, "P");
-
-    plot_var_pull_->GetXaxis()->SetTickLength(0.03 * pad_var->GetAbsHNDC() /
+        plot_pull->GetXaxis()->SetTickLength(0.03 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
+        plot_pull->GetXaxis()->SetTitle(TString(var.GetTitle()));
+        plot_pull->GetXaxis()->SetTitleOffset(4.0);
+        plot_pull->GetXaxis()->SetLabelOffset(0.01 * pad_var->GetAbsHNDC() /
                                               pad_pull->GetAbsHNDC());
-    plot_var_pull_->GetXaxis()->SetTitle(TString(var.GetTitle()));
-    plot_var_pull_->GetXaxis()->SetTitleOffset(4.0);
-    plot_var_pull_->GetXaxis()->SetLabelOffset(0.01 * pad_var->GetAbsHNDC() /
-                                               pad_pull->GetAbsHNDC());
-    plot_var_pull_->GetYaxis()->SetTitle("");
-    // plot_var_pull_->GetYaxis()->SetRangeUser(0.8, 1.19);
-    double max = std::max(- pull_histo->GetMinimum(), pull_histo->GetMaximum());
-    plot_var_pull_->GetYaxis()->SetRangeUser(-max, +max);
-    // plot_var_pull_->GetYaxis()->SetRangeUser(-5, 5);
-    plot_var_pull_->GetYaxis()->SetNdivisions(505);
-    plot_var_pull_->Draw();
+        plot_pull->GetYaxis()->SetTitle("");
+        // plot_pull->GetYaxis()->SetRangeUser(0.8, 1.19);
+        double max = std::max(-pull_histo->GetMinimum(), pull_histo->GetMaximum());
+        plot_pull->GetYaxis()->SetRangeUser(-max, +max);
+        // plot_pull->GetYaxis()->SetRangeUser(-5, 5);
+        plot_pull->GetYaxis()->SetNdivisions(505);
+        plot_pull->Draw();
 
-    canvas_var_->Write();
-    canvas_var_->SaveAs(format);
+        delete data1_histo;
+        delete data2_histo;
+        delete pull_histo;
+    }
+
+    canvas.Write();
+    canvas.SaveAs(format);
+
+    delete plot;
+
+    delete pad_var;
+    if (draw_pull) {
+        delete pad_pull;
+    }
 }
 
-void Fitter::PlotVars2D(RooRealVar& var1, RooRealVar& var2) {
-    if (canvas_var_) delete canvas_var_;
-    canvas_var_ = new TCanvas(
-        TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_evtgen_canvas",
-        TString(var1.GetTitle()) + "_" + TString(var2.GetName()) + " evtgen canvas", 500, 500);
+void Fitter::PlotVars2D(const RooRealVar& var1, const RooRealVar& var2) const {
+    TCanvas canvas(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_evtgen_canvas",
+                   TString(var1.GetTitle()) + "_" + TString(var2.GetName()) + " evtgen canvas", 500,
+                   500);
 
     TH2D* evtgen_histo = static_cast<TH2D*>(
         evtgen_dataset_->createHistogram("evtgen_histo", var1, RooFit::YVar(var2)));
 
-    canvas_var_->SetRightMargin(0.14);
+    canvas.SetRightMargin(0.14);
 
     evtgen_histo->SetMinimum(0);
     evtgen_histo->SetTitle("");
     evtgen_histo->Draw("colz");
     evtgen_histo->GetZaxis()->SetTitle("");
 
-    canvas_var_->Write();
-    canvas_var_->SaveAs(format);
+    canvas.Write();
+    canvas.SaveAs(format);
 
     TH2D* gsim_histo =
         static_cast<TH2D*>(gsim_dataset_->createHistogram("gsim_histo", var1, RooFit::YVar(var2)));
@@ -334,20 +324,19 @@ void Fitter::PlotVars2D(RooRealVar& var1, RooRealVar& var2) {
     gsim_histo->Draw("colz");
     gsim_histo->GetZaxis()->SetTitle("");
 
-    canvas_var_->SetName(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_gsim_canvas");
-    canvas_var_->SetTitle(TString(var1.GetName()) + "_" + TString(var2.GetName()) + " gsim canvas");
+    canvas.SetName(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_gsim_canvas");
+    canvas.SetTitle(TString(var1.GetName()) + "_" + TString(var2.GetName()) + " gsim canvas");
 
-    canvas_var_->Write();
-    canvas_var_->SaveAs(format);
+    canvas.Write();
+    canvas.SaveAs(format);
 
     delete evtgen_histo;
     delete gsim_histo;
 }
 
-void Fitter::PlotVars2D(RooRealVar& var1, RooRealVar& var2, RooDataHist& data1,
-                        RooDataHist& data2) {
-    if (canvas_var_) delete canvas_var_;
-    canvas_var_ = new TCanvas(
+void Fitter::PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHist& data1,
+                        const RooDataHist& data2) const {
+    TCanvas canvas(
         TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_" + TString(data1.GetName()),
         TString(var1.GetTitle()) + "_" + TString(var2.GetName()) + "_" + TString(data1.GetTitle()),
         500, 500);
@@ -362,7 +351,7 @@ void Fitter::PlotVars2D(RooRealVar& var1, RooRealVar& var2, RooDataHist& data1,
 
     const double max = std::max(histo1->GetMaximum(), histo2->GetMaximum());
 
-    canvas_var_->SetRightMargin(0.14);
+    canvas.SetRightMargin(0.14);
 
     histo1->SetMinimum(0);
     histo1->SetMaximum(max);
@@ -370,8 +359,8 @@ void Fitter::PlotVars2D(RooRealVar& var1, RooRealVar& var2, RooDataHist& data1,
     histo1->Draw("colz");
     histo1->GetZaxis()->SetTitle("");
 
-    canvas_var_->Write();
-    canvas_var_->SaveAs(format);
+    canvas.Write();
+    canvas.SaveAs(format);
 
     histo2->SetMinimum(0);
     histo2->SetMaximum(max);
@@ -379,13 +368,13 @@ void Fitter::PlotVars2D(RooRealVar& var1, RooRealVar& var2, RooDataHist& data1,
     histo2->Draw("colz");
     histo2->GetZaxis()->SetTitle("");
 
-    canvas_var_->SetName(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_" +
-                         TString(data2.GetName()));
-    canvas_var_->SetTitle(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_" +
-                          TString(data2.GetTitle()));
+    canvas.SetName(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_" +
+                   TString(data2.GetName()));
+    canvas.SetTitle(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_" +
+                    TString(data2.GetTitle()));
 
-    canvas_var_->Write();
-    canvas_var_->SaveAs(format);
+    canvas.Write();
+    canvas.SaveAs(format);
 
     double p1;
     double p2;
@@ -408,7 +397,7 @@ void Fitter::PlotVars2D(RooRealVar& var1, RooRealVar& var2, RooDataHist& data1,
     pull_histo->SetTitle("");
     // pull_histo->SetMinimum(0.8);
     // pull_histo->SetMaximum(1.2);
-    const double pull_max = std::max(- pull_histo->GetMinimum(), pull_histo->GetMaximum());
+    const double pull_max = std::max(-pull_histo->GetMinimum(), pull_histo->GetMaximum());
     pull_histo->SetMinimum(-pull_max);
     pull_histo->SetMaximum(+pull_max);
     // pull_histo->SetMinimum(-5);
@@ -417,12 +406,14 @@ void Fitter::PlotVars2D(RooRealVar& var1, RooRealVar& var2, RooDataHist& data1,
     pull_histo->Draw("colz");
     pull_histo->Write();
 
-    canvas_var_->SetName(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_" + TString(data1.GetName()) + "_" + TString(data2.GetName()));
-    canvas_var_->SetTitle(TString(var1.GetTitle()) + "_" + TString(var2.GetTitle()) + " " + TString(data1.GetName()) + " " + TString(data2.GetName()));
+    canvas.SetName(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_" +
+                   TString(data1.GetName()) + "_" + TString(data2.GetName()));
+    canvas.SetTitle(TString(var1.GetTitle()) + "_" + TString(var2.GetTitle()) + " " +
+                    TString(data1.GetName()) + " " + TString(data2.GetName()));
 
-    canvas_var_->Update();
-    canvas_var_->Write();
-    canvas_var_->SaveAs(format);
+    canvas.Update();
+    canvas.Write();
+    canvas.SaveAs(format);
     colors::setColors();
 
     delete histo1;
@@ -628,9 +619,11 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
 #endif
     eff_pull_histo->SetTitle("");
     eff_pull_histo->GetZaxis()->SetTitle();
-    const double max = std::max(-eff_pull_histo->GetMinimum(), eff_pull_histo->GetMaximum());
-    eff_pull_histo->SetMinimum(-max);
-    eff_pull_histo->SetMaximum(max);
+    // const double max = std::max(-eff_pull_histo->GetMinimum(), eff_pull_histo->GetMaximum());
+    // eff_pull_histo->SetMinimum(-max);
+    // eff_pull_histo->SetMaximum(max);
+    eff_pull_histo->SetMinimum(-0.1);
+    eff_pull_histo->SetMaximum(0.1);
     eff_pull_histo->SetOption("colz 1");
     eff_pull_histo->Draw();
     eff_pull_histo->Write();
@@ -750,91 +743,15 @@ void Fitter::SetEfficiencyModel(const int model_num) {
     }
 }
 
-void Fitter::ProcessBinnedEfficiency() {
-    TEfficiency* binned_efficiency;
-
-    TH3F* evtgen_histo =
-        new TH3F("evtgen_histo", "evtgen_histo", 10, 0, kPi, 10, 0.5, 2.95, 10, -kPi, kPi);
-    for (int i = 0; i < evtgen_dataset_->numEntries(); i++) {
-        const RooArgSet* row = evtgen_dataset_->get(i);
-        // printf("thetab = %f\n", row->getRealValue("thetab"));
-        double thetat = row->getRealValue("thetat");
-        double thetab = row->getRealValue("thetab");
-        double phit = row->getRealValue("phit");
-        evtgen_histo->Fill(thetat, thetab, phit);
+void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
+                                  const std::array<double, 6> bin_kde_pars,
+                                  const std::array<double, 6> ada_kde_pars,
+                                  const double mirror_margin) {
+    if (mirror_margin) {
+        EnlargeVarRanges(mirror_margin);
+        MirrorDataAtEdges(evtgen_dataset_);
+        MirrorDataAtEdges(gsim_dataset_);
     }
-
-    TH3F* gsim_histo =
-        new TH3F("gsim_histo", "gsim_histo", 10, 0, kPi, 10, 0.5, 2.95, 10, -kPi, kPi);
-    for (int i = 0; i < gsim_dataset_->numEntries(); i++) {
-        const RooArgSet* row = gsim_dataset_->get(i);
-        // printf("thetab = %f\n", row->getRealValue("thetab"));
-        double thetat = row->getRealValue("thetat");
-        double thetab = row->getRealValue("thetab");
-        double phit = row->getRealValue("phit");
-        gsim_histo->Fill(thetat, thetab, phit);
-    }
-
-    // Check how many bins are empty
-    printf("***** Bins where evtgen < gsim\n");
-    for (int i = 0; i < 12 * 12 * 12; i++) {
-        if (evtgen_histo->GetBinContent(i) < gsim_histo->GetBinContent(i)) {
-            printf("Before: bin = %i, evtgen = %f, gsim = %f\n", i, evtgen_histo->GetBinContent(i),
-                   gsim_histo->GetBinContent(i));
-            gsim_histo->SetBinContent(i, evtgen_histo->GetBinContent(i));
-            printf("After:  bin = %i, evtgen = %f, gsim = %f\n", i, evtgen_histo->GetBinContent(i),
-                   gsim_histo->GetBinContent(i));
-        }
-    }
-    printf("***** That's all\n");
-
-    if (TEfficiency::CheckConsistency(*gsim_histo, *evtgen_histo)) {
-        binned_efficiency = new TEfficiency(*gsim_histo, *evtgen_histo);
-    }
-
-    int global_bin = binned_efficiency->GetGlobalBin(kPi / 2, kPi / 2, kPi / 2);
-    double particular_eff = binned_efficiency->GetEfficiency(global_bin);
-    printf("bin = %i, Eff = %f\n", global_bin, particular_eff);
-    for (int i = 0; i < 1000; i++) {
-        printf("bin = %i, Eff = %f\n", i, binned_efficiency->GetEfficiency(i));
-    }
-
-    double thetat_bin_width = kPi / 10;
-    double thetab_bin_width = (2.95 - 0.5) / 10;
-    double phit_bin_width = 2 * kPi / 10;
-    double thetat_start = 0 + thetat_bin_width / 2;
-    double thetab_start = 0.5 + thetab_bin_width / 2;
-    double phit_start = -kPi + phit_bin_width / 2;
-
-    for (int t = 1; t <= 10; t++) {
-        for (int b = 1; b <= 10; b++) {
-            for (int p = 1; p <= 10; p++) {
-                double tht = thetat_start + thetat_bin_width * (t - 1);
-                double thb = thetab_start + thetab_bin_width * (b - 1);
-                double pht = phit_start + phit_bin_width * (p - 1);
-                int bin = evtgen_histo->GetBin(t, b, p);
-                double evt = evtgen_histo->GetBinContent(bin);
-                double gsim = gsim_histo->GetBinContent(bin);
-                double eff = binned_efficiency->GetEfficiency(bin);
-                printf(
-                    "t = %i, b = %i, p = %i, tht = %f, thb = %f, pht = %f, bin = "
-                    "%i, evt = %f, "
-                    "gsim = %f, eff = %f\n",
-                    t, b, p, tht, thb, pht, bin, evt, gsim, eff);
-            }
-        }
-    }
-
-    TCanvas* eff_canvas = new TCanvas("eff_evtgen_canvas", "eff evtgen canvas", 500, 500);
-    TH2D* proj2D = dynamic_cast<TH2D*>(evtgen_histo->Project3D("xy"));
-    proj2D->Draw();
-    eff_canvas->SaveAs("test.png");
-}
-
-void Fitter::ProcessKDEEfficiency() {
-    EnlargeVarRanges(0.1);
-    MirrorDataAtEdges(evtgen_dataset_);
-    MirrorDataAtEdges(gsim_dataset_);
 
     OneDimPhaseSpace phasespace_thetat("phasespace_thetat", thetat_.getMin(), thetat_.getMax());
     OneDimPhaseSpace phasespace_thetab("phasespace_thetab", thetab_.getMin(), thetab_.getMax());
@@ -849,214 +766,37 @@ void Fitter::ProcessKDEEfficiency() {
     TTree* eff_tree = Histogram2TTree(eff_histo);
 
     BinnedKernelDensity bin_kde("BinKernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
-                                "weight", 50, 50, 50, 0.20, 0.20, 0.40, 0);
+                                "weight", bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
+                                bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], 0);
 
     AdaptiveKernelDensity kde("KernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
-                              "weight", 50, 50, 50, 0.10, 0.10, 0.20, &bin_kde);
+                              "weight", ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2],
+                              ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
+    kde.writeToTextFile(efficiency_file);
 
-    kde.writeToTextFile("efficiency.root");
+    if (mirror_margin) {
+        thetat_.setMin(0);
+        thetat_.setMax(kPi);
+        thetab_.setMin(0.5);
+        thetab_.setMax(2.95);
+        phit_.setMin(-kPi);
+        phit_.setMax(kPi);
+        vars_[0]->setMin(0);
+        vars_[0]->setMax(kPi);
+        vars_[1]->setMin(0.5);
+        vars_[1]->setMax(2.95);
+        vars_[2]->setMin(-kPi);
+        vars_[2]->setMax(+kPi);
+        delete eff_histo;
+        eff_histo = GetBinned3DEfficiency();
+    }
 
-    thetat_.setMin(0);
-    thetat_.setMax(kPi);
-    thetab_.setMin(0.5);
-    thetab_.setMax(2.95);
-    phit_.setMin(-kPi);
-    phit_.setMax(kPi);
-    vars_[0]->setMin(0);
-    vars_[0]->setMax(kPi);
-    vars_[1]->setMin(0.5);
-    vars_[1]->setMax(2.95);
-    vars_[2]->setMin(-kPi);
-    vars_[2]->setMax(+kPi);
 
-    eff_histo = GetBinned3DEfficiency();
-
-    OneDimPhaseSpace phasespace_thetat_new("phasespace_thetat", thetat_.getMin(), thetat_.getMax());
-    OneDimPhaseSpace phasespace_thetab_new("phasespace_thetab", thetab_.getMin(), thetab_.getMax());
-    OneDimPhaseSpace phasespace_phit_new("phasespace_phit", phit_.getMin(), phit_.getMax());
-    CombinedPhaseSpace phasespace_new("phasespace", &phasespace_thetat_new, &phasespace_thetab_new,
-                                  &phasespace_phit_new);
-
-    // printf("eff_tree->GetEntriesFast() = %i\n", eff_tree->GetEntriesFast());
-    // KernelDensity kde("KernelPDF", &phasespace, eff_tree->GetEntriesFast(), 0.2,
-    // 0.2, 0.4);
-    // kde.readTuple(eff_tree, "thetat", "thetab", "phit");
-    // kde.generateApproximation(eff_tree->GetEntriesFast());
-
-    TH3F* binned_pdf = DensityToHisto(kde, phasespace_new);
-    binned_pdf->Print();
-
-    TH3F* simulated_histo = SimulateEfficiency(kde, evtgen_dataset_);
-    TH3F* simulated_histo_dummy = SimulateEfficiencyDummy(eff_histo, evtgen_dataset_);
     TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
-    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
-    TCanvas* eff_canvas = new TCanvas("eff_evtgen_canvas", "eff evtgen canvas", 500, 500);
-    TH1D* simulated_projection;
-    TH1D* gsim_projection;
-    TH1D* eff_projection;
-    TString name;
-
-    printf("*** Numeric check ***\n");
-    for (int i = 5000; i < 5010; i++) {
-        printf("i = %i, eff = %f, gsim = %f, evtgen = %f, sim_dummy = %f, sim = %f\n", i,
-               eff_histo->GetBinContent(i), gsim_histo->GetBinContent(i),
-               evtgen_histo->GetBinContent(i), simulated_histo_dummy->GetBinContent(i),
-               simulated_histo->GetBinContent(i));
-    }
-    for (int i = 50000; i < 50010; i++) {
-        printf("i = %i, eff = %f, gsim = %f, evtgen = %f, sim_dummy = %f, sim = %f\n", i,
-               eff_histo->GetBinContent(i), gsim_histo->GetBinContent(i),
-               evtgen_histo->GetBinContent(i), simulated_histo_dummy->GetBinContent(i),
-               simulated_histo->GetBinContent(i));
-    }
-    // printf("*** Non-matching bins ***\n");
-    // for (int i = 0; i < 52 * 52 * 52; i++) {
-    //     if (((int)gsim_histo->GetBinContent(i)) !=
-    //     ((int)simulated_histo_dummy->GetBinContent(i))) {
-    //         printf("i = %i, eff = %f, gsim = %f, evtgen = %f, sim_dummy = %f, sim
-    //         = %f\n", i,
-    //                eff_histo->GetBinContent(i), gsim_histo->GetBinContent(i),
-    //                evtgen_histo->GetBinContent(i),
-    //                simulated_histo_dummy->GetBinContent(i),
-    //                simulated_histo->GetBinContent(i));
-    //     }
-    // }
-
-    // printf("*** < 1 gsim bins ***\n");
-    // for (int i = 0; i < 52 * 52 * 52; i++) {
-    //     if (gsim_histo->GetBinContent(i) < 1.0) {
-    //         printf("i = %i, eff = %f, gsim = %f, evtgen = %f, sim_dummy = %f, sim
-    //         = %f\n", i,
-    //                eff_histo->GetBinContent(i), gsim_histo->GetBinContent(i),
-    //                evtgen_histo->GetBinContent(i),
-    //                simulated_histo_dummy->GetBinContent(i),
-    //                simulated_histo->GetBinContent(i));
-    //     }
-    // }
-
-    printf("total: gsim = %f, sim dummy = %f, sim = %f\n", gsim_histo->GetSumOfWeights(),
-           simulated_histo_dummy->GetSumOfWeights(), simulated_histo->GetSumOfWeights());
-
-    // TString var[] = {'x', 'y', 'z'};
-    // for (int var_num = 0; var_num < 3; var_num++) {
-    //     name = "proj_1D_sim_";
-    //     name += vars_[var_num]->GetName();
-    //     eff_canvas->SetName(name);
-    //     simulated_projection = dynamic_cast<TH1D*>(simulated_histo->Project3D(var[var_num]));
-    //     simulated_projection->Draw();
-    //     eff_canvas->SaveAs(format);
-    // }
-
-    // for (int var_num = 0; var_num < 3; var_num++) {
-    //     name = "proj_1D_sim_dummy_";
-    //     name += vars_[var_num]->GetName();
-    //     eff_canvas->SetName(name);
-    //     simulated_projection = dynamic_cast<TH1D*>(simulated_histo_dummy->Project3D(var[var_num]));
-    //     simulated_projection->Draw();
-    //     eff_canvas->SaveAs(format);
-    // }
-
-    // for (int var_num = 0; var_num < 3; var_num++) {
-    //     name = "proj_1D_gsim_";
-    //     name += vars_[var_num]->GetName();
-    //     eff_canvas->SetName(name);
-    //     gsim_projection = dynamic_cast<TH1D*>(gsim_histo->Project3D(var[var_num]));
-    //     gsim_projection->Draw();
-    //     eff_canvas->SaveAs(format);
-    // }
-
-    // for (int var_num = 0; var_num < 3; var_num++) {
-    //     name = "proj_1D_gsim_and_sim_";
-    //     name += vars_[var_num]->GetName();
-    //     eff_canvas->SetName(name);
-    //     gsim_projection = dynamic_cast<TH1D*>(gsim_histo->Project3D(var[var_num]));
-    //     gsim_projection->Draw();
-    //     simulated_projection = dynamic_cast<TH1D*>(simulated_histo->Project3D(var[var_num]));
-    //     simulated_projection->SetLineColor(kRed);
-    //     simulated_projection->Draw("same");
-    //     eff_canvas->SaveAs(format);
-    // }
-
-    // for (int var_num = 0; var_num < 3; var_num++) {
-    //     name = "dummy_vs_gsim_1D_";
-    //     name += vars_[var_num]->GetName();
-    //     eff_canvas->SetName(name);
-    //     simulated_projection = dynamic_cast<TH1D*>(simulated_histo_dummy->Project3D(var[var_num]));
-    //     gsim_projection = dynamic_cast<TH1D*>(gsim_histo->Project3D(var[var_num]));
-    //     eff_projection = dynamic_cast<TH1D*>(simulated_projection->Clone("eff projection"));
-    //     eff_projection->Divide(simulated_projection, gsim_projection);
-    //     eff_projection->Draw();
-    //     eff_canvas->SaveAs(format);
-    // }
-
-    // for (int var_num = 0; var_num < 3; var_num++) {
-    //     name = "dummy_minus_gsim_1D_";
-    //     name += vars_[var_num]->GetName();
-    //     eff_canvas->SetName(name);
-    //     simulated_projection = dynamic_cast<TH1D*>(simulated_histo_dummy->Project3D(var[var_num]));
-    //     gsim_projection = dynamic_cast<TH1D*>(gsim_histo->Project3D(var[var_num]));
-    //     eff_projection = dynamic_cast<TH1D*>(simulated_projection->Clone("eff projection"));
-    //     eff_projection->Add(gsim_projection, -1);
-    //     eff_projection->Draw();
-    //     eff_canvas->SaveAs(format);
-    // }
-
-    // for (int var_num = 0; var_num < 3; var_num++) {
-    //     name = "sim_vs_gsim_1D_";
-    //     name += vars_[var_num]->GetName();
-    //     eff_canvas->SetName(name);
-    //     simulated_projection = dynamic_cast<TH1D*>(simulated_histo->Project3D(var[var_num]));
-    //     gsim_projection = dynamic_cast<TH1D*>(gsim_histo->Project3D(var[var_num]));
-    //     eff_projection = dynamic_cast<TH1D*>(simulated_projection->Clone("eff projection"));
-    //     eff_projection->Divide(simulated_projection, gsim_projection);
-    //     eff_projection->Draw();
-    //     eff_canvas->SaveAs(format);
-    // }
-
-    // for (int var_num = 0; var_num < 3; var_num++) {
-    //     name = "sim_minus_gsim_1D_";
-    //     name += vars_[var_num]->GetName();
-    //     eff_canvas->SetName(name);
-    //     simulated_projection = dynamic_cast<TH1D*>(simulated_histo->Project3D(var[var_num]));
-    //     gsim_projection = dynamic_cast<TH1D*>(gsim_histo->Project3D(var[var_num]));
-    //     eff_projection = dynamic_cast<TH1D*>(simulated_projection->Clone("eff projection"));
-    //     eff_projection->Add(gsim_projection, -1);
-    //     eff_projection->Draw();
-    //     eff_canvas->SaveAs(format);
-    // }
-
-    // for (int var_num = 0; var_num < 3; var_num++) {
-    //     name = "eff_1D_";
-    //     name += vars_[var_num]->GetName();
-    //     eff_canvas->SetName(name);
-    //     eff_projection = dynamic_cast<TH1D*>(eff_histo->Project3D(var[var_num]));
-    //     eff_projection->Draw();
-    //     eff_canvas->SaveAs(format);
-    // }
-
-    // for (int var_num = 0; var_num < 3; var_num++) {
-    //     name = "eff_pdf_1D_";
-    //     name += vars_[var_num]->GetName();
-    //     eff_canvas->SetName(name);
-    //     eff_projection = dynamic_cast<TH1D*>(binned_pdf->Project3D(var[var_num]));
-    //     eff_projection->Draw();
-    //     eff_canvas->SaveAs(format);
-    // }
-
-    // TH2D* pdf_projection_2D;
-    // for (int var_num = 0; var_num < 3; var_num++) {
-    //     name = "proj_2D";
-    //     for (int i = 0; i < 3; i++) {
-    //         if (i != var_num) {
-    //             name += "_";
-    //             name += vars_[i].GetName();
-    //         }
-    //     }
-    //     name += ".png";
-    //     pdf_projection_2D = ProjectDensityTo2D(kde, phasespace, var_num);
-    //     pdf_projection_2D->Draw("colz");
-    //     eff_canvas->SaveAs(name);
-    // }
+    TH3F* binned_pdf = ConvertDensityToHisto(kde);
+    TH3F* simulated_histo = Create3DHisto(evtgen_dataset_);
+    simulated_histo->Multiply(binned_pdf);
+    simulated_histo->Scale(gsim_histo->GetSumOfWeights() / simulated_histo->GetSumOfWeights());
 
     RooDataHist roo_simulated_histo("roo_simulated_histo", "roo_simulated_histo",
                                     RooArgList(thetat_, thetab_, phit_), simulated_histo);
@@ -1064,7 +804,7 @@ void Fitter::ProcessKDEEfficiency() {
                                RooArgList(thetat_, thetab_, phit_), gsim_histo);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_simulated_histo, roo_gsim_histo);
+        PlotVar(*var, roo_simulated_histo, roo_gsim_histo, true);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -1074,26 +814,25 @@ void Fitter::ProcessKDEEfficiency() {
     }
 
     // Scale the histos so that they have efficiency averages on y (or z) axes
-    eff_histo->Scale(1./50.);
-    RooDataHist roo_eff_histo_2D("roo_eff_histo", "roo_eff_histo", RooArgList(thetat_, thetab_, phit_),
-                              eff_histo);
+    eff_histo->Scale(1. / 50.);
+    RooDataHist roo_eff_histo_2D("roo_eff_histo", "roo_eff_histo",
+                                 RooArgList(thetat_, thetab_, phit_), eff_histo);
+
     TH3F* scaled_binned_pdf = dynamic_cast<TH3F*>(binned_pdf->Clone("scaled_binned_pdf"));
-
-    double scale = eff_histo->GetSumOfWeights()/binned_pdf->GetSumOfWeights();
+    double scale = eff_histo->GetSumOfWeights() / binned_pdf->GetSumOfWeights();
     scaled_binned_pdf->Scale(scale);
-
     RooDataHist roo_eff_pdf_histo_2D("roo_eff_pdf_histo", "roo_eff_pdf_histo",
-                                  RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
+                                     RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 
-    eff_histo->Scale(1./50.);
-    RooDataHist roo_eff_histo_1D("roo_eff_histo", "roo_eff_histo", RooArgList(thetat_, thetab_, phit_),
-                              eff_histo);
-    scaled_binned_pdf->Scale(1./50.);
+    eff_histo->Scale(1. / 50.);
+    RooDataHist roo_eff_histo_1D("roo_eff_histo", "roo_eff_histo",
+                                 RooArgList(thetat_, thetab_, phit_), eff_histo);
+    scaled_binned_pdf->Scale(1. / 50.);
     RooDataHist roo_eff_pdf_histo_1D("roo_eff_pdf_histo", "roo_eff_pdf_histo",
-                                  RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
+                                     RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_eff_histo_1D, roo_eff_pdf_histo_1D);
+        PlotVar(*var, roo_eff_histo_1D, roo_eff_pdf_histo_1D, true);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -1104,63 +843,12 @@ void Fitter::ProcessKDEEfficiency() {
 }
 
 TH3F* Fitter::GetBinned3DEfficiency() {
-    // printf("Trying to get binned efficiency.\n");
-    const int num_bins = 50;
-    TH3F* evtgen_histo = new TH3F("evtgen_histo", "evtgen_histo", num_bins, thetat_.getMin(),
-                                  thetat_.getMax(), num_bins, thetab_.getMin(), thetab_.getMax(),
-                                  num_bins, phit_.getMin(), phit_.getMax());
-    for (int i = 0; i < evtgen_dataset_->numEntries(); i++) {
-        const RooArgSet* row = evtgen_dataset_->get(i);
-        // printf("thetab = %f\n", row->getRealValue("thetab"));
-        double thetat = row->getRealValue("thetat");
-        double thetab = row->getRealValue("thetab");
-        double phit = row->getRealValue("phit");
-        evtgen_histo->Fill(thetat, thetab, phit);
-    }
+    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
+    TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
 
-    TH3F* gsim_histo =
-        new TH3F("gsim_histo", "gsim_histo", num_bins, thetat_.getMin(), thetat_.getMax(), num_bins,
-                 thetab_.getMin(), thetab_.getMax(), num_bins, phit_.getMin(), phit_.getMax());
-    for (int i = 0; i < gsim_dataset_->numEntries(); i++) {
-        const RooArgSet* row = gsim_dataset_->get(i);
-        // printf("thetab = %f\n", row->getRealValue("thetab"));
-        double thetat = row->getRealValue("thetat");
-        double thetab = row->getRealValue("thetab");
-        double phit = row->getRealValue("phit");
-        gsim_histo->Fill(thetat, thetab, phit);
-    }
-
-    // TH1D* evtgen_histo_1D = evtgen_histo->ProjectionZ();
-    // TH1D* gsim_histo_1D = gsim_histo->ProjectionZ();
-    // TH1D* eff_histo_1D =
-    // dynamic_cast<TH1D*>(gsim_histo_1D->Clone("eff_histo_1D"));
-    // eff_histo_1D->Divide(gsim_histo_1D, evtgen_histo_1D, 1.0, 1.0, "B");
-
-    // TCanvas* canvas = new TCanvas("canvas", "canvas", 500, 500);
-    // eff_histo_1D->Draw();
-    // canvas->SaveAs("eff_1D.png");
-
-    // printf("Trying to clone and divide binned histos.\n");
     TH3F* eff_histo = dynamic_cast<TH3F*>(gsim_histo->Clone("eff_histo"));
     eff_histo->Divide(gsim_histo, evtgen_histo);  //, 1.0, 1.0, "B");
 
-    // TH1D* histo_projection;
-    // histo_projection = evtgen_histo->ProjectionZ();
-    // histo_projection->Draw();
-    // canvas->SaveAs("evtgen.png");
-
-    // histo_projection = gsim_histo->ProjectionZ();
-    // histo_projection->Draw();
-    // canvas->SaveAs("gsim.png");
-
-    // histo_projection = eff_histo->ProjectionZ();
-    // histo_projection->Draw();
-    // canvas->SaveAs("eff.png");
-
-    // evtgen_histo->Print();
-    // gsim_histo->Print();
-    // eff_histo->Print();
-    // printf("Trying to delete binned histos.\n");
     delete gsim_histo;
     delete evtgen_histo;
 
@@ -1201,186 +889,13 @@ TTree* Fitter::Histogram2TTree(TH3F* histo) {
     return tree;
 }
 
-TH1D* Fitter::ProjectDensityTo1D(BinnedKernelDensity pdf, CombinedPhaseSpace phasespace,
-                                 const int var_num) {
-    TH3F* binned_pdf =
-        new TH3F("binned_pdf", "Binned PDF", 100, phasespace.lowerLimit(0),
-                 phasespace.upperLimit(0), 100, phasespace.lowerLimit(1), phasespace.upperLimit(1),
-                 100, phasespace.lowerLimit(2), phasespace.upperLimit(2));
-
-    double thetat;
-    double thetab;
-    double phit;
-    for (int x = 1; x <= binned_pdf->GetXaxis()->GetNbins(); x++) {
-        for (int y = 1; y <= binned_pdf->GetYaxis()->GetNbins(); y++) {
-            for (int z = 1; z <= binned_pdf->GetZaxis()->GetNbins(); z++) {
-                thetat = binned_pdf->GetXaxis()->GetBinCenter(x);
-                thetab = binned_pdf->GetYaxis()->GetBinCenter(y);
-                phit = binned_pdf->GetZaxis()->GetBinCenter(z);
-                std::vector<double> coords;
-                coords.push_back(thetat);
-                coords.push_back(thetab);
-                coords.push_back(phit);
-                binned_pdf->SetBinContent(binned_pdf->GetBin(x, y, z), pdf.density(coords));
-            }
-        }
-    }
-
-    TH1D* pdf_projection;
-    switch (var_num) {
-        case 0:
-            pdf_projection = binned_pdf->ProjectionX();
-            break;
-        case 1:
-            pdf_projection = binned_pdf->ProjectionY();
-            break;
-        case 2:
-            pdf_projection = binned_pdf->ProjectionZ();
-            break;
-    }
-    return pdf_projection;
-}
-
-TH2D* Fitter::ProjectDensityTo2D(BinnedKernelDensity pdf, CombinedPhaseSpace phasespace,
-                                 const int var_num) {
-    TH3F* binned_pdf =
-        new TH3F("binned_pdf", "Binned PDF", 100, phasespace.lowerLimit(0),
-                 phasespace.upperLimit(0), 100, phasespace.lowerLimit(1), phasespace.upperLimit(1),
-                 100, phasespace.lowerLimit(2), phasespace.upperLimit(2));
-
-    double thetat;
-    double thetab;
-    double phit;
-    for (int x = 1; x <= binned_pdf->GetXaxis()->GetNbins(); x++) {
-        for (int y = 1; y <= binned_pdf->GetYaxis()->GetNbins(); y++) {
-            for (int z = 1; z <= binned_pdf->GetZaxis()->GetNbins(); z++) {
-                thetat = binned_pdf->GetXaxis()->GetBinCenter(x);
-                thetab = binned_pdf->GetYaxis()->GetBinCenter(y);
-                phit = binned_pdf->GetZaxis()->GetBinCenter(z);
-                std::vector<double> coords;
-                coords.push_back(thetat);
-                coords.push_back(thetab);
-                coords.push_back(phit);
-                binned_pdf->SetBinContent(binned_pdf->GetBin(x, y, z), pdf.density(coords));
-            }
-        }
-    }
-
-    TH2D* pdf_projection;
-    switch (var_num) {
-        case 0:
-            pdf_projection = dynamic_cast<TH2D*>(binned_pdf->Project3D("yz"));
-            break;
-        case 1:
-            pdf_projection = dynamic_cast<TH2D*>(binned_pdf->Project3D("xz"));
-            break;
-        case 2:
-            pdf_projection = dynamic_cast<TH2D*>(binned_pdf->Project3D("xy"));
-            break;
-    }
-    return pdf_projection;
-}
-
-void Fitter::Process1DKDEEfficiency() {
-    OneDimPhaseSpace phasespace("phasespace", phit_.getMin(), phit_.getMax());
-
-    TH3F* eff_histo = GetBinned3DEfficiency();
-    TTree* eff_tree_3D = Histogram2TTree(eff_histo);
-    eff_tree_3D->SetBranchStatus("*", 0);
-    eff_tree_3D->SetBranchStatus("phit", 1);
-    eff_tree_3D->SetBranchStatus("weight", 1);
-    TTree* eff_tree = eff_tree_3D->CloneTree();
-
-    BinnedKernelDensity kde("KernelPDF", &phasespace, eff_tree, "phit", "weight", 100, 0.05, 0, 0);
-
-    TCanvas* eff_canvas = new TCanvas("eff_evtgen_canvas", "eff evtgen canvas", 500, 500);
-    TH1F* projection = new TH1F("projection", "projection", 100, -kPi, kPi);
-    TH1D* histo_projection;
-    kde.project(projection);
-    // projection->Draw();
-    histo_projection = eff_histo->ProjectionZ();
-    histo_projection->Draw();
-    // eff_tree->Draw("weight");
-    eff_canvas->SaveAs("phit.png");
-}
-
-TH3F* Fitter::SimulateEfficiency(AdaptiveKernelDensity pdf, const RooDataSet* dataset) {
-    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
-    const int num_bins = 50;
-    TH3F* simulated_histo = new TH3F("simulated_histo", "simulated_histo", num_bins,
-                                     thetat_.getMin(), thetat_.getMax(), num_bins, thetab_.getMin(),
-                                     thetab_.getMax(), num_bins, phit_.getMin(), phit_.getMax());
-
-    const double total_efficiency = 0.105;
-    double thetat;
-    double thetab;
-    double phit;
-    int bin;
-    double evtgen_value;
-    for (int x = 1; x <= simulated_histo->GetXaxis()->GetNbins(); x++) {
-        for (int y = 1; y <= simulated_histo->GetYaxis()->GetNbins(); y++) {
-            for (int z = 1; z <= simulated_histo->GetZaxis()->GetNbins(); z++) {
-                thetat = simulated_histo->GetXaxis()->GetBinCenter(x);
-                thetab = simulated_histo->GetYaxis()->GetBinCenter(y);
-                phit = simulated_histo->GetZaxis()->GetBinCenter(z);
-                std::vector<double> coords;
-                coords.push_back(thetat);
-                coords.push_back(thetab);
-                coords.push_back(phit);
-                bin = simulated_histo->GetBin(x, y, z);
-                evtgen_value = evtgen_histo->GetBinContent(bin);
-                simulated_histo->SetBinContent(
-                    bin, pdf.density(coords) * evtgen_value * total_efficiency);
-            }
-        }
-    }
-
-    return simulated_histo;
-}
-
-TH3F* Fitter::SimulateEfficiencyDummy(TH3F* eff_histo, const RooDataSet* dataset) {
-    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
-    const int num_bins = 50;
-    TH3F* simulated_histo = new TH3F("simulated_histo", "simulated_histo", num_bins,
-                                     thetat_.getMin(), thetat_.getMax(), num_bins, thetab_.getMin(),
-                                     thetab_.getMax(), num_bins, phit_.getMin(), phit_.getMax());
-
-    const double total_efficiency = 1;
-    double thetat;
-    double thetab;
-    double phit;
-    int bin;
-    double eff_value;
-    double evtgen_value;
-    for (int x = 1; x <= simulated_histo->GetXaxis()->GetNbins(); x++) {
-        for (int y = 1; y <= simulated_histo->GetYaxis()->GetNbins(); y++) {
-            for (int z = 1; z <= simulated_histo->GetZaxis()->GetNbins(); z++) {
-                thetat = simulated_histo->GetXaxis()->GetBinCenter(x);
-                thetab = simulated_histo->GetYaxis()->GetBinCenter(y);
-                phit = simulated_histo->GetZaxis()->GetBinCenter(z);
-                std::vector<double> coords;
-                coords.push_back(thetat);
-                coords.push_back(thetab);
-                coords.push_back(phit);
-                bin = simulated_histo->GetBin(x, y, z);
-                evtgen_value = evtgen_histo->GetBinContent(bin);
-                eff_value = eff_histo->GetBinContent(bin);
-                simulated_histo->SetBinContent(bin, eff_value * evtgen_value * total_efficiency);
-            }
-        }
-    }
-
-    return simulated_histo;
-}
-
 TH3F* Fitter::Create3DHisto(const RooDataSet* dataset) {
     const int num_bins = 50;
-    TH3F* histo =
-        new TH3F("histo", "histo", num_bins, thetat_.getMin(), thetat_.getMax(), num_bins,
-                 thetab_.getMin(), thetab_.getMax(), num_bins, phit_.getMin(), phit_.getMax());
+    TH3F* histo = new TH3F(dataset->GetName(), dataset->GetTitle(), num_bins, thetat_.getMin(),
+                           thetat_.getMax(), num_bins, thetab_.getMin(), thetab_.getMax(), num_bins,
+                           phit_.getMin(), phit_.getMax());
     for (int i = 0; i < dataset->numEntries(); i++) {
         const RooArgSet* row = dataset->get(i);
-        // printf("thetab = %f\n", row->getRealValue("thetab"));
         double thetat = row->getRealValue("thetat");
         double thetab = row->getRealValue("thetab");
         double phit = row->getRealValue("phit");
@@ -1390,29 +905,29 @@ TH3F* Fitter::Create3DHisto(const RooDataSet* dataset) {
     return histo;
 }
 
-TH3F* Fitter::DensityToHisto(AdaptiveKernelDensity pdf, CombinedPhaseSpace phasespace) {
-    TH3F* binned_pdf =
-        new TH3F("binned_pdf", "Binned PDF", 50, phasespace.lowerLimit(0),
-                 phasespace.upperLimit(0), 50, phasespace.lowerLimit(1), phasespace.upperLimit(1),
-                 50, phasespace.lowerLimit(2), phasespace.upperLimit(2));
+TH3F* Fitter::ConvertDensityToHisto(AdaptiveKernelDensity pdf) {
+    const int num_bins = 50;
+    TH3F* pdf_histo =
+        new TH3F("pdf_histo", "pdf_histo", num_bins, thetat_.getMin(), thetat_.getMax(), num_bins,
+                 thetab_.getMin(), thetab_.getMax(), num_bins, phit_.getMin(), phit_.getMax());
 
     double thetat;
     double thetab;
     double phit;
-    for (int x = 1; x <= binned_pdf->GetXaxis()->GetNbins(); x++) {
-        for (int y = 1; y <= binned_pdf->GetYaxis()->GetNbins(); y++) {
-            for (int z = 1; z <= binned_pdf->GetZaxis()->GetNbins(); z++) {
-                thetat = binned_pdf->GetXaxis()->GetBinCenter(x);
-                thetab = binned_pdf->GetYaxis()->GetBinCenter(y);
-                phit = binned_pdf->GetZaxis()->GetBinCenter(z);
+    for (int x = 1; x <= pdf_histo->GetXaxis()->GetNbins(); x++) {
+        for (int y = 1; y <= pdf_histo->GetYaxis()->GetNbins(); y++) {
+            for (int z = 1; z <= pdf_histo->GetZaxis()->GetNbins(); z++) {
+                thetat = pdf_histo->GetXaxis()->GetBinCenter(x);
+                thetab = pdf_histo->GetYaxis()->GetBinCenter(y);
+                phit = pdf_histo->GetZaxis()->GetBinCenter(z);
                 std::vector<double> coords;
                 coords.push_back(thetat);
                 coords.push_back(thetab);
                 coords.push_back(phit);
-                binned_pdf->SetBinContent(binned_pdf->GetBin(x, y, z), pdf.density(coords));
+                pdf_histo->SetBinContent(pdf_histo->GetBin(x, y, z), pdf.density(coords));
             }
         }
     }
 
-    return binned_pdf;
+    return pdf_histo;
 }

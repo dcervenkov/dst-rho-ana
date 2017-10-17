@@ -23,7 +23,7 @@
 
 //ClassImp(DtCPPDF)
 
-DtCPPDF::DtCPPDF(const char *name, const char *title, bool _CKM_favored, bool _perfect_tagging, int _efficiency_model,
+DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_favored, bool _perfect_tagging, int _efficiency_model,
 		RooAbsReal& _tht,
 		RooAbsReal& _thb,
 		RooAbsReal& _phit,
@@ -92,6 +92,7 @@ DtCPPDF::DtCPPDF(const char *name, const char *title, bool _CKM_favored, bool _p
 
 			efficiency_model(_efficiency_model),
 			mixing(true),
+			B_bar(_B_bar),
 			CKM_favored(_CKM_favored),
 			perfect_tagging(_perfect_tagging)
 {
@@ -161,6 +162,7 @@ DtCPPDF::DtCPPDF(const char *name, const char *title,
 			vtistagl("vtistagl","vtistagl",this,_vtistagl),
 
 			mixing(false),
+			B_bar(false),
 			CKM_favored(false),
 			perfect_tagging(false)
 {
@@ -204,6 +206,7 @@ DtCPPDF::DtCPPDF(const DtCPPDF& other, const char* name) :
 
 			efficiency_model(other.efficiency_model),
 			mixing(other.mixing),
+			B_bar(other.B_bar),
 			CKM_favored(other.CKM_favored),
 			perfect_tagging(other.perfect_tagging)
 {
@@ -305,6 +308,14 @@ Double_t DtCPPDF::evaluate() const {
 		Double_t a0ti = a0*at*sin(-a0a+ata);
 		Double_t aptr = ap*at*cos(-apa+ata);
 		Double_t apti = ap*at*sin(-apa+ata);
+
+		// Add pi to at phase for antiparticles
+		if (B_bar) {
+			a0tr = -a0tr;
+			a0ti = -a0ti;
+			aptr = -aptr;
+			apti = -apti;
+		}
 
 		Double_t At2 = 0;
 		Double_t Ap2 = 0;
@@ -521,6 +532,14 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
 		Double_t a0ti = a0*at*sin(-a0a+ata);
 		Double_t aptr = ap*at*cos(-apa+ata);
 		Double_t apti = ap*at*sin(-apa+ata);
+
+		// Add pi to at phase for antiparticles
+		if (B_bar) {
+			a0tr = -a0tr;
+			a0ti = -a0ti;
+			aptr = -aptr;
+			apti = -apti;
+		}
 
 		Double_t At2 = 0;
 		Double_t Ap2 = 0;

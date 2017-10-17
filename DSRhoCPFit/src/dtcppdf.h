@@ -44,7 +44,7 @@ public:
 			RooAbsReal& _vtndf,
 			RooAbsReal& _vtistagl);
 
-	DtCPPDF(const char *name, const char *title, bool CKM_favored, bool perfect_tagging, const int efficiency_model,
+	DtCPPDF(const char *name, const char *title, bool B_bar, bool CKM_favored, bool perfect_tagging, const int efficiency_model,
 			RooAbsReal& _tht,
 			RooAbsReal& _thb,
 			RooAbsReal& _phit,
@@ -128,6 +128,7 @@ protected:
 
 	int efficiency_model;
 	bool mixing;
+	bool B_bar;
 	bool CKM_favored;
 	bool perfect_tagging;
 

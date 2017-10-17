@@ -245,25 +245,25 @@ void FitterCPV::PlotVar(RooRealVar& var, const RooAbsData& data) const {
 // TODO: Remove/refactor
 void FitterCPV::Test() {
     DtCPPDF mixing_pdf_a(
-        "mixing_pdf_a", "mixing_pdf_a", true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        "mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
         *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_ab(
-        "mixing_pdf_ab", "mixing_pdf_ab", true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        "mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
         *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_b(
-        "mixing_pdf_b", "mixing_pdf_b", false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        "mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
         *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_bb(
-        "mixing_pdf_bb", "mixing_pdf_bb", false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        "mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
         *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
@@ -376,25 +376,25 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     RooRealVar ytb("ytb", "ytb", par_input[15], -0.2, 0.2);
 
     DtCPPDF mixing_pdf_a(
-        "mixing_pdf_a", "mixing_pdf_a", true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        "mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
         ap, apa, a0, ata, xp, x0, xt, yp, y0, yt,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_ab(
-        "mixing_pdf_ab", "mixing_pdf_ab", true, perfect_tagging_,  efficiency_model_,*thetat_, *thetab_, *phit_,
+        "mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_,  efficiency_model_,*thetat_, *thetab_, *phit_,
         ap, apa, a0, ata, xpb, x0b, xtb, ypb, y0b, ytb,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_b(
-        "mixing_pdf_b", "mixing_pdf_b", false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        "mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
         ap, apa, a0, ata, xp, x0, xt, yp, y0, yt,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_bb(
-        "mixing_pdf_bb", "mixing_pdf_bb", false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        "mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
         ap, apa, a0, ata, xpb, x0b, xtb, ypb, y0b, ytb,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);

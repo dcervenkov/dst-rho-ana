@@ -698,6 +698,19 @@ void DtCPPDF::CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
                                       double& Ap0r, double& A0ti, double& Apti,
                                       const double& constant, const double& cosine, 
                                       const double& sine) const {
+
+        const bool mc = (expmc == 2) ? 1 : 0;
+		double r = 1 - 2 * wtag;
+		int r_bin = GetRBin(r);
+		double wtag_binned = GetWTag(expno, r_bin, mc);
+		double delta_wtag_binned = GetDeltaWTag(expno, r_bin, mc);
+		double r_binned = 1 - 2 * wtag_binned;
+
+		if (perfect_tagging) {
+			delta_wtag_binned = 0;
+			r_binned = 1;
+        }
+
         Double_t a0a = 0;
         Double_t at = sqrt(1-ap*ap-a0*a0);
 
@@ -718,19 +731,18 @@ void DtCPPDF::CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
 
         double sign = -1 + 2*CKM_favored;
 
-        Ap2 = ap*ap*((1 + xp*xp + yp*yp)*constant + (1 - xp*xp - yp*yp)*sign*cosine + 2*yp*sign*sine);
-        A02 = a0*a0*((1 + x0*x0 + y0*y0)*constant + (1 - x0*x0 - y0*y0)*sign*cosine + 2*y0*sign*sine);
-        At2 = at*at*((1 + xt*xt + yt*yt)*constant + (1 - xt*xt - yt*yt)*sign*cosine + 2*yt*sign*sine);
+		Ap2 = ap*ap*((1 + xp*xp + yp*yp)*constant*(1 - delta_wtag_binned) + ((1 - xp*xp - yp*yp)*sign*cosine + 2*yp*sign*sine)*r_binned);
+		A02 = a0*a0*((1 + x0*x0 + y0*y0)*constant*(1 - delta_wtag_binned) + ((1 - x0*x0 - y0*y0)*sign*cosine + 2*y0*sign*sine)*r_binned);
+		At2 = at*at*((1 + xt*xt + yt*yt)*constant*(1 - delta_wtag_binned) + ((1 - xt*xt - yt*yt)*sign*cosine + 2*yt*sign*sine)*r_binned);
 
-        Ap0r = ap0r*((1 + xp*x0 + yp*y0)*constant + (1 - xp*x0 - yp*y0)*sign*cosine + (yp + y0)*sign*sine) -\
-               ap0i*((x0*yp - xp*y0)*(constant - sign*cosine) + (x0 - xp)*sign*sine);
+		Ap0r = ap0r*((1 + xp*x0 + yp*y0)*constant*(1 - delta_wtag_binned) + (1 - xp*x0 - yp*y0)*sign*cosine*r_binned + (yp + y0)*sign*sine*r_binned) -\
+			   ap0i*((x0*yp - xp*y0)*(constant*(1 - delta_wtag_binned) - sign*cosine*r_binned) + (x0 - xp)*sign*sine*r_binned);
 
-        A0ti = a0ti*((1 + x0*xt + y0*yt)*constant + (1 - x0*xt - y0*yt)*sign*cosine + (y0 + yt)*sign*sine) +\
-               a0tr*((xt*y0 - x0*yt)*(constant - sign*cosine) + (xt - x0)*sign*sine);
+		A0ti = a0ti*((1 + x0*xt + y0*yt)*constant*(1 - delta_wtag_binned) + (1 - x0*xt - y0*yt)*sign*cosine*r_binned + (y0 + yt)*sign*sine*r_binned) +\
+			   a0tr*((xt*y0 - x0*yt)*(constant*(1 - delta_wtag_binned) - sign*cosine*r_binned) + (xt - x0)*sign*sine*r_binned);
 
-        Apti = apti*((1 + xp*xt + yp*yt)*constant + (1 - xp*xt - yp*yt)*sign*cosine + (yp + yt)*sign*sine) +\
-               aptr*((xt*yp - xp*yt)*(constant - sign*cosine) + (xt - xp)*sign*sine);
-
+		Apti = apti*((1 + xp*xt + yp*yt)*constant*(1 - delta_wtag_binned) + (1 - xp*xt - yp*yt)*sign*cosine*r_binned + (yp + yt)*sign*sine*r_binned) +\
+			   aptr*((xt*yp - xp*yt)*(constant*(1 - delta_wtag_binned) - sign*cosine*r_binned) + (xt - xp)*sign*sine*r_binned);
     
 }
     

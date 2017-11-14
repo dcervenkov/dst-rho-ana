@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from ROOT import *
+import ROOT
 import os
 
 histograms = []
@@ -55,12 +55,14 @@ data = []
 #data.append(["data/signal/DSRho-mdst_D0Kpi_svd2_kfitter_baseline.root",1,"kfitter_baseline"])
 #data.append(["data/signal/DSRho-mdst_D0Kpi_svd2_wo_iptube.root",1,"wo_iptube"])
 #data.append(["data/signal/DSRho-mdst_D0Kpi_svd2.root",1,"svd2"])
-data.append(["data/signal/DSRho-mdst_D0Kpi_exa_svd2.root",1,"exa"])
+#data.append(["data/signal/DSRho-mdst_D0Kpi_exa_svd2.root",1,"exa"])
 #data.append(["data/signal/DSRho-mdst_D0Kpi_exa_new_svd2.root",1,"exa_new"])
 
 #data.append(["data/signal/DSRho-mdst_D0Kpi_exa_small_svd1.root",1,"small"])
 #data.append(["data/signal/DSRho-mdst_D0Kpi_exa_woip_small_svd1.root",1,"woip_small"])
 #data.append(["data/signal/DSRho-mdst_D0Kpi_exa_vnew_small_svd1.root",1,"vnew_small"])
+
+data.append(["../data/DSRho-mdst_basf2_mod_real_unmod_1.root",1,"unmod"])
 
 #extra_text = "_signalMC"
 extra_text = ""
@@ -75,21 +77,21 @@ legend_text = ["other", "CR", "bad #rho", "bad D^{0}", "bad D*", "bad D*, D^{0},
 
 min_num_to_print = 200
 
-gROOT.Reset()
-gROOT.ProcessLine(".L include/Colors.h")
-gROOT.ProcessLine("colors::setColors()")
-gROOT.ProcessLine(".L ../DSRhoFit/src/tools.cc")
-gROOT.ProcessLine("tools::SetupPlotStyle()")
-gStyle.SetOptStat(0);
+ROOT.gROOT.Reset()
+ROOT.gROOT.ProcessLine(".L src/colors.cc")
+ROOT.gROOT.ProcessLine("colors::setColors()")
+ROOT.gROOT.ProcessLine(".L src/tools.cc")
+ROOT.gROOT.ProcessLine("tools::SetupPlotStyle()")
+ROOT.gStyle.SetOptStat(0);
 
-output_file = TFile(os.path.join(plot_dir, "plots.root"),"RECREATE")
+output_file = ROOT.TFile(os.path.join(plot_dir, "plots.root"),"RECREATE")
 
-c = TCanvas("c", "c", canvas_width, canvas_height)
+c = ROOT.TCanvas("c", "c", canvas_width, canvas_height)
 c.cd()
 
 for histogram_name, histogram_formula, histogram_cuts, axis_title, logaritmic, min, max in histograms:
     for file_name, hist_num, channel in data:
-        file = TFile(file_name)
+        file = ROOT.TFile(file_name)
         tree = file.Get("h2000")
         c.SetLogy(logaritmic)
 
@@ -110,11 +112,11 @@ for histogram_name, histogram_formula, histogram_cuts, axis_title, logaritmic, m
         if not tree.Draw(histogram_formula, histogram_cuts, to_same):
             print("WARNING: Nothing to print for {} with {} cuts!".format(histogram_formula, histogram_cuts))
             continue
-        histo = gPad.GetPrimitive("htemp")
+        histo = ROOT.gPad.GetPrimitive("htemp")
         if channel == "exa_new":
-            histo.SetLineColor(kRed)
+            histo.SetLineColor(ROOT.kRed)
         else:
-            histo.SetLineColor(kBlack)
+            histo.SetLineColor(ROOT.kBlack)
         histo.SetStats(True)
         histo.GetXaxis().SetTitle(axis_title)
         histo.SetTitle("")

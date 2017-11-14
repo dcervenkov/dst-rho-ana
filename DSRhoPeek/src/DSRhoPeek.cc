@@ -27,8 +27,8 @@
 #include "RooPlot.h"
 
 #include "DSRhoPeek.h"
-#include "Constants.h"
-#include "Colors.h"
+#include "constants.h"
+#include "colors.h"
 
 //#define GRAPHIC
 

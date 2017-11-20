@@ -152,7 +152,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit\n");
                 printf("-h, --help                       display this text and exit\n");
                 printf("-m, --mixing                     make a mixing fit\n");
-                printf("-t, --perfecttag                 use MC info to get perfect tagging\n");
+                printf("-t, --perfect-tag                 use MC info to get perfect tagging\n");
                 printf("-p, --plot=PLOT_DIR              create lifetime/mixing plots\n");
                 exit(0);
                 break;

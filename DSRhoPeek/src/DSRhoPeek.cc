@@ -190,6 +190,7 @@ unsigned int getHistogramFromTree(TH1F* histogram, TTree* tree, const char* bran
 		}
 		// If branch == xBranch the first SetAddress is overridden by the second
 		if (branch == candidateBranch) datapoint = eventCandidate;
+		else if (branch == MCFlagBranch) datapoint = mcflag;
 		else branch->GetEntry(i);
 
 		histogram->Fill(datapoint);

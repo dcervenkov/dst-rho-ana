@@ -63,20 +63,28 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
     canvas = ROOT.TCanvas("canvas", "canvas", canvas_width, canvas_height)
     canvas.cd()
 
+    # 2D plots must have a larger margin to accomodate z legend
+    if ':' in plot_data['formula']:
+        canvas.SetRightMargin(0.14)
+
     for i, element in enumerate(plot_data['elements']):
         # First element in a plot must be drawn without "same" or all
         # the plots would get piled together
-        same_opt = "same"
+        same_opt = "same colz"
         if i == 0:
-            same_opt = ""
+            same_opt = "colz"
 
         draw_element(tree, element, plot_data, same_opt)
 
+    # 2D plots don't need legends as there is only a single element and it
+    # would look bad
+    if ':' not in plot_data['formula']:
+        change_line_colors(plot_data)
+        legend = create_legend(plot_data)
+        legend.Draw()
+
     histo = ROOT.gPad.GetPrimitive("htemp")
-    change_line_colors(plot_data)
     set_histogram_titles(histo, plot_data)
-    legend = create_legend(plot_data)
-    legend.Draw()
 
     output_file.cd()
     histo.Write()

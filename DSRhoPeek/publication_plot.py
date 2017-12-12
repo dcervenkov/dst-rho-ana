@@ -43,68 +43,94 @@ def make_publication_plots(json_file, image_format, plot_dir):
         plots_data = json.loads(f.read())['plots']
 
         setup_plot_style()
-        canvas_width = 500
-        canvas_height = 500
 
         output_file = ROOT.TFile(os.path.join(
             plot_dir, "plots.root"), "RECREATE")
-        canvas = ROOT.TCanvas("canvas", "canvas", canvas_width, canvas_height)
-        canvas.cd()
 
         for plot_data in plots_data:
-            root_file = ROOT.TFile(plot_data['file'])
-            tree = root_file.Get(plot_data['treeName'])
-
-            for i, element in enumerate(plot_data['elements']):
-                # First element in a plot must be drawn without "same" or all
-                # the plots would get piled together
-                same_opt = "same"
-                if i == 0:
-                    same_opt = ""
-
-                if 'cut' in element:
-                    cut = element['cut']
-                else:
-                    # A dummy cut so we can always use && when adding something
-                    cut = "1==1"
-
-                if 'min' in plot_data:
-                    cut += '&&' + plot_data['formula'] + \
-                        '>' + str(plot_data['min'])
-                if 'max' in plot_data:
-                    cut += '&&' + plot_data['formula'] + \
-                        '<' + str(plot_data['max'])
-
-                # If this element has it's own 'file' key defined, it
-                # superseeds the plot's 'file'
-                if 'file' in element:
-                    root_file_temp = ROOT.TFile(element['file'])
-                    tree_temp = root_file_temp.Get(plot_data['treeName'])
-                    tree_temp.Draw(plot_data['formula'], cut, same_opt)
-                else:
-                    tree.Draw(plot_data['formula'], cut, same_opt)
-
-            # Color changes must be done after Draw() because of ROOT
-            for i in range(len(plot_data['elements'])):
-                ROOT.gPad.GetListOfPrimitives().At(i).SetLineColor(
-                    plot_data['elements'][i]['color'])
-
-            histo = ROOT.gPad.GetPrimitive("htemp")
-            histo.SetName(plot_data['fileName'])
-            histo.GetXaxis().SetTitle(plot_data['xAxisTitle'])
-            histo.SetTitle("")
-
-            legend = create_legend(plot_data)
-            legend.Draw()
-
-            output_file.cd()
-            histo.Write()
-            canvas.SetTickx()
-            canvas.SetTicky()
-            canvas.SaveAs(
-                os.path.join(plot_dir, plot_data['fileName'] + image_format))
+            make_plot(plot_data, image_format, plot_dir, output_file)
 
         output_file.Close()
+
+
+def make_plot(plot_data, image_format, plot_dir, output_file):
+    """Make a single plot, save it as a file and into the ROOT output file"""
+    root_file = ROOT.TFile(plot_data['file'])
+    tree = root_file.Get(plot_data['treeName'])
+
+    canvas_width = 500
+    canvas_height = 500
+    canvas = ROOT.TCanvas("canvas", "canvas", canvas_width, canvas_height)
+    canvas.cd()
+
+    for i, element in enumerate(plot_data['elements']):
+        # First element in a plot must be drawn without "same" or all
+        # the plots would get piled together
+        same_opt = "same"
+        if i == 0:
+            same_opt = ""
+
+        draw_element(tree, element, plot_data, same_opt)
+
+    histo = ROOT.gPad.GetPrimitive("htemp")
+    change_line_colors(plot_data)
+    set_histogram_titles(histo, plot_data)
+    legend = create_legend(plot_data)
+    legend.Draw()
+
+    output_file.cd()
+    histo.Write()
+    canvas.SetTickx()
+    canvas.SetTicky()
+    canvas.SaveAs(os.path.join(plot_dir, plot_data['fileName'] + image_format))
+    canvas.IsA().Destructor(canvas)
+
+
+def change_line_colors(plot_data):
+    """Change line colors in a plot according to plot_data info"""
+    # Color changes must be done after Draw() because of ROOT
+    num_histos_found = 0
+    for i in range(ROOT.gPad.GetListOfPrimitives().GetEntries()):
+        # There are other things than histos in the list
+        if ROOT.gPad.GetListOfPrimitives().At(i).GetName() == 'htemp':
+            ROOT.gPad.GetListOfPrimitives().At(i).SetLineColor(
+                plot_data['elements'][num_histos_found]['color'])
+            num_histos_found += 1
+
+
+def set_histogram_titles(histo, plot_data):
+    """Set various titles in the histogram according to plot_data"""
+    histo.SetName(plot_data['fileName'])
+    histo.SetTitle("")
+    if 'xAxisTitle' in plot_data:
+        histo.GetXaxis().SetTitle(plot_data['xAxisTitle'])
+    if 'yAxisTitle' in plot_data:
+        histo.GetYaxis().SetTitle(plot_data['yAxisTitle'])
+
+
+def draw_element(tree, element, plot_data, same_opt):
+    """Draw a single element of a plot, e.g., a histogram"""
+    if 'cut' in element:
+        cut = element['cut']
+    else:
+        # A dummy cut so we can always use && when adding something
+        cut = "1==1"
+
+    if 'min' in plot_data:
+        cut += '&&' + plot_data['formula'] + \
+            '>' + str(plot_data['min'])
+    if 'max' in plot_data:
+        cut += '&&' + plot_data['formula'] + \
+            '<' + str(plot_data['max'])
+
+    # If this element has it's own 'file' key defined, it
+    # superseeds the plot's 'file'
+    if 'file' in element:
+        root_file_temp = ROOT.TFile(element['file'])
+        tree_temp = root_file_temp.Get(plot_data['treeName'])
+        tree_temp.Draw(plot_data['formula'], cut, same_opt)
+    else:
+        tree.Draw(plot_data['formula'], cut, same_opt)
 
 
 def decode_arguments():

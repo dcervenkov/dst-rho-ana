@@ -46,8 +46,9 @@ data
 */results*/*
 */doc/html/*
 *.db
-DSRhoPeek/svd*/*
 DSRho/Makefile
+DSRhoEfficiency/efficiency*
+DSRhoPeek/svd*/*
 DSRhoSkim/Makefile
 panther2TTree/Makefile
 printTree/Makefile

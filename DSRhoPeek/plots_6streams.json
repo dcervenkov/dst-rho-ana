@@ -22,25 +22,25 @@
             {
                 "label": "mixed", 
                 "color": 5,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-mixed.root"
             },
             {
                 "label": "charged", 
                 "color": 3,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charged.root"
             },
             {
                 "label": "charm", 
                 "color": 9,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charm.root"
             },
             {
                 "label": "uds", 
                 "color": 8,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-uds.root"
             }
         ]
@@ -67,25 +67,25 @@
             {
                 "label": "mixed", 
                 "color": 5,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-mixed.root"
             },
             {
                 "label": "charged", 
                 "color": 3,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charged.root"
             },
             {
                 "label": "charm", 
                 "color": 9,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charm.root"
             },
             {
                 "label": "uds", 
                 "color": 8,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-uds.root"
             }
         ]
@@ -112,25 +112,25 @@
             {
                 "label": "mixed", 
                 "color": 5,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-mixed.root"
             },
             {
                 "label": "charged", 
                 "color": 3,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charged.root"
             },
             {
                 "label": "charm", 
                 "color": 9,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charm.root"
             },
             {
                 "label": "uds", 
                 "color": 8,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-uds.root"
             }
         ]
@@ -202,25 +202,25 @@
             {
                 "label": "mixed", 
                 "color": 5,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-mixed.root"
             },
             {
                 "label": "charged", 
                 "color": 3,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charged.root"
             },
             {
                 "label": "charm", 
                 "color": 9,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charm.root"
             },
             {
                 "label": "uds", 
                 "color": 8,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-uds.root"
             }
         ]
@@ -247,25 +247,25 @@
             {
                 "label": "mixed", 
                 "color": 5,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-mixed.root"
             },
             {
                 "label": "charged", 
                 "color": 3,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charged.root"
             },
             {
                 "label": "charm", 
                 "color": 9,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charm.root"
             },
             {
                 "label": "uds", 
                 "color": 8,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-uds.root"
             }
         ]
@@ -292,25 +292,25 @@
             {
                 "label": "mixed", 
                 "color": 5,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-mixed.root"
             },
             {
                 "label": "charged", 
                 "color": 3,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charged.root"
             },
             {
                 "label": "charm", 
                 "color": 9,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-charm.root"
             },
             {
                 "label": "uds", 
                 "color": 8,
-                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
+                "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                 "file": "../data/Kpi/mc/all_streams/DSRhoSkim_svd2_on_resonance_evtgen-uds.root"
             }
         ]

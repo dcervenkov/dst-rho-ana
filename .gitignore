@@ -55,6 +55,7 @@ printTree/Makefile
 
 # Executable files
 DSRhoCPFit/DSRhoCPFit
+DSRhoBackground/DSRhoBackground
 DSRhoEfficiency/DSRhoEfficiency
 DSRhoFit/DSRhoFit
 DSRhoLifetime/DSRhoLifetime

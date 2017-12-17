@@ -108,37 +108,32 @@ class FitterBKG {
     TFile* output_file_ = NULL;
 
     // Self-cross-feed phit model
-    RooRealVar scf_phit_poly_p2_{"scf_phit_poly_p2", "p_{2}", 0.4, -0.1, 2};
-    RooRealVar scf_phit_f_{"scf_phit_f", "f_{poly}", 0.25, 0.1, 0.9};
+    RooRealVar scf_phit_poly_p2_{"scf_phit_poly_p2", "p_{2}", 0.856, -0.1, 2};
+    RooRealVar scf_phit_f_{"scf_phit_f", "f_{poly}", 0.147, 0.1, 0.9};
     RooPolynomial scf_phit_poly_{"scf_phit_poly", "scf_phit_poly", phit_, scf_phit_poly_p2_, 2};
-    RooRealVar scf_phit_offset_{"scf_phit_offset", "#phi_{t}^{offset}", 0, -0.1, 0.1};
+    RooRealVar scf_phit_offset_{"scf_phit_offset", "#phi_{t}^{offset}", 0.056, -0.1, 0.1};
     RooFormulaVar scf_phit_phit_{"scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
                                  RooArgList(phit_, scf_phit_offset_)};
     RooGenericPdf scf_phit_cos_{"scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2",
                                 RooArgList(scf_phit_phit_)};
 
     // Self-cross-feed thetat model
-    RooRealVar scf_thetat_f_{"scf_thetat_f", "#theta_{t}^{w}", 0, -0.1, 0.1};
+    RooRealVar scf_thetat_f_{"scf_thetat_f", "#theta_{t}^{w}", -0.051, -0.1, 0.1};
     RooFormulaVar scf_thetat_thetat_{"scf_thetat_thetat", "scf_thetat_thetat",
                                      "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
                                      RooArgList(thetat_, scf_thetat_f_)};
 
     // Self-cross-feed thetab model
-    // RooRealVar scf_thetab_poly_p1_{"scf_thetab_poly_p1", "p_{1}", 0.4, -10, 10};
-    // RooRealVar scf_thetab_poly_p2_{"scf_thetab_poly_p2", "p_{2}", 0.4, -10, 10};
-    // RooRealVar scf_thetab_poly_p3_{"scf_thetab_poly_p3", "p_{3}", 0.4, -10, 10};
-    // RooRealVar scf_thetab_poly_p4_{"scf_thetab_poly_p4", "p_{4}", 0.4, -10, 10};
-    // RooRealVar scf_thetab_poly_p5_{"scf_thetab_poly_p5", "p_{5}", 0.4, -10, 10};
-    RooRealVar scf_thetab_gaus_mu_{"scf_thetab_gaus_mu", "#mu", 2.7, 1.5, 3};
-    RooRealVar scf_thetab_gaus_sigma_l_{"scf_thetab_gaus_sigma_l", "#sigma_{L}", 1, 0, 3};
-    RooRealVar scf_thetab_gaus_sigma_r_{"scf_thetab_gaus_sigma_r", "#sigma_{R}", 1, 0, 3};
+    RooRealVar scf_thetab_gaus_mu_{"scf_thetab_gaus_mu", "#mu", 2.885, 1.5, 3};
+    RooRealVar scf_thetab_gaus_sigma_l_{"scf_thetab_gaus_sigma_l", "#sigma_{L}", 0.411, 0, 3};
+    RooRealVar scf_thetab_gaus_sigma_r_{"scf_thetab_gaus_sigma_r", "#sigma_{R}", 0.094, 0, 3};
     RooBifurGauss scf_thetab_gaus_{
         "scf_thetab_gaus",  "scf_thetab_gaus",       thetab_,
         scf_thetab_gaus_mu_, scf_thetab_gaus_sigma_l_, scf_thetab_gaus_sigma_r_};
-    RooRealVar scf_thetab_exp_alpha_{"scf_thetab_exp_alpha", "#alpha", -1, -10, 0.0};
+    RooRealVar scf_thetab_exp_alpha_{"scf_thetab_exp_alpha", "#alpha", -4.63, -10, 0.0};
     RooExponential scf_thetab_exp_{"scf_thetab_exp", "scf_thetab_exp", thetab_,
                                    scf_thetab_exp_alpha_};
-    RooRealVar scf_thetab_f_{"scf_thetab_f", "f_{exp}", 0.5, 0, 1};
+    RooRealVar scf_thetab_f_{"scf_thetab_f", "f_{exp}", 0.625, 0, 1};
 
    public:
     RooAddPdf scf_phit_model_{"scf_phit_model", "scf_phit_model",
@@ -146,11 +141,6 @@ class FitterBKG {
 
     RooGenericPdf scf_thetat_model_{"scf_thetat_model", "scf_thetat_model",
                                     "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat_)};
-
-    // RooChebychev scf_thetab_model_{
-    //     "scf_thetab_model", "scf_thetab_model", thetab_,
-    //     RooArgList(scf_thetab_poly_p1_, scf_thetab_poly_p2_, scf_thetab_poly_p3_,
-    //                scf_thetab_poly_p4_, scf_thetab_poly_p5_)};
 
     RooAddPdf scf_thetab_model_{"scf_thetab_model", "scf_thetab_model",
                               RooArgList(scf_thetab_exp_, scf_thetab_gaus_), RooArgList(scf_thetab_f_)};

@@ -45,5 +45,8 @@ int main(int argc, char* argv[]) {
     fitter.Fit(&fitter.scf_thetat_model_, fitter.dataset_);
     fitter.PlotWithPull(fitter.thetat_, fitter.dataset_, &fitter.scf_thetat_model_);
 
+    fitter.Fit(&fitter.scf_thetab_model_, fitter.dataset_);
+    fitter.PlotWithPull(fitter.thetab_, fitter.dataset_, &fitter.scf_thetab_model_);
+
     return 0;
 }

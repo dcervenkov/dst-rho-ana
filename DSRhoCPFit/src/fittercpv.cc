@@ -55,21 +55,21 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     at_ = new RooFormulaVar("at", "sqrt(1-ap*ap-a0*a0)", RooArgSet(*ap_, *a0_));
     ata_ = new RooRealVar("ata", "ata", par_input[3], 2, 4);
 
-    xp_ = new RooRealVar("xp", "xp", par_input[4], -0.2, 0.2);
-    x0_ = new RooRealVar("x0", "x0", par_input[5], -0.2, 0.2);
-    xt_ = new RooRealVar("xt", "xt", par_input[6], -0.2, 0.2);
+    xp_ = new RooRealVar("xp", "xp", par_input[4], -0.4, 0.4);
+    x0_ = new RooRealVar("x0", "x0", par_input[5], -0.4, 0.4);
+    xt_ = new RooRealVar("xt", "xt", par_input[6], -0.4, 0.4);
 
-    yp_ = new RooRealVar("yp", "yp", par_input[7], -0.2, 0.2);
-    y0_ = new RooRealVar("y0", "y0", par_input[8], -0.2, 0.2);
-    yt_ = new RooRealVar("yt", "yt", par_input[9], -0.2, 0.2);
+    yp_ = new RooRealVar("yp", "yp", par_input[7], -0.4, 0.4);
+    y0_ = new RooRealVar("y0", "y0", par_input[8], -0.4, 0.4);
+    yt_ = new RooRealVar("yt", "yt", par_input[9], -0.4, 0.4);
 
-    xpb_ = new RooRealVar("xpb", "xpb", par_input[10], -0.2, 0.2);
-    x0b_ = new RooRealVar("x0b", "x0b", par_input[11], -0.2, 0.2);
-    xtb_ = new RooRealVar("xtb", "xtb", par_input[12], -0.2, 0.2);
+    xpb_ = new RooRealVar("xpb", "xpb", par_input[10], -0.4, 0.4);
+    x0b_ = new RooRealVar("x0b", "x0b", par_input[11], -0.4, 0.4);
+    xtb_ = new RooRealVar("xtb", "xtb", par_input[12], -0.4, 0.4);
 
-    ypb_ = new RooRealVar("ypb", "ypb", par_input[13], -0.2, 0.2);
-    y0b_ = new RooRealVar("y0b", "y0b", par_input[14], -0.2, 0.2);
-    ytb_ = new RooRealVar("ytb", "ytb", par_input[15], -0.2, 0.2);
+    ypb_ = new RooRealVar("ypb", "ypb", par_input[13], -0.4, 0.4);
+    y0b_ = new RooRealVar("y0b", "y0b", par_input[14], -0.4, 0.4);
+    ytb_ = new RooRealVar("ytb", "ytb", par_input[15], -0.4, 0.4);
 
     thetat_ = new RooRealVar("thetat", "thetat", 0, constants::pi);
     thetab_ = new RooRealVar("thetab", "thetab", 0, constants::pi);

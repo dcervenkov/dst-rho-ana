@@ -10,8 +10,6 @@
 #include "dsrhobackground.h"
 
 // Standard includes
-#include <array>
-#include <getopt.h>
 #include <stdio.h>
 
 // Local includes
@@ -21,10 +19,6 @@
 #include "tools.h"
 
 int main(int argc, char* argv[]) {
-    // The {} causes the struct's members to be initialized to 0. Without it
-    // they would have unspecified values
-    fitter_options options = {};
-
     if (argc != 3) {
         printf("ERROR: Wrong number of arguments.\n");
         printf(
@@ -43,7 +37,9 @@ int main(int argc, char* argv[]) {
 
     FitterBKG fitter;
     fitter.ReadInFile(file_path);
-    fitter.PlotVar(*(fitter.phit_));
+    fitter.SetPlotDir(results_path);
+    fitter.Fit(&fitter.scf_phit_model_, fitter.dataset_);
+    fitter.PlotWithPull(fitter.phit_, fitter.dataset_, &fitter.scf_phit_model_);
 
     return 0;
 }

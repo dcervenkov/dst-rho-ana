@@ -15,23 +15,15 @@
 #include <sstream>
 #include <string>
 
-// Belle includes
-#include "tatami/tatami.h"
-
 // ROOT includes
 #include "RooArgSet.h"
 #include "RooCategory.h"
-#include "RooDataHist.h"
 #include "RooDataSet.h"
-#include "RooExtendPdf.h"
 #include "RooFitResult.h"
 #include "RooGenericPdf.h"
 #include "RooHist.h"
-#include "RooHistPdf.h"
 #include "RooPlot.h"
-#include "RooRandom.h"
 #include "RooRealVar.h"
-#include "RooSimultaneous.h"
 #include "RooTreeDataStore.h"
 #include "TAxis.h"
 #include "TCanvas.h"
@@ -47,10 +39,6 @@
 #include "constants.h"
 
 FitterBKG::FitterBKG() {
-    thetat_ = new RooRealVar("thetat", "thetat", 0, constants::pi);
-    thetab_ = new RooRealVar("thetab", "thetab", 0, constants::pi);
-    phit_ = new RooRealVar("phit", "phit", -constants::pi, constants::pi);
-
     vrusable_ = new RooRealVar("vrusable", "vrusable", 0, 1);
     vrvtxz_ = new RooRealVar("vrvtxz", "vrvtxz", -10, 10);
     vrerr6_ = new RooRealVar("vrerr6", "vrerr6", -1, 1);
@@ -133,9 +121,9 @@ FitterBKG::FitterBKG() {
     conditional_vars_.push_back(&vtistagl_);
 
     dataset_vars_ = conditional_vars_;
-    dataset_vars_.push_back(&thetat_);
-    dataset_vars_.push_back(&thetab_);
-    dataset_vars_.push_back(&phit_);
+    // dataset_vars_.push_back(&thetat_);
+    // dataset_vars_.push_back(&thetab_);
+    // dataset_vars_.push_back(&phit_);
 
     // The variables present in the ntuple are added to an RooArgSet that will be needed
     // when we create a RooDataSet from the input_tree
@@ -147,6 +135,9 @@ FitterBKG::FitterBKG() {
     for (auto var : dataset_vars_) {
         dataset_vars_argset_.add(**var);
     }
+    dataset_vars_argset_.add(thetat_);
+    dataset_vars_argset_.add(thetab_);
+    dataset_vars_argset_.add(phit_);
 
 }
 
@@ -157,16 +148,16 @@ FitterBKG::~FitterBKG() {
  * Make a simple plot of a variable and save it to a file
  * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
  */
-void FitterBKG::PlotVar(RooRealVar& var) const {
+void FitterBKG::PlotVar(RooRealVar& var, const RooDataSet* data) const {
     TCanvas* canvas = new TCanvas(var.GetName(), var.GetTitle(), 500, 500);
 
     double range_min;
     double range_max;
-    dataset_->getRange(var, range_min, range_max, 0.05);
+    data->getRange(var, range_min, range_max, 0.05);
 
     RooPlot* plot = var.frame(range_min, range_max);
 
-    dataset_->plotOn(plot);
+    data->plotOn(plot);
     plot->Draw();
 
     plot->SetTitle("");
@@ -186,9 +177,9 @@ void FitterBKG::PlotVar(RooRealVar& var) const {
  * @param pdf PDF to use for plotting and pull calculation
  * @param title [optional] Title for the y-axis
  */
-void FitterBKG::PlotWithPull(const RooRealVar& var, const RooAbsData& data, const RooAbsPdf& pdf,
+void FitterBKG::PlotWithPull(const RooRealVar& var, const RooDataSet* data, const RooAbsPdf* pdf,
                              const char* title) const {
-    TString name = pdf.GetName();
+    TString name = pdf->GetName();
     name += "_";
     name += var.GetName();
     TCanvas canvas(name, name, 500, 500);
@@ -205,8 +196,8 @@ void FitterBKG::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
     pad_var->SetBottomMargin(0.0);
     pad_var->SetLeftMargin(0.12);
 
-    data.plotOn(plot);
-    pdf.plotOn(plot);
+    data->plotOn(plot);
+    pdf->plotOn(plot);
 
     plot->GetXaxis()->SetTitle("");
     plot->GetXaxis()->SetLabelSize(0);
@@ -322,7 +313,7 @@ TPaveText* FitterBKG::CreateStatBox(const double chi2, const bool position_top,
  * Construct and return a cut string common for all for categories
  */
 TString FitterBKG::GetCommonCutsString() const {
-    TString common_cuts("evmcflag==1&&vrusable==1&&vtusable==1&&");
+    TString common_cuts("evmcflag!=1&&vrusable==1&&vtusable==1&&");
     common_cuts += "((vrchi2/vrndf)<";
     common_cuts += constants::cuts::sig_vtx_h;
     common_cuts += "||vrntrk==1)&&";
@@ -375,7 +366,7 @@ void FitterBKG::ReadInFile(const char* file_path, const int& num_events) {
     // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
     // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
     RooDataSet* temp_dataset =
-        new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_); // TODO:, common_cuts);
+        new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_, common_cuts);
 
     //  separate conditional vars from stuff like thetat
 
@@ -435,4 +426,13 @@ void FitterBKG::SetPlotDir(const char* plot_dir) {
     gEnv->SetValue("Canvas.PrintDirectory", plot_dir);
     printf("print dir: %s\n", gEnv->GetValue("Canvas.PrintDirectory", "not found"));
     output_file_ = new TFile(TString(plot_dir) + "/plots.root", "RECREATE");
+}
+
+/**
+ * Fit a given PDF to a given dataset
+ * 
+ * All the variables are already defined in the PDF.
+ */
+void FitterBKG::Fit(RooAbsPdf* pdf, RooDataSet* data) {
+    result_ = pdf->fitTo(*data, RooFit::Save());
 }

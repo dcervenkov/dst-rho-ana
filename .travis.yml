@@ -69,6 +69,7 @@ script:
 
   - source activate root6env
   - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit && make
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoBackground && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoEfficiency && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoFit && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoLifetime && make

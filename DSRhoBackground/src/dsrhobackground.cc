@@ -38,8 +38,12 @@ int main(int argc, char* argv[]) {
     FitterBKG fitter;
     fitter.ReadInFile(file_path);
     fitter.SetPlotDir(results_path);
+
     fitter.Fit(&fitter.scf_phit_model_, fitter.dataset_);
     fitter.PlotWithPull(fitter.phit_, fitter.dataset_, &fitter.scf_phit_model_);
+
+    fitter.Fit(&fitter.scf_thetat_model_, fitter.dataset_);
+    fitter.PlotWithPull(fitter.thetat_, fitter.dataset_, &fitter.scf_thetat_model_);
 
     return 0;
 }

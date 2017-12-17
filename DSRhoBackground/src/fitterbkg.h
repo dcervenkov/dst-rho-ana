@@ -15,7 +15,9 @@
 
 // ROOT includes
 #include "RooAddPdf.h"
+#include "RooChebychev.h"
 #include "RooFormulaVar.h"
+#include "RooGaussian.h"
 #include "RooGenericPdf.h"
 #include "RooPolynomial.h"
 #include "RooRealVar.h"
@@ -108,12 +110,28 @@ class FitterBKG {
     RooRealVar scf_phit_f_{"scf_phit_f", "f_{poly}", 0.25, 0.1, 0.9};
     RooPolynomial scf_phit_poly_{"scf_phit_poly", "scf_phit_poly", phit_, scf_phit_poly_p2_, 2};
     RooRealVar scf_phit_offset_{"scf_phit_offset", "#phi_{t}^{offset}", 0, -0.1, 0.1};
-    RooFormulaVar scf_phit_phit_{"scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset", RooArgList(phit_, scf_phit_offset_)};
-    RooGenericPdf scf_phit_cos_{"scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2", RooArgList(scf_phit_phit_)};
+    RooFormulaVar scf_phit_phit_{"scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
+                                 RooArgList(phit_, scf_phit_offset_)};
+    RooGenericPdf scf_phit_cos_{"scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2",
+                                RooArgList(scf_phit_phit_)};
+
+    // Self-cross-feed thetat model
+    RooRealVar scf_thetat_poly_p1_{"scf_thetat_poly_p1", "p_{1}", 0.4, -10, 10};
+    RooRealVar scf_thetat_poly_p2_{"scf_thetat_poly_p2", "p_{2}", 0.4, -10, 10};
+    RooRealVar scf_thetat_poly_p3_{"scf_thetat_poly_p3", "p_{3}", 0.4, -10, 10};
+    RooRealVar scf_thetat_poly_p4_{"scf_thetat_poly_p4", "p_{4}", 0.4, -10, 10};
+
+    RooRealVar scf_thetat_f_{"scf_thetat_f", "#theta_{t}^{w}", 0, -0.1, 0.1};
+    RooFormulaVar scf_thetat_thetat_{"scf_thetat_thetat", "scf_thetat_thetat",
+                                     "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
+                                     RooArgList(thetat_, scf_thetat_f_)};
 
    public:
     RooAddPdf scf_phit_model_{"scf_phit_model", "scf_phit_model",
                               RooArgList(scf_phit_poly_, scf_phit_cos_), RooArgList(scf_phit_f_)};
+
+    RooGenericPdf scf_thetat_model_{"scf_thetat_model", "scf_thetat_model",
+                                    "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat_)};
 };
 
 #endif /* FITTERBKG_H_ */

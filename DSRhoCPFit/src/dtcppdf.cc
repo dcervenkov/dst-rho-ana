@@ -229,12 +229,6 @@ Double_t DtCPPDF::evaluate() const {
     double pdf_sin = 0;
     double pdf_cos = 0;
 
-//  double norm = 0;
-//  double nnorm = 0;
-//  double norm_const = 0;
-//  double norm_sin = 0;
-//  double norm_cos = 0;
-
     if (mixing) {
         // AfRkRdetRnp_fullrec and MfRkRdetRnp_fullrec are supposedly (Sumisawa BAS 2010)
         // not normalized, hence the 0.5/tau factors
@@ -253,51 +247,6 @@ Double_t DtCPPDF::evaluate() const {
                 vrntrk, vrzerr, vrchi2, vrndf,
                 vtntrk, vtzerr, vtchi2, vtndf,
                 vtistagl, dtres_param ) * 0.5/tau;
-
-//      norm_const = norm_EfRkRdetRnp_fullrec(constants::cut_dt_low, constants::cut_dt_high, constants::btype,
-//              tau, ak, ck,
-//              vrntrk, vrzerr, vrchi2, vrndf,
-//              vtntrk, vtzerr, vtchi2, vtndf,
-//              vtistagl, dtres_param );
-//      norm_sin = norm_AfRkRdetRnp_fullrec(constants::cut_dt_low, constants::cut_dt_high, constants::btype,
-//              tau, dm, ak, ck,
-//              vrntrk, vrzerr, vrchi2, vrndf,
-//              vtntrk, vtzerr, vtchi2, vtndf,
-//              vtistagl, dtres_param ) * 0.5/tau;
-//      norm_cos = norm_MfRkRdetRnp_fullrec(constants::cut_dt_low, constants::cut_dt_high, constants::btype,
-//              tau, dm, ak, ck,
-//              vrntrk, vrzerr, vrchi2, vrndf,
-//              vtntrk, vtzerr, vtchi2, vtndf,
-//              vtistagl, dtres_param ) * 0.5/tau;
-
-//      double alpha = 1;
-
-//      pdf_const = Belle::AddOutlierWithBkg((int) expno, dt, 1, pdf_const, pdf_const, (int) vrntrk, (int) vtntrk, dtres_param,
-//              norm_const / alpha, norm_const / alpha, constants::cut_dt_low, constants::cut_dt_high, alpha, 1);
-//
-//      pdf_sin = Belle::AddOutlierWithBkg((int) expno, dt, 1, pdf_sin, pdf_sin, (int) vrntrk, (int) vtntrk, dtres_param,
-//              norm_sin / alpha, norm_sin / alpha, constants::cut_dt_low, constants::cut_dt_high, alpha, 1);
-//
-//      pdf_cos = Belle::AddOutlierWithBkg((int) expno, dt, 1, pdf_cos, pdf_cos, (int) vrntrk, (int) vtntrk, dtres_param,
-//              norm_cos / alpha, norm_cos / alpha, constants::cut_dt_low, constants::cut_dt_high, alpha, 1);
-
-//      double r = 1 - 2 * wtag;
-//      int r_bin = GetRBin(r);
-//      double wtag_binned = GetWTag(expno, r_bin, mc);
-//      double delta_wtag_binned = GetDeltaWTag(expno, r_bin, mc);
-//      double r_binned = 1 - 2 * wtag_binned;
-//
-//      if (perfect_tagging) {
-//          delta_wtag_binned = 0;
-//          r_binned = 1;
-//      }
-
-//      pdf = pdf_const * (1 + sign * delta_wtag_binned) - sign * r_binned * (S * pdf_sin + A * pdf_cos);
-//      norm = norm_const * (1 + sign * delta_wtag_binned) - sign * r_binned * (S * norm_sin + A * norm_cos);
-
-
-////////////////////////////////////////////////////////////////
-
 
         Double_t At2 = 0;
         Double_t Ap2 = 0;
@@ -319,44 +268,10 @@ Double_t DtCPPDF::evaluate() const {
 
         pdf = value * eff.GetEfficiency(tht, thb, phit, efficiency_model);
 
-//      printf("DBG: value = %f, pdf = %f\n", value, pdf);
-
 //      double A = ap*ap*(1 - xp*xp - yp*yp) + a0*a0*(1 - x0*x0 - y0*y0) + at*at*(1 - xt*xt - yt*yt);
 //      double S = ap*ap*2*yp + a0*a0*2*y0 + at*at*2*yt;
 //
-//      printf("ap  = %f\n"
-//              "apa = %f\n"
-//              "a0  = %f\n"
-//              "a0a = %f\n"
-//              "at  = %f\n"
-//              "ata = %f\n"
-//              "xp  = %f\n"
-//              "x0  = %f\n"
-//              "xt  = %f\n"
-//              "yp  = %f\n"
-//              "y0  = %f\n"
-//              "yt  = %f\n",
-//              (double) ap,
-//              (double) apa,
-//              (double) a0,
-//              (double) a0a,
-//              (double) at,
-//              (double) ata,
-//              (double) xp,
-//              (double) x0,
-//              (double) xt,
-//              (double) yp,
-//              (double) y0,
-//              (double) yt);
-//
 //      printf("\nA = %f\nS = %f\n\n", A, S);
-
-//      double nAp2 = ap*ap*((1 + xp*xp + yp*yp)*norm_const + (1 - xp*xp - yp*yp)*sign*norm_cos + 2*yp*sign*norm_sin);
-//      double nA02 = a0*a0*((1 + x0*x0 + y0*y0)*norm_const + (1 - x0*x0 - y0*y0)*sign*norm_cos + 2*y0*sign*norm_sin);
-//      double nAt2 = at*at*((1 + xt*xt + yt*yt)*norm_const + (1 - xt*xt - yt*yt)*sign*norm_cos + 2*yt*sign*norm_sin);
-
-//      norm = 64.0 * constants::kPi/9 * (Ap2 + A02 + At2);
-//      nnorm = 64.0 * constants::kPi/9 * (nAp2 + nA02 + nAt2);
 
     } else {
         pdf = EfRkRdetRnp_fullrec( dt, constants::btype,
@@ -364,14 +279,7 @@ Double_t DtCPPDF::evaluate() const {
                 vrntrk, vrzerr, vrchi2, vrndf,
                 vtntrk, vtzerr, vtchi2, vtndf,
                 vtistagl, dtres_param );
-
-//      norm = norm_EfRkRdetRnp_fullrec(constants::cut_dt_low, constants::cut_dt_high, constants::btype,
-//                  tau, ak, ck,
-//                  vrntrk, vrzerr, vrchi2, vrndf,
-//                  vtntrk, vtzerr, vtchi2, vtndf,
-//                  vtistagl, dtres_param );
     }
-
 
     // This is extremely dumb, as I calculate the normalization, normalize
     // the PDF (inside AddOutlier) and then de-normalize it, only to calculate
@@ -386,8 +294,8 @@ Double_t DtCPPDF::evaluate() const {
 
 //  return Belle::AddOutlierWithBkg((int) expno, dt, 1, pdf, pdf, (int) vrntrk, (int) vtntrk, dtres_param,
 //          nnorm / alpha, nnorm / alpha, constants::cut_dt_low, constants::cut_dt_high, alpha, 1);
-
-    return pdf;
+// 
+//  return pdf;
 
 }
 
@@ -476,23 +384,6 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
                     vtntrk, vtzerr, vtchi2, vtndf,
                     vtistagl, dtres_param ) * 0.5/tau;
         }
-
-//      double r = 1 - 2 * wtag;
-//      int r_bin = GetRBin(r);
-//      double wtag_binned = GetWTag(expno, r_bin, mc);
-//      double delta_wtag_binned = GetDeltaWTag(expno, r_bin, mc);
-//      double r_binned = 1 - 2 * wtag_binned;
-//
-//      if (perfect_tagging) {
-//          delta_wtag_binned = 0;
-//          r_binned = 1;
-//      }
-
-//      pdf = pdf_const * (1 + sign * delta_wtag_binned) - sign * r_binned * (S * pdf_sin + A * pdf_cos);
-//      norm = norm_const * (1 + sign * delta_wtag_binned) - sign * r_binned * (S * norm_sin + A * norm_cos);
-
-
-////////////////////////////////////////////////////////////////
 
         Double_t a0a = 0;
         Double_t at = sqrt(1-ap*ap-a0*a0);

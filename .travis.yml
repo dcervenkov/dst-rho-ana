@@ -62,12 +62,14 @@ install:
 
 script:
   - source activate root5env
+  - export ROOTSYS=/home/travis/miniconda/envs/root5env
   - cd ${TRAVIS_BUILD_DIR}/DSRho && xmkmf && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoSkim && xmkmf && make
   - cd ${TRAVIS_BUILD_DIR}/panther2TTree && xmkmf && make
   - cd ${TRAVIS_BUILD_DIR}/printTree && xmkmf && make
 
   - source activate root6env
+  - export ROOTSYS=/home/travis/miniconda/envs/root6env
   - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoBackground && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoEfficiency && make

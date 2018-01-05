@@ -485,10 +485,6 @@
         "formula": "thetat:thetab",
         "xAxisTitle": "#theta_{b} [rad]",
         "yAxisTitle": "#theta_{t} [rad]",
-        "xMin": 0.5,
-        "xMax": 0.9,
-        "yMin": -3,
-        "yMax": 3,
         "file": "../data/DSRho-mdst_basf2_mod_real_unmod_1.root",
         "treeName": "h2000",
         "elements": [
@@ -503,6 +499,7 @@
         "fileName": "thetat_phit",
         "formula": "thetat:phit",
         "xAxisTitle": "#phi_{t} [rad]",
+        "yAxisTitle": "#theta_{t} [rad]",
         "file": "../data/DSRho-mdst_basf2_mod_real_unmod_1.root",
         "treeName": "h2000",
         "elements": [
@@ -517,6 +514,7 @@
         "fileName": "thetab_phit",
         "formula": "thetab:phit",
         "xAxisTitle": "#phi_{t} [rad]",
+        "yAxisTitle": "#theta_{b} [rad]",
         "file": "../data/DSRho-mdst_basf2_mod_real_unmod_1.root",
         "treeName": "h2000",
         "elements": [

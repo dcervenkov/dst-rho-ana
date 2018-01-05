@@ -29,7 +29,8 @@ class FitterCPV {
     void PlotVar(RooRealVar& var, const RooAbsData&) const;
     void PlotWithPull(const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
                       const char* title = "") const;
-    void Test();
+    void FitSignal();
+    void FitSCF();
     void GenerateToys(const int num_events, const int num_toys);
 
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };

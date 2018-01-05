@@ -71,9 +71,9 @@ int main(int argc, char* argv[]) {
         fitter.ReadInFile(file_path);
     }
 
-    fitter.Test();
     //  fitter.GenerateToys(10000, 10);
-    //  fitter.Test();
+    fitter.FitSignal();
+    // fitter.FitSCF();
     fitter.SaveResults(results_path);
 
     return 0;
@@ -158,6 +158,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 break;
             default:
                 printf("?? getopt returned character code 0%o ??\n", c);
+                exit(1);
         }
     }
 

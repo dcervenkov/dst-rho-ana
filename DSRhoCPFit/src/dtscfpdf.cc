@@ -1,15 +1,13 @@
 /**
- *  @file    dtcppdf.cc
+ *  @file    dtscfpdf.cc
  *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
- *  @date    2016-06-25
+ *  @date    2017-12-25
  *
- *  @brief Class that calculates the full angular time-dependent efficiency corrected
- *  CP violating PDF and provides it's analytical integrals
+ *  @brief Class that holds the full angular time-dependent self-cross-feed PDF
  *
  */
 
-
-#include "dtcppdf.h"
+#include "dtscfpdf.h"
 
 // ROOT includes
 #include "TF1.h"
@@ -21,9 +19,9 @@
 // Local includes
 #include "constants.h"
 
-//ClassImp(DtCPPDF)
+//ClassImp(DtSCFPDF)
 
-DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_favored, bool _perfect_tagging, int _efficiency_model,
+DtSCFPDF::DtSCFPDF(const char *name, const char *title, bool _B_bar, bool _CKM_favored, bool _perfect_tagging, int _efficiency_model,
         RooAbsReal& _tht,
         RooAbsReal& _thb,
         RooAbsReal& _phit,
@@ -98,13 +96,13 @@ DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_fav
 {
     // The rest of this constructor computes angular integrals
     // of certain terms of the PDF. This is used to speed up
-    // computation of normalization; see DtCPPDF::analyticalIntegral
-    ROOT::Math::Functor wf1(this, &DtCPPDF::f1, 3);
-    ROOT::Math::Functor wf2(this, &DtCPPDF::f2, 3);
-    ROOT::Math::Functor wf3(this, &DtCPPDF::f3, 3);
-    ROOT::Math::Functor wf4(this, &DtCPPDF::f4, 3);
-    ROOT::Math::Functor wf5(this, &DtCPPDF::f5, 3);
-    ROOT::Math::Functor wf6(this, &DtCPPDF::f6, 3);
+    // computation of normalization; see DtSCFPDF::analyticalIntegral
+    ROOT::Math::Functor wf1(this, &DtSCFPDF::f1, 3);
+    ROOT::Math::Functor wf2(this, &DtSCFPDF::f2, 3);
+    ROOT::Math::Functor wf3(this, &DtSCFPDF::f3, 3);
+    ROOT::Math::Functor wf4(this, &DtSCFPDF::f4, 3);
+    ROOT::Math::Functor wf5(this, &DtSCFPDF::f5, 3);
+    ROOT::Math::Functor wf6(this, &DtSCFPDF::f6, 3);
 
     double a[] = {tht.min(), thb.min(), phit.min()};
     double b[] = {tht.max(), thb.max(), phit.max()};
@@ -126,7 +124,7 @@ DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_fav
     printf("INFO: Efficiency integrals' precomputation finished. \n");
 }
 
-DtCPPDF::DtCPPDF(const char *name, const char *title,
+DtSCFPDF::DtSCFPDF(const char *name, const char *title,
         RooAbsReal& _dt,
         RooAbsReal& _tau,
         RooAbsReal& _expmc,
@@ -169,7 +167,7 @@ DtCPPDF::DtCPPDF(const char *name, const char *title,
 }
 
 
-DtCPPDF::DtCPPDF(const DtCPPDF& other, const char* name) :
+DtSCFPDF::DtSCFPDF(const DtSCFPDF& other, const char* name) :
             RooAbsPdf(other,name),
             tht("tht",this,other.tht),
             thb("thb",this,other.thb),
@@ -216,7 +214,7 @@ DtCPPDF::DtCPPDF(const DtCPPDF& other, const char* name) :
 }
 
 
-Double_t DtCPPDF::evaluate() const {
+Double_t DtSCFPDF::evaluate() const {
     const bool mc = (expmc == 2) ? 1 : 0;
     const Belle::dtres_param_t* dtres_param = Belle::get_dtres_param((int)expno, mc);
     double ak, ck;
@@ -299,7 +297,7 @@ Double_t DtCPPDF::evaluate() const {
 
 }
 
-Int_t DtCPPDF::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* /*rangeName*/) const {
+Int_t DtSCFPDF::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* /*rangeName*/) const {
 
 //  printf(" ******************************* DBG: Looking for analytical integral...\n");
 
@@ -330,7 +328,7 @@ Int_t DtCPPDF::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, co
     return 0 ;
 }
 
-Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
+Double_t DtSCFPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
 
     const bool mc = (expmc == 2) ? 1 : 0;
     const Belle::dtres_param_t* dtres_param = Belle::get_dtres_param((int)expno, mc);
@@ -409,7 +407,6 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
         case 1: // Int[g,{dt,tht,thb,phit}]
             CalculateAmplitudeTerms(nAp2, nA02, nAt2, nAp0r, nA0ti, nApti, norm_const,
                                     norm_cos, norm_sin);
-            printf("DCIntegration 1\n");
             return  nAp2 * int_tht_thb_phit[0] +
                     nAt2 * int_tht_thb_phit[1] +
                     nA02 * int_tht_thb_phit[2] +
@@ -420,7 +417,6 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
         case 2: // Int[g,{tht,thb,phit}]
             CalculateAmplitudeTerms(Ap2, A02, At2, Ap0r, A0ti, Apti, pdf_const,
                                     pdf_cos, pdf_sin);
-            printf("DCIntegration 2\n");
             return  Ap2 * int_tht_thb_phit[0] +
                     At2 * int_tht_thb_phit[1] +
                     A02 * int_tht_thb_phit[2] +
@@ -462,7 +458,6 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
         case 12: // Int[g,{dt}]
             CalculateAmplitudeTerms(nAp2, nA02, nAt2, nAp0r, nA0ti, nApti, norm_const,
                                     norm_cos, norm_sin);
-            printf("DCIntegration 12\n");
             return (nAp2*2*sin(tht)*sin(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)*sin(phit)+\
                             nAt2*2*cos(tht)*cos(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)+\
                             nA02*4*sin(tht)*sin(tht)*sin(tht)*cos(thb)*cos(thb)*sin(thb)*cos(phit)*cos(phit)+\
@@ -493,7 +488,7 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
 
 }
 
-bool DtCPPDF::IsTimeIntegrated(int code) const {
+bool DtSCFPDF::IsTimeIntegrated(int code) const {
     if (code == 1 || (code >= 3 && code <= 8) || code == 12) {
         return true;
     } else {
@@ -501,7 +496,7 @@ bool DtCPPDF::IsTimeIntegrated(int code) const {
     }
 }
 
-int DtCPPDF::GetRBin(double r) const {
+int DtSCFPDF::GetRBin(double r) const {
     return (0. <= r && r <= 0.1 ? 0 :
     0.1 < r && r <= 0.25 ? 1 :
     0.25 < r && r <= 0.5 ? 2 :
@@ -511,7 +506,7 @@ int DtCPPDF::GetRBin(double r) const {
     0.875 < r && r <= 1.0 ? 6 : 7);
 }
 
-double DtCPPDF::GetWTag(int expno, int rbin, bool mc) const {
+double DtSCFPDF::GetWTag(int expno, int rbin, bool mc) const {
     double w_svd1_data[7] = {0.5, 0.418852, 0.329879, 0.233898, 0.170608, 0.099791, 0.0228501};
 
     double w_svd2_data[7] = {0.5, 0.418826, 0.319303, 0.222948, 0.163191, 0.104085, 0.0251454};
@@ -535,7 +530,7 @@ double DtCPPDF::GetWTag(int expno, int rbin, bool mc) const {
     }
 }
 
-double DtCPPDF::GetDeltaWTag(int expno, int rbin, bool mc) const {
+double DtSCFPDF::GetDeltaWTag(int expno, int rbin, bool mc) const {
     double dw_svd1_data[7] = {0., 0.0569661, 0.0126192, -0.0147724, -0.000550289, 0.00887704, 0.00465683};
 
     double dw_svd2_data[7] = {0., -0.00877001, 0.0103515, -0.0109253, -0.0186365, 0.00168037, -0.0036441};
@@ -558,37 +553,37 @@ double DtCPPDF::GetDeltaWTag(int expno, int rbin, bool mc) const {
     }
 }
 
-Double_t DtCPPDF::f1(const double * vars) {
+Double_t DtSCFPDF::f1(const double * vars) {
     Double_t val = 2 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]) * sin(vars[2]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
-Double_t DtCPPDF::f2(const double * vars) {
+Double_t DtSCFPDF::f2(const double * vars) {
     Double_t val = 2 * cos(vars[0]) * cos(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
-Double_t DtCPPDF::f3(const double * vars) {
+Double_t DtSCFPDF::f3(const double * vars) {
     Double_t val = 4 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * cos(vars[1]) * cos(vars[1]) * sin(vars[1]) * cos(vars[2]) * cos(vars[2]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
-Double_t DtCPPDF::f4(const double * vars) {
+Double_t DtSCFPDF::f4(const double * vars) {
     Double_t val = sqrt(2) * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * sin(2 * vars[2]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
-Double_t DtCPPDF::f5(const double * vars) {
+Double_t DtSCFPDF::f5(const double * vars) {
     Double_t val = sqrt(2) * sin(2 * vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * cos(vars[2]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
-Double_t DtCPPDF::f6(const double * vars) {
+Double_t DtSCFPDF::f6(const double * vars) {
     Double_t val = 2 * sin(2 * vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
-void DtCPPDF::CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
+void DtSCFPDF::CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
                                       double& Ap0r, double& A0ti, double& Apti,
                                       const double& constant, const double& cosine, 
                                       const double& sine) const {

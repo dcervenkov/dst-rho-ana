@@ -46,6 +46,7 @@
 // Local includes
 #include "constants.h"
 #include "dtcppdf.h"
+#include "dtscfpdf.h"
 
 FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     ap_ = new RooRealVar("ap", "ap", par_input[0], 0, 0.5);
@@ -243,7 +244,10 @@ void FitterCPV::PlotVar(RooRealVar& var, const RooAbsData& data) const {
 }
 
 // TODO: Remove/refactor
-void FitterCPV::Test() {
+void FitterCPV::FitSignal() {
+    RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
+    dataset_ = temp_dataset;
+
     DtCPPDF mixing_pdf_a(
         "mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
         *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
@@ -263,6 +267,76 @@ void FitterCPV::Test() {
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_bb(
+        "mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_,
+        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+
+    RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
+    sim_pdf.addPdf(mixing_pdf_a, "a");
+    sim_pdf.addPdf(mixing_pdf_ab, "ab");
+    sim_pdf.addPdf(mixing_pdf_b, "b");
+    sim_pdf.addPdf(mixing_pdf_bb, "bb");
+
+    dt_->setRange("dtFitRange", -15, 15);
+
+    tau_->setConstant(true);
+    dm_->setConstant(true);
+
+    if (do_mixing_fit_) {
+        result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
+                                RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
+                                RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+        result_->Print();
+
+        if (make_plots_) {
+            RooDataSet* dataset_a =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
+            // PlotWithPull(*dt_, *dataset_a, mixing_pdf_a);
+
+            RooDataSet* dataset_b =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
+            // PlotWithPull(*dt_, *dataset_b, mixing_pdf_b);
+
+            RooDataSet* dataset_ab =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
+            // PlotWithPull(*dt_, *dataset_ab, mixing_pdf_ab);
+
+            RooDataSet* dataset_bb =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
+            // PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
+
+            PlotWithPull(*thetat_, *dataset_, mixing_pdf_a);
+            PlotWithPull(*thetab_, *dataset_, mixing_pdf_a);
+            PlotWithPull(*phit_, *dataset_, mixing_pdf_a);
+        }
+    }
+}
+
+// TODO: Remove/refactor
+void FitterCPV::FitSCF() {
+    RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag!=1"));
+    dataset_ = temp_dataset;
+
+    DtSCFPDF mixing_pdf_a(
+        "mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
+        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+
+    DtSCFPDF mixing_pdf_ab(
+        "mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_,
+        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+
+    DtSCFPDF mixing_pdf_b(
+        "mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
+        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+
+    DtSCFPDF mixing_pdf_bb(
         "mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
         *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
@@ -687,7 +761,7 @@ TPaveText* FitterCPV::CreateStatBox(const double chi2, const bool position_top,
  * Construct and return a cut string common for all for categories
  */
 TString FitterCPV::GetCommonCutsString() const {
-    TString common_cuts("evmcflag==1&&vrusable==1&&vtusable==1&&");
+    TString common_cuts("vrusable==1&&vtusable==1&&");
     common_cuts += "((vrchi2/vrndf)<";
     common_cuts += constants::cuts::sig_vtx_h;
     common_cuts += "||vrntrk==1)&&";

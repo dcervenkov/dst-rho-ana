@@ -14,13 +14,20 @@
 #include "TF1.h"
 #include "RooRealProxy.h"
 #include "RooAbsPdf.h"
+#include "RooBifurGauss.h"
+#include "RooExponential.h"
+#include "RooAddPdf.h"
+#include "RooBifurGauss.h"
+#include "RooPolynomial.h"
+#include "RooGenericPdf.h"
+#include "RooExponential.h"
+#include "RooFormulaVar.h"
 
 // BASF includes
 #include "tatami/tatami.h"
 
 // Local includes
 #include "constants.h"
-#include "efficiency.h"
 
 class DtSCFPDF : public RooAbsPdf {
 public:
@@ -43,7 +50,7 @@ public:
             RooAbsReal& _vtndf,
             RooAbsReal& _vtistagl);
 
-    DtSCFPDF(const char *name, const char *title, bool B_bar, bool CKM_favored, bool perfect_tagging, const int efficiency_model,
+    DtSCFPDF(const char *name, const char *title, bool B_bar, bool CKM_favored, bool perfect_tagging,
             RooAbsReal& _tht,
             RooAbsReal& _thb,
             RooAbsReal& _phit,
@@ -119,34 +126,44 @@ protected:
     RooRealProxy vtndf ;
     RooRealProxy vtistagl ;
 
+    // Self-cross-feed phit model
+    RooRealVar* scf_phit_poly_p2_;
+    RooRealVar* scf_phit_f_;
+    RooPolynomial* scf_phit_poly_;
+    RooRealVar* scf_phit_offset_;
+    RooFormulaVar* scf_phit_phit_;
+    RooGenericPdf* scf_phit_cos_;
+    RooAddPdf* scf_phit_model_;
+
+    // Self-cross-feed thetat model
+    RooRealVar* scf_thetat_f_;
+    RooFormulaVar* scf_thetat_thetat_;
+    RooGenericPdf* scf_thetat_model_;
+
+    // Self-cross-feed thetab model
+    RooRealVar* scf_thetab_gaus_mu_;
+    RooRealVar* scf_thetab_gaus_sigma_l_;
+    RooRealVar* scf_thetab_gaus_sigma_r_;
+    RooBifurGauss* scf_thetab_gaus_;
+    RooRealVar* scf_thetab_exp_alpha_;
+    RooExponential* scf_thetab_exp_;
+    RooRealVar* scf_thetab_f_;
+    RooAddPdf* scf_thetab_model_;
+
     Double_t evaluate() const;
     bool IsTimeIntegrated(int code) const;
     int GetRBin(double r) const;
     double GetWTag(int expno, int rbin, bool mc) const;
     double GetDeltaWTag(int expno, int rbin, bool mc) const;
     void CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
-                                 double& Ap0r, double& A0ti, double& Apti,
                                  const double& constant, const double& cos, 
                                  const double& sin) const;
 
-    int efficiency_model;
     bool mixing;
     bool B_bar;
     bool CKM_favored;
     bool perfect_tagging;
 
-    Efficiency eff;
-
-    // Angular terms from PDF x Efficiency
-    Double_t f1 (const double * vars);
-    Double_t f2 (const double * vars);
-    Double_t f3 (const double * vars);
-    Double_t f4 (const double * vars);
-    Double_t f5 (const double * vars);
-    Double_t f6 (const double * vars);
-
-    // Numerical integrals of the above
-    Double_t int_tht_thb_phit[6] ;
 
 private:
     //ClassDef(DSRhoPDF,1) // Your description goes here...

@@ -13,6 +13,8 @@
 #include "TF1.h"
 #include "RooAbsReal.h"
 #include "RooRealVar.h"
+#include "RooAddPdf.h"
+#include "RooGenericPdf.h"
 #include "Math/Functor.h"
 #include "Math/IntegratorMultiDim.h"
 
@@ -21,7 +23,7 @@
 
 //ClassImp(DtSCFPDF)
 
-DtSCFPDF::DtSCFPDF(const char *name, const char *title, bool _B_bar, bool _CKM_favored, bool _perfect_tagging, int _efficiency_model,
+DtSCFPDF::DtSCFPDF(const char *name, const char *title, bool _B_bar, bool _CKM_favored, bool _perfect_tagging,
         RooAbsReal& _tht,
         RooAbsReal& _thb,
         RooAbsReal& _phit,
@@ -88,40 +90,47 @@ DtSCFPDF::DtSCFPDF(const char *name, const char *title, bool _B_bar, bool _CKM_f
             vtndf("vtndf","vtndf",this,_vtndf),
             vtistagl("vtistagl","vtistagl",this,_vtistagl),
 
-            efficiency_model(_efficiency_model),
             mixing(true),
             B_bar(_B_bar),
             CKM_favored(_CKM_favored),
             perfect_tagging(_perfect_tagging)
 {
-    // The rest of this constructor computes angular integrals
-    // of certain terms of the PDF. This is used to speed up
-    // computation of normalization; see DtSCFPDF::analyticalIntegral
-    ROOT::Math::Functor wf1(this, &DtSCFPDF::f1, 3);
-    ROOT::Math::Functor wf2(this, &DtSCFPDF::f2, 3);
-    ROOT::Math::Functor wf3(this, &DtSCFPDF::f3, 3);
-    ROOT::Math::Functor wf4(this, &DtSCFPDF::f4, 3);
-    ROOT::Math::Functor wf5(this, &DtSCFPDF::f5, 3);
-    ROOT::Math::Functor wf6(this, &DtSCFPDF::f6, 3);
+    // Self-cross-feed phit model
+    scf_phit_poly_p2_ = new RooRealVar("scf_phit_poly_p2", "p_(2)", 0.856, -0.1, 2);
+    scf_phit_f_ = new RooRealVar("scf_phit_f", "f_(poly)", 0.147, 0.1, 0.9);
+    scf_phit_poly_ = new RooPolynomial("scf_phit_poly", "scf_phit_poly", _phit, *scf_phit_poly_p2_, 2);
+    scf_phit_offset_ = new RooRealVar("scf_phit_offset", "#phi_(t)^(offset)", 0.056, -0.1, 0.1);
+    scf_phit_phit_ = new RooFormulaVar("scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
+                                 RooArgList(_phit, *scf_phit_offset_));
+    scf_phit_cos_ = new RooGenericPdf("scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2",
+                                RooArgList(*scf_phit_phit_));
 
-    double a[] = {tht.min(), thb.min(), phit.min()};
-    double b[] = {tht.max(), thb.max(), phit.max()};
+    // Self-cross-feed thetat model
+    scf_thetat_f_ = new RooRealVar("scf_thetat_f", "#theta_(t)^(w)", -0.051, -0.1, 0.1);
+    scf_thetat_thetat_ = new RooFormulaVar("scf_thetat_thetat", "scf_thetat_thetat",
+                                     "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
+                                     RooArgList(_tht, *scf_thetat_f_));
 
-    printf("INFO: Beginning precomputation of efficiency integrals... \n");
-    ROOT::Math::IntegratorMultiDim ig(ROOT::Math::IntegrationMultiDim::kADAPTIVE);
-    ig.SetFunction(wf1);
-    int_tht_thb_phit[0] = ig.Integral(a,b);
-    ig.SetFunction(wf2);
-    int_tht_thb_phit[1] = ig.Integral(a,b);
-    ig.SetFunction(wf3);
-    int_tht_thb_phit[2] = ig.Integral(a,b);
-    ig.SetFunction(wf4);
-    int_tht_thb_phit[3] = ig.Integral(a,b);
-    ig.SetFunction(wf5);
-    int_tht_thb_phit[4] = ig.Integral(a,b);
-    ig.SetFunction(wf6);
-    int_tht_thb_phit[5] = ig.Integral(a,b);
-    printf("INFO: Efficiency integrals' precomputation finished. \n");
+    // Self-cross-feed thetab model
+    scf_thetab_gaus_mu_ = new RooRealVar("scf_thetab_gaus_mu", "#mu", 2.885, 1.5, 3);
+    scf_thetab_gaus_sigma_l_ = new RooRealVar("scf_thetab_gaus_sigma_l", "#sigma_(L)", 0.411, 0, 3);
+    scf_thetab_gaus_sigma_r_ = new RooRealVar("scf_thetab_gaus_sigma_r", "#sigma_(R)", 0.094, 0, 3);
+    scf_thetab_gaus_ = new RooBifurGauss(
+        "scf_thetab_gaus",  "scf_thetab_gaus",       _thb,
+        *scf_thetab_gaus_mu_, *scf_thetab_gaus_sigma_l_, *scf_thetab_gaus_sigma_r_);
+    scf_thetab_exp_alpha_ = new RooRealVar("scf_thetab_exp_alpha", "#alpha", -4.63, -10, 0.0);
+    scf_thetab_exp_ = new RooExponential("scf_thetab_exp", "scf_thetab_exp", _thb,
+                                   *scf_thetab_exp_alpha_);
+    scf_thetab_f_ = new RooRealVar("scf_thetab_f", "f_(exp)", 0.625, 0, 1);
+
+    scf_phit_model_ = new RooAddPdf("scf_phit_model", "scf_phit_model",
+                              RooArgList(*scf_phit_poly_, *scf_phit_cos_), RooArgList(*scf_phit_f_));
+
+    scf_thetat_model_ = new RooGenericPdf("scf_thetat_model", "scf_thetat_model",
+                                    "sin(scf_thetat_thetat)^3", RooArgList(*scf_thetat_thetat_));
+
+    scf_thetab_model_ = new RooAddPdf("scf_thetab_model", "scf_thetab_model",
+                              RooArgList(*scf_thetab_exp_, *scf_thetab_gaus_), RooArgList(*scf_thetab_f_));
 }
 
 DtSCFPDF::DtSCFPDF(const char *name, const char *title,
@@ -201,16 +210,36 @@ DtSCFPDF::DtSCFPDF(const DtSCFPDF& other, const char* name) :
             vtchi2("vtchi2",this,other.vtchi2),
             vtndf("vtndf",this,other.vtndf),
             vtistagl("vtistagl",this,other.vtistagl),
+            
+            // Self-cross-feed phit model
+            scf_phit_poly_p2_(other.scf_phit_poly_p2_),
+            scf_phit_f_(other.scf_phit_f_),
+            scf_phit_poly_(other.scf_phit_poly_),
+            scf_phit_offset_(other.scf_phit_offset_),
+            scf_phit_phit_(other.scf_phit_phit_),
+            scf_phit_cos_(other.scf_phit_cos_),
+            scf_phit_model_(other.scf_phit_model_),
 
-            efficiency_model(other.efficiency_model),
+            // Self-cross-feed thetat model
+            scf_thetat_f_(other.scf_thetat_f_),
+            scf_thetat_thetat_(other.scf_thetat_thetat_),
+            scf_thetat_model_(other.scf_thetat_model_),
+
+            // Self-cross-feed thetab model
+            scf_thetab_gaus_mu_(other.scf_thetab_gaus_mu_),
+            scf_thetab_gaus_sigma_l_(other.scf_thetab_gaus_sigma_l_),
+            scf_thetab_gaus_sigma_r_(other.scf_thetab_gaus_sigma_r_),
+            scf_thetab_gaus_(other.scf_thetab_gaus_),
+            scf_thetab_exp_alpha_(other.scf_thetab_exp_alpha_),
+            scf_thetab_exp_(other.scf_thetab_exp_),
+            scf_thetab_f_(other.scf_thetab_f_),
+            scf_thetab_model_(other.scf_thetab_model_),
+
             mixing(other.mixing),
             B_bar(other.B_bar),
             CKM_favored(other.CKM_favored),
             perfect_tagging(other.perfect_tagging)
 {
-    for (int i = 0; i < 6; i++) {
-        int_tht_thb_phit[i] = other.int_tht_thb_phit[i];
-    }
 }
 
 
@@ -249,27 +278,14 @@ Double_t DtSCFPDF::evaluate() const {
         Double_t At2 = 0;
         Double_t Ap2 = 0;
         Double_t A02 = 0;
-        Double_t Ap0r = 0;
-        Double_t A0ti = 0;
-        Double_t Apti = 0;
 
-        CalculateAmplitudeTerms(Ap2, A02, At2, Ap0r, A0ti, Apti, pdf_const,
-                                pdf_cos, pdf_sin);
+        CalculateAmplitudeTerms(Ap2, A02, At2, pdf_const, pdf_cos, pdf_sin);
 
+        pdf = (Ap2 + A02 + At2) * scf_thetat_model_->getVal() * scf_thetab_model_->getVal() * scf_phit_model_->getVal();
 
-        Double_t value =    (Ap2*2*sin(tht)*sin(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)*sin(phit)+\
-                            At2*2*cos(tht)*cos(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)+\
-                            A02*4*sin(tht)*sin(tht)*sin(tht)*cos(thb)*cos(thb)*sin(thb)*cos(phit)*cos(phit)+\
-                            sqrt(2)*Ap0r*sin(tht)*sin(tht)*sin(tht)*sin(2*thb)*sin(thb)*sin(2*phit)-\
-                            sqrt(2)*A0ti*sin(2*tht)*sin(tht)*sin(2*thb)*sin(thb)*cos(phit)-\
-                            2*Apti*sin(2*tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit));
-
-        pdf = value * eff.GetEfficiency(tht, thb, phit, efficiency_model);
-
-//      double A = ap*ap*(1 - xp*xp - yp*yp) + a0*a0*(1 - x0*x0 - y0*y0) + at*at*(1 - xt*xt - yt*yt);
-//      double S = ap*ap*2*yp + a0*a0*2*y0 + at*at*2*yt;
-//
-//      printf("\nA = %f\nS = %f\n\n", A, S);
+        double dtht = tht;
+        RooRealVar rootht("thetat", "thetat", dtht);
+        printf("tht = %f, tht_model = %f\n", dtht, scf_thetat_model_->getVal(RooArgSet(rootht)));
 
     } else {
         pdf = EfRkRdetRnp_fullrec( dt, constants::btype,
@@ -279,22 +295,7 @@ Double_t DtSCFPDF::evaluate() const {
                 vtistagl, dtres_param );
     }
 
-    // This is extremely dumb, as I calculate the normalization, normalize
-    // the PDF (inside AddOutlier) and then de-normalize it, only to calculate
-    // the normalization later in analyticalIntegral again. Don't have time to
-    // fix the dumbness now.
-    // TODO: Fix dumbness
-    double alpha = 1;
-    double nnorm = analyticalIntegral(12);
-    pdf = Belle::AddOutlier(expno, dt, pdf, vrntrk, vtntrk, dtres_param,
-            nnorm, constants::cuts::dt_low, constants::cuts::dt_high, alpha);
-    return pdf*nnorm;
-
-//  return Belle::AddOutlierWithBkg((int) expno, dt, 1, pdf, pdf, (int) vrntrk, (int) vtntrk, dtres_param,
-//          nnorm / alpha, nnorm / alpha, constants::cut_dt_low, constants::cut_dt_high, alpha, 1);
-// 
-//  return pdf;
-
+    return pdf;
 }
 
 Int_t DtSCFPDF::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* /*rangeName*/) const {
@@ -309,9 +310,9 @@ Int_t DtSCFPDF::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, c
     // procedure to integrate out the angles (taking efficiency into account)
     // has to be implemented
 
-//  if(matchArgs(allVars,analVars,dt,thb,tht)) return 3;
-//  if(matchArgs(allVars,analVars,dt,tht,phit)) return 4;
-//  if(matchArgs(allVars,analVars,dt,thb,phit)) return 5;
+    if(matchArgs(allVars,analVars,dt,thb,tht)) return 3;
+    if(matchArgs(allVars,analVars,dt,tht,phit)) return 4;
+    if(matchArgs(allVars,analVars,dt,thb,phit)) return 5;
 //
 //  if(matchArgs(allVars,analVars,dt,tht)) return 6;
 //  if(matchArgs(allVars,analVars,dt,thb)) return 7;
@@ -383,87 +384,50 @@ Double_t DtSCFPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
                     vtistagl, dtres_param ) * 0.5/tau;
         }
 
-        Double_t a0a = 0;
-        Double_t at = sqrt(1-ap*ap-a0*a0);
-
-        Double_t ap0r = ap*a0*cos(-apa+a0a);
-        Double_t apti = ap*at*sin(-apa+ata);
-
         Double_t At2 = 0;
         Double_t Ap2 = 0;
         Double_t A02 = 0;
-        Double_t Ap0r = 0;
-        Double_t A0ti = 0;
-        Double_t Apti = 0;
 
         Double_t nAt2 = 0;
         Double_t nAp2 = 0;
         Double_t nA02 = 0;
-        Double_t nAp0r = 0;
-        Double_t nA0ti = 0;
-        Double_t nApti = 0;
 
         switch(code) {
         case 1: // Int[g,{dt,tht,thb,phit}]
-            CalculateAmplitudeTerms(nAp2, nA02, nAt2, nAp0r, nA0ti, nApti, norm_const,
-                                    norm_cos, norm_sin);
-            return  nAp2 * int_tht_thb_phit[0] +
-                    nAt2 * int_tht_thb_phit[1] +
-                    nA02 * int_tht_thb_phit[2] +
-                    nAp0r * int_tht_thb_phit[3] -
-                    nA0ti * int_tht_thb_phit[4] -
-                    nApti * int_tht_thb_phit[5];
+            CalculateAmplitudeTerms(nAp2, nA02, nAt2, norm_const, norm_cos, norm_sin);
+            return nAp2 + nA02 + nAt2;
 
         case 2: // Int[g,{tht,thb,phit}]
-            CalculateAmplitudeTerms(Ap2, A02, At2, Ap0r, A0ti, Apti, pdf_const,
-                                    pdf_cos, pdf_sin);
-            return  Ap2 * int_tht_thb_phit[0] +
-                    At2 * int_tht_thb_phit[1] +
-                    A02 * int_tht_thb_phit[2] +
-                    Ap0r * int_tht_thb_phit[3] -
-                    A0ti * int_tht_thb_phit[4] -
-                    Apti * int_tht_thb_phit[5];
+            CalculateAmplitudeTerms(Ap2, A02, At2, pdf_const, pdf_cos, pdf_sin);
+            return Ap2 + A02 + At2;
 
-        // TODO: Coeficients are not right - efficiency not taken into account
         case 3: // Int[g,{dt,tht,thb}]
-            return 16./9.*(nAt2 + 2*nA02*cos(phit)*cos(phit) + 2*nAp2*sin(phit)*sin(phit));
+            CalculateAmplitudeTerms(nAp2, nA02, nAt2, norm_const, norm_cos, norm_sin);
+            return (nAp2 + nA02 + nAt2) * scf_phit_model_->getVal();
 
         case 4: // Int[g,{dt,tht,phit}]
-            return 8.*constants::pi/3*((nAp2+nAt2)*sin(thb)*sin(thb) + 2*nA02*cos(thb)*cos(thb))*sin(thb);
+            CalculateAmplitudeTerms(nAp2, nA02, nAt2, norm_const, norm_cos, norm_sin);
+            return (nAp2 + nA02 + nAt2) * scf_thetab_model_->getVal();
 
         case 5: // Int[g,{dt,thb,phit}]
-            return 8.*constants::pi/3*((nAp2+nA02)*sin(tht)*sin(tht) + 2*nAt2*cos(tht)*cos(tht))*sin(tht);
+            CalculateAmplitudeTerms(nAp2, nA02, nAt2, norm_const, norm_cos, norm_sin);
+            return (nAp2 + nA02 + nAt2) * scf_thetat_model_->getVal();
 
         case 6: // Int[g,{dt,tht}]
-            return 4./3.*(4*nA02*cos(phit)*cos(phit)*cos(thb)*cos(thb) + \
-                    (nAt2 + 2*nAp2*sin(phit)*sin(phit))*sin(thb)*sin(thb) + sqrt(2)*ap0r*sin(2*phit)*sin(2*thb))*sin(thb);
 
         case 7: // Int[g,{dt,thb}]
-            return 8./3.*(nAt2*cos(tht)*cos(tht) + nA02*cos(phit)*cos(phit)*sin(tht)*sin(tht) + \
-                    sin(phit)*(nAp2*sin(phit)*sin(tht)*sin(tht) - apti*sin(2*tht)))*sin(tht);
 
         case 8: // Int[g,{dt,phit}]
-            return 2*constants::pi*(2*nAt2*cos(tht)*cos(tht)*sin(thb)*sin(thb) +
-                    (2*nA02*cos(thb)*cos(thb) + nAp2*sin(thb)*sin(thb))*sin(tht)*sin(tht))*(sin(tht)*sin(thb));
 
         case 9: // Int[g,{tht,thb}]
-            return 16./9.*(At2 + 2*A02*cos(phit)*cos(phit) + 2*Ap2*sin(phit)*sin(phit));
 
         case 10: // Int[g,{tht,phit}]
-            return 8.*constants::pi/3*((Ap2+At2)*sin(thb)*sin(thb) + 2*A02*cos(thb)*cos(thb))*sin(thb);
 
         case 11: // Int[g,{thb,phit}]
-            return 8.*constants::pi/3*((Ap2+A02)*sin(tht)*sin(tht) + 2*At2*cos(tht)*cos(tht))*sin(tht);
 
         case 12: // Int[g,{dt}]
-            CalculateAmplitudeTerms(nAp2, nA02, nAt2, nAp0r, nA0ti, nApti, norm_const,
-                                    norm_cos, norm_sin);
-            return (nAp2*2*sin(tht)*sin(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)*sin(phit)+\
-                            nAt2*2*cos(tht)*cos(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)+\
-                            nA02*4*sin(tht)*sin(tht)*sin(tht)*cos(thb)*cos(thb)*sin(thb)*cos(phit)*cos(phit)+\
-                            sqrt(2)*nAp0r*sin(tht)*sin(tht)*sin(tht)*sin(2*thb)*sin(thb)*sin(2*phit)-\
-                            sqrt(2)*nA0ti*sin(2*tht)*sin(tht)*sin(2*thb)*sin(thb)*cos(phit)-\
-                            2*nApti*sin(2*tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)) * eff.GetEfficiency(tht, thb, phit, efficiency_model);
+            CalculateAmplitudeTerms(nAp2, nA02, nAt2, norm_const, norm_cos, norm_sin);
+            return (nAp2 + nA02 + nAt2) * scf_thetat_model_->getVal() * scf_thetab_model_->getVal() * scf_phit_model_->getVal();
 
         default:
             return 0;
@@ -553,38 +517,7 @@ double DtSCFPDF::GetDeltaWTag(int expno, int rbin, bool mc) const {
     }
 }
 
-Double_t DtSCFPDF::f1(const double * vars) {
-    Double_t val = 2 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]) * sin(vars[2]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
-}
-
-Double_t DtSCFPDF::f2(const double * vars) {
-    Double_t val = 2 * cos(vars[0]) * cos(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
-}
-
-Double_t DtSCFPDF::f3(const double * vars) {
-    Double_t val = 4 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * cos(vars[1]) * cos(vars[1]) * sin(vars[1]) * cos(vars[2]) * cos(vars[2]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
-}
-
-Double_t DtSCFPDF::f4(const double * vars) {
-    Double_t val = sqrt(2) * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * sin(2 * vars[2]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
-}
-
-Double_t DtSCFPDF::f5(const double * vars) {
-    Double_t val = sqrt(2) * sin(2 * vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * cos(vars[2]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
-}
-
-Double_t DtSCFPDF::f6(const double * vars) {
-    Double_t val = 2 * sin(2 * vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
-}
-
 void DtSCFPDF::CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
-                                      double& Ap0r, double& A0ti, double& Apti,
                                       const double& constant, const double& cosine, 
                                       const double& sine) const {
 
@@ -600,23 +533,7 @@ void DtSCFPDF::CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
 			r_binned = 1;
         }
 
-        Double_t a0a = 0;
         Double_t at = sqrt(1-ap*ap-a0*a0);
-
-        Double_t ap0r = ap*a0*cos(-apa+a0a);
-        Double_t ap0i = ap*a0*sin(-apa+a0a);
-        Double_t a0tr = a0*at*cos(-a0a+ata);
-        Double_t a0ti = a0*at*sin(-a0a+ata);
-        Double_t aptr = ap*at*cos(-apa+ata);
-        Double_t apti = ap*at*sin(-apa+ata);
-
-        // Add pi to at phase for antiparticles
-        if (B_bar) {
-            a0tr = -a0tr;
-            a0ti = -a0ti;
-            aptr = -aptr;
-            apti = -apti;
-        }
 
         double sign = -1 + 2*CKM_favored;
 
@@ -624,14 +541,5 @@ void DtSCFPDF::CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
 		A02 = a0*a0*((1 + x0*x0 + y0*y0)*constant*(1 - delta_wtag_binned) + ((1 - x0*x0 - y0*y0)*sign*cosine + 2*y0*sign*sine)*r_binned);
 		At2 = at*at*((1 + xt*xt + yt*yt)*constant*(1 - delta_wtag_binned) + ((1 - xt*xt - yt*yt)*sign*cosine + 2*yt*sign*sine)*r_binned);
 
-		Ap0r = ap0r*((1 + xp*x0 + yp*y0)*constant*(1 - delta_wtag_binned) + (1 - xp*x0 - yp*y0)*sign*cosine*r_binned + (yp + y0)*sign*sine*r_binned) -\
-			   ap0i*((x0*yp - xp*y0)*(constant*(1 - delta_wtag_binned) - sign*cosine*r_binned) + (x0 - xp)*sign*sine*r_binned);
-
-		A0ti = a0ti*((1 + x0*xt + y0*yt)*constant*(1 - delta_wtag_binned) + (1 - x0*xt - y0*yt)*sign*cosine*r_binned + (y0 + yt)*sign*sine*r_binned) +\
-			   a0tr*((xt*y0 - x0*yt)*(constant*(1 - delta_wtag_binned) - sign*cosine*r_binned) + (xt - x0)*sign*sine*r_binned);
-
-		Apti = apti*((1 + xp*xt + yp*yt)*constant*(1 - delta_wtag_binned) + (1 - xp*xt - yp*yt)*sign*cosine*r_binned + (yp + yt)*sign*sine*r_binned) +\
-			   aptr*((xt*yp - xp*yt)*(constant*(1 - delta_wtag_binned) - sign*cosine*r_binned) + (xt - xp)*sign*sine*r_binned);
-    
 }
     

@@ -409,7 +409,6 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
         case 1: // Int[g,{dt,tht,thb,phit}]
             CalculateAmplitudeTerms(nAp2, nA02, nAt2, nAp0r, nA0ti, nApti, norm_const,
                                     norm_cos, norm_sin);
-            printf("DCIntegration 1\n");
             return  nAp2 * int_tht_thb_phit[0] +
                     nAt2 * int_tht_thb_phit[1] +
                     nA02 * int_tht_thb_phit[2] +
@@ -420,7 +419,6 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
         case 2: // Int[g,{tht,thb,phit}]
             CalculateAmplitudeTerms(Ap2, A02, At2, Ap0r, A0ti, Apti, pdf_const,
                                     pdf_cos, pdf_sin);
-            printf("DCIntegration 2\n");
             return  Ap2 * int_tht_thb_phit[0] +
                     At2 * int_tht_thb_phit[1] +
                     A02 * int_tht_thb_phit[2] +
@@ -462,7 +460,6 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
         case 12: // Int[g,{dt}]
             CalculateAmplitudeTerms(nAp2, nA02, nAt2, nAp0r, nA0ti, nApti, norm_const,
                                     norm_cos, norm_sin);
-            printf("DCIntegration 12\n");
             return (nAp2*2*sin(tht)*sin(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)*sin(phit)+\
                             nAt2*2*cos(tht)*cos(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)+\
                             nA02*4*sin(tht)*sin(tht)*sin(tht)*cos(thb)*cos(thb)*sin(thb)*cos(phit)*cos(phit)+\

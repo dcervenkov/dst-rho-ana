@@ -292,23 +292,23 @@ void FitterCPV::FitSignal() {
         if (make_plots_) {
             RooDataSet* dataset_a =
                 static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
-            // PlotWithPull(*dt_, *dataset_a, mixing_pdf_a);
+            PlotWithPull(*dt_, *dataset_a, mixing_pdf_a);
 
             RooDataSet* dataset_b =
                 static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
-            // PlotWithPull(*dt_, *dataset_b, mixing_pdf_b);
+            PlotWithPull(*dt_, *dataset_b, mixing_pdf_b);
 
             RooDataSet* dataset_ab =
                 static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
-            // PlotWithPull(*dt_, *dataset_ab, mixing_pdf_ab);
+            PlotWithPull(*dt_, *dataset_ab, mixing_pdf_ab);
 
             RooDataSet* dataset_bb =
                 static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
-            // PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
+            PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
 
-            PlotWithPull(*thetat_, *dataset_, mixing_pdf_a);
-            PlotWithPull(*thetab_, *dataset_, mixing_pdf_a);
-            PlotWithPull(*phit_, *dataset_, mixing_pdf_a);
+            // PlotWithPull(*thetat_, *dataset_, mixing_pdf_a);
+            // PlotWithPull(*thetab_, *dataset_, mixing_pdf_a);
+            // PlotWithPull(*phit_, *dataset_, mixing_pdf_a);
         }
     }
 }
@@ -319,26 +319,26 @@ void FitterCPV::FitSCF() {
     dataset_ = temp_dataset;
 
     DtSCFPDF mixing_pdf_a(
-        "mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        "mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_, *thetat_, *thetab_, *phit_,
         *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtSCFPDF mixing_pdf_ab(
-        "mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_,
+        "mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_, *thetat_, *thetab_, *phit_,
+        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtSCFPDF mixing_pdf_b(
-        "mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
+        "mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_, *thetat_, *thetab_, *phit_,
         *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtSCFPDF mixing_pdf_bb(
-        "mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_,
+        "mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_, *thetat_, *thetab_, *phit_,
+        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
@@ -375,6 +375,10 @@ void FitterCPV::FitSCF() {
             RooDataSet* dataset_bb =
                 static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
             PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
+
+            PlotWithPull(*thetat_, *dataset_, mixing_pdf_a);
+            PlotWithPull(*thetab_, *dataset_, mixing_pdf_a);
+            PlotWithPull(*phit_, *dataset_, mixing_pdf_a);
         }
     }
 }

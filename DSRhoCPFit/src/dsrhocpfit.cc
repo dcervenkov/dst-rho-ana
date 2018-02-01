@@ -73,7 +73,8 @@ int main(int argc, char* argv[]) {
 
     //  fitter.GenerateToys(10000, 10);
     // fitter.FitSignal();
-    fitter.FitSCF();
+    // fitter.FitSCF();
+    fitter.FitAll();
     fitter.SaveResults(results_path);
 
     return 0;

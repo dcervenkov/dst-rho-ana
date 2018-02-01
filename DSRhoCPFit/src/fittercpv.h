@@ -31,6 +31,7 @@ class FitterCPV {
                       const char* title = "") const;
     void FitSignal();
     void FitSCF();
+    void FitAll();
     void GenerateToys(const int num_events, const int num_toys);
 
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };

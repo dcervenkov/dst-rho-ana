@@ -88,9 +88,8 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     //  vreffndf_ = new RooRealVar( "vreffndf", "vreffndf", 0, 100);
     vrntrk_ = new RooRealVar("vrntrk", "vrntrk", 0, 100);
 
-    vtusable_ = new RooRealVar("vtusable", "vtusable", 1);
+    vtusable_ = new RooRealVar("vtusable", "vtusable", 0, 1);
     vtvtxz_ = new RooRealVar("vtvtxz", "vtvtxz", -10, 10);
-    vtchi2_ = new RooRealVar("vtchi2", "vtchi2", 1.6);
     vtndf_ = new RooRealVar("vtndf", "vtndf", 4);
     vterr6_ = new RooRealVar("vterr6", "vterr6", -1, 1);
     vtchi2_ = new RooRealVar("vtchi2", "vtchi2", 0, 10000000);
@@ -1054,8 +1053,11 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     input_file->Close();
 
     vrzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vrzerr_formula_));
+    vrzerr_->setRange(0, 10000);
     vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));
+    vtzerr_->setRange(0, 10000);
     dt_ = static_cast<RooRealVar*>(dataset_->addColumn(*dt_formula_));
+    dt_->setRange(-150, 150);
 
     conditional_vars_argset_.add(*vrzerr_);
     conditional_vars_argset_.add(*vtzerr_);

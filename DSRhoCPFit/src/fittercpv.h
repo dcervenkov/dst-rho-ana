@@ -28,6 +28,7 @@ class FitterCPV {
 
     void PlotVar(RooRealVar& var, const RooAbsData&) const;
     void PlotWithPull(const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
+                      const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
                       const char* title = "") const;
     void FitSignal();
     void FitSCF();

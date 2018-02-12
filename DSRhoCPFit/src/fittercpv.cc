@@ -546,14 +546,14 @@ void FitterCPV::FitAll() {
 
     if (do_mixing_fit_) {
         result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
-                                RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
-                                RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+                                RooFit::Minimizer("Minuit2"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         result_->Print();
 
         if (make_plots_) {
-            // RooDataSet* dataset_a =
-            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
-            // PlotWithPull(*dt_, *dataset_a, scf_pdf_a);
+            RooDataSet* dataset_a =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
+            PlotWithPull(*dt_, *dataset_a, cr_pdf_a);
+            PlotWithPull(*dt_, *dataset_a, scf_pdf_a);
 
             // RooDataSet* dataset_b =
             //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
@@ -567,9 +567,27 @@ void FitterCPV::FitAll() {
             //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
             // PlotWithPull(*dt_, *dataset_bb, pdf_bb);
 
-            // PlotWithPull(*thetat_, *dataset_, pdf_a);
-            // PlotWithPull(*thetab_, *dataset_, pdf_a);
-            // PlotWithPull(*phit_, *dataset_, pdf_a);
+            // PlotWithPull(*thetat_, *dataset_, cr_pdf_a);
+            // PlotWithPull(*thetab_, *dataset_, cr_pdf_a);
+            // PlotWithPull(*phit_, *dataset_, cr_pdf_a);
+            PlotWithPull(*thetat_, *dataset_, scf_pdf_a);
+            PlotWithPull(*thetab_, *dataset_, scf_pdf_a);
+            PlotWithPull(*phit_, *dataset_, scf_pdf_a);
+            // thetab_->setBins(300);
+            RooDataHist* cr_hist = cr_pdf_a.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000*0.8, RooFit::ExpectedData(true));
+            RooDataHist* scf_hist = scf_pdf_a.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000*0.2, RooFit::ExpectedData(true));
+
+            // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *all_hist);
+            RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *cr_hist);
+            RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *scf_hist);
+            RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf), cr_scf_f);
+            std::vector<RooAbsPdf*> components;
+            components.push_back(&cr_histpdf);
+            components.push_back(&scf_histpdf);
+            // thetab_->setBins(100);
+            PlotWithPull(*thetat_, *dataset_, all_histpdf, components);
+            PlotWithPull(*thetab_, *dataset_, all_histpdf, components);
+            PlotWithPull(*phit_, *dataset_, all_histpdf, components);
         }
     }
 }
@@ -809,10 +827,11 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
  * @param var Variable to be plotted
  * @param data Dataset against which to plot
  * @param pdf PDF to use for plotting and pull calculation
+ * @param components [optional] Component PDFs to plot alongside the full PDF
  * @param title [optional] Title for the y-axis
  */
 void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, const RooAbsPdf& pdf,
-                             const char* title) const {
+                             const std::vector<RooAbsPdf*> components, const char* title) const {
     TString name = pdf.GetName();
     name += "_";
     name += var.GetName();
@@ -832,16 +851,28 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
 
     data.plotOn(plot);
 
-    // Renormalization required for multi-CPU plots but not for single-CPU; possible RooFit bug
-    if (num_CPUs_ > 1) {
-        pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
-                   RooFit::NumCPU(num_CPUs_), RooFit::NormRange("dtFitRange"),
-                   RooFit::Normalization(1.0 / data.numEntries()));
-    } else {
-        pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
-                   RooFit::NumCPU(num_CPUs_), RooFit::NormRange("dtFitRange"));
+    // Renormalization required for certain plots, when using multiple CPUs but
+    // not with a single CPU; possible RooFit bug
+    double norm = 1;
+    if (!name.Contains("hist") && num_CPUs_ > 1){
+        norm = 1.0 / data.numEntries();
     }
 
+    // Plot components before the total PDF as the pull plots are made from the
+    // last plotted PDF
+    const int colors[] = {4, 7, 5};
+    int i = 0;
+    for (auto component : components) {
+        pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
+                   RooFit::NumCPU(num_CPUs_), RooFit::LineColor(colors[i++]),
+                   RooFit::NormRange("dtFitRange"), RooFit::Components(*component),
+                   RooFit::Normalization(norm));
+    }
+
+    pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
+               RooFit::NumCPU(num_CPUs_), RooFit::NormRange("dtFitRange"),
+               RooFit::Normalization(norm));
+    
     plot->GetXaxis()->SetTitle("");
     plot->GetXaxis()->SetLabelSize(0);
 
@@ -853,10 +884,10 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
     plot->Draw();
 
     const double chi2 = plot->chiSquare();
-    // TPaveText* stat_box = CreateStatBox(chi2, true, true);
-    // if (stat_box) {
-    //     stat_box->Draw();
-    // }
+    TPaveText* stat_box = CreateStatBox(chi2, true, true);
+    if (stat_box) {
+        stat_box->Draw();
+    }
 
     pad_pull->cd();
     pad_pull->SetTopMargin(0.0);
@@ -1057,7 +1088,7 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));
     vtzerr_->setRange(0, 10000);
     dt_ = static_cast<RooRealVar*>(dataset_->addColumn(*dt_formula_));
-    dt_->setRange(-150, 150);
+    dt_->setRange(-10, 10);
 
     conditional_vars_argset_.add(*vrzerr_);
     conditional_vars_argset_.add(*vtzerr_);

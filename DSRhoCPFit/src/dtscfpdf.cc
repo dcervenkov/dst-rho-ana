@@ -269,7 +269,7 @@ Double_t DtSCFPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
         Double_t nA02 = 0;
 
         switch(code) {
-        case 1: // Int[g,{dt,tht,thb,phit}]
+        case 1: // Int[g,{dt}]
             CalculateAmplitudeTerms(nAp2, nA02, nAt2, norm_const, norm_cos, norm_sin);
             return nAp2 + nA02 + nAt2;
 

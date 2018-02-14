@@ -550,29 +550,52 @@ void FitterCPV::FitAll() {
         result_->Print();
 
         if (make_plots_) {
-            RooDataSet* dataset_a =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
-            PlotWithPull(*dt_, *dataset_a, cr_pdf_a);
-            PlotWithPull(*dt_, *dataset_a, scf_pdf_a);
+            RooDataSet* cr_dataset_ =
+                static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
+            RooDataSet* scf_dataset_ =
+                static_cast<RooDataSet*>(dataset_->reduce("evmcflag!=1"));
 
-            // RooDataSet* dataset_b =
-            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
-            // PlotWithPull(*dt_, *dataset_b, pdf_b);
 
-            // RooDataSet* dataset_ab =
-            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
-            // PlotWithPull(*dt_, *dataset_ab, pdf_ab);
+            RooDataSet* cr_dataset_a =
+                static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::a"));
+            PlotWithPull(*dt_, *cr_dataset_a, cr_pdf_a);
 
-            // RooDataSet* dataset_bb =
-            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
-            // PlotWithPull(*dt_, *dataset_bb, pdf_bb);
+            RooDataSet* cr_dataset_b =
+                static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::b"));
+            PlotWithPull(*dt_, *cr_dataset_b, cr_pdf_b);
 
-            // PlotWithPull(*thetat_, *dataset_, cr_pdf_a);
-            // PlotWithPull(*thetab_, *dataset_, cr_pdf_a);
-            // PlotWithPull(*phit_, *dataset_, cr_pdf_a);
-            PlotWithPull(*thetat_, *dataset_, scf_pdf_a);
-            PlotWithPull(*thetab_, *dataset_, scf_pdf_a);
-            PlotWithPull(*phit_, *dataset_, scf_pdf_a);
+            RooDataSet* cr_dataset_ab =
+                static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::ab"));
+            PlotWithPull(*dt_, *cr_dataset_ab, cr_pdf_ab);
+
+            RooDataSet* cr_dataset_bb =
+                static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::bb"));
+            PlotWithPull(*dt_, *cr_dataset_bb, cr_pdf_bb);
+
+
+            RooDataSet* scf_dataset_a =
+                static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::a"));
+            PlotWithPull(*dt_, *scf_dataset_a, scf_pdf_a);
+
+            RooDataSet* scf_dataset_b =
+                static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::b"));
+            PlotWithPull(*dt_, *scf_dataset_b, scf_pdf_b);
+
+            RooDataSet* scf_dataset_ab =
+                static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::ab"));
+            PlotWithPull(*dt_, *scf_dataset_ab, scf_pdf_ab);
+
+            RooDataSet* scf_dataset_bb =
+                static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::bb"));
+            PlotWithPull(*dt_, *scf_dataset_bb, scf_pdf_bb);
+
+
+            // PlotWithPull(*thetat_, *cr_dataset_, cr_pdf_a);
+            // PlotWithPull(*thetab_, *cr_dataset_, cr_pdf_a);
+            // PlotWithPull(*phit_, *cr_dataset_, cr_pdf_a);
+            PlotWithPull(*thetat_, *scf_dataset_, scf_pdf_a);
+            PlotWithPull(*thetab_, *scf_dataset_, scf_pdf_a);
+            PlotWithPull(*phit_, *scf_dataset_, scf_pdf_a);
             // thetab_->setBins(300);
             RooDataHist* cr_hist = cr_pdf_a.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000*0.8, RooFit::ExpectedData(true));
             RooDataHist* scf_hist = scf_pdf_a.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000*0.2, RooFit::ExpectedData(true));
@@ -1088,7 +1111,7 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));
     vtzerr_->setRange(0, 10000);
     dt_ = static_cast<RooRealVar*>(dataset_->addColumn(*dt_formula_));
-    dt_->setRange(-10, 10);
+    dt_->setRange(-15, 15);
 
     conditional_vars_argset_.add(*vrzerr_);
     conditional_vars_argset_.add(*vtzerr_);

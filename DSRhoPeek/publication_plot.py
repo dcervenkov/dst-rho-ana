@@ -135,10 +135,11 @@ def draw_element(tree, element, plot_data, same_opt):
     # superseeds the plot's 'file'
     if 'file' in element:
         root_file_temp = ROOT.TFile(element['file'])
-        tree_temp = root_file_temp.Get(plot_data['treeName'])
-        tree_temp.Draw(plot_data['formula'], cut, same_opt)
-    else:
-        tree.Draw(plot_data['formula'], cut, same_opt)
+        tree = root_file_temp.Get(plot_data['treeName'])
+
+    num_passing = tree.Draw(plot_data['formula'], cut, same_opt)
+    if num_passing == 0:
+        print("WARNING: No events are passing the following cut: " + cut)
 
 
 def decode_arguments():

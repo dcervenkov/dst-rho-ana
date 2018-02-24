@@ -49,6 +49,7 @@ void setBAscVertex(Particle& Bcand);
 bool enoughSVDHits(const Particle& p);
 int getExKFitterPID(const Particle& particle);
 void tag(Particle& Bcand);
+double twoParticleInvariantMass(const Particle& part1, const Particle& part2);
 
 #if defined(BELLE_NAMESPACE)
 } // namespace Belle

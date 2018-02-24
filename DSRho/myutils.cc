@@ -1184,6 +1184,13 @@ void tag(Particle& Bcand) {
 	dynamic_cast<UserInfo&>(Bcand.userInfo()).setWtag((1.0 - flavor_tagger.q()*flavor_tagger.flavor())*0.5);
 }
 
+double twoParticleInvariantMass(const Particle& part1, const Particle& part2) {
+	HepLorentzVector p1(part1.p());
+	HepLorentzVector p2(part2.p());
+	p1 += p2;
+	return p1.m();
+}
+
 #if defined(BELLE_NAMESPACE)
 } // namespace Belle
 #endif

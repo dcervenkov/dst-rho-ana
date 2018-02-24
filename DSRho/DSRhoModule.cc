@@ -173,7 +173,7 @@ void DSRhoModule::hist_def(void) {
 	// Tuples to be created in the HBOOK file
 	std::string tuples("benergy brecflavor btagmclink candsel csbdtg csmlp d0chi2 d0mass d0massbf d0mcflag d0mclink d0pcms "
 			"d0pi0chi de detver dpi0mcflag dsd0diff dspiinv dsmass dsmcflag dsmclink dspcms "
-			"e9oe25g1 e9oe25g2 energyg1 energyg2 evmcflag evtno expmc expno mbc mcflag mclink "
+			"e9oe25g1 e9oe25g2 energyg1 energyg2 evmcflag evtno expmc expno mbc mcflag mclink mdspi mdspi0"
 			"nocand phit phitg pi0chi2 pi0decangle pi0mass pi0mcflag pi0pcms rhomass rhomcflag rhomclink "
 			"rhopcms rhopidr rhopidz rhopimcflag rhopinrf rhopinz rhopipcms runno "
 			"shcosthb shcostht shcosttb spidr spidz spimcflag spimclink spinrf spinz spipcms "
@@ -470,6 +470,9 @@ void DSRhoModule::saveToTuple(Particle Bcand, BelleTuple* tuple) {
 	tuple->column("shcosthb", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getCosThetaB());
 	tuple->column("shcosttb", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getCosThetaTB());
 	tuple->column("shcostht", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getCosThetaT());
+
+	tuple->column("mdspi", twoParticleInvariantMass(Bcand.child(0), Bcand.child(1).child(1)));
+	tuple->column("mdspi0", twoParticleInvariantMass(Bcand.child(0), Bcand.child(1).child(0)));
 
 	const vfit_info vtxRec = dynamic_cast<UserInfo&>(Bcand.userInfo()).getVertexRec();
 	tuple->column("vrusable", vtxRec.m_usable);

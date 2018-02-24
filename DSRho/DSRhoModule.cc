@@ -173,7 +173,7 @@ void DSRhoModule::hist_def(void) {
 	// Tuples to be created in the HBOOK file
 	std::string tuples("benergy brecflavor btagmclink candsel csbdtg csmlp d0chi2 d0mass d0massbf d0mcflag d0mclink d0pcms "
 			"d0pi0chi de detver dpi0mcflag dsd0diff dspiinv dsmass dsmcflag dsmclink dspcms "
-			"e9oe25g1 e9oe25g2 energyg1 energyg2 evmcflag evtno expmc expno mbc mcflag mclink mdspi mdspi0"
+			"e9oe25g1 e9oe25g2 energyg1 energyg2 evmcflag evtno expmc expno mbc mcflag mclink mdspi mdspi0 "
 			"nocand phit phitg pi0chi2 pi0decangle pi0mass pi0mcflag pi0pcms rhomass rhomcflag rhomclink "
 			"rhopcms rhopidr rhopidz rhopimcflag rhopinrf rhopinz rhopipcms runno "
 			"shcosthb shcostht shcosttb spidr spidz spimcflag spimclink spinrf spinz spipcms "

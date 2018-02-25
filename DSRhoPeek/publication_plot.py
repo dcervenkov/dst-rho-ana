@@ -55,8 +55,9 @@ def make_publication_plots(json_file, image_format, plot_dir):
 
 def make_plot(plot_data, image_format, plot_dir, output_file):
     """Make a single plot, save it as a file and into the ROOT output file"""
-    root_file = ROOT.TFile(plot_data['file'])
-    tree = root_file.Get(plot_data['treeName'])
+    tree = ROOT.TChain(plot_data['treeName'])
+    for root_file in plot_data['files']:
+        tree.Add(root_file)
 
     canvas_width = 500
     canvas_height = 500

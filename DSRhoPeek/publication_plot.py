@@ -134,9 +134,10 @@ def draw_element(tree, element, plot_data, same_opt):
 
     # If this element has it's own 'file' key defined, it
     # superseeds the plot's 'file'
-    if 'file' in element:
-        root_file_temp = ROOT.TFile(element['file'])
-        tree = root_file_temp.Get(plot_data['treeName'])
+    if 'files' in element:
+        tree = ROOT.TChain(plot_data['treeName'])
+        for root_file in element['files']:
+            tree.Add(root_file)
 
     num_passing = tree.Draw(plot_data['formula'], cut, same_opt)
     if num_passing == 0:

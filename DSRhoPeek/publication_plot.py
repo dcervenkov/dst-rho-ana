@@ -21,9 +21,39 @@ def setup_plot_style():
 
 def create_legend(plot_data):
     """Create a legend based on labels in plot_data"""
-    legend = ROOT.TLegend(
-        0.75, 0.9 - 0.04 * len(plot_data['elements']), 0.85, 0.9)
-    #mylegend = TLegend(0.15,0.9 - 0.04*num_hists_to_draw,0.25,0.9)
+    # Default legend placement is top right
+    x_min = 0.75
+    x_max = 0.85
+    y_min = 0.9 - 0.04 * len(plot_data['elements'])
+    y_max = 0.9
+
+    if 'legendPosition' in plot_data:
+        if plot_data['legendPosition'] == "top left":
+            x_min = 0.15
+            x_max = 0.25
+            y_min = 0.9 - 0.04 * len(plot_data['elements'])
+            y_max = 0.9
+
+        elif plot_data['legendPosition'] == "top right":
+            x_min = 0.75
+            x_max = 0.85
+            y_min = 0.9 - 0.04 * len(plot_data['elements'])
+            y_max = 0.9
+
+        elif plot_data['legendPosition'] == "bottom right":
+            x_min = 0.75
+            x_max = 0.85
+            y_min = 0.1
+            y_max = 0.1 + 0.04 * len(plot_data['elements'])
+
+        elif plot_data['legendPosition'] == "bottom left":
+            x_min = 0.15
+            x_max = 0.25
+            y_min = 0.1
+            y_max = 0.1 + 0.04 * len(plot_data['elements'])
+
+    legend = ROOT.TLegend(x_min, y_min, x_max, y_max)
+
     legend.SetBorderSize(0)
     legend.SetFillColor(0)
     legend.SetTextFont(43)

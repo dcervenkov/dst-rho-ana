@@ -707,6 +707,7 @@
             "fileName": "mdspi0",
             "formula": "mdspi0",
             "xAxisTitle": "M(D*#pi^{0}) [GeV]",
+            "legendPosition": "top left",
             "files": [
                 "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
                 "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
@@ -761,6 +762,7 @@
             "fileName": "mdspi",
             "formula": "mdspi",
             "xAxisTitle": "M(D*#pi) [GeV]",
+            "legendPosition": "top left",
             "files": [
                 "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
                 "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",

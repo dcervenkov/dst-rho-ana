@@ -60,9 +60,13 @@ def create_legend(plot_data):
     legend.SetTextSize(16)
 
     # Color changes must be done after Draw() because of ROOT
-    for i in range(len(plot_data['elements'])):
-        legend.AddEntry(ROOT.gPad.GetListOfPrimitives().At(i),
-                        plot_data['elements'][i]['label'], "L")
+    num_histos_found = 0
+    for i in range(len(ROOT.gPad.GetListOfPrimitives())):
+        # Not all objects in the list are the ones we are looking for
+        if ROOT.gPad.GetListOfPrimitives().At(i).GetName() == 'htemp':
+            legend.AddEntry(ROOT.gPad.GetListOfPrimitives().At(i),
+                            plot_data['elements'][num_histos_found]['label'], "L")
+            num_histos_found += 1
 
     return legend
 

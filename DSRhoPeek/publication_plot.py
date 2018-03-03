@@ -112,10 +112,13 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
 
         draw_element(tree, element, plot_data, same_opt)
 
+    histograms = get_histograms()
+
     # 2D plots don't need legends as there is only a single element and it
     # would look bad
     if ':' not in plot_data['formula']:
-        change_line_colors(plot_data)
+        change_line_colors(plot_data, histograms)
+        set_optimal_histogram_range(histograms)
         legend = create_legend(plot_data)
         legend.Draw()
 
@@ -130,16 +133,29 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
     canvas.IsA().Destructor(canvas)
 
 
-def change_line_colors(plot_data):
+def change_line_colors(plot_data, histograms):
     """Change line colors in a plot according to plot_data info"""
     # Color changes must be done after Draw() because of ROOT
-    num_histos_found = 0
+    for i, histo in enumerate(histograms):
+        histo.SetLineColor(plot_data['elements'][i]['color'])
+
+
+def set_optimal_histogram_range(histograms):
+    """Set an optimal histogram Y axis range"""
+    max_value = max([histo.GetMaximum() for histo in histograms])
+    for histo in histograms:
+        histo.GetYaxis().SetRangeUser(0, max_value*1.05)
+
+
+def get_histograms():
+    """Return a list of all current histograms (htemp(s))"""
+    histograms = []
     for i in range(ROOT.gPad.GetListOfPrimitives().GetEntries()):
         # There are other things than histos in the list
         if ROOT.gPad.GetListOfPrimitives().At(i).GetName() == 'htemp':
-            ROOT.gPad.GetListOfPrimitives().At(i).SetLineColor(
-                plot_data['elements'][num_histos_found]['color'])
-            num_histos_found += 1
+            histograms.append(ROOT.gPad.GetListOfPrimitives().At(i))
+
+    return histograms
 
 
 def set_histogram_titles(histo, plot_data):

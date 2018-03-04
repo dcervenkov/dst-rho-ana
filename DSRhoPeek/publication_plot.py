@@ -170,19 +170,6 @@ def set_histogram_titles(histo, plot_data):
 
 def draw_element(tree, element, plot_data, same_opt):
     """Draw a single element of a plot, e.g., a histogram"""
-    if 'cut' in element:
-        cut = element['cut']
-    else:
-        # A dummy cut so we can always use && when adding something
-        cut = "1==1"
-
-    if 'min' in plot_data:
-        cut += '&&' + plot_data['formula'] + \
-            '>' + str(plot_data['min'])
-    if 'max' in plot_data:
-        cut += '&&' + plot_data['formula'] + \
-            '<' + str(plot_data['max'])
-
     # If this element has it's own 'file' key defined, it
     # superseeds the plot's 'file'
     if 'files' in element:
@@ -190,9 +177,25 @@ def draw_element(tree, element, plot_data, same_opt):
         for root_file in element['files']:
             tree.Add(root_file)
 
-    num_passing = tree.Draw(plot_data['formula'], cut, same_opt)
+    cuts = get_cut_string(plot_data, element)
+    num_passing = tree.Draw(plot_data['formula'], cuts, same_opt)
     if num_passing == 0:
-        print("WARNING: No events are passing the following cut: " + cut)
+        print("WARNING: No events are passing the following cut: " + cuts)
+
+
+def get_cut_string(plot_data, element):
+    """Return a string with all the relevant cuts"""
+    cuts = []
+    if 'cut' in plot_data:
+        cuts.append(plot_data['cut'])
+    if 'cut' in element:
+        cuts.append(element['cut'])
+    if 'min' in plot_data:
+        cuts.append(plot_data['formula'] + '>' + str(plot_data['min']))
+    if 'max' in plot_data:
+        cuts.append(plot_data['formula'] + '<' + str(plot_data['max']))
+
+    return "&&".join(cuts)
 
 
 def decode_arguments():

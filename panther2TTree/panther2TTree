@@ -1,0 +1,44 @@
+#!/bin/tcsh -f
+
+if ( "$#" != "4" ) then
+    echo "Missing parameters: $0 mdstFileName runNo evtNo nEvts"
+	exit -1
+endif
+
+setenv BASF_NPROCESS 0
+setenv USE_GRAND_REPROCESS_DATA 1
+source /sw/belle/local/etc/cshrc_general
+source /home/belle/dcervenk/Env/cshrc.post
+
+# Parameters
+set mdst="$1"
+set oFile="`basename $mdst .gen`"
+set run="$2"
+set event="$3"
+set n="$4"
+
+basf << EOF >& log/$oFile.log
+
+path create main
+path add_module main panther2TTree
+
+path add_condition main >:0:EXIT
+path add_condition main <=:0:KILL
+
+module put_parameter panther2TTree fileName\\root/$oFile
+module put_parameter panther2TTree qqOnly\1
+module put_parameter panther2TTree strVars\MXYZES
+module put_parameter panther2TTree runNo\\$run
+module put_parameter panther2TTree evtNo\\$event
+module put_parameter panther2TTree nEvts\\$n
+
+initialize
+
+histogram define hbook/$oFile.hbook
+
+process_event $mdst 0 
+
+terminate
+
+EOF
+

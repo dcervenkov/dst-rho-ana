@@ -866,7 +866,7 @@ double getCosThetaT(std::vector<Hep3Vector>& signalMomenta, std::vector<Hep3Vect
 }
 
 void applyCandidateCuts(std::vector<Particle> &B, Continuum& continuumSupression,
-		unsigned& eventsDiscardedByDEandMbcCuts, unsigned& eventsDiscardedByCSCut) {
+		unsigned& eventsDiscardedByDEandMbcCuts, unsigned& eventsDiscardedByCSCut, const bool useSidebands) {
 	Hep3Vector myCMSBoost = -BeamEnergy::CMBoost(); // note the "-" sign
 	double myCMSE = BeamEnergy::E_beam_corr();
 	// Loop over all B candidates, calculate DeltaE and Mbc,
@@ -879,7 +879,9 @@ void applyCandidateCuts(std::vector<Particle> &B, Continuum& continuumSupression
 		double Energy = B0mom.e();
 		double deltaE = Energy - myCMSE;
 
-		if (mbc < MBC_CUT || deltaE > DELTA_E_CUT_HIGH || deltaE < DELTA_E_CUT_LOW) {
+		if (((!useSidebands && mbc < MBC_CUT) || 
+			 (useSidebands && (mbc < MBC_SIDEBAND_CUT || mbc > MBC_CUT))) || 
+			 deltaE > DELTA_E_CUT_HIGH || deltaE < DELTA_E_CUT_LOW) {
 			// bad candidate, remove it
 			B.erase(B.begin() + i);
 			--i;

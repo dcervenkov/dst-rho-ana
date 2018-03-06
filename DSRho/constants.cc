@@ -43,6 +43,7 @@ extern const double BKW_ENDCAP_ANGLE = 2.27;
 //----------------- Cuts ------------------
 // Values are in GeV, cm or dimensionless
 extern const double MBC_CUT = 5.27;
+extern const double MBC_SIDEBAND_CUT = 5.24;
 extern const double DELTA_E_CUT_LOW = -0.15;
 extern const double DELTA_E_CUT_HIGH = 0.10;
 

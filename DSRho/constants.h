@@ -28,6 +28,7 @@ extern const double PI0WIDTH;
 extern const double FWD_ENDCAP_ANGLE;
 extern const double BKW_ENDCAP_ANGLE;
 extern const double MBC_CUT;
+extern const double MBC_SIDEBAND_CUT;
 extern const double DELTA_E_CUT_LOW;
 extern const double DELTA_E_CUT_HIGH;
 extern const double KAON_ID;

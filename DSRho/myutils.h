@@ -41,7 +41,7 @@ void setBCSMetadata(int trueCandidateWasGenerated, const unsigned indexOfBestCan
 		unsigned& eventsWithRightCandidate, unsigned& eventsWithOutRightCandidate, unsigned& numCorrectlySelectedCandidates);
 double invariantMass(const Particle& p1, const Particle& p2);
 void applyCandidateCuts(std::vector<Particle> &B, Continuum& continuumSupression,
-		unsigned& eventsDiscardedByDEandMbcCuts, unsigned& eventsDiscardedByCSCut);
+		unsigned& eventsDiscardedByDEandMbcCuts, unsigned& eventsDiscardedByCSCut, const bool useSidebands);
 void setBRecVertex(Particle& Bcand);
 void setBRecVertexKFitter(Particle& Bcand);
 int setDVertex(Particle& Dcand);

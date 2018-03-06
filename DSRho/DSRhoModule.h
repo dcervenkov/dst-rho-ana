@@ -43,6 +43,7 @@ public:
 	// Parameter set from outside; used to select which channel to reconstruct
 	char channel[128];
 	char svd[10];
+	char sidebands[10];
 
 private:
 	void saveToTuple(Particle Bcand, BelleTuple* tupleB);
@@ -83,6 +84,7 @@ private:
 	int ipUsable;
 
 	int channelNum;
+	bool useSidebands;
 
 	printTree* pt;
 	Continuum continuumSupression;
@@ -94,6 +96,7 @@ extern "C" Module_descr *mdcl_dsrhomodule() {
 	Module_descr *dscr = new Module_descr("dsrhomodule", module);
 	dscr->define_param("channel" ,"Decay channel to be reconstructed", sizeof(module->channel)/sizeof(char), module->channel);
 	dscr->define_param("svd" ,"Weight file for which SVD to be used", sizeof(module->svd)/sizeof(char), module->svd);
+	dscr->define_param("sidebands" ,"Whether to process sidebands or not", sizeof(module->sidebands)/sizeof(char), module->sidebands);
 	basf_save_mdsc(dscr);
 	return dscr;
 }

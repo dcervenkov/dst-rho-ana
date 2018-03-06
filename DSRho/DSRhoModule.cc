@@ -139,6 +139,13 @@ void DSRhoModule::begin_run(BelleEvent*, int *status) {
 	if (strcmp(channel, "D0Kpi") == 0) channelNum = 1;
 	else if (strcmp(channel, "D0Kpipi0") == 0) channelNum = 2;
 	else if (strcmp(channel, "D0K3pi") == 0) channelNum = 3;
+
+	if (strcmp(sidebands, "yes") == 0) {
+		useSidebands = true;
+		printf("*** DC: Processing sidebands\n");
+	} else {
+		useSidebands = false;
+	}
 }
 
 void DSRhoModule::term(void) {
@@ -348,7 +355,7 @@ void DSRhoModule::event(BelleEvent*, int *status) {
 	}
 	// Loop over all B candidates, keep only candidates passing Mbc, DeltaE, rho pi chi^2
 	// and continuum suppression cuts
-	applyCandidateCuts(B, continuumSupression, eventsDiscardedByDEandMbcCuts, eventsDiscardedByCSCut);
+	applyCandidateCuts(B, continuumSupression, eventsDiscardedByDEandMbcCuts, eventsDiscardedByCSCut, useSidebands);
 
 	// Cut on the number of candidates, because the chance to pick the
 	// right one decreases with their number

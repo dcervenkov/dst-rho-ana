@@ -78,6 +78,9 @@ def make_publication_plots(json_file, image_format, plot_dir):
 
         setup_plot_style()
 
+        if not os.path.exists(plot_dir):
+            os.makedirs(plot_dir)
+
         output_file = ROOT.TFile(os.path.join(
             plot_dir, "plots.root"), "RECREATE")
 
@@ -144,7 +147,7 @@ def set_optimal_histogram_range(histograms):
     """Set an optimal histogram Y axis range"""
     max_value = max([histo.GetMaximum() for histo in histograms])
     for histo in histograms:
-        histo.GetYaxis().SetRangeUser(0, max_value*1.05)
+        histo.GetYaxis().SetRangeUser(0, max_value * 1.05)
 
 
 def get_histograms():

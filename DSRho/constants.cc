@@ -11,6 +11,8 @@
 extern const int MAX_NAME_LENGHT = 100;
 
 extern const double PI = 3.14159265358979323846;
+extern const double SPEED_OF_LIGHT = 0.0299792458; //[cm/ps]
+extern const double BETA_GAMMA = 0.425; // Lorentz beta*gamma of Y(4S) in lab
 
 // The Y4S IDHEP code is redefined to a lower value, because
 // the IDHEP plots are otherwise too "zoomed out"

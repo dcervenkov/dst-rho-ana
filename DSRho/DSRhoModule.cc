@@ -172,7 +172,7 @@ void DSRhoModule::hist_def(void) {
 
 	// Tuples to be created in the HBOOK file
 	std::string tuples("benergy brecflavor btagmclink candsel csbdtg csmlp d0chi2 d0mass d0massbf d0mcflag d0mclink d0pcms "
-			"d0pi0chi de detver dpi0mcflag dsd0diff dspiinv dsmass dsmcflag dsmclink dspcms "
+			"d0pi0chi de detver dpi0mcflag dsd0diff dspiinv dsmass dsmcflag dsmclink dspcms dt dtg "
 			"e9oe25g1 e9oe25g2 energyg1 energyg2 evmcflag evtno expmc expno mbc mcflag mclink "
 			"nocand phit phitg pi0chi2 pi0decangle pi0mass pi0mcflag pi0pcms rhomass rhomcflag rhomclink "
 			"rhopcms rhopidr rhopidz rhopimcflag rhopinrf rhopinz rhopipcms runno "
@@ -533,12 +533,14 @@ void DSRhoModule::saveToTuple(Particle Bcand, BelleTuple* tuple) {
 			tuple->column("vtgvtxy", genBTagDaughter->VY());
 			tuple->column("vtgvtxz", genBTagDaughter->VZ());
 			tuple->column("btagmclink", genBtag->idhep());
+			tuple->column("dtg", Bcand.child(0).genHepevt().T() - genBTagDaughter->T());
 		} else {
 			tuple->column("vtgexist", 0);
 			tuple->column("vtgvtxx", 100);
 			tuple->column("vtgvtxy", 100);
 			tuple->column("vtgvtxz", 100);
 			tuple->column("btagmclink", 0);
+			tuple->column("dtg", 100);
 		}
 	} else {
 		tuple->column("vtgexist", 0);
@@ -546,6 +548,7 @@ void DSRhoModule::saveToTuple(Particle Bcand, BelleTuple* tuple) {
 		tuple->column("vtgvtxy", 100);
 		tuple->column("vtgvtxz", 100);
 		tuple->column("btagmclink", 0);
+		tuple->column("dtg", 100);
 
 	}
 
@@ -565,6 +568,8 @@ void DSRhoModule::saveToTuple(Particle Bcand, BelleTuple* tuple) {
 	tuple->column("vtndf", vtxTag.m_ndf);
 	tuple->column("vtntrk", vtxTag.m_ntrk);
 	tuple->column("vtistagl", vtxTag.m_tmp[1]);
+
+	tuple->column("dt", (vtxRec.m_pos.z() - vtxTag.m_pos.z())/(BETA_GAMMA*SPEED_OF_LIGHT));
 
 	tuple->column("tagflavor", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getFlavor());
 	tuple->column("tagqr", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getQr());

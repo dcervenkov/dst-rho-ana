@@ -10,6 +10,8 @@
 
 extern const int MAX_NAME_LENGHT;
 extern const double PI;
+extern const double SPEED_OF_LIGHT;
+extern const double BETA_GAMMA;
 extern const int IDHEP_Y4S;
 extern const int IDHEP_Y4S_REDEFINED;
 extern const int IDHEP_B0;

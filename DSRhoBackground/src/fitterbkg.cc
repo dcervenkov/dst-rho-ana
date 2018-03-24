@@ -72,14 +72,6 @@ FitterBKG::FitterBKG() {
 
     shcosthb_ = new RooRealVar("shcosthb", "shcosthb", -1, 1);
 
-    // TODO: beta*gamma should be computed not a constant and c should be taken from constants.cc
-    dt_formula_ = new RooFormulaVar("dt", "#Deltat [ps]", "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
-                                    RooArgSet(*vrvtxz_, *vtvtxz_));
-    vrzerr_formula_ =
-        new RooFormulaVar("vrzerr", "#sigma z_{rec} [cm]", "sqrt(vrerr6)", RooArgSet(*vrerr6_));
-    vtzerr_formula_ =
-        new RooFormulaVar("vtzerr", "#sigma z_{tag} [cm]", "sqrt(vterr6)", RooArgSet(*vterr6_));
-
     decaytype_ = new RooCategory("decaytype", "decaytype");
     decaytype_->defineType("a", 1);
     decaytype_->defineType("ab", 2);
@@ -135,6 +127,7 @@ FitterBKG::FitterBKG() {
     for (auto var : dataset_vars_) {
         dataset_vars_argset_.add(**var);
     }
+    dataset_vars_argset_.add(dt_);
     dataset_vars_argset_.add(thetat_);
     dataset_vars_argset_.add(thetab_);
     dataset_vars_argset_.add(phit_);

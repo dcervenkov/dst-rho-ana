@@ -81,6 +81,7 @@ class FitterCPV {
     RooRealVar* y0b_;
     RooRealVar* ytb_;
 
+    RooRealVar* dt_;
     RooRealVar* thetat_;
     RooRealVar* thetab_;
     RooRealVar* phit_;
@@ -98,9 +99,6 @@ class FitterCPV {
     RooRealVar* mbc_;
 
     RooRealVar* shcosthb_;
-
-    RooRealVar* dt_;
-    RooFormulaVar* dt_formula_;
 
     RooRealVar* vrzerr_;
     RooFormulaVar* vrzerr_formula_;

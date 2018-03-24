@@ -75,6 +75,8 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     y0b_ = new RooRealVar("y0b", "y0b", par_input[14], -0.4, 0.4);
     ytb_ = new RooRealVar("ytb", "ytb", par_input[15], -0.4, 0.4);
 
+    dt_ = new RooRealVar("dt", "dt", constants::fit_range_dt_low,
+                         constants::fit_range_dt_high);
     thetat_ = new RooRealVar("thetat", "thetat", 0, constants::pi);
     thetab_ = new RooRealVar("thetab", "thetab", 0.5, 2.95);
     phit_ = new RooRealVar("phit", "phit", -constants::pi, constants::pi);
@@ -111,9 +113,6 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
 
     shcosthb_ = new RooRealVar("shcosthb", "shcosthb", -1, 1);
 
-    // TODO: beta*gamma should be computed not a constant and c should be taken from constants.cc
-    dt_formula_ = new RooFormulaVar("dt", "#Deltat [ps]", "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
-                                    RooArgSet(*vrvtxz_, *vtvtxz_));
     vrzerr_formula_ =
         new RooFormulaVar("vrzerr", "#sigma z_{rec} [cm]", "sqrt(vrerr6)", RooArgSet(*vrerr6_));
     vtzerr_formula_ =
@@ -163,6 +162,7 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     conditional_vars_.push_back(&vtistagl_);
 
     dataset_vars_ = conditional_vars_;
+    dataset_vars_.push_back(&dt_);
     dataset_vars_.push_back(&thetat_);
     dataset_vars_.push_back(&thetab_);
     dataset_vars_.push_back(&phit_);
@@ -208,7 +208,6 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     make_plots_ = false;
     perfect_tagging_ = false;
 
-    dt_ = NULL;
     vrzerr_ = NULL;
     vtzerr_ = NULL;
 }
@@ -279,8 +278,6 @@ void FitterCPV::FitSignal() {
     sim_pdf.addPdf(mixing_pdf_ab, "ab");
     sim_pdf.addPdf(mixing_pdf_b, "b");
     sim_pdf.addPdf(mixing_pdf_bb, "bb");
-
-    dt_->setRange("dtFitRange", -15, 15);
 
     tau_->setConstant(true);
     dm_->setConstant(true);
@@ -806,9 +803,6 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
 
         dataset->addColumns(varsToAdd);
 
-        dt_formula_ =
-            new RooFormulaVar("dt", "#Deltat [ps]", "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
-                              RooArgSet(*vrvtxz_, *vtvtxz_));
         vrzerr_formula_ =
             new RooFormulaVar("vrzerr", "#sigma z_{rec} [cm]", "sqrt(vrerr6)", RooArgSet(*vrerr6_));
         vtzerr_formula_ =
@@ -1110,8 +1104,6 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     vrzerr_->setRange(0, 10000);
     vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));
     vtzerr_->setRange(0, 10000);
-    dt_ = static_cast<RooRealVar*>(dataset_->addColumn(*dt_formula_));
-    dt_->setRange(-15, 15);
 
     conditional_vars_argset_.add(*vrzerr_);
     conditional_vars_argset_.add(*vtzerr_);

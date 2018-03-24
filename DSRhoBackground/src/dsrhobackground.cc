@@ -42,6 +42,18 @@ int main(int argc, char* argv[]) {
     fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_);
     fitter.PlotWithPull(fitter.dt_, fitter.dataset_, &fitter.scf_dt_model_);
 
+    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_a_);
+    fitter.PlotWithPull(fitter.dt_, fitter.dataset_a_, &fitter.scf_dt_model_);
+
+    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_ab_);
+    fitter.PlotWithPull(fitter.dt_, fitter.dataset_ab_, &fitter.scf_dt_model_);
+
+    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_b_);
+    fitter.PlotWithPull(fitter.dt_, fitter.dataset_b_, &fitter.scf_dt_model_);
+
+    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_bb_);
+    fitter.PlotWithPull(fitter.dt_, fitter.dataset_bb_, &fitter.scf_dt_model_, "test");
+
     fitter.Fit(&fitter.scf_phit_model_, fitter.dataset_);
     fitter.PlotWithPull(fitter.phit_, fitter.dataset_, &fitter.scf_phit_model_);
 

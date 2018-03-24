@@ -174,10 +174,10 @@ void FitterBKG::PlotWithPull(const RooRealVar& var, const RooDataSet* data, cons
                              const char* title) const {
     TString name = pdf->GetName();
     name += "_";
-    name += var.GetName();
+    name += data->GetName();
     TCanvas canvas(name, name, 500, 500);
 
-    RooPlot* plot = var.frame(RooFit::Range("dtFitRange"));
+    RooPlot* plot = var.frame();
     TPad* pad_var;
     TPad* pad_pull;
     pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
@@ -215,7 +215,7 @@ void FitterBKG::PlotWithPull(const RooRealVar& var, const RooDataSet* data, cons
 
     // Create a new frame to draw the pull distribution and add the distribution to the frame
     RooPlot* plot_pull_ =
-        var.frame(RooFit::Title("Pull Distribution"), RooFit::Range("dtFitRange"));
+        var.frame(RooFit::Title("Pull Distribution"));
     plot_pull_->SetTitle("");
     RooHist* hpull = plot->pullHist();
     hpull->SetFillColor(kGray);
@@ -356,41 +356,29 @@ void FitterBKG::ReadInFile(const char* file_path, const int& num_events) {
     b_cuts = "brecflav==1&&tagqr>0";
     bb_cuts = "brecflav==-1&&tagqr<0";
 
-    // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
-    // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
-    RooDataSet* temp_dataset =
-        new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_, common_cuts);
-
-    //  separate conditional vars from stuff like thetat
+    dataset_ = new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_, common_cuts);
 
     // We add an identifying label to each of the 4 categories and then combine it into a single
     // dataset for RooSimultaneous fitting
-    RooDataSet* dataset_a = static_cast<RooDataSet*>(temp_dataset->reduce(a_cuts));
+    dataset_a_ = static_cast<RooDataSet*>(dataset_->reduce(a_cuts));
     decaytype_->setLabel("a");
-    dataset_a->addColumn(*decaytype_);
+    dataset_a_->addColumn(*decaytype_);
+    dataset_a_->SetName("dataset_a");
 
-    RooDataSet* dataset_ab = static_cast<RooDataSet*>(temp_dataset->reduce(ab_cuts));
+    dataset_ab_ = static_cast<RooDataSet*>(dataset_->reduce(ab_cuts));
     decaytype_->setLabel("ab");
-    dataset_ab->addColumn(*decaytype_);
+    dataset_ab_->addColumn(*decaytype_);
+    dataset_ab_->SetName("dataset_ab");
 
-    RooDataSet* dataset_b = static_cast<RooDataSet*>(temp_dataset->reduce(b_cuts));
+    dataset_b_ = static_cast<RooDataSet*>(dataset_->reduce(b_cuts));
     decaytype_->setLabel("b");
-    dataset_b->addColumn(*decaytype_);
+    dataset_b_->addColumn(*decaytype_);
+    dataset_b_->SetName("dataset_b");
 
-    RooDataSet* dataset_bb = static_cast<RooDataSet*>(temp_dataset->reduce(bb_cuts));
+    dataset_bb_ = static_cast<RooDataSet*>(dataset_->reduce(bb_cuts));
     decaytype_->setLabel("bb");
-    dataset_bb->addColumn(*decaytype_);
-
-    delete temp_dataset;
-
-    dataset_ = static_cast<RooDataSet*>(dataset_a->Clone());
-    delete dataset_a;
-    dataset_->append(*dataset_ab);
-    delete dataset_ab;
-    dataset_->append(*dataset_b);
-    delete dataset_b;
-    dataset_->append(*dataset_bb);
-    delete dataset_bb;
+    dataset_bb_->addColumn(*decaytype_);
+    dataset_bb_->SetName("dataset_bb");
 
     delete input_tree;
     input_file->Close();

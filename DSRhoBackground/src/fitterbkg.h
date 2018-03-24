@@ -86,6 +86,10 @@ class FitterBKG {
     RooCategory* decaytype_;
 
     RooDataSet* dataset_ = NULL;
+    RooDataSet* dataset_a_ = NULL;
+    RooDataSet* dataset_ab_ = NULL;
+    RooDataSet* dataset_b_ = NULL;
+    RooDataSet* dataset_bb_ = NULL;
 
    private:
     TPaveText* CreateStatBox(const double chi2, const bool position_top,

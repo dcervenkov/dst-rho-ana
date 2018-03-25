@@ -981,6 +981,293 @@
                     ]
                 }
             ]
+        },
+        {
+            "fileName": "thetat_bkg",
+            "formula": "thetat",
+            "xAxisTitle": "#theta_{t} [rad]",
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "MC bkg.",
+                    "color": 2,
+                    "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                    ]
+                },
+                {
+                    "label": "MC sideb.",
+                    "color": 9,
+                    "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                    ]
+                },
+                {
+                    "label": "data sideb.",
+                    "color": 5,
+                    "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp07_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp09_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp11_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp13_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp15_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp17_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp19_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp21_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp23_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp25_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp27_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp31_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp33_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp35_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp37_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp39_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp41_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp43_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp45_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp47_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp49_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp51_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp55_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp61_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp63_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp65_on_resonance_HadronBorJ.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "thetab_bkg",
+            "formula": "thetab",
+            "xAxisTitle": "#theta_{b} [rad]",
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "MC bkg.",
+                    "color": 2,
+                    "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                    ]
+                },
+                {
+                    "label": "MC sideb.",
+                    "color": 9,
+                    "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                    ]
+                },
+                {
+                    "label": "data sideb.",
+                    "color": 5,
+                    "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp07_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp09_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp11_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp13_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp15_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp17_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp19_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp21_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp23_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp25_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp27_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp31_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp33_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp35_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp37_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp39_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp41_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp43_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp45_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp47_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp49_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp51_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp55_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp61_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp63_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp65_on_resonance_HadronBorJ.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "phit_bkg",
+            "formula": "phit",
+            "xAxisTitle": "#phi_{t} [rad]",
+            "treeName": "h2000",
+            "legendPosition": "bottom right",
+            "elements": [
+                {
+                    "label": "MC bkg.",
+                    "color": 2,
+                    "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                    ]
+                },
+                {
+                    "label": "MC sideb.",
+                    "color": 9,
+                    "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                    ]
+                },
+                {
+                    "label": "data sideb.",
+                    "color": 5,
+                    "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp07_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp09_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp11_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp13_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp15_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp17_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp19_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp21_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp23_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp25_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp27_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp31_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp33_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp35_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp37_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp39_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp41_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp43_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp45_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp47_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp49_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp51_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp55_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp61_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp63_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp65_on_resonance_HadronBorJ.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "dt_bkg",
+            "formula": "dt",
+            "xAxisTitle": "#Delta t [ps]",
+            "treeName": "h2000",
+            "min": -10,
+            "max": 10,
+            "elements": [
+                {
+                    "label": "MC bkg.",
+                    "color": 2,
+                    "cut": "evmcflag!=1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                    ]
+                },
+                {
+                    "label": "MC sideb.",
+                    "color": 9,
+                    "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+                        "../data/sidebands/D0Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                    ]
+                },
+                {
+                    "label": "data sideb.",
+                    "color": 5,
+                    "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+                    "files": [
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp07_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp09_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp11_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp13_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp15_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp17_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp19_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp21_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp23_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp25_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd1_exp27_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp31_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp33_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp35_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp37_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp39_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp41_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp43_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp45_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp47_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp49_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp51_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp55_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp61_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp63_on_resonance_HadronBorJ.root",
+                        "../data/sidebands/D0Kpi/DSRhoSkim_svd2_exp65_on_resonance_HadronBorJ.root"
+                    ]
+                }
+            ]
         }
     ]
 }

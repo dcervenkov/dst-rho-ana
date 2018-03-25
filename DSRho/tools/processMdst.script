@@ -2,6 +2,7 @@
 
 set MDST_DIR = ${1}
 set CHANNEL = ${2}
+set SIDEBANDS = "no"
 
 switch (${CHANNEL})
 	case "D0Kpi":
@@ -47,6 +48,7 @@ path add_condition main =<:0:KILL
 
 module put_parameter dsrhomodule channel\\${CHANNEL}
 module put_parameter dsrhomodule svd\\${SVD}
+module put_parameter dsrhomodule sidebands\\${SIDEBANDS}
 
 initialize
 histogram define hbook/DSRho-${MDST_DIR}.hbook

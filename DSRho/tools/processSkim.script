@@ -11,6 +11,7 @@ set INDEXPATH=${2}
 set HBOOKPATH=${3}
 set LOGPATH=${4}
 set BASENAME=`basename $INDEXPATH .index`
+set SIDEBANDS="no"
 
 if (! -e ${INDEXPATH}) then
 	echo "ERROR: File '${INDEXPATH}' doesn't exist."
@@ -43,6 +44,7 @@ path add_condition main =<:0:KILL
 
 module put_parameter dsrhomodule channel\\${CHANNEL}
 module put_parameter dsrhomodule svd\\${SVD}
+module put_parameter dsrhomodule sidebands\\${SIDEBANDS}
 
 initialize
 

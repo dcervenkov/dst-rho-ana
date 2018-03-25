@@ -43,14 +43,14 @@ def create_legend(plot_data):
         elif plot_data['legendPosition'] == "bottom right":
             x_min = 0.75
             x_max = 0.85
-            y_min = 0.1
-            y_max = 0.1 + 0.04 * len(plot_data['elements'])
+            y_min = 0.12
+            y_max = 0.12 + 0.04 * len(plot_data['elements'])
 
         elif plot_data['legendPosition'] == "bottom left":
             x_min = 0.15
             x_max = 0.25
-            y_min = 0.1
-            y_max = 0.1 + 0.04 * len(plot_data['elements'])
+            y_min = 0.12
+            y_max = 0.12 + 0.04 * len(plot_data['elements'])
 
     legend = ROOT.TLegend(x_min, y_min, x_max, y_max)
 

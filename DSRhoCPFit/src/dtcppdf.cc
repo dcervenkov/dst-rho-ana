@@ -23,6 +23,9 @@
 
 //ClassImp(DtCPPDF)
 
+Double_t DtCPPDF::int_tht_thb_phit[6];
+bool DtCPPDF::efficiency_integrals_ready = false;
+
 DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_favored, bool _perfect_tagging, int _efficiency_model,
         RooAbsReal& _tht,
         RooAbsReal& _thb,
@@ -99,31 +102,36 @@ DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_fav
     // The rest of this constructor computes angular integrals
     // of certain terms of the PDF. This is used to speed up
     // computation of normalization; see DtCPPDF::analyticalIntegral
-    ROOT::Math::Functor wf1(this, &DtCPPDF::f1, 3);
-    ROOT::Math::Functor wf2(this, &DtCPPDF::f2, 3);
-    ROOT::Math::Functor wf3(this, &DtCPPDF::f3, 3);
-    ROOT::Math::Functor wf4(this, &DtCPPDF::f4, 3);
-    ROOT::Math::Functor wf5(this, &DtCPPDF::f5, 3);
-    ROOT::Math::Functor wf6(this, &DtCPPDF::f6, 3);
 
-    double a[] = {tht.min(), thb.min(), phit.min()};
-    double b[] = {tht.max(), thb.max(), phit.max()};
+    if (efficiency_integrals_ready == false) {
+        ROOT::Math::Functor wf1(this, &DtCPPDF::f1, 3);
+        ROOT::Math::Functor wf2(this, &DtCPPDF::f2, 3);
+        ROOT::Math::Functor wf3(this, &DtCPPDF::f3, 3);
+        ROOT::Math::Functor wf4(this, &DtCPPDF::f4, 3);
+        ROOT::Math::Functor wf5(this, &DtCPPDF::f5, 3);
+        ROOT::Math::Functor wf6(this, &DtCPPDF::f6, 3);
 
-    printf("INFO: Beginning precomputation of efficiency integrals... \n");
-    ROOT::Math::IntegratorMultiDim ig(ROOT::Math::IntegrationMultiDim::kADAPTIVE);
-    ig.SetFunction(wf1);
-    int_tht_thb_phit[0] = ig.Integral(a,b);
-    ig.SetFunction(wf2);
-    int_tht_thb_phit[1] = ig.Integral(a,b);
-    ig.SetFunction(wf3);
-    int_tht_thb_phit[2] = ig.Integral(a,b);
-    ig.SetFunction(wf4);
-    int_tht_thb_phit[3] = ig.Integral(a,b);
-    ig.SetFunction(wf5);
-    int_tht_thb_phit[4] = ig.Integral(a,b);
-    ig.SetFunction(wf6);
-    int_tht_thb_phit[5] = ig.Integral(a,b);
-    printf("INFO: Efficiency integrals' precomputation finished. \n");
+        double a[] = {tht.min(), thb.min(), phit.min()};
+        double b[] = {tht.max(), thb.max(), phit.max()};
+
+        printf("INFO: Beginning precomputation of efficiency integrals... \n");
+        ROOT::Math::IntegratorMultiDim ig(ROOT::Math::IntegrationMultiDim::kADAPTIVE);
+        ig.SetFunction(wf1);
+        int_tht_thb_phit[0] = ig.Integral(a,b);
+        ig.SetFunction(wf2);
+        int_tht_thb_phit[1] = ig.Integral(a,b);
+        ig.SetFunction(wf3);
+        int_tht_thb_phit[2] = ig.Integral(a,b);
+        ig.SetFunction(wf4);
+        int_tht_thb_phit[3] = ig.Integral(a,b);
+        ig.SetFunction(wf5);
+        int_tht_thb_phit[4] = ig.Integral(a,b);
+        ig.SetFunction(wf6);
+        int_tht_thb_phit[5] = ig.Integral(a,b);
+        printf("INFO: Efficiency integrals' precomputation finished. \n");
+
+        efficiency_integrals_ready = true;
+    }
 }
 
 DtCPPDF::DtCPPDF(const char *name, const char *title,
@@ -210,9 +218,6 @@ DtCPPDF::DtCPPDF(const DtCPPDF& other, const char* name) :
             CKM_favored(other.CKM_favored),
             perfect_tagging(other.perfect_tagging)
 {
-    for (int i = 0; i < 6; i++) {
-        int_tht_thb_phit[i] = other.int_tht_thb_phit[i];
-    }
 }
 
 

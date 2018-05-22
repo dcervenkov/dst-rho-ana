@@ -25,6 +25,10 @@
 
 class DtCPPDF : public RooAbsPdf {
 public:
+    // Numerical integrals of certain parts of the PDF
+    static Double_t int_tht_thb_phit[6];
+    static bool efficiency_integrals_ready;
+
     // Constructor without mixing and CPV parameters for lifetime fits
     DtCPPDF(const char *name, const char *title,
             RooAbsReal& _dt,
@@ -145,9 +149,6 @@ protected:
     Double_t f4 (const double * vars);
     Double_t f5 (const double * vars);
     Double_t f6 (const double * vars);
-
-    // Numerical integrals of the above
-    Double_t int_tht_thb_phit[6] ;
 
 private:
     //ClassDef(DSRhoPDF,1) // Your description goes here...

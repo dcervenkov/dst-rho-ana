@@ -35,14 +35,17 @@
 #include "RooRandom.h"
 #include "RooRealVar.h"
 #include "RooSimultaneous.h"
+#include "RooTFnBinding.h"
 #include "RooTreeDataStore.h"
 #include "RooVoigtian.h"
 #include "TAxis.h"
 #include "TCanvas.h"
 #include "TEnv.h"
+#include "TF3.h"
 #include "TFile.h"
 #include "TH1D.h"
 #include "TH2D.h"
+#include "TH3D.h"
 #include "TPaveText.h"
 #include "TStyle.h"
 #include "TTree.h"
@@ -51,6 +54,7 @@
 #include "constants.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
+#include "tools.h"
 
 FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     ap_ = new RooRealVar("ap", "ap", par_input[0], 0, 0.5);
@@ -78,9 +82,10 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
 
     dt_ = new RooRealVar("dt", "dt", constants::fit_range_dt_low,
                          constants::fit_range_dt_high);
-    thetat_ = new RooRealVar("thetat", "thetat", 0, constants::pi);
-    thetab_ = new RooRealVar("thetab", "thetab", 0.5, 2.95);
-    phit_ = new RooRealVar("phit", "phit", -constants::pi, constants::pi);
+    thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", 0, constants::pi);
+    // thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", 0.5, 2.95);
+    thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", 0, constants::pi);
+    phit_ = new RooRealVar("phit", "#phi_{t} [rad]", -constants::pi, constants::pi);
 
     vrusable_ = new RooRealVar("vrusable", "vrusable", 0, 1);
     vrvtxz_ = new RooRealVar("vrvtxz", "vrvtxz", -10, 10);
@@ -286,29 +291,35 @@ void FitterCPV::FitSignal() {
     if (do_mixing_fit_) {
         result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
                                 RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
+                                RooFit::Hesse(false), RooFit::Minos(false),
                                 RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         result_->Print();
 
         if (make_plots_) {
-            RooDataSet* dataset_a =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
-            PlotWithPull(*dt_, *dataset_a, mixing_pdf_a);
+            // RooDataSet* dataset_a =
+            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
+            // PlotWithPull(*dt_, *dataset_a, mixing_pdf_a);
 
-            RooDataSet* dataset_b =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
-            PlotWithPull(*dt_, *dataset_b, mixing_pdf_b);
+            // RooDataSet* dataset_b =
+            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
+            // PlotWithPull(*dt_, *dataset_b, mixing_pdf_b);
 
-            RooDataSet* dataset_ab =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
-            PlotWithPull(*dt_, *dataset_ab, mixing_pdf_ab);
+            // RooDataSet* dataset_ab =
+            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
+            // PlotWithPull(*dt_, *dataset_ab, mixing_pdf_ab);
 
-            RooDataSet* dataset_bb =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
-            PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
+            // RooDataSet* dataset_bb =
+            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
+            // PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
 
-            // PlotWithPull(*thetat_, *dataset_, mixing_pdf_a);
-            // PlotWithPull(*thetab_, *dataset_, mixing_pdf_a);
-            // PlotWithPull(*phit_, *dataset_, mixing_pdf_a);
+            RooDataHist* cr_hist = mixing_pdf_a.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000, RooFit::ExpectedData(true));
+
+            // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *all_hist);
+            RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *cr_hist);
+            // thetab_->setBins(100);
+            PlotWithPull(*thetat_, *dataset_, cr_histpdf);
+            PlotWithPull(*thetab_, *dataset_, cr_histpdf);
+            PlotWithPull(*phit_, *dataset_, cr_histpdf);
         }
     }
 }
@@ -427,6 +438,7 @@ void FitterCPV::FitSCF() {
     if (do_mixing_fit_) {
         // result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
         //                         RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
+        //                         RooFit::Hesse(false), RooFit::Minos(false),
         //                         RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         // result_->Print();
 
@@ -606,6 +618,7 @@ void FitterCPV::FitAll() {
 
     if (do_mixing_fit_) {
         result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
+                                RooFit::Hesse(false), RooFit::Minos(false),
                                 RooFit::Minimizer("Minuit2"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         result_->Print();
 
@@ -1330,3 +1343,50 @@ bool FitterCPV::FixParameters(const char* pars) {
 
      return 0;
  }
+
+ void FitterCPV::TestEfficiency() {
+    Efficiency* eff = new Efficiency();
+    TF3* f = new TF3("f", eff, &Efficiency::EfficiencyInterface, thetat_->getMin(), thetat_->getMax(), thetab_->getMin(), thetab_->getMax(), phit_->getMin(), phit_->getMax(), 0);
+
+    TCanvas* c1 = new TCanvas("c1", "canvas", 500, 500);
+    RooAbsReal* rf = RooFit::bindFunction(f, *thetat_, *thetab_, *phit_);
+    RooPlot* plot = thetab_->frame();
+    rf->plotOn(plot);
+    plot->Draw();
+
+    c1->SaveAs("eff_test.pdf");
+ }
+
+
+TH3D* FitterCPV::GetBinnedEfficiency() {
+    Efficiency eff;
+    TH3D* histo = new TH3D("histo", "histo", 100, thetat_->getMin(), thetat_->getMax(), 100, thetab_->getMin(), thetab_->getMax(), 100, phit_->getMin(), phit_->getMax());
+
+    double thetat, thetab, phit;
+    for (int x = 1; x <= histo->GetXaxis()->GetNbins(); x++) {
+        for (int y = 1; y <= histo->GetYaxis()->GetNbins(); y++) {
+            for (int z = 1; z <= histo->GetZaxis()->GetNbins(); z++) {
+                thetat = histo->GetXaxis()->GetBinCenter(x);
+                thetab = histo->GetYaxis()->GetBinCenter(y);
+                phit = histo->GetZaxis()->GetBinCenter(z);
+                histo->SetBinContent(histo->GetBin(x, y, z), eff.GetEfficiency(thetat, thetab, phit, 5));
+            }
+        }
+    }
+
+    return histo;
+}
+
+void FitterCPV::PlotEfficiency() {
+    TH3D* eff_histo = GetBinnedEfficiency();
+    RooArgSet vars(*thetat_, *thetab_, *phit_);
+    RooDataHist eff_roohisto("eff", "eff", vars, eff_histo);
+
+    thetat_->setBins(50);
+    thetab_->setBins(50);
+    phit_->setBins(50);
+
+    tools::PlotVars2D(*thetat_, *thetab_, eff_roohisto);
+    tools::PlotVars2D(*thetat_, *phit_, eff_roohisto);
+    tools::PlotVars2D(*thetab_, *phit_, eff_roohisto);
+}

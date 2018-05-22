@@ -32,8 +32,10 @@ public:
 	Efficiency();
 	virtual ~Efficiency();
 	double GetEfficiency(double thetat, double thetab, double phit, int efficiency_model) const;
+	double EfficiencyInterface(double* x, double* p) const;
 
 protected:
+	void RescaleVars(double& thetat, double& thetab, double& phit, const double margin) const;
 	RooRealVar* thetat_ = new RooRealVar{"thetat", "#theta_{t}", 0, constants::pi };
 	RooRealVar* thetab_ = new RooRealVar{"thetab", "#theta_{b}", 0.5, 2.95 };
 	RooRealVar* phit_ = new RooRealVar{ "phit", "#phi_{t}", -constants::pi, constants::pi };

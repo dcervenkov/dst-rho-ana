@@ -11,11 +11,15 @@
 
 // ROOT includes
 #include "RooRealVar.h"
+#include "TCanvas.h"
+#include "TH2D.h"
 #include "TList.h"
 #include "TPaveStats.h"
 #include "TStyle.h"
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
+
+#include "constants.h"
 
 namespace tools {
 
@@ -84,6 +88,7 @@ void SetupPlotStyle() {
     gStyle->SetPadTopMargin(0.05);
     gStyle->SetPadRightMargin(0.05);
     gStyle->SetPadBottomMargin(0.1);
+    gStyle->SetOptStat(0);
 }
 
 TPaveText* CreateStatBox(double chi2, RooArgList* results, bool position_top, bool position_left) {
@@ -128,6 +133,24 @@ TPaveText* CreateStatBox(double chi2, RooArgList* results, bool position_top, bo
     snprintf(line, 1000, "#chi^{2} = %.2f\n", chi2);
     stat_box->AddText(line);
     return stat_box;
+}
+
+void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHist& data) {
+    TCanvas canvas(TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
+                   TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
+                   500, 500);
+
+    TH2D* histo = static_cast<TH2D*>(data.createHistogram("histo", var1, RooFit::YVar(var2)));
+
+    canvas.SetRightMargin(0.14);
+
+    histo->SetMinimum(0);
+    histo->SetTitle("");
+    histo->Draw("colz");
+    histo->GetZaxis()->SetTitle("");
+
+    canvas.Write();
+    canvas.SaveAs(constants::format);
 }
 
 }  // namespace tools

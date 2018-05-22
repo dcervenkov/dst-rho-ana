@@ -16,6 +16,7 @@
 // ROOT includes
 #include "RooRealVar.h"
 #include "TCanvas.h"
+#include "TH3D.h"
 #include "TPaveText.h"
 
 // Local includes
@@ -34,6 +35,8 @@ class FitterCPV {
     void FitSCF();
     void FitAll();
     void GenerateToys(const int num_events, const int num_toys);
+    void TestEfficiency();
+    void PlotEfficiency();
 
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
     int GetNumCPUs() { return num_CPUs_; };
@@ -132,6 +135,7 @@ class FitterCPV {
     TPaveText* CreateStatBox(const double chi2, const bool position_top,
                              const bool position_left) const;
     TString GetCommonCutsString() const;
+    TH3D* GetBinnedEfficiency();
 
     std::vector<RooRealVar**> conditional_vars_;
     std::vector<RooRealVar**> dataset_vars_;

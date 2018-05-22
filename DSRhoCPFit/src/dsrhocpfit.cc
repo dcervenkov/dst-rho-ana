@@ -71,10 +71,13 @@ int main(int argc, char* argv[]) {
         fitter.ReadInFile(file_path);
     }
 
-    //  fitter.GenerateToys(10000, 10);
-    // fitter.FitSignal();
+    // fitter.TestEfficiency();
+    // fitter.PlotEfficiency();
+
+    // fitter.GenerateToys(10000, 10);
+    fitter.FitSignal();
     // fitter.FitSCF();
-    fitter.FitAll();
+    // fitter.FitAll();
     fitter.SaveResults(results_path);
 
     return 0;

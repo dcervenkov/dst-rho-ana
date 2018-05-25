@@ -32,6 +32,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3F.h"
+#include "TLegend.h"
 #include "TPaveText.h"
 #include "TStyle.h"
 #include "TTree.h"
@@ -218,14 +219,21 @@ void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooD
     pad_var->cd();
     pad_var->SetLeftMargin(0.12);
 
-    data1.plotOn(plot, RooFit::DataError(RooAbsData::None));
+    data1.plotOn(plot, RooFit::DataError(RooAbsData::None), RooFit::Name("data1"));
     data2.plotOn(plot, RooFit::MarkerColor(2), RooFit::LineColor(2),
-                 RooFit::DataError(RooAbsData::None));
+                 RooFit::DataError(RooAbsData::None), RooFit::Name("data2"));
 
     plot->SetTitle("");
     plot->GetYaxis()->SetTitle("");
     plot->GetYaxis()->SetTitleOffset(1.60);
     plot->Draw();
+
+    TLegend *leg1 = new TLegend(0.65,0.73,0.86,0.87);
+    leg1->SetFillColor(kWhite);
+    leg1->SetLineColor(kWhite);
+    leg1->AddEntry(plot->findObject("data1"), data1.GetTitle(),"LP");
+    leg1->AddEntry(plot->findObject("data2"), data2.GetTitle(), "LP");
+    leg1->Draw();
 
     if (draw_pull) {
         pad_pull->cd();
@@ -793,18 +801,22 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
 
 
     TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
+    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
     TH3F* binned_pdf = ConvertDensityToHisto(kde);
     TH3F* simulated_histo = Create3DHisto(evtgen_dataset_);
     simulated_histo->Multiply(binned_pdf);
     simulated_histo->Scale(gsim_histo->GetSumOfWeights() / simulated_histo->GetSumOfWeights());
 
-    RooDataHist roo_simulated_histo("roo_simulated_histo", "roo_simulated_histo",
+    RooDataHist roo_simulated_histo("simulated", "simulated",
                                     RooArgList(thetat_, thetab_, phit_), simulated_histo);
-    RooDataHist roo_gsim_histo("roo_gsim_histo", "roo_gsim_histo",
+    RooDataHist roo_gsim_histo("gsim", "gsim",
                                RooArgList(thetat_, thetab_, phit_), gsim_histo);
+    RooDataHist roo_evtgen_histo("evtgen", "evtgen",
+                               RooArgList(thetat_, thetab_, phit_), evtgen_histo);
 
     for (auto&& var : vars_) {
         PlotVar(*var, roo_simulated_histo, roo_gsim_histo, true);
+        PlotVar(*var, roo_evtgen_histo, roo_gsim_histo, true);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -815,20 +827,20 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
 
     // Scale the histos so that they have efficiency averages on y (or z) axes
     eff_histo->Scale(1. / 50.);
-    RooDataHist roo_eff_histo_2D("roo_eff_histo", "roo_eff_histo",
+    RooDataHist roo_eff_histo_2D("eff", "eff",
                                  RooArgList(thetat_, thetab_, phit_), eff_histo);
 
     TH3F* scaled_binned_pdf = dynamic_cast<TH3F*>(binned_pdf->Clone("scaled_binned_pdf"));
     double scale = eff_histo->GetSumOfWeights() / binned_pdf->GetSumOfWeights();
     scaled_binned_pdf->Scale(scale);
-    RooDataHist roo_eff_pdf_histo_2D("roo_eff_pdf_histo", "roo_eff_pdf_histo",
+    RooDataHist roo_eff_pdf_histo_2D("eff_pdf", "eff_pdf",
                                      RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 
     eff_histo->Scale(1. / 50.);
-    RooDataHist roo_eff_histo_1D("roo_eff_histo", "roo_eff_histo",
+    RooDataHist roo_eff_histo_1D("eff1D", "eff1D",
                                  RooArgList(thetat_, thetab_, phit_), eff_histo);
     scaled_binned_pdf->Scale(1. / 50.);
-    RooDataHist roo_eff_pdf_histo_1D("roo_eff_pdf_histo", "roo_eff_pdf_histo",
+    RooDataHist roo_eff_pdf_histo_1D("eff_pdf1D", "eff_pdf1D",
                                      RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 
     for (auto&& var : vars_) {

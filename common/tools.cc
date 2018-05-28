@@ -19,8 +19,6 @@
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
 
-#include "constants.h"
-
 namespace tools {
 
 /**
@@ -70,7 +68,7 @@ TChain* ReadDataFromDir(const char* dir) {
 }
 
 /**
- * Setup sane ROOT plot style
+ * Setup a sane ROOT plot style.
  */
 void SetupPlotStyle() {
     // Fonts ending in 3 are not proportional in size to the pad; their size is in pixels
@@ -91,6 +89,14 @@ void SetupPlotStyle() {
     gStyle->SetOptStat(0);
 }
 
+/**
+ * Create a stat box with supplied fit results.
+ *
+ * @param chi2 A chi2 value to be included.
+ * @param results A list of fit results.
+ * @param position_top Place the box at the top (or bottom).
+ * @param position_left Place the box to the left (or right).
+ */
 TPaveText* CreateStatBox(double chi2, RooArgList* results, bool position_top, bool position_left) {
     double x_left, x_right, y_bottom, y_top;
     const double line_height = 0.06;
@@ -135,7 +141,15 @@ TPaveText* CreateStatBox(double chi2, RooArgList* results, bool position_top, bo
     return stat_box;
 }
 
-void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHist& data) {
+/*
+ * Create and save 2D plots of supplied vars and data
+ *
+ * @param var1 First variable.
+ * @param var2 Second variable.
+ * @param data Data to be plotted.
+ * @param format Format in which to save the images.
+ */
+void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHist& data, const char* format) {
     TCanvas canvas(TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
                    TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
                    500, 500);
@@ -150,7 +164,7 @@ void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHis
     histo->GetZaxis()->SetTitle("");
 
     canvas.Write();
-    canvas.SaveAs(constants::format);
+    canvas.SaveAs(format);
 }
 
 }  // namespace tools

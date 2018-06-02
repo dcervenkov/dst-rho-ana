@@ -91,9 +91,6 @@ extern const int D0_PI0_CHI2_CUT = 26;
 // Continuum suppression cut
 extern const double CS_CUT = -1000.6;
 
-// Theta_b cut; see joural
-extern const double THETA_B_CUT = 0.5;
-
 // Track cuts
 extern const int TRACK_NHITS_RPHI = 1;
 extern const int TRACK_NHITS_Z = 2;

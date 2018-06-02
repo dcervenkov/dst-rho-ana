@@ -918,12 +918,6 @@ void applyCandidateCuts(std::vector<Particle> &B, Continuum& continuumSupression
 		dynamic_cast<UserInfo&>(Bcand.userInfo()).setTransversityAngles(thetaT, phiT, thetaB);
 		dynamic_cast<UserInfo&>(Bcand.userInfo()).setGeneratedTransversityAngles(thetaTG, phiTG, thetaBG);
 
-		if (thetaB < THETA_B_CUT) {
-			B.erase(B.begin() + i);
-			--i;
-			continue;
-		}
-
 		ksfwmoments km(Bcand, BeamEnergy::Ecm()/2, -BeamEnergy::CMBoost());
 		dynamic_cast<UserInfo&>(Bcand.userInfo()).setKSFW(km);
 

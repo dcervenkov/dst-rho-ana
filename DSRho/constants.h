@@ -57,7 +57,6 @@ extern const unsigned MAX_NUM_B_CANDIDATES;
 extern const int RHO_PI0_CHI2_CUT;
 extern const int D0_PI0_CHI2_CUT;
 extern const double CS_CUT;
-extern const double THETA_B_CUT;
 extern const int TRACK_NHITS_RPHI;
 extern const int TRACK_NHITS_Z;
 extern const double TAG_TRACK_DZ_CUT;

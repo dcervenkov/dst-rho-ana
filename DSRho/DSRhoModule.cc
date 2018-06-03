@@ -178,8 +178,9 @@ void DSRhoModule::hist_def(void) {
 	extern BelleTupleManager* BASF_Histogram;
 
 	// Tuples to be created in the HBOOK file
-	std::string tuples("benergy brecflavor btagmclink candsel csbdtg csmlp d0chi2 d0mass d0massbf d0mcflag d0mclink d0pcms "
-			"d0pi0chi de detver dpi0mcflag dsd0diff dspiinv dsmass dsmcflag dsmclink dspcms dt dtg "
+	std::string tuples("benergy brecflavor btagmclink candsel costhetat costhetatg costhetab costhetabg csbdtg csmlp "
+			"d0chi2 d0mass d0massbf d0mcflag d0mclink d0pcms d0pi0chi de detver "
+			"dpi0mcflag dsd0diff dspiinv dsmass dsmcflag dsmclink dspcms dt dtg "
 			"e9oe25g1 e9oe25g2 energyg1 energyg2 evmcflag evtno expmc expno mbc mcflag mclink mdspi mdspi0 "
 			"nocand phit phitg pi0chi2 pi0decangle pi0mass pi0mcflag pi0pcms rhomass rhomcflag rhomclink "
 			"rhopcms rhopidr rhopidz rhopimcflag rhopinrf rhopinz rhopipcms runno "
@@ -469,10 +470,14 @@ void DSRhoModule::saveToTuple(Particle Bcand, BelleTuple* tuple) {
 	tuple->column("thetat", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getThetaT());
 	tuple->column("phit", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getPhiT());
 	tuple->column("thetab", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getThetaB());
+	tuple->column("costhetat", cos(dynamic_cast<const UserInfo&>(Bcand.userInfo()).getThetaT()));
+	tuple->column("costhetab", cos(dynamic_cast<const UserInfo&>(Bcand.userInfo()).getThetaB()));
 
 	tuple->column("thetatg", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getThetaTG());
 	tuple->column("phitg", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getPhiTG());
 	tuple->column("thetabg", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getThetaBG());
+	tuple->column("costhetatg", cos(dynamic_cast<const UserInfo&>(Bcand.userInfo()).getThetaTG()));
+	tuple->column("costhetabg", cos(dynamic_cast<const UserInfo&>(Bcand.userInfo()).getThetaBG()));
 
 	tuple->column("shcosthb", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getCosThetaB());
 	tuple->column("shcosttb", dynamic_cast<const UserInfo&>(Bcand.userInfo()).getCosThetaTB());

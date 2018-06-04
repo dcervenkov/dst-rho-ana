@@ -2,6 +2,7 @@
 #include "TCanvas.h"
 #include "TChain.h"
 #include "TF3.h"
+#include "TFile.h"
 #include "TGraph.h"
 #include "TH1D.h"
 #include "TH2D.h"
@@ -110,6 +111,10 @@ std::map<TString,Double_t> GetChi2NDF(TH3D *h3_phi_cosTheta1_cosTheta2, TF3 *f3,
   }
   printf("                                     \r");
   flush(cout);
+
+  TFile output_file(title, "RECREATE");
+  hf3_phi_cosTheta1_cosTheta2->Write();
+  output_file.Close();
 
   // Create 1D and 2D projections from the data histogram
   TH1D *h1_phi                 = (TH1D*)h3_phi_cosTheta1_cosTheta2->Project3D("x");
@@ -374,6 +379,8 @@ void AnalyzeDataset(TString dataset = "BsJpsiPhi", Int_t max_entries = -1,
                     Int_t nBins3D = 20, Int_t nBins1D = 50, Int_t smooth3D = 1, Int_t smooth1D = 1,
                     Int_t max_k = 10, Int_t max_l = 10, TString options = "") {
 
+  gStyle->SetPalette(kViridis);
+
   Bool_t opt_checkNorm  = options.Contains("norm"    , TString::kIgnoreCase);
   Bool_t opt_fastSearch = options.Contains("fast"    , TString::kIgnoreCase);
   Bool_t opt_noSearch   = options.Contains("fullonly", TString::kIgnoreCase);
@@ -421,7 +428,7 @@ void AnalyzeDataset(TString dataset = "BsJpsiPhi", Int_t max_entries = -1,
 
     selection = "";
     t_data = new TChain("Bd");
-    t_data->Add("/home/reznicek/data/SemileptonicRareB/Data2012/MCntuples/cut/skim_208456_sel_red_cut.root");
+    t_data->Add("skim_208456_sel_red_cut.root");
     angle_names[0] = "Extra_helicityAnglePhi" ; angle_title[0] = "#phi";       // phi must be 1st !!!, cos theta1/2 to follow
     angle_names[1] = "Extra_helicityCosThetaL"; angle_title[1] = "cos #theta_{L}";
     angle_names[2] = "Extra_helicityCosThetaK"; angle_title[2] = "cos #theta_{K}";
@@ -443,6 +450,24 @@ void AnalyzeDataset(TString dataset = "BsJpsiPhi", Int_t max_entries = -1,
     angle_names[0] = "Extra_helicityAnglePhi" ; angle_title[0] = "#phi";       // phi must be 1st !!!, cos theta1/2 to follow
     angle_names[1] = "Extra_helicityCosThetaL"; angle_title[1] = "cos #theta_{L}";
     angle_names[2] = "Extra_helicityCosThetaK"; angle_title[2] = "cos #theta_{K}";
+
+  } else if ( dataset == "DC_gsim_mod" ) {
+
+    selection = "";
+    t_data = new TChain("h2000");
+    t_data->Add("../data/DSRho-mdst_basf2_mod_real_unmod_all.root");
+    angle_names[0] = "phit" ; angle_title[0] = "#phi_{t}";       // phi must be 1st !!!, cos theta1/2 to follow
+    angle_names[1] = "costht"; angle_title[1] = "cos #theta_{t}";
+    angle_names[2] = "costhb"; angle_title[2] = "cos #theta_{b}";
+
+  } else if ( dataset == "DC_evtgen" ) {
+
+    selection = "";
+    t_data = new TChain("dataset");
+    t_data->Add("from_ascii.root");
+    angle_names[0] = "phit" ; angle_title[0] = "#phi_{t}";       // phi must be 1st !!!, cos theta1/2 to follow
+    angle_names[1] = "costht"; angle_title[1] = "cos #theta_{t}";
+    angle_names[2] = "costhb"; angle_title[2] = "cos #theta_{b}";
 
   } else {
     printf("Unknown dataset %s !\n", dataset.Data());
@@ -522,7 +547,7 @@ void AnalyzeDataset(TString dataset = "BsJpsiPhi", Int_t max_entries = -1,
   }
 
   // Test plots with full aklm set
-  GetChi2NDF(h3, f3, "full aklm set", "plot text", smooth3D);
+  GetChi2NDF(h3, f3, dataset + ".root", "plot text", smooth3D);
   if ( opt_noSearch ) return;
 
   std::map<TString,Double_t> chi2;

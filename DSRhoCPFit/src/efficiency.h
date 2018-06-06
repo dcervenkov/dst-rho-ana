@@ -18,6 +18,7 @@
 #include "RooGaussian.h"
 #include "RooAddPdf.h"
 #include "RooGenericPdf.h"
+#include "TH3F.h"
 
 // Meerkat includes
 #include "BinnedDensity.hh"
@@ -119,6 +120,9 @@ protected:
     CombinedPhaseSpace phasespace{"phasespace", &phasespace_thetat, &phasespace_thetab,
                                   &phasespace_phit};
 	BinnedDensity* binned_efficiency;
+
+	TH3F* histo_efficiency;
+	bool CanUseInterpolation(const double& phit, const double& transtht, const double& transthb) const;
 	
 };
 

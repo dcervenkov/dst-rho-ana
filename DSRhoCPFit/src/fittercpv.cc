@@ -282,6 +282,7 @@ void FitterCPV::Test() {
     if (do_mixing_fit_) {
         result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
                                 RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
+                                RooFit::Hesse(false), RooFit::Minos(true),
                                 RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         result_->Print();
 

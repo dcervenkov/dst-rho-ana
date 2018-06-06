@@ -763,16 +763,16 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
                                    "(x - 1.57)^2 * (y - 1.57)^2 * (z)^2");
 
     TH3F* eff_histo = GetBinned3DEfficiency();
-    TTree* eff_tree = Histogram2TTree(eff_histo);
+    // TTree* eff_tree = Histogram2TTree(eff_histo);
 
-    BinnedKernelDensity bin_kde("BinKernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
-                                "weight", bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
-                                bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], 0);
+    // BinnedKernelDensity bin_kde("BinKernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
+    //                             "weight", bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
+    //                             bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], 0);
 
-    AdaptiveKernelDensity kde("KernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
-                              "weight", ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2],
-                              ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
-    kde.writeToTextFile(efficiency_file);
+    // AdaptiveKernelDensity kde("KernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
+    //                           "weight", ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2],
+    //                           ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
+    // kde.writeToTextFile(efficiency_file);
 
     if (mirror_margin) {
         thetat_.setMin(0);
@@ -791,9 +791,15 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
         eff_histo = GetBinned3DEfficiency();
     }
 
+    TFile new_efficiency_file("efficiency.root", "read");
+    TH3F* trans_histo = (TH3F*)new_efficiency_file.Get("eff_histo");
+    trans_histo->SetDirectory(0);
+    new_efficiency_file.Close();
+    TH3F* binned_pdf = ConvertTransHisto(trans_histo);
+
 
     TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
-    TH3F* binned_pdf = ConvertDensityToHisto(kde);
+    // TH3F* binned_pdf = ConvertDensityToHisto(kde);
     TH3F* simulated_histo = Create3DHisto(evtgen_dataset_);
     simulated_histo->Multiply(binned_pdf);
     simulated_histo->Scale(gsim_histo->GetSumOfWeights() / simulated_histo->GetSumOfWeights());
@@ -930,4 +936,64 @@ TH3F* Fitter::ConvertDensityToHisto(AdaptiveKernelDensity pdf) {
     }
 
     return pdf_histo;
+}
+
+TH3F* Fitter::ConvertTransHisto(TH3F* trans_histo) {
+    const int num_bins = 50;
+    TH3F* pdf_histo =
+        new TH3F("pdf_histo", "pdf_histo", num_bins, thetat_.getMin(), thetat_.getMax(), num_bins,
+                 thetab_.getMin(), thetab_.getMax(), num_bins, phit_.getMin(), phit_.getMax());
+
+    double thetat;
+    double thetab;
+    double phit;
+    for (int x = 1; x <= pdf_histo->GetXaxis()->GetNbins(); x++) {
+        for (int y = 1; y <= pdf_histo->GetYaxis()->GetNbins(); y++) {
+            for (int z = 1; z <= pdf_histo->GetZaxis()->GetNbins(); z++) {
+                thetat = pdf_histo->GetXaxis()->GetBinCenter(x);
+                thetab = pdf_histo->GetYaxis()->GetBinCenter(y);
+                phit = pdf_histo->GetZaxis()->GetBinCenter(z);
+
+                double eff = 0;
+                double transtht = thetat / TMath::Pi() * 2 - 1;
+                double transthb = thetab / TMath::Pi() * 2 - 1;
+                if (CanUseInterpolation(trans_histo, phit, transtht, transthb)) {
+                    eff = trans_histo->Interpolate(phit, transtht, transthb);
+                } else {
+                    int binx = trans_histo->GetXaxis()->FindBin(phit);
+                    int biny = trans_histo->GetYaxis()->FindBin(transtht);
+                    int binz = trans_histo->GetZaxis()->FindBin(transthb);
+                    int bin = trans_histo->GetBin(binx, biny, binz);
+                    eff = trans_histo->GetBinContent(bin);
+                }
+
+                pdf_histo->SetBinContent(pdf_histo->GetBin(x, y, z), eff);
+            }
+        }
+    }
+
+    return pdf_histo;
+}
+
+/**
+ * Check whether any of the vars is too close to the histogram edge to use
+ * interpolation.
+ * 
+ * From the ROOT documentation: The given values (x,y,z) must be between first
+ * bin center and last bin center for each coordinate.
+ */
+bool Fitter::CanUseInterpolation(const TH3F* histo, const double& phit, const double& transtht,
+                               const double& transthb) const {
+    double vars[3] = {phit, transtht, transthb};
+    const TAxis* axes[3] = {histo->GetXaxis(), histo->GetYaxis(), histo->GetZaxis()};
+
+    for (int i = 0; i < 3; i++) {
+        int last_bin = axes[i]->GetNbins();
+        double low_center = axes[i]->GetBinCenter(1);
+        double high_center = axes[i]->GetBinCenter(last_bin);
+        if (vars[i] < low_center || vars[i] > high_center) {
+            return false;
+        }
+    }
+    return true;
 }

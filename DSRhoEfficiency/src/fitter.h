@@ -49,9 +49,9 @@ class Fitter {
 
     void ProcessKDEEfficiency(const char* efficiency_file, const std::array<double, 6> bin_kde_pars,
                               const std::array<double, 6> ada_kde_pars, const double mirror_margin = 0);
-
+    
     RooRealVar thetat_{"thetat", "#theta_{t} [rad]", 0, kPi};
-    RooRealVar thetab_{"thetab", "#theta_{b} [rad]", 0.5, 2.95};
+    RooRealVar thetab_{"thetab", "#theta_{b} [rad]", 0, kPi};
     RooRealVar phit_{"phit", "#phi_{t} [rad]", -kPi, kPi};
     RooRealVar dt_{"dt", "dt", -15, +15};
     RooCategory dec_type_{"dec_type", "dec_type"};
@@ -69,6 +69,8 @@ class Fitter {
                           const int var_num3);
     int CloseToEdge(double vals[], const int var_num);
     void EnlargeVarRanges(const double margin);
+    TH3F* ConvertTransHisto(TH3F* trans_histo);
+	bool CanUseInterpolation(const TH3F* histo, const double& phit, const double& transtht, const double& transthb) const;
 
     RooRealVar vrvtxz_{"vrvtxz", "vrvtxz", 0};
     RooRealVar vtvtxz_{"vtvtxz", "vtvtxz", 0};

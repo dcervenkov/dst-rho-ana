@@ -875,6 +875,10 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
     TH3F* eff_kde = dynamic_cast<TH3F*>(gsim_kde->Clone("eff_kde"));
     eff_kde->Divide(gsim_kde, evtgen_kde);  //, 1.0, 1.0, "B");
 
+    TFile f(efficiency_file, "RECREATE");
+    eff_kde->Write();
+    f.Close();
+
     RooDataHist roo_gsim_kde_histo("gsim_kde", "gsim_kde",
                                     RooArgList(thetat_, thetab_, phit_), gsim_kde);
     RooDataHist roo_gsim_histo("gsim", "gsim",

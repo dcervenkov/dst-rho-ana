@@ -55,21 +55,31 @@ double Efficiency::GetEfficiency(double thetat, double thetab, double phit,
             if (eff == 0) {
                 eff = GetModel4Efficiency();
             }
+            // printf("Model 5: %f\n", eff);
             return eff;
         }
         case 6:
             double eff = 0;
-            double transtht = thetat / TMath::Pi() * 2 - 1;
-            double transthb = thetab / TMath::Pi() * 2 - 1;
-            if (CanUseInterpolation(phit, transtht, transthb)) {
-                eff = histo_efficiency->Interpolate(phit, transtht, transthb);
+            // double transtht = thetat / TMath::Pi() * 2 - 1;
+            // double transthb = thetab / TMath::Pi() * 2 - 1;
+            double transtht = thetat;
+            double transthb = thetab;
+            // if (CanUseInterpolation(phit, transtht, transthb)) {
+            if (CanUseInterpolation(transtht, transthb, phit)) {
+                // eff = histo_efficiency->Interpolate(phit, transtht, transthb);
+                eff = histo_efficiency->Interpolate(transtht, transthb, phit);
             } else {
-                int binx = histo_efficiency->GetXaxis()->FindBin(phit);
-                int biny = histo_efficiency->GetYaxis()->FindBin(transtht);
-                int binz = histo_efficiency->GetZaxis()->FindBin(transthb);
+                // int binx = histo_efficiency->GetXaxis()->FindBin(phit);
+                // int biny = histo_efficiency->GetYaxis()->FindBin(transtht);
+                // int binz = histo_efficiency->GetZaxis()->FindBin(transthb);
+                int binx = histo_efficiency->GetXaxis()->FindBin(transtht);
+                int biny = histo_efficiency->GetYaxis()->FindBin(transthb);
+                int binz = histo_efficiency->GetZaxis()->FindBin(phit);
                 int bin = histo_efficiency->GetBin(binx, biny, binz);
                 eff = histo_efficiency->GetBinContent(bin);
             }
+            if (eff == 0) eff += 0.000001;
+            // printf("Model 6: %f\n", eff);
             return eff;
     }
     return 0;
@@ -101,7 +111,7 @@ bool Efficiency::CanUseInterpolation(const double& phit, const double& transtht,
 
 // double Efficiency::EfficiencyInterface(double* vars, double* pars) const {
 double Efficiency::EfficiencyInterface(double* x, double* p) const {
-	GetEfficiency(x[0], x[1], x[2], 5);
+	return GetEfficiency(x[0], x[1], x[2], 5);
 }
 
 /**

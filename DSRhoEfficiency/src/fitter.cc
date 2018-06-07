@@ -860,6 +860,137 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
     }
 }
 
+void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
+                                  const std::array<double, 6> bin_kde_pars,
+                                  const std::array<double, 6> ada_kde_pars,
+                                  const double mirror_margin) {
+    TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
+    TH3F* gsim_kde = GetKDEHisto(gsim_dataset_, bin_kde_pars);
+    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
+    TH3F* evtgen_kde = GetKDEHisto(evtgen_dataset_, bin_kde_pars);
+
+    TH3F* eff_histo = dynamic_cast<TH3F*>(gsim_histo->Clone("eff_histo"));
+    eff_histo->Divide(gsim_histo, evtgen_histo);  //, 1.0, 1.0, "B");
+
+    TH3F* eff_kde = dynamic_cast<TH3F*>(gsim_kde->Clone("eff_kde"));
+    eff_kde->Divide(gsim_kde, evtgen_kde);  //, 1.0, 1.0, "B");
+
+    RooDataHist roo_gsim_kde_histo("gsim_kde", "gsim_kde",
+                                    RooArgList(thetat_, thetab_, phit_), gsim_kde);
+    RooDataHist roo_gsim_histo("gsim", "gsim",
+                               RooArgList(thetat_, thetab_, phit_), gsim_histo);
+
+    RooDataHist roo_evtgen_kde_histo("evtgen_kde", "evtgen_kde",
+                                     RooArgList(thetat_, thetab_, phit_), evtgen_kde);
+    RooDataHist roo_evtgen_histo("evtgen", "evtgen",
+                                 RooArgList(thetat_, thetab_, phit_), evtgen_histo);
+
+    for (auto&& var : vars_) {
+        PlotVar(*var, roo_gsim_kde_histo, roo_gsim_histo, true);
+        PlotVar(*var, roo_evtgen_kde_histo, roo_evtgen_histo, true);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = i + 1; j < 3; j++) {
+            PlotVars2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo);
+            PlotVars2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo);
+        }
+    }
+
+    // Scale the histos so that they have efficiency averages on y (or z) axes
+    eff_histo->Scale(1. / 50.);
+    RooDataHist roo_eff_histo_2D("eff", "eff",
+                                 RooArgList(thetat_, thetab_, phit_), eff_histo);
+
+    eff_kde->Scale(1. / 50.);
+    RooDataHist roo_eff_kde_histo_2D("eff_kde", "eff_kde",
+                                     RooArgList(thetat_, thetab_, phit_), eff_kde);
+
+    eff_histo->Scale(1. / 50.);
+    RooDataHist roo_eff_histo_1D("eff1D", "eff1D",
+                                 RooArgList(thetat_, thetab_, phit_), eff_histo);
+    eff_kde->Scale(1. / 50.);
+    RooDataHist roo_eff_kde_histo_1D("eff_pdf1D", "eff_pdf1D",
+                                     RooArgList(thetat_, thetab_, phit_), eff_kde);
+
+    for (auto&& var : vars_) {
+        PlotVar(*var, roo_eff_histo_1D, roo_eff_kde_histo_1D, true);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = i + 1; j < 3; j++) {
+            PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D);
+        }
+    }
+}
+
+void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
+
+
+    TH3F* eff_histo = GetBinned3DEfficiency();
+
+    TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
+    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
+    TH3F* binned_pdf = NormalizePDF(eff_histo, 0, 1);
+
+    TFile f(efficiency_file, "RECREATE");
+    binned_pdf->Write();
+    f.Close();
+
+    TH3F* simulated_histo = Create3DHisto(evtgen_dataset_);
+    simulated_histo->Multiply(binned_pdf);
+    simulated_histo->Scale(gsim_histo->GetSumOfWeights() / simulated_histo->GetSumOfWeights());
+
+    RooDataHist roo_simulated_histo("simulated", "simulated",
+                                    RooArgList(thetat_, thetab_, phit_), simulated_histo);
+    RooDataHist roo_gsim_histo("gsim", "gsim",
+                               RooArgList(thetat_, thetab_, phit_), gsim_histo);
+    RooDataHist roo_evtgen_histo("evtgen", "evtgen",
+                               RooArgList(thetat_, thetab_, phit_), evtgen_histo);
+
+    for (auto&& var : vars_) {
+        PlotVar(*var, roo_simulated_histo, roo_gsim_histo, true);
+        PlotVar(*var, roo_evtgen_histo, roo_gsim_histo, true);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = i + 1; j < 3; j++) {
+            PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo);
+        }
+    }
+
+    // Scale the histos so that they have efficiency averages on y (or z) axes
+    eff_histo->Scale(1. / 50.);
+    RooDataHist roo_eff_histo_2D("eff", "eff",
+                                 RooArgList(thetat_, thetab_, phit_), eff_histo);
+
+    TH3F* scaled_binned_pdf = dynamic_cast<TH3F*>(binned_pdf->Clone("scaled_binned_pdf"));
+    double scale = eff_histo->GetSumOfWeights() / binned_pdf->GetSumOfWeights();
+    scaled_binned_pdf->Scale(scale);
+    RooDataHist roo_eff_pdf_histo_2D("eff_pdf", "eff_pdf",
+                                     RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
+
+    eff_histo->Scale(1. / 50.);
+    RooDataHist roo_eff_histo_1D("eff1D", "eff1D",
+                                 RooArgList(thetat_, thetab_, phit_), eff_histo);
+    scaled_binned_pdf->Scale(1. / 50.);
+    RooDataHist roo_eff_pdf_histo_1D("eff_pdf1D", "eff_pdf1D",
+                                     RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
+
+    for (auto&& var : vars_) {
+        PlotVar(*var, roo_eff_histo_1D, roo_eff_pdf_histo_1D, true);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = i + 1; j < 3; j++) {
+            PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D);
+        }
+    }
+
+}
+
+
+
 TH3F* Fitter::GetBinned3DEfficiency() {
     TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
     TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
@@ -907,7 +1038,7 @@ TTree* Fitter::Histogram2TTree(TH3F* histo) {
     return tree;
 }
 
-TH3F* Fitter::Create3DHisto(const RooDataSet* dataset) {
+TH3F* Fitter::Create3DHisto(const RooDataSet* dataset) const {
     const int num_bins = 50;
     TH3F* histo = new TH3F(dataset->GetName(), dataset->GetTitle(), num_bins, thetat_.getMin(),
                            thetat_.getMax(), num_bins, thetab_.getMin(), thetab_.getMax(), num_bins,
@@ -923,7 +1054,34 @@ TH3F* Fitter::Create3DHisto(const RooDataSet* dataset) {
     return histo;
 }
 
-TH3F* Fitter::ConvertDensityToHisto(AdaptiveKernelDensity pdf) {
+TH3F* Fitter::ConvertDensityToHisto(AdaptiveKernelDensity pdf) const {
+    const int num_bins = 50;
+    TH3F* pdf_histo =
+        new TH3F("pdf_histo", "pdf_histo", num_bins, thetat_.getMin(), thetat_.getMax(), num_bins,
+                 thetab_.getMin(), thetab_.getMax(), num_bins, phit_.getMin(), phit_.getMax());
+
+    double thetat;
+    double thetab;
+    double phit;
+    for (int x = 1; x <= pdf_histo->GetXaxis()->GetNbins(); x++) {
+        for (int y = 1; y <= pdf_histo->GetYaxis()->GetNbins(); y++) {
+            for (int z = 1; z <= pdf_histo->GetZaxis()->GetNbins(); z++) {
+                thetat = pdf_histo->GetXaxis()->GetBinCenter(x);
+                thetab = pdf_histo->GetYaxis()->GetBinCenter(y);
+                phit = pdf_histo->GetZaxis()->GetBinCenter(z);
+                std::vector<double> coords;
+                coords.push_back(thetat);
+                coords.push_back(thetab);
+                coords.push_back(phit);
+                pdf_histo->SetBinContent(pdf_histo->GetBin(x, y, z), pdf.density(coords));
+            }
+        }
+    }
+
+    return pdf_histo;
+}
+
+TH3F* Fitter::ConvertDensityToHisto(BinnedKernelDensity pdf) const {
     const int num_bins = 50;
     TH3F* pdf_histo =
         new TH3F("pdf_histo", "pdf_histo", num_bins, thetat_.getMin(), thetat_.getMax(), num_bins,
@@ -1008,4 +1166,112 @@ bool Fitter::CanUseInterpolation(const TH3F* histo, const double& phit, const do
         }
     }
     return true;
+}
+
+TTree* Fitter::DoubleTreeToFloatTree(TTree* double_tree) const {
+    double dthetat, dthetab, dphit;
+    double_tree->SetBranchAddress("thetat", &dthetat);
+    double_tree->SetBranchAddress("thetab", &dthetab);
+    double_tree->SetBranchAddress("phit", &dphit);
+
+    TTree* tree = new TTree("floattree", "floattree");
+    float thetat;
+    float thetab;
+    float phit;
+    tree->Branch("thetat", &thetat, "thetat/F");
+    tree->Branch("thetab", &thetab, "thetab/F");
+    tree->Branch("phit", &phit, "phit/F");
+
+    Long64_t num_entries = double_tree->GetEntries();
+    for (Long64_t i = 0; i < num_entries; i++) {
+        double_tree->GetEntry(i);
+        thetat = (float)dthetat;
+        thetab = (float)dthetab;
+        phit = (float)dphit;
+        tree->Fill();
+    }
+
+    return tree;
+}
+
+TH3F* Fitter::GetKDEHisto(RooDataSet* dataset, const std::array<double, 6> bin_kde_pars) const {
+    OneDimPhaseSpace phasespace_thetat("phasespace_thetat", thetat_.getMin(), thetat_.getMax());
+    OneDimPhaseSpace phasespace_thetab("phasespace_thetab", thetab_.getMin(), thetab_.getMax());
+    OneDimPhaseSpace phasespace_phit("phasespace_phit", phit_.getMin(), phit_.getMax());
+    CombinedPhaseSpace phasespace("phasespace", &phasespace_thetat, &phasespace_thetab,
+                                  &phasespace_phit);
+    
+    // This line needs to be here to make the new dataset have TTree as a storage backend
+    RooDataSet* dataset_with_tree = new RooDataSet("dataset_with_tree", "dataset_with_tree", dataset, *dataset->get()); 
+    TTree* double_tree = (TTree*)dataset_with_tree->tree();
+
+    // KernelDensity takes float TTrees not double TTrees
+    TTree* tree = DoubleTreeToFloatTree(double_tree);
+
+    BinnedKernelDensity kde("gsim_kde", &phasespace, tree, "thetat", "thetab", "phit",
+                                "weight", bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
+                                bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], 0);
+
+    // AdaptiveKernelDensity kde("KernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
+    //                           "weight", ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2],
+    //                           ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
+
+    TH3F* pdf = ConvertDensityToHisto(kde);
+    TH3F* histo = Create3DHisto(dataset);
+    pdf->Scale(histo->Integral()/pdf->Integral());
+
+    return pdf;
+}
+
+TH3F* Fitter::NormalizePDF(const TH3F* pdf, const double low, const double high) {
+    int total_bins = 0;
+    int fixed_bins = 0;
+    TH3F* normalized_pdf = (TH3F*)pdf->Clone();
+    for (int x = 1; x <= pdf->GetNbinsX(); x++) {
+        for (int y = 1; y <= pdf->GetNbinsY(); y++) {
+            for (int z = 1; z <= pdf->GetNbinsZ(); z++) {
+                total_bins++;
+                int bin = pdf->GetBin(x, y, z);
+                if (pdf->GetBinContent(bin) > high || pdf->GetBinContent(bin) < low) {
+                    fixed_bins++;
+                    int size = 1;
+                    double interpolation = -1;
+                    do {
+                        interpolation = Interpolate(pdf, x, y, z, size++);
+                    } while (interpolation < 0 || interpolation > 1);
+                    // printf("bin %i: value = %f, interpolation = %f\n", bin, pdf->GetBinContent(bin), interpolation);
+                    normalized_pdf->SetBinContent(bin, interpolation);
+                }
+            }
+        }
+    }
+
+    printf("Fixed %i/%i (%.2f%%) bins.\n", fixed_bins, total_bins, (double)fixed_bins/total_bins * 100);
+    return normalized_pdf;
+}
+
+double Fitter::Interpolate(const TH3F* histo, int x_org, int y_org, int z_org, int size) {
+    double new_value = 0;
+    int points = 0;
+    int num_bins_x = histo->GetXaxis()->GetNbins();
+    int num_bins_y = histo->GetYaxis()->GetNbins();
+    int num_bins_z = histo->GetZaxis()->GetNbins();
+
+    for (int x = x_org - size; x <= x_org + size; x++) {
+        for (int y = y_org - size; y <= y_org + size; y++) {
+            for (int z = z_org - size; z <= z_org + size; z++) {
+                if (x == x_org && y == y_org && z == z_org) continue;
+                if (x < 1 || y < 1 || z < 1 || x > num_bins_x || y > num_bins_y || z > num_bins_z) {
+                    printf("skipping\n");
+                    continue;
+                }
+                int bin = histo->GetBin(x, y, z);
+                new_value += histo->GetBinContent(bin);
+                // printf("delta = %f\n", histo->GetBinContent(bin));
+                points++;
+            }
+        }
+    }
+    if (points == 0) return 0;
+    return new_value/points;
 }

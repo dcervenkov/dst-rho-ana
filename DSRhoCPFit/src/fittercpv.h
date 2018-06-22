@@ -34,6 +34,7 @@ class FitterCPV {
     void FitSignal();
     void FitSCF();
     void FitAll();
+    void FitAngularCR();
     void GenerateToys(const int num_events, const int num_toys);
     void TestEfficiency();
     void PlotEfficiency();
@@ -49,6 +50,11 @@ class FitterCPV {
 
     void SetDoMixingFit(const bool& do_mixing_fit) { do_mixing_fit_ = do_mixing_fit; };
     int GetDoMixingFit() const { return do_mixing_fit_; };
+
+    void SetDoTimeIndependentFit(const bool& do_time_independent_fit) {
+        do_time_independent_fit_ = do_time_independent_fit;
+    };
+    int GetDoTimeIndependentFit() const { return do_time_independent_fit_; };
 
     void SetMakePlots(const bool& make_plots) { make_plots_ = make_plots; };
     int GetMakePlots() const { return make_plots_; };
@@ -155,6 +161,7 @@ class FitterCPV {
     int efficiency_model_;
     bool do_lifetime_fit_;
     bool do_mixing_fit_;
+    bool do_time_independent_fit_;
     bool make_plots_;
     bool perfect_tagging_;
 };

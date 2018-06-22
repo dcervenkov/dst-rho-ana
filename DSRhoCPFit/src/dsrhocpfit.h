@@ -15,6 +15,8 @@ struct fitter_options {
     bool num_CPUs_set;
     bool do_mixing_fit;
     bool do_mixing_fit_set;
+    bool do_time_independent_fit;
+    bool do_time_independent_fit_set;
     char* fix;
     bool fix_set;
     char* plot_dir;
@@ -25,6 +27,8 @@ struct fitter_options {
     bool perfect_tagging_set;
     int efficiency_model;
     bool efficiency_model_set;
+    char* fit;
+    bool fit_set;
 };
 
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,

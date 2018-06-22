@@ -51,6 +51,7 @@
 #include "TTree.h"
 
 // Local includes
+#include "angularpdf.h"
 #include "constants.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
@@ -591,11 +592,11 @@ void FitterCPV::FitAll() {
     RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a",
                          RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
     RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab",
-                         RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
+                          RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
     RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b",
                          RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
     RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb",
-                     RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
+                          RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
 
 
     RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.8);
@@ -685,6 +686,29 @@ void FitterCPV::FitAll() {
             PlotWithPull(*thetab_, *dataset_, all_histpdf, components);
             PlotWithPull(*phit_, *dataset_, all_histpdf, components);
         }
+    }
+}
+
+void FitterCPV::FitAngularCR() {
+    RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
+    dataset_ = temp_dataset;
+
+    AngularPDF pdf("pdf", "pdf", efficiency_model_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_,
+                   *ata_);
+
+    result_ = pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false), 
+                        RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+    result_->Print();
+
+    if (make_plots_) {
+        RooDataHist* cr_hist = pdf.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+                                                  RooFit::ExpectedData(true));
+        RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
+                              *cr_hist);
+
+        PlotWithPull(*thetat_, *dataset_, cr_histpdf);
+        PlotWithPull(*thetab_, *dataset_, cr_histpdf);
+        PlotWithPull(*phit_, *dataset_, cr_histpdf);
     }
 }
 
@@ -1251,7 +1275,7 @@ bool FitterCPV::FixParameters(const char* pars) {
      // const RooArgSet* args = dataSet->get();
      // RooPlot* frame = 0;
 
-     const int numParameters = 54;
+     int numParameters = 54;
      double* parameters = new double[numParameters];
 
      FILE* pFile;
@@ -1281,43 +1305,47 @@ bool FitterCPV::FixParameters(const char* pars) {
      parameters[16] = ata_->getVal();
      parameters[17] = ata_->getError();
 
-     parameters[18] = par_input_[4];
-     parameters[19] = xp_->getVal();
-     parameters[20] = xp_->getError();
-     parameters[21] = par_input_[5];
-     parameters[22] = x0_->getVal();
-     parameters[23] = x0_->getError();
-     parameters[24] = par_input_[6];
-     parameters[25] = xt_->getVal();
-     parameters[26] = xt_->getError();
-     parameters[27] = par_input_[7];
-     parameters[28] = yp_->getVal();
-     parameters[29] = yp_->getError();
-     parameters[30] = par_input_[8];
-     parameters[31] = y0_->getVal();
-     parameters[32] = y0_->getError();
-     parameters[33] = par_input_[9];
-     parameters[34] = yt_->getVal();
-     parameters[35] = yt_->getError();
+     if (!do_time_independent_fit_) {
+        parameters[18] = par_input_[4];
+        parameters[19] = xp_->getVal();
+        parameters[20] = xp_->getError();
+        parameters[21] = par_input_[5];
+        parameters[22] = x0_->getVal();
+        parameters[23] = x0_->getError();
+        parameters[24] = par_input_[6];
+        parameters[25] = xt_->getVal();
+        parameters[26] = xt_->getError();
+        parameters[27] = par_input_[7];
+        parameters[28] = yp_->getVal();
+        parameters[29] = yp_->getError();
+        parameters[30] = par_input_[8];
+        parameters[31] = y0_->getVal();
+        parameters[32] = y0_->getError();
+        parameters[33] = par_input_[9];
+        parameters[34] = yt_->getVal();
+        parameters[35] = yt_->getError();
 
-     parameters[36] = par_input_[10];
-     parameters[37] = xpb_->getVal();
-     parameters[38] = xpb_->getError();
-     parameters[39] = par_input_[11];
-     parameters[40] = x0b_->getVal();
-     parameters[41] = x0b_->getError();
-     parameters[42] = par_input_[12];
-     parameters[43] = xtb_->getVal();
-     parameters[44] = xtb_->getError();
-     parameters[45] = par_input_[13];
-     parameters[46] = ypb_->getVal();
-     parameters[47] = ypb_->getError();
-     parameters[48] = par_input_[14];
-     parameters[49] = y0b_->getVal();
-     parameters[50] = y0b_->getError();
-     parameters[51] = par_input_[15];
-     parameters[52] = ytb_->getVal();
-     parameters[53] = ytb_->getError();
+        parameters[36] = par_input_[10];
+        parameters[37] = xpb_->getVal();
+        parameters[38] = xpb_->getError();
+        parameters[39] = par_input_[11];
+        parameters[40] = x0b_->getVal();
+        parameters[41] = x0b_->getError();
+        parameters[42] = par_input_[12];
+        parameters[43] = xtb_->getVal();
+        parameters[44] = xtb_->getError();
+        parameters[45] = par_input_[13];
+        parameters[46] = ypb_->getVal();
+        parameters[47] = ypb_->getError();
+        parameters[48] = par_input_[14];
+        parameters[49] = y0b_->getVal();
+        parameters[50] = y0b_->getError();
+        parameters[51] = par_input_[15];
+        parameters[52] = ytb_->getVal();
+        parameters[53] = ytb_->getError();
+     } else {
+        numParameters = 18;
+     }
 
      Int_t separators[] = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2,
                            0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2,

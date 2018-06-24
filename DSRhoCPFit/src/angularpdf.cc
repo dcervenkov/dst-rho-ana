@@ -14,7 +14,7 @@
 
 //ClassImp(AngularPDF)
 
-AngularPDF::AngularPDF(const char *name, const char *title, int _efficiency_model,
+AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _efficiency_model,
                    RooAbsReal& _tht,
                    RooAbsReal& _thb,
                    RooAbsReal& _phit,
@@ -29,10 +29,10 @@ AngularPDF::AngularPDF(const char *name, const char *title, int _efficiency_mode
     ap("ap","ap",this,_ap),
     apa("apa","apa",this,_apa),
     a0("a0","a0",this,_a0),
-    ata("ata","ata",this,_ata)
+    ata("ata","ata",this,_ata),
+    B_bar(_B_bar),
+    efficiency_model(_efficiency_model)
 {
-    efficiency_model = _efficiency_model;
-
     // The rest of this constructor computes angular integration
     // of certain terms of the PDF. This is used to speed up
     // computation of normalization; see AngularPDF::analyticalIntegral
@@ -71,13 +71,13 @@ AngularPDF::AngularPDF(const AngularPDF& other, const char* name) :
     ap("ap",this,other.ap),
     apa("apa",this,other.apa),
     a0("a0",this,other.a0),
-    ata("ata",this,other.ata)
+    ata("ata",this,other.ata),
+    B_bar(other.B_bar),
+    efficiency_model(other.efficiency_model)
 {
     for (int i = 0; i < 6; i++) {
         int_tht_thb_phit[i] = other.int_tht_thb_phit[i];
     }
-
-    efficiency_model = other.efficiency_model;
 }
 
 
@@ -87,11 +87,14 @@ Double_t AngularPDF::evaluate() const {
     Double_t at = sqrt(1-ap*ap-a0*a0);
 
     Double_t ap0r = ap*a0*cos(-apa+a0a);
-//    Double_t ap0i = ap*a0*sin(-apa+a0a);
-//    Double_t a0tr = a0*at*cos(-a0a+ata);
     Double_t a0ti = a0*at*sin(-a0a+ata);
-//    Double_t aptr = ap*at*cos(-apa+ata);
     Double_t apti = ap*at*sin(-apa+ata);
+
+    // Add pi to at phase for antiparticles
+    if (B_bar) {
+        a0ti = -a0ti;
+        apti = -apti;
+    }
 
     Double_t value = ap*ap*2*sin(tht)*sin(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)*sin(phit)+\
                      at*at*2*cos(tht)*cos(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)+\

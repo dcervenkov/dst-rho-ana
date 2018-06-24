@@ -693,15 +693,23 @@ void FitterCPV::FitAngularCR() {
     RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
     dataset_ = temp_dataset;
 
-    AngularPDF pdf("pdf", "pdf", efficiency_model_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_,
+    AngularPDF pdf_B("pdf_B", "pdf_B", false, efficiency_model_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_,
+                   *ata_);
+    AngularPDF pdf_B_bar("pdf_B_bar", "pdf_B_bar", true, efficiency_model_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_,
                    *ata_);
 
-    result_ = pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false), 
+    RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
+    sim_pdf.addPdf(pdf_B, "a");
+    sim_pdf.addPdf(pdf_B_bar, "ab");
+    sim_pdf.addPdf(pdf_B, "b");
+    sim_pdf.addPdf(pdf_B_bar, "bb");
+
+    result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
                         RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
     result_->Print();
 
     if (make_plots_) {
-        RooDataHist* cr_hist = pdf.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+        RooDataHist* cr_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                   RooFit::ExpectedData(true));
         RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                               *cr_hist);

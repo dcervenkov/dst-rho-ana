@@ -83,10 +83,10 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
 
     dt_ = new RooRealVar("dt", "dt", constants::fit_range_dt_low,
                          constants::fit_range_dt_high);
-    thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", 0, constants::pi);
+    thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", 0, TMath::Pi());
     thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", 0.5, 2.95);
-    // thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", 0, constants::pi);
-    phit_ = new RooRealVar("phit", "#phi_{t} [rad]", -constants::pi, constants::pi);
+    // thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", 0, TMath::Pi());
+    phit_ = new RooRealVar("phit", "#phi_{t} [rad]", -TMath::Pi(), TMath::Pi());
 
     vrusable_ = new RooRealVar("vrusable", "vrusable", 0, 1);
     vrvtxz_ = new RooRealVar("vrvtxz", "vrvtxz", -10, 10);

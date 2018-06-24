@@ -10,8 +10,12 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
+// Standard includes
+#include <array>
+
 namespace constants {
 
+extern const std::array<double, 16> par_input;
 extern const double pi;
 extern const double ap;
 extern const double at;

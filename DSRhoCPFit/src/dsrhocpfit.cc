@@ -28,11 +28,11 @@ int main(int argc, char* argv[]) {
     fitter_options options = {};
     const int optionless_argc = ProcessCmdLineOptions(argc, argv, optionless_argv, options);
 
-    if (optionless_argc != 19) {
+    if (optionless_argc != 19 && optionless_argc != 3) {
         printf("ERROR: Wrong number of arguments.\n");
         printf(
             "Usage: %s [OPTION]... -- INPUT-FILE OUTPUT_DIR "
-            "AP APA A0 ATA XP X0 XT YP Y0 YT XPB X0B XTB YPB Y0B YTB\n",
+            "[AP APA A0 ATA XP X0 XT YP Y0 YT XPB X0B XTB YPB Y0B YTB]\n",
             optionless_argv[0]);
         return 2;
     }
@@ -42,10 +42,14 @@ int main(int argc, char* argv[]) {
     const char* file_path = optionless_argv[1];
     const char* results_path = optionless_argv[2];
     std::array<double, 16> par_input;
-    for (size_t i = 0; i < par_input.size(); i++) {
-        par_input[i] = atof(optionless_argv[i + 3]);
-    }
 
+    if (optionless_argc == 19) {
+        for (size_t i = 0; i < par_input.size(); i++) {
+            par_input[i] = atof(optionless_argv[i + 3]);
+        }
+    } else {
+        par_input = constants::par_input;
+    }
     tools::SetupPlotStyle();
     colors::setColors();
 

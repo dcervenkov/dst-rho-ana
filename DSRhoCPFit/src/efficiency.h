@@ -37,9 +37,9 @@ public:
 
 protected:
 	void RescaleVars(double& thetat, double& thetab, double& phit, const double margin) const;
-	RooRealVar* thetat_ = new RooRealVar{"thetat", "#theta_{t}", 0, constants::pi };
+	RooRealVar* thetat_ = new RooRealVar{"thetat", "#theta_{t}", 0, TMath::Pi() };
 	RooRealVar* thetab_ = new RooRealVar{"thetab", "#theta_{b}", 0.5, 2.95 };
-	RooRealVar* phit_ = new RooRealVar{ "phit", "#phi_{t}", -constants::pi, constants::pi };
+	RooRealVar* phit_ = new RooRealVar{ "phit", "#phi_{t}", -TMath::Pi(), TMath::Pi() };
 
 	// Model 1
 	RooRealVar model1_thetat_p0_ { "model1_thetat_p0", "p_{0}", 0.004249 };

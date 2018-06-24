@@ -431,10 +431,10 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
             return 16./9.*(nAt2 + 2*nA02*cos(phit)*cos(phit) + 2*nAp2*sin(phit)*sin(phit));
 
         case 4: // Int[g,{dt,tht,phit}]
-            return 8.*constants::pi/3*((nAp2+nAt2)*sin(thb)*sin(thb) + 2*nA02*cos(thb)*cos(thb))*sin(thb);
+            return 8.*TMath::Pi()/3*((nAp2+nAt2)*sin(thb)*sin(thb) + 2*nA02*cos(thb)*cos(thb))*sin(thb);
 
         case 5: // Int[g,{dt,thb,phit}]
-            return 8.*constants::pi/3*((nAp2+nA02)*sin(tht)*sin(tht) + 2*nAt2*cos(tht)*cos(tht))*sin(tht);
+            return 8.*TMath::Pi()/3*((nAp2+nA02)*sin(tht)*sin(tht) + 2*nAt2*cos(tht)*cos(tht))*sin(tht);
 
         case 6: // Int[g,{dt,tht}]
             return 4./3.*(4*nA02*cos(phit)*cos(phit)*cos(thb)*cos(thb) + \
@@ -445,17 +445,17 @@ Double_t DtCPPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
                     sin(phit)*(nAp2*sin(phit)*sin(tht)*sin(tht) - apti*sin(2*tht)))*sin(tht);
 
         case 8: // Int[g,{dt,phit}]
-            return 2*constants::pi*(2*nAt2*cos(tht)*cos(tht)*sin(thb)*sin(thb) +
+            return 2*TMath::Pi()*(2*nAt2*cos(tht)*cos(tht)*sin(thb)*sin(thb) +
                     (2*nA02*cos(thb)*cos(thb) + nAp2*sin(thb)*sin(thb))*sin(tht)*sin(tht))*(sin(tht)*sin(thb));
 
         case 9: // Int[g,{tht,thb}]
             return 16./9.*(At2 + 2*A02*cos(phit)*cos(phit) + 2*Ap2*sin(phit)*sin(phit));
 
         case 10: // Int[g,{tht,phit}]
-            return 8.*constants::pi/3*((Ap2+At2)*sin(thb)*sin(thb) + 2*A02*cos(thb)*cos(thb))*sin(thb);
+            return 8.*TMath::Pi()/3*((Ap2+At2)*sin(thb)*sin(thb) + 2*A02*cos(thb)*cos(thb))*sin(thb);
 
         case 11: // Int[g,{thb,phit}]
-            return 8.*constants::pi/3*((Ap2+A02)*sin(tht)*sin(tht) + 2*At2*cos(tht)*cos(tht))*sin(tht);
+            return 8.*TMath::Pi()/3*((Ap2+A02)*sin(tht)*sin(tht) + 2*At2*cos(tht)*cos(tht))*sin(tht);
 
         case 12: // Int[g,{dt}]
             CalculateAmplitudeTerms(nAp2, nA02, nAt2, nAp0r, nA0ti, nApti, norm_const,

@@ -119,8 +119,8 @@ double Efficiency::EfficiencyInterface(double* x, double* p) const {
  */
 void Efficiency::RescaleVars(double& thetat, double& thetab, double& phit, const double margin) const {
 	const double vars[3] = {thetat, thetab, phit};
-	const double min[3] = {0, 0.6, -constants::pi};
-	const double max[3] = {constants::pi, 2.95, constants::pi};
+	const double min[3] = {0, 0.6, -TMath::Pi()};
+	const double max[3] = {TMath::Pi(), 2.95, TMath::Pi()};
 
 	double center[3];
 	double new_vars[3];

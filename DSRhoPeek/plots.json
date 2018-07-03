@@ -1,6 +1,37 @@
 {
     "plots": [
         {
+            "fileName": "dt_cr",
+            "formula": "dt",
+            "xAxisTitle": "#Deltat [ps]",
+            "min": -10,
+            "max": 10,
+            "file": "../data/DSRho-mdst_basf2_mod_real_unmod_1.root",
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "a",
+                    "color": 2,
+                    "cut": "evmcflag==1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagqr<0"
+                },
+                {
+                    "label": "ab",
+                    "color": 3,
+                    "cut": "evmcflag==1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagqr>0"
+                },
+                {
+                    "label": "b",
+                    "color": 4,
+                    "cut": "evmcflag==1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==1&&tagqr>0"
+                },
+                {
+                    "label": "bb",
+                    "color": 5,
+                    "cut": "evmcflag==1&&vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&brecflav==-1&&tagqr<0"
+                }
+            ]
+        },
+        {
             "fileName": "dt_a",
             "formula": "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
             "xAxisTitle": "#Deltat [ps]",

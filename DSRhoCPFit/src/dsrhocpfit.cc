@@ -11,6 +11,7 @@
 
 // Standard includes
 #include <array>
+#include <cstring>
 #include <getopt.h>
 #include <stdio.h>
 
@@ -27,11 +28,11 @@ int main(int argc, char* argv[]) {
     fitter_options options = {};
     const int optionless_argc = ProcessCmdLineOptions(argc, argv, optionless_argv, options);
 
-    if (optionless_argc != 19) {
+    if (optionless_argc != 19 && optionless_argc != 3) {
         printf("ERROR: Wrong number of arguments.\n");
         printf(
             "Usage: %s [OPTION]... -- INPUT-FILE OUTPUT_DIR "
-            "AP APA A0 ATA XP X0 XT YP Y0 YT XPB X0B XTB YPB Y0B YTB\n",
+            "[AP APA A0 ATA XP X0 XT YP Y0 YT XPB X0B XTB YPB Y0B YTB]\n",
             optionless_argv[0]);
         return 2;
     }
@@ -41,10 +42,14 @@ int main(int argc, char* argv[]) {
     const char* file_path = optionless_argv[1];
     const char* results_path = optionless_argv[2];
     std::array<double, 16> par_input;
-    for (size_t i = 0; i < par_input.size(); i++) {
-        par_input[i] = atof(optionless_argv[i + 3]);
-    }
 
+    if (optionless_argc == 19) {
+        for (size_t i = 0; i < par_input.size(); i++) {
+            par_input[i] = atof(optionless_argv[i + 3]);
+        }
+    } else {
+        par_input = constants::par_input;
+    }
     tools::SetupPlotStyle();
     colors::setColors();
 
@@ -58,11 +63,20 @@ int main(int argc, char* argv[]) {
     }
     if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
     if (options.do_mixing_fit_set) fitter.SetDoMixingFit(options.do_mixing_fit);
+    if (options.do_time_independent_fit_set) {
+        fitter.SetDoTimeIndependentFit(options.do_time_independent_fit);
+    } else {
+        fitter.SetDoTimeIndependentFit(false);
+    }
     if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
     if (options.fix_set) {
         if (fitter.FixParameters(options.fix)) {
             return 1;
         }
+    }
+
+    if (!options.fit_set) {
+        options.fit = (char*)"all";
     }
 
     if (options.num_events_set) {
@@ -71,9 +85,31 @@ int main(int argc, char* argv[]) {
         fitter.ReadInFile(file_path);
     }
 
-    fitter.Test();
-    //  fitter.GenerateToys(10000, 10);
-    //  fitter.Test();
+    // fitter.TestEfficiency();
+    // fitter.PlotEfficiency();
+
+    if (std::strcmp(options.fit, "CR")) {
+        if (fitter.GetDoTimeIndependentFit()) {
+            fitter.FitAngularCR();
+        } else {
+            fitter.FitSignal();
+        }
+    } else if (std::strcmp(options.fit, "CRSCF")) {
+        if (fitter.GetDoTimeIndependentFit()) {
+            printf("ERROR: Time independent CRSCF fit not implemented!\n");
+            return 2;
+        } else {
+            fitter.FitSCF();
+        }
+    } else if (std::strcmp(options.fit, "all")) {
+        if (fitter.GetDoTimeIndependentFit()) {
+            printf("ERROR: Full time independent fit not implemented!\n");
+            return 2;
+        } else {
+            fitter.FitAll();
+        }
+    }
+    // fitter.GenerateToys(10000, 10);
     fitter.SaveResults(results_path);
 
     return 0;
@@ -99,16 +135,17 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     int c;
     struct option long_options[] = {
         {"cpus", required_argument, 0, 'c'},
-        {"efficiency-model", required_argument, 0, 'f'},
-        {"events", required_argument, 0, 'e'},
+        {"efficiency-model", required_argument, 0, 'e'},
+        {"events", required_argument, 0, 'n'},
         {"fix", required_argument, 0, 'x'},
         {"mixing", no_argument, 0, 'm'},
+        {"time-independent", no_argument, 0, 'i'},
         {"perfect-tag", no_argument, 0, 't'},
         {"plot", required_argument, 0, 'p'},
         {"help", no_argument, 0, 'h'},
         {NULL, no_argument, NULL, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:f:e:x:p:lmth", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:f:e:x:p:lmith", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -119,11 +156,11 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.num_CPUs = atoi(optarg);
                 options.num_CPUs_set = true;
                 break;
-            case 'f':
+            case 'e':
                 options.efficiency_model = atoi(optarg);
                 options.efficiency_model_set = true;
                 break;
-            case 'e':
+            case 'n':
                 options.num_events = atoi(optarg);
                 options.num_events_set = true;
                 break;
@@ -139,6 +176,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.do_mixing_fit = true;
                 options.do_mixing_fit_set = true;
                 break;
+            case 'i':
+                options.do_time_independent_fit = true;
+                options.do_time_independent_fit_set = true;
+                break;
             case 't':
                 options.perfect_tagging = true;
                 options.perfect_tagging_set = true;
@@ -147,17 +188,20 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("Usage: %s [OPTION]... INPUT-FILE OUTPUT_DIR\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
-                printf("-f, --efficiency-model=MODEL_NUM number of CPU cores to use for fitting and plotting\n");
-                printf("-e, --events=NUM_EVENTS          number of events to be imported from the input file\n");
-                printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit\n");
+                printf("-e, --efficiency-model=MODEL_NUM number of the efficiency model to be used\n");
+                printf("-f, --fit=CR|CRSCF|all           do a specified fit type\n");
                 printf("-h, --help                       display this text and exit\n");
+                printf("-i, --time-independent           make a time-independent fit\n");
                 printf("-m, --mixing                     make a mixing fit\n");
-                printf("-t, --perfect-tag                 use MC info to get perfect tagging\n");
+                printf("-n, --events=NUM_EVENTS          number of events to be imported from the input file\n");
                 printf("-p, --plot=PLOT_DIR              create lifetime/mixing plots\n");
+                printf("-t, --perfect-tag                use MC info to get perfect tagging\n");
+                printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit\n");
                 exit(0);
                 break;
             default:
                 printf("?? getopt returned character code 0%o ??\n", c);
+                exit(1);
         }
     }
 

@@ -12,6 +12,8 @@
 
 // ROOT includes
 #include "RooArgList.h"
+#include "RooDataHist.h"
+#include "RooRealVar.h"
 #include "TChain.h"
 #include "TPaveText.h"
 
@@ -22,6 +24,7 @@ TChain* ReadDataFromDir(const char* dir);
 void SetupPlotStyle();
 TPaveText* CreateStatBox(double chi2, RooArgList* results = NULL, bool position_top = true,
                          bool position_left = true);
+void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHist& data, const char* format = ".pdf");
 }
 
 #endif /* TOOLS_H_ */

@@ -103,6 +103,9 @@ Fitter::~Fitter() {
 }
 
 void Fitter::Fit() {
+    RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataSet->reduce("evmcflag==1"));
+    dataSet = temp_dataset;
+
 	numFitParameters = (parameters->selectByAttrib("Constant", kFALSE))->getSize();
 	result = pdf->fitTo(*dataSet, RooFit::Save(), RooFit::Timer(true),
 			RooFit::Minos(false), RooFit::Hesse(false), RooFit::Strategy(1), RooFit::NumCPU(4));

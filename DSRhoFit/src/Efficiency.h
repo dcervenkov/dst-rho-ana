@@ -1,8 +1,10 @@
-/*
- * Efficiency.h
+/**
+ *  @file    efficiency.cc
+ *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
+ *  @date    2016-01-22
  *
- *  Created on: Jan 22, 2016
- *      Author: cervenkov
+ *  @brief Class that calculates efficiency (detector acceptance) from a model for a set of parameters
+ *
  */
 
 #ifndef EFFICIENCY_H_
@@ -16,6 +18,12 @@
 #include "RooGaussian.h"
 #include "RooAddPdf.h"
 #include "RooGenericPdf.h"
+#include "TH3F.h"
+
+// Meerkat includes
+#include "BinnedDensity.hh"
+#include "OneDimPhaseSpace.hh"
+#include "CombinedPhaseSpace.hh"
 
 // Local includes
 #include "Constants.h"
@@ -24,12 +32,14 @@ class Efficiency {
 public:
 	Efficiency();
 	virtual ~Efficiency();
-	double GetEfficiency(double thetat, double thetab, double phit) const;
+	double GetEfficiency(double thetat, double thetab, double phit, int efficiency_model = 6) const;
+	double EfficiencyInterface(double* x, double* p) const;
 
 protected:
-	RooRealVar* thetat_ = new RooRealVar{"thetat", "#theta_{t}", 0, PI };
+	void RescaleVars(double& thetat, double& thetab, double& phit, const double margin) const;
+	RooRealVar* thetat_ = new RooRealVar{"thetat", "#theta_{t}", 0, TMath::Pi() };
 	RooRealVar* thetab_ = new RooRealVar{"thetab", "#theta_{b}", 0.5, 2.95 };
-	RooRealVar* phit_ = new RooRealVar{ "phit", "#phi_{t}", -PI, PI };
+	RooRealVar* phit_ = new RooRealVar{ "phit", "#phi_{t}", -TMath::Pi(), TMath::Pi() };
 
 	// Model 1
 	RooRealVar model1_thetat_p0_ { "model1_thetat_p0", "p_{0}", 0.004249 };
@@ -105,6 +115,16 @@ protected:
     RooPolynomial model4_thetat_{"model4_thetat", "model4_thetat", thetat_plus_pi2, RooArgList{model4_thetat_p1_, model4_thetat_p2_}};
 
 	double GetModel4Efficiency() const { return model4_thetat_.getVal() * model2_thetab_.getVal() * model2_phit_.getVal(); }
+
+    OneDimPhaseSpace phasespace_thetat{"phasespace_thetat", thetat_->getMin(), thetat_->getMax()};
+    OneDimPhaseSpace phasespace_thetab{"phasespace_thetab", thetab_->getMin(), thetab_->getMax()};
+    OneDimPhaseSpace phasespace_phit{"phasespace_phit", phit_->getMin(), phit_->getMax()};
+    CombinedPhaseSpace phasespace{"phasespace", &phasespace_thetat, &phasespace_thetab,
+                                  &phasespace_phit};
+	BinnedDensity* binned_efficiency;
+
+	TH3F* histo_efficiency;
+	bool CanUseInterpolation(const double& phit, const double& transtht, const double& transthb) const;
 
 };
 

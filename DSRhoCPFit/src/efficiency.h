@@ -18,6 +18,7 @@
 #include "RooGaussian.h"
 #include "RooAddPdf.h"
 #include "RooGenericPdf.h"
+#include "TH3F.h"
 
 // Meerkat includes
 #include "BinnedDensity.hh"
@@ -32,11 +33,13 @@ public:
 	Efficiency();
 	virtual ~Efficiency();
 	double GetEfficiency(double thetat, double thetab, double phit, int efficiency_model) const;
+	double EfficiencyInterface(double* x, double* p) const;
 
 protected:
-	RooRealVar* thetat_ = new RooRealVar{"thetat", "#theta_{t}", 0, constants::pi };
+	void RescaleVars(double& thetat, double& thetab, double& phit, const double margin) const;
+	RooRealVar* thetat_ = new RooRealVar{"thetat", "#theta_{t}", 0, TMath::Pi() };
 	RooRealVar* thetab_ = new RooRealVar{"thetab", "#theta_{b}", 0.5, 2.95 };
-	RooRealVar* phit_ = new RooRealVar{ "phit", "#phi_{t}", -constants::pi, constants::pi };
+	RooRealVar* phit_ = new RooRealVar{ "phit", "#phi_{t}", -TMath::Pi(), TMath::Pi() };
 
 	// Model 1
 	RooRealVar model1_thetat_p0_ { "model1_thetat_p0", "p_{0}", 0.004249 };
@@ -119,6 +122,9 @@ protected:
     CombinedPhaseSpace phasespace{"phasespace", &phasespace_thetat, &phasespace_thetab,
                                   &phasespace_phit};
 	BinnedDensity* binned_efficiency;
+
+	TH3F* histo_efficiency;
+	bool CanUseInterpolation(const double& phit, const double& transtht, const double& transthb) const;
 	
 };
 

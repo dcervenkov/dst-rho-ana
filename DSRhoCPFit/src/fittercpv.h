@@ -16,6 +16,7 @@
 // ROOT includes
 #include "RooRealVar.h"
 #include "TCanvas.h"
+#include "TH3D.h"
 #include "TPaveText.h"
 
 // Local includes
@@ -28,9 +29,15 @@ class FitterCPV {
 
     void PlotVar(RooRealVar& var, const RooAbsData&) const;
     void PlotWithPull(const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
+                      const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
                       const char* title = "") const;
-    void Test();
+    void FitSignal();
+    void FitSCF();
+    void FitAll();
+    void FitAngularCR();
     void GenerateToys(const int num_events, const int num_toys);
+    void TestEfficiency();
+    void PlotEfficiency();
 
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
     int GetNumCPUs() { return num_CPUs_; };
@@ -43,6 +50,11 @@ class FitterCPV {
 
     void SetDoMixingFit(const bool& do_mixing_fit) { do_mixing_fit_ = do_mixing_fit; };
     int GetDoMixingFit() const { return do_mixing_fit_; };
+
+    void SetDoTimeIndependentFit(const bool& do_time_independent_fit) {
+        do_time_independent_fit_ = do_time_independent_fit;
+    };
+    int GetDoTimeIndependentFit() const { return do_time_independent_fit_; };
 
     void SetMakePlots(const bool& make_plots) { make_plots_ = make_plots; };
     int GetMakePlots() const { return make_plots_; };
@@ -78,6 +90,7 @@ class FitterCPV {
     RooRealVar* y0b_;
     RooRealVar* ytb_;
 
+    RooRealVar* dt_;
     RooRealVar* thetat_;
     RooRealVar* thetab_;
     RooRealVar* phit_;
@@ -95,9 +108,6 @@ class FitterCPV {
     RooRealVar* mbc_;
 
     RooRealVar* shcosthb_;
-
-    RooRealVar* dt_;
-    RooFormulaVar* dt_formula_;
 
     RooRealVar* vrzerr_;
     RooFormulaVar* vrzerr_formula_;
@@ -131,6 +141,7 @@ class FitterCPV {
     TPaveText* CreateStatBox(const double chi2, const bool position_top,
                              const bool position_left) const;
     TString GetCommonCutsString() const;
+    TH3D* GetBinnedEfficiency();
 
     std::vector<RooRealVar**> conditional_vars_;
     std::vector<RooRealVar**> dataset_vars_;
@@ -150,6 +161,7 @@ class FitterCPV {
     int efficiency_model_;
     bool do_lifetime_fit_;
     bool do_mixing_fit_;
+    bool do_time_independent_fit_;
     bool make_plots_;
     bool perfect_tagging_;
 };

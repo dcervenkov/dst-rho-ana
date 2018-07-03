@@ -49,9 +49,12 @@ class Fitter {
 
     void ProcessKDEEfficiency(const char* efficiency_file, const std::array<double, 6> bin_kde_pars,
                               const std::array<double, 6> ada_kde_pars, const double mirror_margin = 0);
-
+    void ProcessKDEEfficiency2(const char* efficiency_file, const std::array<double, 6> bin_kde_pars,
+                               const std::array<double, 6> ada_kde_pars, const double mirror_margin = 0);
+    void ProcessNormalizedEfficiency(const char* efficiency_file);
+    
     RooRealVar thetat_{"thetat", "#theta_{t} [rad]", 0, kPi};
-    RooRealVar thetab_{"thetab", "#theta_{b} [rad]", 0.5, 2.95};
+    RooRealVar thetab_{"thetab", "#theta_{b} [rad]", 0, kPi};
     RooRealVar phit_{"phit", "#phi_{t} [rad]", -kPi, kPi};
     RooRealVar dt_{"dt", "dt", -15, +15};
     RooCategory dec_type_{"dec_type", "dec_type"};
@@ -60,8 +63,9 @@ class Fitter {
    private:
     TH3F* GetBinned3DEfficiency();
     TTree* Histogram2TTree(TH3F* histo);
-    TH3F* Create3DHisto(const RooDataSet* dataset);
-    TH3F* ConvertDensityToHisto(AdaptiveKernelDensity pdf);
+    TH3F* Create3DHisto(const RooDataSet* dataset) const;
+    TH3F* ConvertDensityToHisto(AdaptiveKernelDensity pdf) const;
+    TH3F* ConvertDensityToHisto(BinnedKernelDensity pdf) const;
     void MirrorDataAtEdges(RooDataSet* data);
     double* GetMirrorVals(double vals[], const int var_num);
     double* GetMirrorVals(double vals[], const int var_num1, const int var_num2);
@@ -69,6 +73,12 @@ class Fitter {
                           const int var_num3);
     int CloseToEdge(double vals[], const int var_num);
     void EnlargeVarRanges(const double margin);
+    TH3F* ConvertTransHisto(TH3F* trans_histo);
+	bool CanUseInterpolation(const TH3F* histo, const double& phit, const double& transtht, const double& transthb) const;
+    TTree* DoubleTreeToFloatTree(TTree* double_tree) const;
+    TH3F* GetKDEHisto(RooDataSet* dataset, const std::array<double, 6> bin_kde_pars) const;
+    TH3F* NormalizePDF(const TH3F* pdf, const double low, const double high);
+    double Interpolate(const TH3F* histo, int x_org, int y_org, int z_org, int size);
 
     RooRealVar vrvtxz_{"vrvtxz", "vrvtxz", 0};
     RooRealVar vtvtxz_{"vtvtxz", "vtvtxz", 0};

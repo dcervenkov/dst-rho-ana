@@ -51,6 +51,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (options.efficiency_model == 5) {
+
         if (!options.efficiency_file) {
             options.efficiency_file = "efficiency";
         }
@@ -64,7 +65,32 @@ int main(int argc, char* argv[]) {
         }
         fitter.ProcessKDEEfficiency(options.efficiency_file, bin_kde_pars, ada_kde_pars,
                                     options.mirror_margin);
+
+    } else if (options.efficiency_model == 6) {
+
+        if (!options.efficiency_file) {
+            options.efficiency_file = "efficiency.root";
+        }
+        std::array<double, 6> bin_kde_pars = {50, 50, 50, 0.2, 0.2, 0.4};
+        std::array<double, 6> ada_kde_pars = {50, 50, 50, 0.1, 0.1, 0.2};
+        if (options.bin_kde_pars) {
+            bin_kde_pars = DecodeStringPars(options.bin_kde_pars);
+        }
+        if (options.ada_kde_pars) {
+            ada_kde_pars = DecodeStringPars(options.ada_kde_pars);
+        }
+        fitter.ProcessKDEEfficiency2(options.efficiency_file, bin_kde_pars, ada_kde_pars,
+                                    options.mirror_margin);
+
+    } else if (options.efficiency_model == 7) {
+
+        if (!options.efficiency_file) {
+            options.efficiency_file = "efficiency.root";
+        }
+        fitter.ProcessNormalizedEfficiency(options.efficiency_file);
+
     } else {
+
         fitter.SetEfficiencyModel(options.efficiency_model);
 
         fitter.PlotVar(fitter.thetat_);

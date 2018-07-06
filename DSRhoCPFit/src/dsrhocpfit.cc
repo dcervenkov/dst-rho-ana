@@ -88,20 +88,20 @@ int main(int argc, char* argv[]) {
     // fitter.TestEfficiency();
     // fitter.PlotEfficiency();
 
-    if (std::strcmp(options.fit, "CR")) {
+    if (std::strcmp(options.fit, "CR") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {
             fitter.FitAngularCR();
         } else {
             fitter.FitSignal();
         }
-    } else if (std::strcmp(options.fit, "CRSCF")) {
+    } else if (std::strcmp(options.fit, "CRSCF") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {
             printf("ERROR: Time independent CRSCF fit not implemented!\n");
             return 2;
         } else {
             fitter.FitSCF();
         }
-    } else if (std::strcmp(options.fit, "all")) {
+    } else if (std::strcmp(options.fit, "all") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {
             printf("ERROR: Full time independent fit not implemented!\n");
             return 2;
@@ -137,6 +137,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"cpus", required_argument, 0, 'c'},
         {"efficiency-model", required_argument, 0, 'e'},
         {"events", required_argument, 0, 'n'},
+        {"fit", required_argument, 0, 'f'},
         {"fix", required_argument, 0, 'x'},
         {"mixing", no_argument, 0, 'm'},
         {"time-independent", no_argument, 0, 'i'},
@@ -163,6 +164,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'n':
                 options.num_events = atoi(optarg);
                 options.num_events_set = true;
+                break;
+            case 'f':
+                options.fit = optarg;
+                options.fit_set = true;
                 break;
             case 'x':
                 options.fix = optarg;

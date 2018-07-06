@@ -2,7 +2,7 @@ import subprocess
 import sys
 
 print("Running a full fit DSRhoCPFit test")
-return_code = subprocess.call(["./DSRhoCPFit", "--efficiency-model=6", "--mixing", "--events=1000",
+return_code = subprocess.call(["./DSRhoCPFit", "--efficiency-model=6", "--fit=CR", "--mixing", "--events=1000",
                                "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb", "--",
                                "tests/signalMC_data.root", "tests/current_result"],
                                cwd="../.")

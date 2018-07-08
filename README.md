@@ -21,14 +21,12 @@ A BASF module that goes through the (hopefully skimmed) data and creates an ntup
 The goal of this program is to test various efficiency models by fitting them to signal MC, pick a satisfactory one and then use the model together with its parameters gained from the fit in further steps of the analysis.
 
 ### DSRhoCPFit
-The complete time-dependent angular fitter. Incorporates angular efficiency and Tatami. It can fit:
+The complete fitter time-dependent angular fitter. Incorporates angular efficiency and Tatami. It can fit:
  - transversity amplitudes 
  - x and y Cartesian parameters 
  - lifetime
  - Δm (mixing parameter)
-
-### DSRhoFit
-Time-independent angular fitter that can be used to extract the transversity amplitudes. It incorporates efficiency parametrization.
+It can also be switched to use a time-independent PDF which gives access to the transversity amplitudes only, but is much faster and simpler then the time-dependent PDF.
 
 ### DSRhoLifetime
 Time-dependent non-angular fitter that can be used to extract B lifetime. It incorporates Tatami.

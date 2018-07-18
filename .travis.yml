@@ -74,7 +74,6 @@ script:
   - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit/tests && python fit_test.py
   - cd ${TRAVIS_BUILD_DIR}/DSRhoBackground && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoEfficiency && make
-  - cd ${TRAVIS_BUILD_DIR}/DSRhoFit && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoLifetime && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoPeek && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoYield && make

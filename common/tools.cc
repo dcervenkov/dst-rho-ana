@@ -167,4 +167,53 @@ void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHis
     canvas.SaveAs(format);
 }
 
+/*
+ * Create and save 2D pulls of supplied vars and two datahists
+ *
+ * @param var1 First variable.
+ * @param var2 Second variable.
+ * @param data Data from which to calculate pull
+ * @param pdf Histogrammed PDF from which to calculate pull
+ * @param format Format in which to save the images.
+ */
+void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHist& data, const RooDataHist& pdf, const char* format) {
+    TCanvas canvas(TString(data.GetName()) + "_pull_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
+                   TString(data.GetName()) + "_pull_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
+                   500, 500);
+
+    gStyle->SetPalette(kLightTemperature);
+
+    TH2D* histo1 = static_cast<TH2D*>(data.createHistogram("histo1", var1, RooFit::YVar(var2)));
+    TH2D* histo2 = static_cast<TH2D*>(pdf.createHistogram("histo2", var1, RooFit::YVar(var2)));
+    TH2D* pull_histo =
+        static_cast<TH2D*>(pdf.createHistogram("pull_histo", var1, RooFit::YVar(var2)));
+
+
+    double p1;
+    double p2;
+    for (int i = 1; i <= pull_histo->GetNbinsX(); i++) {
+        for (int j = 1; j <= pull_histo->GetNbinsY(); j++) {
+            p1 = histo1->GetBinContent(i, j);
+            p2 = histo2->GetBinContent(i, j);
+            // pull_histo->SetBinContent(i, j, p1/p2);
+            // pull_histo->SetBinContent(i, j, p1 - p2);
+            pull_histo->SetBinContent(i, j, (p1 - p2) / std::sqrt(p2));
+            // if (p2 < 10) printf("WARNING: In pull calculation - PDF bin content = %f, Poisson approximation questionable!\n", p2);
+        }
+    }
+
+    const double pull_max = std::max(abs(pull_histo->GetMinimum()), abs(pull_histo->GetMaximum()));
+    pull_histo->SetMinimum(-pull_max);
+    pull_histo->SetMaximum(pull_max);
+    canvas.SetRightMargin(0.14);
+    pull_histo->SetTitle("");
+    pull_histo->Draw("colz");
+    pull_histo->GetZaxis()->SetTitle("");
+
+    canvas.Write();
+    canvas.SaveAs(format);
+
+    gStyle->SetPalette(kViridis);
+}
+
 }  // namespace tools

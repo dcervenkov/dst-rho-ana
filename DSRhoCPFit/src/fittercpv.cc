@@ -705,18 +705,60 @@ void FitterCPV::FitAngularCR() {
     sim_pdf.addPdf(pdf_B_bar, "bb");
 
     result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
+                        RooFit::Range("dtFitRange"),
                         RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
     result_->Print();
 
     if (make_plots_) {
+        // PDF for B_bar differs, so we have to generate them separately. (One
+        // could also use *extended* RooSimultaneous or 'ProtoData' for
+        // RooSimultaneous.)
         RooDataHist* cr_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                   RooFit::ExpectedData(true));
+        RooDataHist* cr_hist_B_bar = pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+                                                              1000, RooFit::ExpectedData(true));
+        // Add histos from both particle and anti-particle PDFs to create the
+        // final RooHistPdf.
+        cr_hist->add(*cr_hist_B_bar);
         RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                               *cr_hist);
 
         PlotWithPull(*thetat_, *dataset_, cr_histpdf);
         PlotWithPull(*thetab_, *dataset_, cr_histpdf);
         PlotWithPull(*phit_, *dataset_, cr_histpdf);
+
+        // We need this to get the exact number of events to be generated for
+        // the PDF distribution. This is unnecessary for the above, because we
+        // create a RooHistPdf from it and that is normalized to the data when
+        // plotted.
+        RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a||decaytype==decaytype::b"));
+        RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab||decaytype==decaytype::bb"));
+
+        thetat_->setBins(40);
+        thetab_->setBins(40);
+        phit_->setBins(40);
+        RooDataHist hist("hist", "hist", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_);
+        tools::PlotVars2D(*thetat_, *thetab_, hist);
+        tools::PlotVars2D(*thetat_, *phit_, hist);
+        tools::PlotVars2D(*thetab_, *phit_, hist);
+
+        // We change the binning for 2D plots, so we have to generate new binned
+        // dataset, to avoid dealing with rebinning.
+        delete cr_hist;
+        delete cr_hist_B_bar;
+        cr_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+                                       dataset_B->sumEntries(), RooFit::ExpectedData(true));
+        cr_hist_B_bar =
+            pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+                                     dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
+        cr_hist->add(*cr_hist_B_bar);
+
+        tools::PlotPull2D(*thetat_, *thetab_, hist, *cr_hist);
+        tools::PlotPull2D(*thetat_, *phit_, hist, *cr_hist);
+        tools::PlotPull2D(*thetab_, *phit_, hist, *cr_hist);
+
+        delete dataset_B;
+        delete dataset_B_bar;
     }
 }
 

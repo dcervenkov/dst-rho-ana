@@ -25,6 +25,7 @@ void SetupPlotStyle();
 TPaveText* CreateStatBox(double chi2, RooArgList* results = NULL, bool position_top = true,
                          bool position_left = true);
 void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHist& data, const char* format = ".pdf");
+void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHist& data, const RooDataHist& pdf, const char* format = ".pdf");
 }
 
 #endif /* TOOLS_H_ */

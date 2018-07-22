@@ -12,6 +12,7 @@
 // Standard includes
 #include <array>
 #include <boost/filesystem.hpp>
+#include <fstream>
 #include <sstream>
 #include <string>
 

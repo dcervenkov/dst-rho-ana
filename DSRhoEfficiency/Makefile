@@ -20,10 +20,10 @@ all:: $(TARGET)
 -include $(DEP_FILES)
 
 $(TARGET): $(OBJ_FILES)
-	g++ -o $@ $^ $(LD_FLAGS) $(ROOT_LIBS) $(LIBS)
+	$(CXX) -o $@ $^ $(LD_FLAGS) $(ROOT_LIBS) $(LIBS)
 
 obj/%.o: src/%.cc | obj
-	g++ $(CXX_FLAGS) $(INCS) $(ROOT_FLAGS) -c -MMD -o $@ $<
+	$(CXX) $(CXX_FLAGS) $(INCS) $(ROOT_FLAGS) -c -MMD -o $@ $<
 
 obj:
 	mkdir obj

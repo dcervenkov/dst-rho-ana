@@ -55,6 +55,7 @@
 #include "constants.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
+#include "rapidjson/document.h"
 #include "tools.h"
 
 FitterCPV::FitterCPV(std::array<double, 16> par_input) {
@@ -704,8 +705,13 @@ void FitterCPV::FitAngularCR() {
     sim_pdf.addPdf(pdf_B, "b");
     sim_pdf.addPdf(pdf_B_bar, "bb");
 
+    // std::string ranges_string = SetupFitRange("config.json");
+    // printf("Ranges string = '%s'\n", ranges_string.c_str());
+    dataset_ = ReduceDataToFitRange("config.json");
+
     result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
-                        RooFit::Range("dtFitRange"),
+                        // RooFit::Range(ranges_string.c_str()),
+                        // RooFit::Range("dtFitRange"),
                         RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
     result_->Print();
 
@@ -760,6 +766,81 @@ void FitterCPV::FitAngularCR() {
         delete dataset_B;
         delete dataset_B_bar;
     }
+}
+
+std::string FitterCPV::SetupFitRange(const char* filename) {
+    std::ifstream filestream(filename);
+    std::stringstream buffer;
+    buffer << filestream.rdbuf();
+
+    rapidjson::Document config;
+    config.Parse(buffer.str().c_str());
+
+    std::string all_fit_range_names;
+
+    if (config.HasMember("fitRanges")) {
+        printf("DC: Setting up fit ranges:\n");
+        for (auto var: dataset_vars_) {
+            const char* var_name = (**var).GetName();
+            if (config["fitRanges"].HasMember(var_name)) {
+                for (rapidjson::SizeType i = 0; i < config["fitRanges"][var_name].Size(); i++) {
+                    double low, high;
+                    low = config["fitRanges"][var_name][i][0].GetDouble();
+                    high = config["fitRanges"][var_name][i][1].GetDouble();
+
+                    std::string range_name(var_name);
+                    range_name += "_";
+                    range_name += std::to_string(i + 1);
+
+                    (**var).setRange(range_name.c_str(), low, high);
+                    all_fit_range_names += range_name;
+                    all_fit_range_names += ",";
+                }
+            }
+        }
+    }
+
+    // Remove last comma from the list
+    all_fit_range_names.pop_back();
+
+    return all_fit_range_names;
+}
+
+RooDataSet* FitterCPV::ReduceDataToFitRange(const char* filename) {
+    std::ifstream filestream(filename);
+    std::stringstream buffer;
+    buffer << filestream.rdbuf();
+
+    rapidjson::Document config;
+    config.Parse(buffer.str().c_str());
+
+    RooDataSet* reduced_dataset = 0;
+    std::ostringstream reduce_string;
+    bool first = true;
+
+    if (config.HasMember("fitRanges")) {
+        printf("DC: Setting up fit ranges:\n");
+        for (auto var: dataset_vars_) {
+            const char* var_name = (**var).GetName();
+            if (config["fitRanges"].HasMember(var_name)) {
+                for (rapidjson::SizeType i = 0; i < config["fitRanges"][var_name].Size(); i++) {
+                    double low, high;
+                    low = config["fitRanges"][var_name][i][0].GetDouble();
+                    high = config["fitRanges"][var_name][i][1].GetDouble();
+
+                    if (first == false) {
+                        reduce_string << "&&";
+                    } else {
+                        first = false;
+                    }
+                    reduce_string << "(" << var_name << ">" << low << "&&" << var_name << "<" << high << ")";
+                }
+            }
+        }
+    }
+
+    reduced_dataset = dynamic_cast<RooDataSet*>(dataset_->reduce(reduce_string.str().c_str()));
+    return reduced_dataset;
 }
 
 void FitterCPV::GenerateToys(const int num_events, const int num_toys) {

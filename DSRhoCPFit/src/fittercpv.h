@@ -66,6 +66,8 @@ class FitterCPV {
     void SetPlotDir(const char* output_dir);
     bool FixParameters(const char* pars);
     bool SaveResults(const char* file);
+    std::string SetupFitRange(const char* filename);
+    RooDataSet* ReduceDataToFitRange(const char* filename);
 
     RooRealVar* ap_;
     RooRealVar* apa_;

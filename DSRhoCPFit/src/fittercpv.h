@@ -21,6 +21,7 @@
 
 // Local includes
 #include "constants.h"
+#include "rapidjson/document.h"
 
 class FitterCPV {
    public:
@@ -67,9 +68,12 @@ class FitterCPV {
     void ReadInFile(const char* file_path, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);
     bool FixParameters(const char* pars);
-    bool SaveResults(const char* file);
-    std::string SetupFitRange(const char* filename);
-    RooDataSet* ReduceDataToFitRange(const char* filename);
+    std::string CreateResultsString();
+    const void SaveResults();
+    const void SaveTXTResults(const char* filename, const std::string& result_string);
+    RooDataSet* ReduceDataToFitRange(const rapidjson::Document& config);
+    static rapidjson::Document ReadJSONConfig(const char* filename);
+    void ApplyJSONConfig(const rapidjson::Document& config);
 
     RooRealVar* ap_;
     RooRealVar* apa_;

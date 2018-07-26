@@ -29,6 +29,8 @@ struct fitter_options {
     bool efficiency_model_set;
     char* fit;
     bool fit_set;
+    char* config_file;
+    bool config_file_set;
 };
 
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,

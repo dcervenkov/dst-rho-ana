@@ -57,6 +57,8 @@
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
 #include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/prettywriter.h"
 #include "tools.h"
 
 FitterCPV::FitterCPV(std::array<double, 16> par_input) {
@@ -296,6 +298,7 @@ void FitterCPV::FitSignal() {
                                 RooFit::Hesse(false), RooFit::Minos(false), RooFit::Save(true),
                                 RooFit::NumCPU(num_CPUs_));
         result_->Print();
+        SaveResults();
 
         if (make_plots_) {
             // RooDataSet* dataset_a =
@@ -741,12 +744,7 @@ void FitterCPV::FitAngularCR() {
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
     result_->Print();
 
-    // Set the current directory back to the one for plots (ugly ROOT stuff)
-    if (output_file_) {
-        output_file_->cd();
-    }
-
-    result_->Write();
+    SaveResults();
 
     if (make_plots_) {
         // PDF for B_bar differs, so we have to generate them separately. (One
@@ -811,80 +809,58 @@ void FitterCPV::FitAngularCR() {
     }
 }
 
-std::string FitterCPV::SetupFitRange(const char* filename) {
-    std::ifstream filestream(filename);
-    std::stringstream buffer;
-    buffer << filestream.rdbuf();
-
-    rapidjson::Document config;
-    config.Parse(buffer.str().c_str());
-
-    std::string all_fit_range_names;
-
-    if (config.HasMember("fitRanges")) {
-        printf("DC: Setting up fit ranges:\n");
-        for (auto var : dataset_vars_) {
-            const char* var_name = (**var).GetName();
-            if (config["fitRanges"].HasMember(var_name)) {
-                for (rapidjson::SizeType i = 0; i < config["fitRanges"][var_name].Size(); i++) {
-                    double low, high;
-                    low = config["fitRanges"][var_name][i][0].GetDouble();
-                    high = config["fitRanges"][var_name][i][1].GetDouble();
-
-                    std::string range_name(var_name);
-                    range_name += "_";
-                    range_name += std::to_string(i + 1);
-
-                    (**var).setRange(range_name.c_str(), low, high);
-                    all_fit_range_names += range_name;
-                    all_fit_range_names += ",";
-                }
-            }
-        }
-    }
-
-    // Remove last comma from the list
-    all_fit_range_names.pop_back();
-
-    return all_fit_range_names;
-}
-
-RooDataSet* FitterCPV::ReduceDataToFitRange(const char* filename) {
-    std::ifstream filestream(filename);
-    std::stringstream buffer;
-    buffer << filestream.rdbuf();
-
-    rapidjson::Document config;
-    config.Parse(buffer.str().c_str());
-
+RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
     RooDataSet* reduced_dataset = 0;
     std::ostringstream reduce_string;
     bool first = true;
 
-    if (config.HasMember("fitRanges")) {
-        printf("DC: Setting up fit ranges:\n");
-        for (auto var : dataset_vars_) {
-            const char* var_name = (**var).GetName();
-            if (config["fitRanges"].HasMember(var_name)) {
-                for (rapidjson::SizeType i = 0; i < config["fitRanges"][var_name].Size(); i++) {
-                    double low, high;
-                    low = config["fitRanges"][var_name][i][0].GetDouble();
-                    high = config["fitRanges"][var_name][i][1].GetDouble();
+    printf("DC: Setting up fit ranges:\n");
+    for (auto var : dataset_vars_) {
+        const char* var_name = (**var).GetName();
+        if (config["fitRanges"].HasMember(var_name)) {
+            for (rapidjson::SizeType i = 0; i < config["fitRanges"][var_name].Size(); i++) {
+                double low, high;
+                low = config["fitRanges"][var_name][i][0].GetDouble();
+                high = config["fitRanges"][var_name][i][1].GetDouble();
 
-                    if (first == false) {
-                        reduce_string << "&&";
-                    } else {
-                        first = false;
-                    }
-                    reduce_string << "(" << var_name << ">" << low << "&&" << var_name << "<"
-                                  << high << ")";
+                if (first == false) {
+                    reduce_string << "&&";
+                } else {
+                    first = false;
                 }
+                reduce_string << "(" << var_name << ">" << low << "&&" << var_name << "<"
+                                << high << ")";
             }
         }
     }
 
     reduced_dataset = dynamic_cast<RooDataSet*>(dataset_->reduce(reduce_string.str().c_str()));
     return reduced_dataset;
+}
+
+/* static */ rapidjson::Document FitterCPV::ReadJSONConfig(const char* filename) {
+    std::ifstream filestream(filename);
+    std::stringstream buffer;
+    buffer << filestream.rdbuf();
+
+    rapidjson::Document config;
+    config.Parse(buffer.str().c_str());
+    return config;
+}
+
+void FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
+    // Store the applied config in the resulting ROOT file for reference
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    config.Accept(writer);
+    const char* json_string = buffer.GetString();
+    TNamed json_config("json_config", json_string);
+    json_config.Write();
+
+    if (config.HasMember("fitRanges")) {
+        printf("IsObject %i\n", config["fitRanges"].IsObject());
+        dataset_ = ReduceDataToFitRange(config);
+    }
 }
 
 void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
@@ -1453,22 +1429,11 @@ void FitterCPV::SetOutputFile(const char* filename) {
 }
 
 /**
- * Save results and initial values into a file.
+ * Create a string that holds initial values, fit results and errors.
  */
-bool FitterCPV::SaveResults(const char* file) {
-    // const RooArgSet* args = dataSet->get();
-    // RooPlot* frame = 0;
-
+std::string FitterCPV::CreateResultsString() {
     int numParameters = 54;
     double* parameters = new double[numParameters];
-
-    FILE* pFile;
-    pFile = fopen(file, "w");
-    if (pFile == NULL) {
-        printf("ERROR: couldn't open file %s for writing!\n", file);
-        delete[] parameters;
-        return 1;
-    }
 
     parameters[0] = par_input_[0];
     parameters[1] = ap_->getVal();
@@ -1535,25 +1500,56 @@ bool FitterCPV::SaveResults(const char* file) {
                           0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2,
                           0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2};
 
+    char buffer[100];
+    std::string results;
     for (Int_t i = 0; i < numParameters; i++) {
         /// These parameters can be both positive and negative therefore the
         /// added + in front of positive numbers keeps the columns aligned
         if (i >= 18 && (i - 20) % 3 != 0) {
-            fprintf(pFile, "%+.5f ", parameters[i]);
+            snprintf(buffer, 100, "%+.5f ", parameters[i]);
         } else {
-            fprintf(pFile, "%.5f ", parameters[i]);
+            snprintf(buffer, 100, "%.5f ", parameters[i]);
         }
+        results += buffer;
+
         if (i == numParameters - 1) continue;
         if (separators[i] == 1)
-            fprintf(pFile, "| ");
+            results +=  "| ";
         else if (separators[i] == 2)
-            fprintf(pFile, "|| ");
+            results +=  "|| ";
     }
-    fprintf(pFile, "\n");
-    fclose(pFile);
     delete[] parameters;
 
-    return 0;
+    // Replace the final space with a newline
+    results.pop_back();
+    results.append("\n");
+    return results;
+}
+
+/**
+ * Save results to the ROOT outputfile as well as the plain text file
+ */
+const void FitterCPV::SaveResults() {
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+    result_->Write();
+
+    std::string results_string = CreateResultsString();
+    std::string txt_filename(output_file_->GetName());
+    // Remove the .root suffix
+    txt_filename.erase(txt_filename.end()-5, txt_filename.end());
+    SaveTXTResults(txt_filename.c_str(), results_string);
+}
+
+/**
+ * Save results and initial values into a plain file.
+ */
+const void FitterCPV::SaveTXTResults(const char* filename, const std::string& result_string) {
+    std::ofstream file(filename);
+    file << result_string;
+    file.close();
 }
 
 void FitterCPV::TestEfficiency() {

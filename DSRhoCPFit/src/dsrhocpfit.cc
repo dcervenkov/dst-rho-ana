@@ -59,6 +59,20 @@ int main(int argc, char* argv[]) {
     output_filename += ".root";
     fitter.SetOutputFile(output_filename.c_str());
 
+    if (options.num_events_set) {
+        fitter.ReadInFile(file_path, options.num_events);
+    } else {
+        fitter.ReadInFile(file_path);
+    }
+
+    // Config from file is applied first, so that it can be overriden by CLI
+    // switches. However, ReadInFile() has to be called first, as some parts of
+    // a config need the data to be present.
+    if (options.config_file_set) {
+        rapidjson::Document config = FitterCPV::ReadJSONConfig(options.config_file);
+        fitter.ApplyJSONConfig(config);
+    }
+
     if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
     if (options.efficiency_model_set) {
         fitter.SetEfficiencyModel(options.efficiency_model);
@@ -83,11 +97,6 @@ int main(int argc, char* argv[]) {
         options.fit = (char*)"all";
     }
 
-    if (options.num_events_set) {
-        fitter.ReadInFile(file_path, options.num_events);
-    } else {
-        fitter.ReadInFile(file_path);
-    }
 
     // fitter.TestEfficiency();
     // fitter.PlotEfficiency();
@@ -114,7 +123,6 @@ int main(int argc, char* argv[]) {
         }
     }
     // fitter.GenerateToys(10000, 10);
-    fitter.SaveResults(results_path);
 
     return 0;
 }
@@ -139,6 +147,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     int c;
     struct option long_options[] = {
         {"cpus", required_argument, 0, 'c'},
+        {"config", required_argument, 0, 'g'},
         {"efficiency-model", required_argument, 0, 'e'},
         {"events", required_argument, 0, 'n'},
         {"fit", required_argument, 0, 'f'},
@@ -150,7 +159,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"help", no_argument, 0, 'h'},
         {NULL, no_argument, NULL, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:f:e:x:p:lmith", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:g:f:e:x:p:lmith", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -160,6 +169,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'c':
                 options.num_CPUs = atoi(optarg);
                 options.num_CPUs_set = true;
+                break;
+            case 'g':
+                options.config_file = optarg;
+                options.config_file_set = true;
                 break;
             case 'e':
                 options.efficiency_model = atoi(optarg);
@@ -199,6 +212,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
                 printf("-e, --efficiency-model=MODEL_NUM number of the efficiency model to be used\n");
                 printf("-f, --fit=CR|CRSCF|all           do a specified fit type\n");
+                printf("-g, --config=CONFIG_FILE         read in configuration from the specified file");
                 printf("-h, --help                       display this text and exit\n");
                 printf("-i, --time-independent           make a time-independent fit\n");
                 printf("-m, --mixing                     make a mixing fit\n");

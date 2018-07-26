@@ -83,8 +83,7 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     y0b_ = new RooRealVar("y0b", "y0b", par_input[14], -0.4, 0.4);
     ytb_ = new RooRealVar("ytb", "ytb", par_input[15], -0.4, 0.4);
 
-    dt_ = new RooRealVar("dt", "dt", constants::fit_range_dt_low,
-                         constants::fit_range_dt_high);
+    dt_ = new RooRealVar("dt", "dt", constants::fit_range_dt_low, constants::fit_range_dt_high);
     thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", 0, TMath::Pi());
     thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", 0.5, 2.95);
     // thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", 0, TMath::Pi());
@@ -258,29 +257,29 @@ void FitterCPV::FitSignal() {
     RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
     dataset_ = temp_dataset;
 
-    DtCPPDF mixing_pdf_a(
-        "mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_,
+                         efficiency_model_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
+                         *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_,
+                         *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
+                         *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF mixing_pdf_ab(
-        "mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF mixing_pdf_ab("mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_,
+                          efficiency_model_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
+                          *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_,
+                          *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
+                          *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF mixing_pdf_b(
-        "mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF mixing_pdf_b("mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_,
+                         efficiency_model_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
+                         *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_,
+                         *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
+                         *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF mixing_pdf_bb(
-        "mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF mixing_pdf_bb("mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_,
+                          efficiency_model_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
+                          *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_,
+                          *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
+                          *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(mixing_pdf_a, "a");
@@ -294,8 +293,8 @@ void FitterCPV::FitSignal() {
     if (do_mixing_fit_) {
         result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
                                 RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
-                                RooFit::Hesse(false), RooFit::Minos(false),
-                                RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+                                RooFit::Hesse(false), RooFit::Minos(false), RooFit::Save(true),
+                                RooFit::NumCPU(num_CPUs_));
         result_->Print();
 
         if (make_plots_) {
@@ -315,10 +314,13 @@ void FitterCPV::FitSignal() {
             //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
             // PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
 
-            RooDataHist* cr_hist = mixing_pdf_a.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000, RooFit::ExpectedData(true));
+            RooDataHist* cr_hist = mixing_pdf_a.generateBinned(
+                RooArgSet(*thetat_, *thetab_, *phit_), 1000, RooFit::ExpectedData(true));
 
-            // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *all_hist);
-            RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *cr_hist);
+            // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
+            // *phit_), *all_hist);
+            RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
+                                  *cr_hist);
             // thetab_->setBins(100);
             PlotWithPull(*thetat_, *dataset_, cr_histpdf);
             PlotWithPull(*thetab_, *dataset_, cr_histpdf);
@@ -332,57 +334,62 @@ void FitterCPV::FitSCF() {
     RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag!=1"));
     dataset_ = temp_dataset;
 
-    DtSCFPDF mixing_pdf_a(
-        "mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtSCFPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_, *ap_,
+                          *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_,
+                          *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                          *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
+                          *vtistagl_);
 
-    DtSCFPDF mixing_pdf_ab(
-        "mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtSCFPDF mixing_pdf_ab("mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_, *ap_,
+                           *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_,
+                           *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                           *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
+                           *vtistagl_);
 
-    DtSCFPDF mixing_pdf_b(
-        "mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtSCFPDF mixing_pdf_b("mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_, *ap_,
+                          *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_,
+                          *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                          *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
+                          *vtistagl_);
 
-    DtSCFPDF mixing_pdf_bb(
-        "mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtSCFPDF mixing_pdf_bb("mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_, *ap_,
+                           *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_,
+                           *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                           *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
+                           *vtistagl_);
 
     // Self-cross-feed dt CF model
     RooRealVar scf_dt_cf_voigt_mu("scf_dt_cf_voigt_mu", "v_{#mu}", -0.303);
     RooRealVar scf_dt_cf_voigt_sigma("scf_dt_cf_voigt_sigma_", "v_{#sigma}", 2.323);
     RooRealVar scf_dt_cf_voigt_width("scf_dt_cf_voigt_width_", "v_{w}", 0.851);
-    RooVoigtian scf_dt_cf_voigt("scf_dt_cf_voigt",  "scf_dt_cf_voigt", *dt_, scf_dt_cf_voigt_mu, scf_dt_cf_voigt_width, scf_dt_cf_voigt_sigma);
+    RooVoigtian scf_dt_cf_voigt("scf_dt_cf_voigt", "scf_dt_cf_voigt", *dt_, scf_dt_cf_voigt_mu,
+                                scf_dt_cf_voigt_width, scf_dt_cf_voigt_sigma);
 
     RooRealVar scf_dt_cf_gaus_mu("scf_dt_cf_gaus_mu", "g_{#mu}", -0.161);
     RooRealVar scf_dt_cf_gaus_sigma("scf_dt_cf_gaus_sigma_", "g_{#sigma}", 1.096);
-    RooGaussian scf_dt_cf_gaus("scf_dt_cf_gaus",  "scf_dt_cf_gaus", *dt_, scf_dt_cf_gaus_mu, scf_dt_cf_gaus_sigma);
+    RooGaussian scf_dt_cf_gaus("scf_dt_cf_gaus", "scf_dt_cf_gaus", *dt_, scf_dt_cf_gaus_mu,
+                               scf_dt_cf_gaus_sigma);
 
     RooRealVar scf_dt_cf_f("scf_dt_cf_f", "f_{v/g}", 0.631);
     RooAddPdf scf_dt_cf_model("scf_dt_cf_model", "scf_dt_cf_model",
-                            RooArgList(scf_dt_cf_voigt, scf_dt_cf_gaus), RooArgList(scf_dt_cf_f));
+                              RooArgList(scf_dt_cf_voigt, scf_dt_cf_gaus), RooArgList(scf_dt_cf_f));
 
     // Self-cross-feed dt DCS model
     RooRealVar scf_dt_dcs_voigt_mu("scf_dt_dcs_voigt_mu", "v_{#mu}", -0.303);
     RooRealVar scf_dt_dcs_voigt_sigma("scf_dt_dcs_voigt_sigma_", "v_{#sigma}", 2.323);
     RooRealVar scf_dt_dcs_voigt_width("scf_dt_dcs_voigt_width_", "v_{w}", 0.851);
-    RooVoigtian scf_dt_dcs_voigt("scf_dt_dcs_voigt",  "scf_dt_dcs_voigt", *dt_, scf_dt_dcs_voigt_mu, scf_dt_dcs_voigt_width, scf_dt_dcs_voigt_sigma);
+    RooVoigtian scf_dt_dcs_voigt("scf_dt_dcs_voigt", "scf_dt_dcs_voigt", *dt_, scf_dt_dcs_voigt_mu,
+                                 scf_dt_dcs_voigt_width, scf_dt_dcs_voigt_sigma);
 
     RooRealVar scf_dt_dcs_gaus_mu("scf_dt_dcs_gaus_mu", "g_{#mu}", -0.161);
     RooRealVar scf_dt_dcs_gaus_sigma("scf_dt_dcs_gaus_sigma_", "g_{#sigma}", 1.096);
-    RooGaussian scf_dt_dcs_gaus("scf_dt_dcs_gaus",  "scf_dt_dcs_gaus", *dt_, scf_dt_dcs_gaus_mu, scf_dt_dcs_gaus_sigma);
+    RooGaussian scf_dt_dcs_gaus("scf_dt_dcs_gaus", "scf_dt_dcs_gaus", *dt_, scf_dt_dcs_gaus_mu,
+                                scf_dt_dcs_gaus_sigma);
 
     RooRealVar scf_dt_dcs_f("scf_dt_dcs_f", "f_{v/g}", 0.631);
     RooAddPdf scf_dt_dcs_model("scf_dt_dcs_model", "scf_dt_dcs_model",
-                            RooArgList(scf_dt_dcs_voigt, scf_dt_dcs_gaus), RooArgList(scf_dt_dcs_f));
+                               RooArgList(scf_dt_dcs_voigt, scf_dt_dcs_gaus),
+                               RooArgList(scf_dt_dcs_f));
 
     // Self-cross-feed phit model
     RooRealVar scf_phit_poly_p2("scf_phit_poly_p2", "p_(2)", 0.856);
@@ -390,44 +397,48 @@ void FitterCPV::FitSCF() {
     RooPolynomial scf_phit_poly("scf_phit_poly", "scf_phit_poly", *phit_, scf_phit_poly_p2, 2);
     RooRealVar scf_phit_offset("scf_phit_offset", "#phi_(t)^(offset)", 0.056);
     RooFormulaVar scf_phit_phit("scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
-                                 RooArgList(*phit_, scf_phit_offset));
+                                RooArgList(*phit_, scf_phit_offset));
     RooGenericPdf scf_phit_cos("scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2",
-                                RooArgList(scf_phit_phit));
+                               RooArgList(scf_phit_phit));
     RooAddPdf scf_phit_model("scf_phit_model", "scf_phit_model",
-                              RooArgList(scf_phit_poly, scf_phit_cos), RooArgList(scf_phit_f));
+                             RooArgList(scf_phit_poly, scf_phit_cos), RooArgList(scf_phit_f));
 
     // Self-cross-feed thetat model
     RooRealVar scf_thetat_f("scf_thetat_f", "#theta_(t)^(w)", -0.051);
     RooFormulaVar scf_thetat_thetat("scf_thetat_thetat", "scf_thetat_thetat",
-                                     "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
-                                     RooArgList(*thetat_, scf_thetat_f));
+                                    "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
+                                    RooArgList(*thetat_, scf_thetat_f));
     RooGenericPdf scf_thetat_model("scf_thetat_model", "scf_thetat_model",
-                                    "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat));
+                                   "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat));
 
     // Self-cross-feed thetab model
     RooRealVar scf_thetab_gaus_mu("scf_thetab_gaus_mu", "#mu", 2.885);
     RooRealVar scf_thetab_gaus_sigma_l("scf_thetab_gaus_sigma_l", "#sigma_(L)", 0.411);
     RooRealVar scf_thetab_gaus_sigma_r("scf_thetab_gaus_sigma_r", "#sigma_(R)", 0.094);
-    RooBifurGauss scf_thetab_gaus(
-        "scf_thetab_gaus",  "scf_thetab_gaus",       *thetab_,
-        scf_thetab_gaus_mu, scf_thetab_gaus_sigma_l, scf_thetab_gaus_sigma_r);
+    RooBifurGauss scf_thetab_gaus("scf_thetab_gaus", "scf_thetab_gaus", *thetab_,
+                                  scf_thetab_gaus_mu, scf_thetab_gaus_sigma_l,
+                                  scf_thetab_gaus_sigma_r);
     RooRealVar scf_thetab_exp_alpha("scf_thetab_exp_alpha", "#alpha", -4.63);
     RooExponential scf_thetab_exp("scf_thetab_exp", "scf_thetab_exp", *thetab_,
-                                   scf_thetab_exp_alpha);
+                                  scf_thetab_exp_alpha);
     RooRealVar scf_thetab_f("scf_thetab_f", "f_(exp)", 0.625);
 
     RooAddPdf scf_thetab_model("scf_thetab_model", "scf_thetab_model",
-                              RooArgList(scf_thetab_exp, scf_thetab_gaus), RooArgList(scf_thetab_f));
+                               RooArgList(scf_thetab_exp, scf_thetab_gaus),
+                               RooArgList(scf_thetab_f));
 
-
-    RooProdPdf pdf_a("scf_pdf_a", "scf_pdf_a",
-                     RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
-    RooProdPdf pdf_ab("scf_pdf_ab", "scf_pdf_ab",
-                     RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
-    RooProdPdf pdf_b("scf_pdf_b", "scf_pdf_b",
-                     RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
-    RooProdPdf pdf_bb("scf_pdf_bb", "scf_pdf_bb",
-                     RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
+    RooProdPdf pdf_a(
+        "scf_pdf_a", "scf_pdf_a",
+        RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
+    RooProdPdf pdf_ab(
+        "scf_pdf_ab", "scf_pdf_ab",
+        RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
+    RooProdPdf pdf_b(
+        "scf_pdf_b", "scf_pdf_b",
+        RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
+    RooProdPdf pdf_bb(
+        "scf_pdf_bb", "scf_pdf_bb",
+        RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(pdf_a, "a");
@@ -439,7 +450,8 @@ void FitterCPV::FitSCF() {
     dm_->setConstant(true);
 
     if (do_mixing_fit_) {
-        // result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
+        // result_ = sim_pdf.fitTo(*dataset_,
+        // RooFit::ConditionalObservables(conditional_vars_argset_),
         //                         RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
         //                         RooFit::Hesse(false), RooFit::Minos(false),
         //                         RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
@@ -470,82 +482,86 @@ void FitterCPV::FitSCF() {
 }
 
 void FitterCPV::FitAll() {
-    DtCPPDF cr_pdf_a(
-        "cr_pdf_a", "cr_pdf_a", false, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF cr_pdf_a("cr_pdf_a", "cr_pdf_a", false, true, perfect_tagging_, efficiency_model_,
+                     *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_,
+                     *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
+                     *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
+                     *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_ab(
-        "cr_pdf_ab", "cr_pdf_ab", true, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF cr_pdf_ab("cr_pdf_ab", "cr_pdf_ab", true, true, perfect_tagging_, efficiency_model_,
+                      *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_,
+                      *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
+                      *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
+                      *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_b(
-        "cr_pdf_b", "cr_pdf_b", false, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF cr_pdf_b("cr_pdf_b", "cr_pdf_b", false, false, perfect_tagging_, efficiency_model_,
+                     *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_,
+                     *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
+                     *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
+                     *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_bb(
-        "cr_pdf_bb", "cr_pdf_bb", true, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF cr_pdf_bb("cr_pdf_bb", "cr_pdf_bb", true, false, perfect_tagging_, efficiency_model_,
+                      *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_,
+                      *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
+                      *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
+                      *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
+    DtSCFPDF scf_dt_pdf_a("scf_dt_pdf_a", "scf_dt_pdf_a", false, true, perfect_tagging_, *ap_,
+                          *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_,
+                          *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                          *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
+                          *vtistagl_);
 
-    DtSCFPDF scf_dt_pdf_a(
-        "scf_dt_pdf_a", "scf_dt_pdf_a", false, true, perfect_tagging_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtSCFPDF scf_dt_pdf_ab("scf_dt_pdf_ab", "scf_dt_pdf_ab", true, true, perfect_tagging_, *ap_,
+                           *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_,
+                           *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                           *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
+                           *vtistagl_);
 
-    DtSCFPDF scf_dt_pdf_ab(
-        "scf_dt_pdf_ab", "scf_dt_pdf_ab", true, true, perfect_tagging_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtSCFPDF scf_dt_pdf_b("scf_dt_pdf_b", "scf_dt_pdf_b", false, false, perfect_tagging_, *ap_,
+                          *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_,
+                          *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                          *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
+                          *vtistagl_);
 
-    DtSCFPDF scf_dt_pdf_b(
-        "scf_dt_pdf_b", "scf_dt_pdf_b", false, false, perfect_tagging_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
-
-    DtSCFPDF scf_dt_pdf_bb(
-        "scf_dt_pdf_bb", "scf_dt_pdf_bb", true, false, perfect_tagging_,
-        *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtSCFPDF scf_dt_pdf_bb("scf_dt_pdf_bb", "scf_dt_pdf_bb", true, false, perfect_tagging_, *ap_,
+                           *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_,
+                           *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                           *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
+                           *vtistagl_);
 
     // Self-cross-feed dt CF model
     RooRealVar scf_dt_cf_voigt_mu("scf_dt_cf_voigt_mu", "v_{#mu}", -0.303);
     RooRealVar scf_dt_cf_voigt_sigma("scf_dt_cf_voigt_sigma_", "v_{#sigma}", 2.323);
     RooRealVar scf_dt_cf_voigt_width("scf_dt_cf_voigt_width_", "v_{w}", 0.851);
-    RooVoigtian scf_dt_cf_voigt("scf_dt_cf_voigt",  "scf_dt_cf_voigt", *dt_, scf_dt_cf_voigt_mu, scf_dt_cf_voigt_width, scf_dt_cf_voigt_sigma);
+    RooVoigtian scf_dt_cf_voigt("scf_dt_cf_voigt", "scf_dt_cf_voigt", *dt_, scf_dt_cf_voigt_mu,
+                                scf_dt_cf_voigt_width, scf_dt_cf_voigt_sigma);
 
     RooRealVar scf_dt_cf_gaus_mu("scf_dt_cf_gaus_mu", "g_{#mu}", -0.161);
     RooRealVar scf_dt_cf_gaus_sigma("scf_dt_cf_gaus_sigma_", "g_{#sigma}", 1.096);
-    RooGaussian scf_dt_cf_gaus("scf_dt_cf_gaus",  "scf_dt_cf_gaus", *dt_, scf_dt_cf_gaus_mu, scf_dt_cf_gaus_sigma);
+    RooGaussian scf_dt_cf_gaus("scf_dt_cf_gaus", "scf_dt_cf_gaus", *dt_, scf_dt_cf_gaus_mu,
+                               scf_dt_cf_gaus_sigma);
 
     RooRealVar scf_dt_cf_f("scf_dt_cf_f", "f_{v/g}", 0.631);
     RooAddPdf scf_dt_cf_model("scf_dt_cf_model", "scf_dt_cf_model",
-                            RooArgList(scf_dt_cf_voigt, scf_dt_cf_gaus), RooArgList(scf_dt_cf_f));
+                              RooArgList(scf_dt_cf_voigt, scf_dt_cf_gaus), RooArgList(scf_dt_cf_f));
 
     // Self-cross-feed dt DCS model
     RooRealVar scf_dt_dcs_voigt_mu("scf_dt_dcs_voigt_mu", "v_{#mu}", -0.303);
     RooRealVar scf_dt_dcs_voigt_sigma("scf_dt_dcs_voigt_sigma_", "v_{#sigma}", 2.323);
     RooRealVar scf_dt_dcs_voigt_width("scf_dt_dcs_voigt_width_", "v_{w}", 0.851);
-    RooVoigtian scf_dt_dcs_voigt("scf_dt_dcs_voigt",  "scf_dt_dcs_voigt", *dt_, scf_dt_dcs_voigt_mu, scf_dt_dcs_voigt_width, scf_dt_dcs_voigt_sigma);
+    RooVoigtian scf_dt_dcs_voigt("scf_dt_dcs_voigt", "scf_dt_dcs_voigt", *dt_, scf_dt_dcs_voigt_mu,
+                                 scf_dt_dcs_voigt_width, scf_dt_dcs_voigt_sigma);
 
     RooRealVar scf_dt_dcs_gaus_mu("scf_dt_dcs_gaus_mu", "g_{#mu}", -0.161);
     RooRealVar scf_dt_dcs_gaus_sigma("scf_dt_dcs_gaus_sigma_", "g_{#sigma}", 1.096);
-    RooGaussian scf_dt_dcs_gaus("scf_dt_dcs_gaus",  "scf_dt_dcs_gaus", *dt_, scf_dt_dcs_gaus_mu, scf_dt_dcs_gaus_sigma);
+    RooGaussian scf_dt_dcs_gaus("scf_dt_dcs_gaus", "scf_dt_dcs_gaus", *dt_, scf_dt_dcs_gaus_mu,
+                                scf_dt_dcs_gaus_sigma);
 
     RooRealVar scf_dt_dcs_f("scf_dt_dcs_f", "f_{v/g}", 0.631);
     RooAddPdf scf_dt_dcs_model("scf_dt_dcs_model", "scf_dt_dcs_model",
-                            RooArgList(scf_dt_dcs_voigt, scf_dt_dcs_gaus), RooArgList(scf_dt_dcs_f));
+                               RooArgList(scf_dt_dcs_voigt, scf_dt_dcs_gaus),
+                               RooArgList(scf_dt_dcs_f));
 
     // Self-cross-feed phit model
     RooRealVar scf_phit_poly_p2("scf_phit_poly_p2", "p_(2)", 0.856);
@@ -553,53 +569,60 @@ void FitterCPV::FitAll() {
     RooPolynomial scf_phit_poly("scf_phit_poly", "scf_phit_poly", *phit_, scf_phit_poly_p2, 2);
     RooRealVar scf_phit_offset("scf_phit_offset", "#phi_(t)^(offset)", 0.056);
     RooFormulaVar scf_phit_phit("scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
-                                 RooArgList(*phit_, scf_phit_offset));
+                                RooArgList(*phit_, scf_phit_offset));
     RooGenericPdf scf_phit_cos("scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2",
-                                RooArgList(scf_phit_phit));
+                               RooArgList(scf_phit_phit));
     RooAddPdf scf_phit_model("scf_phit_model", "scf_phit_model",
-                              RooArgList(scf_phit_poly, scf_phit_cos), RooArgList(scf_phit_f));
+                             RooArgList(scf_phit_poly, scf_phit_cos), RooArgList(scf_phit_f));
 
     // Self-cross-feed thetat model
     RooRealVar scf_thetat_f("scf_thetat_f", "#theta_(t)^(w)", -0.051);
     RooFormulaVar scf_thetat_thetat("scf_thetat_thetat", "scf_thetat_thetat",
-                                     "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
-                                     RooArgList(*thetat_, scf_thetat_f));
+                                    "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
+                                    RooArgList(*thetat_, scf_thetat_f));
     RooGenericPdf scf_thetat_model("scf_thetat_model", "scf_thetat_model",
-                                    "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat));
+                                   "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat));
 
     // Self-cross-feed thetab model
     RooRealVar scf_thetab_gaus_mu("scf_thetab_gaus_mu", "#mu", 2.885);
     RooRealVar scf_thetab_gaus_sigma_l("scf_thetab_gaus_sigma_l", "#sigma_(L)", 0.411);
     RooRealVar scf_thetab_gaus_sigma_r("scf_thetab_gaus_sigma_r", "#sigma_(R)", 0.094);
-    RooBifurGauss scf_thetab_gaus(
-        "scf_thetab_gaus",  "scf_thetab_gaus",       *thetab_,
-        scf_thetab_gaus_mu, scf_thetab_gaus_sigma_l, scf_thetab_gaus_sigma_r);
+    RooBifurGauss scf_thetab_gaus("scf_thetab_gaus", "scf_thetab_gaus", *thetab_,
+                                  scf_thetab_gaus_mu, scf_thetab_gaus_sigma_l,
+                                  scf_thetab_gaus_sigma_r);
     RooRealVar scf_thetab_exp_alpha("scf_thetab_exp_alpha", "#alpha", -4.63);
     RooExponential scf_thetab_exp("scf_thetab_exp", "scf_thetab_exp", *thetab_,
-                                   scf_thetab_exp_alpha);
+                                  scf_thetab_exp_alpha);
     RooRealVar scf_thetab_f("scf_thetab_f", "f_(exp)", 0.625);
 
     RooAddPdf scf_thetab_model("scf_thetab_model", "scf_thetab_model",
-                              RooArgList(scf_thetab_exp, scf_thetab_gaus), RooArgList(scf_thetab_f));
-
+                               RooArgList(scf_thetab_exp, scf_thetab_gaus),
+                               RooArgList(scf_thetab_f));
 
     // RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a",
-    //                      RooArgList(scf_dt_pdf_a, scf_thetat_model, scf_thetab_model, scf_phit_model));
+    //                      RooArgList(scf_dt_pdf_a, scf_thetat_model, scf_thetab_model,
+    //                      scf_phit_model));
     // RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab",
-    //                      RooArgList(scf_dt_pdf_ab, scf_thetat_model, scf_thetab_model, scf_phit_model));
+    //                      RooArgList(scf_dt_pdf_ab, scf_thetat_model, scf_thetab_model,
+    //                      scf_phit_model));
     // RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b",
-    //                      RooArgList(scf_dt_pdf_b, scf_thetat_model, scf_thetab_model, scf_phit_model));
+    //                      RooArgList(scf_dt_pdf_b, scf_thetat_model, scf_thetab_model,
+    //                      scf_phit_model));
     // RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb",
-    //                  RooArgList(scf_dt_pdf_bb, scf_thetat_model, scf_thetab_model, scf_phit_model));
-    RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a",
-                         RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
-    RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab",
-                          RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
-    RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b",
-                         RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
-    RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb",
-                          RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
-
+    //                  RooArgList(scf_dt_pdf_bb, scf_thetat_model, scf_thetab_model,
+    //                  scf_phit_model));
+    RooProdPdf scf_pdf_a(
+        "scf_pdf_a", "scf_pdf_a",
+        RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
+    RooProdPdf scf_pdf_ab(
+        "scf_pdf_ab", "scf_pdf_ab",
+        RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
+    RooProdPdf scf_pdf_b(
+        "scf_pdf_b", "scf_pdf_b",
+        RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
+    RooProdPdf scf_pdf_bb(
+        "scf_pdf_bb", "scf_pdf_bb",
+        RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
 
     RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.8);
 
@@ -620,17 +643,15 @@ void FitterCPV::FitAll() {
     dm_->setConstant(true);
 
     if (do_mixing_fit_) {
-        result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
-                                RooFit::Hesse(false), RooFit::Minos(false),
-                                RooFit::Minimizer("Minuit2"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+        result_ =
+            sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
+                          RooFit::Hesse(false), RooFit::Minos(false), RooFit::Minimizer("Minuit2"),
+                          RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         result_->Print();
 
         if (make_plots_) {
-            RooDataSet* cr_dataset_ =
-                static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
-            RooDataSet* scf_dataset_ =
-                static_cast<RooDataSet*>(dataset_->reduce("evmcflag!=1"));
-
+            RooDataSet* cr_dataset_ = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
+            RooDataSet* scf_dataset_ = static_cast<RooDataSet*>(dataset_->reduce("evmcflag!=1"));
 
             RooDataSet* cr_dataset_a =
                 static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::a"));
@@ -648,7 +669,6 @@ void FitterCPV::FitAll() {
                 static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::bb"));
             PlotWithPull(*dt_, *cr_dataset_bb, cr_pdf_bb);
 
-
             RooDataSet* scf_dataset_a =
                 static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::a"));
             PlotWithPull(*dt_, *scf_dataset_a, scf_pdf_a);
@@ -665,7 +685,6 @@ void FitterCPV::FitAll() {
                 static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::bb"));
             PlotWithPull(*dt_, *scf_dataset_bb, scf_pdf_bb);
 
-
             // PlotWithPull(*thetat_, *cr_dataset_, cr_pdf_a);
             // PlotWithPull(*thetab_, *cr_dataset_, cr_pdf_a);
             // PlotWithPull(*phit_, *cr_dataset_, cr_pdf_a);
@@ -673,13 +692,19 @@ void FitterCPV::FitAll() {
             PlotWithPull(*thetab_, *scf_dataset_, scf_pdf_a);
             PlotWithPull(*phit_, *scf_dataset_, scf_pdf_a);
             // thetab_->setBins(300);
-            RooDataHist* cr_hist = cr_pdf_a.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000*0.8, RooFit::ExpectedData(true));
-            RooDataHist* scf_hist = scf_pdf_a.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000*0.2, RooFit::ExpectedData(true));
+            RooDataHist* cr_hist = cr_pdf_a.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+                                                           1000 * 0.8, RooFit::ExpectedData(true));
+            RooDataHist* scf_hist = scf_pdf_a.generateBinned(
+                RooArgSet(*thetat_, *thetab_, *phit_), 1000 * 0.2, RooFit::ExpectedData(true));
 
-            // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *all_hist);
-            RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *cr_hist);
-            RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *scf_hist);
-            RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf), cr_scf_f);
+            // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
+            // *phit_), *all_hist);
+            RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
+                                  *cr_hist);
+            RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf",
+                                   RooArgSet(*thetat_, *thetab_, *phit_), *scf_hist);
+            RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf),
+                                  cr_scf_f);
             std::vector<RooAbsPdf*> components;
             components.push_back(&cr_histpdf);
             components.push_back(&scf_histpdf);
@@ -695,10 +720,10 @@ void FitterCPV::FitAngularCR() {
     RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
     dataset_ = temp_dataset;
 
-    AngularPDF pdf_B("pdf_B", "pdf_B", false, efficiency_model_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_,
-                   *ata_);
-    AngularPDF pdf_B_bar("pdf_B_bar", "pdf_B_bar", true, efficiency_model_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_,
-                   *ata_);
+    AngularPDF pdf_B("pdf_B", "pdf_B", false, efficiency_model_, *thetat_, *thetab_, *phit_, *ap_,
+                     *apa_, *a0_, *ata_);
+    AngularPDF pdf_B_bar("pdf_B_bar", "pdf_B_bar", true, efficiency_model_, *thetat_, *thetab_,
+                         *phit_, *ap_, *apa_, *a0_, *ata_);
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(pdf_B, "a");
@@ -711,9 +736,9 @@ void FitterCPV::FitAngularCR() {
     dataset_ = ReduceDataToFitRange("config.json");
 
     result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
-                        // RooFit::Range(ranges_string.c_str()),
-                        // RooFit::Range("dtFitRange"),
-                        RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+                            // RooFit::Range(ranges_string.c_str()),
+                            // RooFit::Range("dtFitRange"),
+                            RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
     result_->Print();
 
     if (make_plots_) {
@@ -721,7 +746,7 @@ void FitterCPV::FitAngularCR() {
         // could also use *extended* RooSimultaneous or 'ProtoData' for
         // RooSimultaneous.)
         RooDataHist* cr_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
-                                                  RooFit::ExpectedData(true));
+                                                    RooFit::ExpectedData(true));
         RooDataHist* cr_hist_B_bar = pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                                               1000, RooFit::ExpectedData(true));
         // Add histos from both particle and anti-particle PDFs to create the
@@ -738,8 +763,10 @@ void FitterCPV::FitAngularCR() {
         // the PDF distribution. This is unnecessary for the above, because we
         // create a RooHistPdf from it and that is normalized to the data when
         // plotted.
-        RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a||decaytype==decaytype::b"));
-        RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab||decaytype==decaytype::bb"));
+        RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
+            dataset_->reduce("decaytype==decaytype::a||decaytype==decaytype::b"));
+        RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(
+            dataset_->reduce("decaytype==decaytype::ab||decaytype==decaytype::bb"));
 
         thetat_->setBins(40);
         thetab_->setBins(40);
@@ -781,7 +808,7 @@ std::string FitterCPV::SetupFitRange(const char* filename) {
 
     if (config.HasMember("fitRanges")) {
         printf("DC: Setting up fit ranges:\n");
-        for (auto var: dataset_vars_) {
+        for (auto var : dataset_vars_) {
             const char* var_name = (**var).GetName();
             if (config["fitRanges"].HasMember(var_name)) {
                 for (rapidjson::SizeType i = 0; i < config["fitRanges"][var_name].Size(); i++) {
@@ -821,7 +848,7 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const char* filename) {
 
     if (config.HasMember("fitRanges")) {
         printf("DC: Setting up fit ranges:\n");
-        for (auto var: dataset_vars_) {
+        for (auto var : dataset_vars_) {
             const char* var_name = (**var).GetName();
             if (config["fitRanges"].HasMember(var_name)) {
                 for (rapidjson::SizeType i = 0; i < config["fitRanges"][var_name].Size(); i++) {
@@ -834,7 +861,8 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const char* filename) {
                     } else {
                         first = false;
                     }
-                    reduce_string << "(" << var_name << ">" << low << "&&" << var_name << "<" << high << ")";
+                    reduce_string << "(" << var_name << ">" << low << "&&" << var_name << "<"
+                                  << high << ")";
                 }
             }
         }
@@ -849,10 +877,10 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
 
     // vars with phiweak = phiweak + pi, r = 0.01
     double par_input[] = {
-        0.269,
-        0.56,
-        0.941,
-        3.11,
+        0.269,        // ap
+        0.56,         // apa
+        0.941,        // a0
+        3.11,         // ata
 
         0.00816649,   // xp
         0.00532961,   // x0
@@ -914,29 +942,29 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     RooRealVar y0b("y0b", "y0b", par_input[14], -0.2, 0.2);
     RooRealVar ytb("ytb", "ytb", par_input[15], -0.2, 0.2);
 
-    DtCPPDF mixing_pdf_a(
-        "mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        ap, apa, a0, ata, xp, x0, xt, yp, y0, yt,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_,
+                         efficiency_model_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xp, x0,
+                         xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
+                         *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
+                         *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF mixing_pdf_ab(
-        "mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_,  efficiency_model_,*thetat_, *thetab_, *phit_,
-        ap, apa, a0, ata, xpb, x0b, xtb, ypb, y0b, ytb,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF mixing_pdf_ab("mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_,
+                          efficiency_model_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xpb, x0b,
+                          xtb, ypb, y0b, ytb, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
+                          *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_,
+                          *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF mixing_pdf_b(
-        "mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        ap, apa, a0, ata, xp, x0, xt, yp, y0, yt,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF mixing_pdf_b("mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_,
+                         efficiency_model_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xp, x0,
+                         xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
+                         *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
+                         *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF mixing_pdf_bb(
-        "mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_, efficiency_model_, *thetat_, *thetab_, *phit_,
-        ap, apa, a0, ata, xpb, x0b, xtb, ypb, y0b, ytb,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    DtCPPDF mixing_pdf_bb("mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_,
+                          efficiency_model_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xpb, x0b,
+                          xtb, ypb, y0b, ytb, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
+                          *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_,
+                          *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     dt_->setRange(-15, 15);
 
@@ -985,7 +1013,8 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     RooRealVar brecflav("brecflav", "brecflav", -1, 1);
 
     for (int i = 1; i <= num_toys; i++) {
-        //  RooDataSet* dataset_a = mixing_pdf_a.generate(varsToGenerate, RooFit::NumEvents(num_fav));
+        //  RooDataSet* dataset_a = mixing_pdf_a.generate(varsToGenerate,
+        //  RooFit::NumEvents(num_fav));
         RooDataSet* dataset_a = mixing_pdf_a.generate(*genSpec_a);
         decaytype_->setLabel("a");
         dataset_a->addColumn(*decaytype_);
@@ -997,7 +1026,8 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
         delete dataset_a;
         printf("INFO: 1/4 decay type ready.\n");
 
-        //  RooDataSet* dataset_ab = mixing_pdf_ab.generate(varsToGenerate, RooFit::NumEvents(num_fav));
+        //  RooDataSet* dataset_ab = mixing_pdf_ab.generate(varsToGenerate,
+        //  RooFit::NumEvents(num_fav));
         RooDataSet* dataset_ab = mixing_pdf_ab.generate(*genSpec_ab);
         decaytype_->setLabel("ab");
         dataset_ab->addColumn(*decaytype_);
@@ -1009,7 +1039,8 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
         delete dataset_ab;
         printf("INFO: 2/4 decay types ready.\n");
 
-        //  RooDataSet* dataset_b = mixing_pdf_b.generate(varsToGenerate, RooFit::NumEvents(num_sup));
+        //  RooDataSet* dataset_b = mixing_pdf_b.generate(varsToGenerate,
+        //  RooFit::NumEvents(num_sup));
         RooDataSet* dataset_b = mixing_pdf_b.generate(*genSpec_b);
         decaytype_->setLabel("b");
         dataset_b->addColumn(*decaytype_);
@@ -1021,7 +1052,8 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
         delete dataset_b;
         printf("INFO: 3/4 decay types ready.\n");
 
-        //  RooDataSet* dataset_bb = mixing_pdf_bb.generate(varsToGenerate, RooFit::NumEvents(num_sup));
+        //  RooDataSet* dataset_bb = mixing_pdf_bb.generate(varsToGenerate,
+        //  RooFit::NumEvents(num_sup));
         RooDataSet* dataset_bb = mixing_pdf_bb.generate(*genSpec_bb);
         decaytype_->setLabel("bb");
         dataset_bb->addColumn(*decaytype_);
@@ -1064,7 +1096,7 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     //  return dataset;
 
     //  result_ = mixing_pdf_a.fitTo(*new_dataset,
-    //RooFit::ConditionalObservables(conditional_vars_argset_),
+    // RooFit::ConditionalObservables(conditional_vars_argset_),
     //          RooFit::Minimizer("Minuit2"), RooFit::Hesse(false), RooFit::Minos(false),
     //          RooFit::Range("dtFitRange"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 }
@@ -1103,7 +1135,7 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
     // Renormalization required for certain plots, when using multiple CPUs but
     // not with a single CPU; possible RooFit bug
     double norm = 1;
-    if (!name.Contains("hist") && num_CPUs_ > 1){
+    if (!name.Contains("hist") && num_CPUs_ > 1) {
         norm = 1.0 / data.numEntries();
     }
 
@@ -1162,7 +1194,7 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
     RooHist* hpull_clone = dynamic_cast<RooHist*>(hpull->Clone());
 
     // We plot again without bars, so the points are not half covered by bars
-    plot_pull_->addPlotable( hpull_clone, "P");
+    plot_pull_->addPlotable(hpull_clone, "P");
 
     plot_pull_->GetXaxis()->SetTickLength(0.03 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
     plot_pull_->GetXaxis()->SetTitle(TString(var.GetTitle()));
@@ -1399,45 +1431,44 @@ bool FitterCPV::FixParameters(const char* pars) {
     return false;
 }
 
-
 /**
  * Save results and initial values into a file.
  */
- bool FitterCPV::SaveResults(const char* file) {
-     // const RooArgSet* args = dataSet->get();
-     // RooPlot* frame = 0;
+bool FitterCPV::SaveResults(const char* file) {
+    // const RooArgSet* args = dataSet->get();
+    // RooPlot* frame = 0;
 
-     int numParameters = 54;
-     double* parameters = new double[numParameters];
+    int numParameters = 54;
+    double* parameters = new double[numParameters];
 
-     FILE* pFile;
-     pFile = fopen(file, "w");
-     if (pFile == NULL) {
-         printf("ERROR: couldn't open file %s for writing!\n", file);
-         delete[] parameters;
-         return 1;
-     }
+    FILE* pFile;
+    pFile = fopen(file, "w");
+    if (pFile == NULL) {
+        printf("ERROR: couldn't open file %s for writing!\n", file);
+        delete[] parameters;
+        return 1;
+    }
 
-     parameters[0] = par_input_[0];
-     parameters[1] = ap_->getVal();
-     parameters[2] = ap_->getError();
-     parameters[3] = par_input_[1];
-     parameters[4] = apa_->getVal();
-     parameters[5] = apa_->getError();
-     parameters[6] = par_input_[2];
-     parameters[7] = a0_->getVal();
-     parameters[8] = a0_->getError();
-     parameters[9] = 0;
-     parameters[10] = a0a_->getVal();
-     parameters[11] = a0a_->getError();
-     parameters[12] = sqrt(1 - par_input_[0] * par_input_[0] - par_input_[2] * par_input_[2]);
-     parameters[13] = at_->getVal();
-     parameters[14] = at_->getPropagatedError(*result_);
-     parameters[15] = par_input_[3];
-     parameters[16] = ata_->getVal();
-     parameters[17] = ata_->getError();
+    parameters[0] = par_input_[0];
+    parameters[1] = ap_->getVal();
+    parameters[2] = ap_->getError();
+    parameters[3] = par_input_[1];
+    parameters[4] = apa_->getVal();
+    parameters[5] = apa_->getError();
+    parameters[6] = par_input_[2];
+    parameters[7] = a0_->getVal();
+    parameters[8] = a0_->getError();
+    parameters[9] = 0;
+    parameters[10] = a0a_->getVal();
+    parameters[11] = a0a_->getError();
+    parameters[12] = sqrt(1 - par_input_[0] * par_input_[0] - par_input_[2] * par_input_[2]);
+    parameters[13] = at_->getVal();
+    parameters[14] = at_->getPropagatedError(*result_);
+    parameters[15] = par_input_[3];
+    parameters[16] = ata_->getVal();
+    parameters[17] = ata_->getError();
 
-     if (!do_time_independent_fit_) {
+    if (!do_time_independent_fit_) {
         parameters[18] = par_input_[4];
         parameters[19] = xp_->getVal();
         parameters[20] = xp_->getError();
@@ -1475,38 +1506,40 @@ bool FitterCPV::FixParameters(const char* pars) {
         parameters[51] = par_input_[15];
         parameters[52] = ytb_->getVal();
         parameters[53] = ytb_->getError();
-     } else {
+    } else {
         numParameters = 18;
-     }
+    }
 
-     Int_t separators[] = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2,
-                           0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2,
-                           0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2};
+    Int_t separators[] = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2,
+                          0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2,
+                          0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2};
 
-     for (Int_t i = 0; i < numParameters; i++) {
-         /// These parameters can be both positive and negative therefore the
-         /// added + in front of positive numbers keeps the columns aligned
-         if (i >= 18 && (i - 20) % 3 != 0) {
-             fprintf(pFile, "%+.5f ", parameters[i]);
-         } else {
-             fprintf(pFile, "%.5f ", parameters[i]);
-         }
-         if (i == numParameters - 1) continue;
-         if (separators[i] == 1)
-             fprintf(pFile, "| ");
-         else if (separators[i] == 2)
-             fprintf(pFile, "|| ");
-     }
-     fprintf(pFile, "\n");
-     fclose(pFile);
-     delete[] parameters;
+    for (Int_t i = 0; i < numParameters; i++) {
+        /// These parameters can be both positive and negative therefore the
+        /// added + in front of positive numbers keeps the columns aligned
+        if (i >= 18 && (i - 20) % 3 != 0) {
+            fprintf(pFile, "%+.5f ", parameters[i]);
+        } else {
+            fprintf(pFile, "%.5f ", parameters[i]);
+        }
+        if (i == numParameters - 1) continue;
+        if (separators[i] == 1)
+            fprintf(pFile, "| ");
+        else if (separators[i] == 2)
+            fprintf(pFile, "|| ");
+    }
+    fprintf(pFile, "\n");
+    fclose(pFile);
+    delete[] parameters;
 
-     return 0;
- }
+    return 0;
+}
 
- void FitterCPV::TestEfficiency() {
+void FitterCPV::TestEfficiency() {
     Efficiency* eff = new Efficiency();
-    TF3* f = new TF3("f", eff, &Efficiency::EfficiencyInterface, thetat_->getMin(), thetat_->getMax(), thetab_->getMin(), thetab_->getMax(), phit_->getMin(), phit_->getMax(), 0);
+    TF3* f =
+        new TF3("f", eff, &Efficiency::EfficiencyInterface, thetat_->getMin(), thetat_->getMax(),
+                thetab_->getMin(), thetab_->getMax(), phit_->getMin(), phit_->getMax(), 0);
 
     TCanvas* c1 = new TCanvas("c1", "canvas", 500, 500);
     RooAbsReal* rf = RooFit::bindFunction(f, *thetat_, *thetab_, *phit_);
@@ -1515,12 +1548,13 @@ bool FitterCPV::FixParameters(const char* pars) {
     plot->Draw();
 
     c1->SaveAs("eff_test.pdf");
- }
-
+}
 
 TH3D* FitterCPV::GetBinnedEfficiency() {
     Efficiency eff;
-    TH3D* histo = new TH3D("histo", "histo", 100, thetat_->getMin(), thetat_->getMax(), 100, thetab_->getMin(), thetab_->getMax(), 100, phit_->getMin(), phit_->getMax());
+    TH3D* histo =
+        new TH3D("histo", "histo", 100, thetat_->getMin(), thetat_->getMax(), 100,
+                 thetab_->getMin(), thetab_->getMax(), 100, phit_->getMin(), phit_->getMax());
 
     double thetat, thetab, phit;
     for (int x = 1; x <= histo->GetXaxis()->GetNbins(); x++) {
@@ -1529,7 +1563,8 @@ TH3D* FitterCPV::GetBinnedEfficiency() {
                 thetat = histo->GetXaxis()->GetBinCenter(x);
                 thetab = histo->GetYaxis()->GetBinCenter(y);
                 phit = histo->GetZaxis()->GetBinCenter(z);
-                histo->SetBinContent(histo->GetBin(x, y, z), eff.GetEfficiency(thetat, thetab, phit, 5));
+                histo->SetBinContent(histo->GetBin(x, y, z),
+                                     eff.GetEfficiency(thetat, thetab, phit, 5));
             }
         }
     }

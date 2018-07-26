@@ -755,6 +755,10 @@ void FitterCPV::FitAngularCR() {
         RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                               *cr_hist);
 
+        // Set the current directory back to the one for plots (ugly ROOT stuff)
+        if (output_file_) {
+            output_file_->cd();
+        }
         PlotWithPull(*thetat_, *dataset_, cr_histpdf);
         PlotWithPull(*thetab_, *dataset_, cr_histpdf);
         PlotWithPull(*phit_, *dataset_, cr_histpdf);
@@ -787,6 +791,10 @@ void FitterCPV::FitAngularCR() {
                                      dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
         cr_hist->add(*cr_hist_B_bar);
 
+        // Set the current directory back to the one for plots (ugly ROOT stuff)
+        if (output_file_) {
+            output_file_->cd();
+        }
         tools::PlotPull2D(*thetat_, *thetab_, hist, *cr_hist);
         tools::PlotPull2D(*thetat_, *phit_, hist, *cr_hist);
         tools::PlotPull2D(*thetab_, *phit_, hist, *cr_hist);

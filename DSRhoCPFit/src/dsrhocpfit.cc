@@ -55,6 +55,10 @@ int main(int argc, char* argv[]) {
 
     FitterCPV fitter(par_input);
 
+    std::string output_filename(results_path);
+    output_filename += ".root";
+    fitter.SetOutputFile(output_filename.c_str());
+
     if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
     if (options.efficiency_model_set) {
         fitter.SetEfficiencyModel(options.efficiency_model);

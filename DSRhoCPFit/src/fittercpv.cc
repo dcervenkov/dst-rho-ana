@@ -733,13 +733,20 @@ void FitterCPV::FitAngularCR() {
 
     // std::string ranges_string = SetupFitRange("config.json");
     // printf("Ranges string = '%s'\n", ranges_string.c_str());
-    dataset_ = ReduceDataToFitRange("config.json");
+    // dataset_ = ReduceDataToFitRange("config.json");
 
     result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
                             // RooFit::Range(ranges_string.c_str()),
                             // RooFit::Range("dtFitRange"),
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
     result_->Print();
+
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+
+    result_->Write();
 
     if (make_plots_) {
         // PDF for B_bar differs, so we have to generate them separately. (One
@@ -1405,7 +1412,6 @@ void FitterCPV::SetPlotDir(const char* plot_dir) {
     }
     gEnv->SetValue("Canvas.PrintDirectory", plot_dir);
     printf("print dir: %s\n", gEnv->GetValue("Canvas.PrintDirectory", "not found"));
-    output_file_ = new TFile(TString(plot_dir) + "/plots.root", "RECREATE");
 }
 
 /**
@@ -1437,6 +1443,13 @@ bool FitterCPV::FixParameters(const char* pars) {
         }
     }
     return false;
+}
+
+/**
+ * Set file in which output will be saved.
+ */
+void FitterCPV::SetOutputFile(const char* filename) {
+    output_file_ = new TFile(filename, "RECREATE");
 }
 
 /**

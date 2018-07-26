@@ -39,6 +39,8 @@ class FitterCPV {
     void TestEfficiency();
     void PlotEfficiency();
 
+    void SetOutputFile(const char* filename);
+
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
     int GetNumCPUs() { return num_CPUs_; };
 

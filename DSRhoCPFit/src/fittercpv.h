@@ -74,6 +74,7 @@ class FitterCPV {
     RooDataSet* ReduceDataToFitRange(const rapidjson::Document& config);
     static rapidjson::Document ReadJSONConfig(const char* filename);
     void ApplyJSONConfig(const rapidjson::Document& config);
+    void SaveEnvironmentMetadata();
 
     RooRealVar* ap_;
     RooRealVar* apa_;

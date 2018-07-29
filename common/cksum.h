@@ -1,0 +1,1 @@
+uint_fast32_t cksum (const char *file, bool print_name);

@@ -12,9 +12,11 @@
 // Standard includes
 #include <array>
 #include <boost/filesystem.hpp>
+#include <ctime>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <unistd.h>
 
 // Belle includes
 #include "tatami/tatami.h"
@@ -39,6 +41,7 @@
 #include "RooTFnBinding.h"
 #include "RooTreeDataStore.h"
 #include "RooVoigtian.h"
+#include "RVersion.h"
 #include "TAxis.h"
 #include "TCanvas.h"
 #include "TEnv.h"
@@ -54,6 +57,7 @@
 // Local includes
 #include "angularpdf.h"
 #include "constants.h"
+#include "cksum.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
 #include "rapidjson/document.h"
@@ -854,6 +858,12 @@ void FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
     config.Accept(writer);
     const char* json_string = buffer.GetString();
+
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+
     TNamed json_config("json_config", json_string);
     json_config.Write();
 
@@ -861,6 +871,30 @@ void FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
         printf("IsObject %i\n", config["fitRanges"].IsObject());
         dataset_ = ReduceDataToFitRange(config);
     }
+}
+
+void FitterCPV::SaveEnvironmentMetadata() {
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+
+    TNamed root_version("root_version", ROOT_RELEASE);
+    root_version.Write();
+
+    char buffer[100];
+    gethostname(buffer, 100);
+    TNamed hostname("hostname", buffer);
+    hostname.Write();
+
+    const time_t now = time(0);
+    const char* local_time_string = ctime(&now);
+    TNamed local_date("local_date", local_time_string);
+
+    tm *gmtm = gmtime(&now);
+    const char* utc_time_string = asctime(gmtm);
+    TNamed utc_date("utc_date", utc_time_string);
+
 }
 
 void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
@@ -1376,6 +1410,13 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     if (output_file_) {
         output_file_->cd();
     }
+    TNamed input_file_name("input_file_name", file_path);
+    input_file_name.Write();
+
+    char buffer[100];
+    snprintf(buffer, 100, "%lu", cksum(file_path, true));
+    TNamed input_file_crc("input_file_crc", buffer);
+    input_file_crc.Write();
 }
 
 /**

@@ -75,6 +75,7 @@ class FitterCPV {
     static rapidjson::Document ReadJSONConfig(const char* filename);
     void ApplyJSONConfig(const rapidjson::Document& config);
     void SaveEnvironmentMetadata();
+    void SaveCLIArguments(int argc, char* argv[]);
 
     RooRealVar* ap_;
     RooRealVar* apa_;

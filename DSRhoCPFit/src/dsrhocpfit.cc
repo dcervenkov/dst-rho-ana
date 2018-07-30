@@ -97,6 +97,7 @@ int main(int argc, char* argv[]) {
         options.fit = (char*)"all";
     }
 
+    fitter.SaveCLIArguments(argc, argv);
     fitter.SaveEnvironmentMetadata();
     // fitter.TestEfficiency();
     // fitter.PlotEfficiency();

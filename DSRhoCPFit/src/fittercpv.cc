@@ -874,6 +874,23 @@ void FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     }
 }
 
+void FitterCPV::SaveCLIArguments(int argc, char* argv[]) {
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+
+    std::string str;
+    for (int i = 0; i < argc; i++) {
+        str += argv[i];
+        str += " ";
+    }
+    // Remove the final space
+    str.pop_back();
+    TNamed cli_arguments("cli_arguments", str.c_str());
+    cli_arguments.Write();
+}
+
 void FitterCPV::SaveEnvironmentMetadata() {
     // Set the current directory back to the one for plots (ugly ROOT stuff)
     if (output_file_) {

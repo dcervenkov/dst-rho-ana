@@ -32,9 +32,9 @@ obj/%.o: src/%.cc | obj
 obj:
 	mkdir obj
 
-src/gitversion.cc: ../.git/HEAD ../.git/index
-	echo "const char *gitversion = \"$(shell git rev-parse HEAD)$(shell git diff --quiet || echo '-dirty')\";" > $@
+src/gitversion.cc: ../.git/HEAD ../.git/index $(filter-out src/gitversion.cc, $(CXX_FILES))
+	echo "const char* gitversion = \"$(shell git rev-parse HEAD)$(shell git diff --quiet || echo '-dirty')\";" > $@
 
 clean::
-	rm -f $(OBJ_FILES) $(DEP_FILES) $(TARGET)
+	rm -f $(OBJ_FILES) $(DEP_FILES) $(TARGET) src/gitversion.cc
 

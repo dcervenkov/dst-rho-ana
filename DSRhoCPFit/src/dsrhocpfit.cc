@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
         options.fit = (char*)"all";
     }
 
-
+    fitter.SaveEnvironmentMetadata();
     // fitter.TestEfficiency();
     // fitter.PlotEfficiency();
 

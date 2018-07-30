@@ -41,6 +41,7 @@
 
 data
 
+gitversion.cc
 */data*/*
 */plots*/*
 */results*/*

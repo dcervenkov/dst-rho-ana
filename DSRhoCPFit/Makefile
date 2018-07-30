@@ -1,6 +1,6 @@
 TARGET := DSRhoCPFit
 
-CXX_FILES := $(wildcard src/*.cc)
+CXX_FILES := $(wildcard src/*.cc) src/gitversion.cc
 OBJ_FILES := $(addprefix obj/,$(notdir $(CXX_FILES:.cc=.o)))
 DEP_FILES := $(OBJ_FILES:.o=.d)
 
@@ -31,6 +31,9 @@ obj/%.o: src/%.cc | obj
 
 obj:
 	mkdir obj
+
+src/gitversion.cc: ../.git/HEAD ../.git/index
+	echo "const char *gitversion = \"$(shell git rev-parse HEAD)$(shell git diff --quiet || echo '-dirty')\";" > $@
 
 clean::
 	rm -f $(OBJ_FILES) $(DEP_FILES) $(TARGET)

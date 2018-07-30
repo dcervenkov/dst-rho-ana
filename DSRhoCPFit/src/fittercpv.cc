@@ -60,6 +60,7 @@
 #include "cksum.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
+#include "gitversion.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
@@ -895,6 +896,8 @@ void FitterCPV::SaveEnvironmentMetadata() {
     const char* utc_time_string = asctime(gmtm);
     TNamed utc_date("utc_date", utc_time_string);
 
+    TNamed git_version("git_version", gitversion);
+    git_version.Write();
 }
 
 void FitterCPV::GenerateToys(const int num_events, const int num_toys) {

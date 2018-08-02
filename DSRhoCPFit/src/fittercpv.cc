@@ -1605,6 +1605,11 @@ const void FitterCPV::SaveResults() {
 
     TNamed txt_result("txt_result", results_string);
     txt_result.Write();
+
+    char buffer[100];
+    snprintf(buffer, 100, "%i", result_->covQual());
+    TNamed cov_qual("cov_qual", buffer);
+    cov_qual.Write();
 }
 
 /**

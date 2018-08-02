@@ -44,6 +44,8 @@ data
 gitversion.cc
 */data*/*
 */plots*/*
+*/configs*/*
+*/logs*/*
 */results*/*
 */doc/html/*
 *.db

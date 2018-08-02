@@ -1602,6 +1602,9 @@ const void FitterCPV::SaveResults() {
     // Remove the .root suffix
     txt_filename.erase(txt_filename.end()-5, txt_filename.end());
     SaveTXTResults(txt_filename.c_str(), results_string);
+
+    TNamed txt_result("txt_result", results_string);
+    txt_result.Write();
 }
 
 /**

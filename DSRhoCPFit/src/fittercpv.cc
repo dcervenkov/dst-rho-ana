@@ -819,27 +819,36 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
     std::ostringstream reduce_string;
     bool first = true;
 
-    printf("DC: Setting up fit ranges:\n");
     for (auto var : dataset_vars_) {
         const char* var_name = (**var).GetName();
         if (config["fitRanges"].HasMember(var_name)) {
-            for (rapidjson::SizeType i = 0; i < config["fitRanges"][var_name].Size(); i++) {
+            if (first == false) {
+                reduce_string << " && ";
+            } else {
+                first = false;
+            }
+
+            reduce_string << "(";
+            const rapidjson::SizeType num_ranges = config["fitRanges"][var_name].Size();
+            for (rapidjson::SizeType i = 0; i < num_ranges; i++) {
+
                 double low, high;
                 low = config["fitRanges"][var_name][i][0].GetDouble();
                 high = config["fitRanges"][var_name][i][1].GetDouble();
 
-                if (first == false) {
-                    reduce_string << "&&";
-                } else {
-                    first = false;
-                }
-                reduce_string << "(" << var_name << ">" << low << "&&" << var_name << "<"
+                reduce_string << "(" << var_name << " > " << low << " && " << var_name << " < "
                                 << high << ")";
+                if (i < num_ranges - 1) {
+                    reduce_string << " || ";
+                }
             }
+            reduce_string << ")";
         }
     }
 
     reduced_dataset = dynamic_cast<RooDataSet*>(dataset_->reduce(reduce_string.str().c_str()));
+    printf("dataset after reduce: %i\n", reduced_dataset->numEntries());
+    printf("reduce string: %s\n", reduce_string.str().c_str());
     return reduced_dataset;
 }
 
@@ -869,7 +878,6 @@ void FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     json_config.Write();
 
     if (config.HasMember("fitRanges")) {
-        printf("IsObject %i\n", config["fitRanges"].IsObject());
         dataset_ = ReduceDataToFitRange(config);
     }
 }

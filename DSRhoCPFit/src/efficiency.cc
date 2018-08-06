@@ -36,6 +36,9 @@ double Efficiency::GetEfficiency(double thetat, double thetab, double phit,
     phit_->setVal(phit);
 
     switch (efficiency_model) {
+        case 0:
+            // Uniform efficiency for generator level fits
+            return 1;
         case 1:
             return GetModel1Efficiency();
         case 2:

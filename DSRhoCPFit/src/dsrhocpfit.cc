@@ -59,6 +59,8 @@ int main(int argc, char* argv[]) {
     output_filename += ".root";
     fitter.SetOutputFile(output_filename.c_str());
 
+    if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
+
     if (options.num_events_set) {
         fitter.ReadInFile(file_path, options.num_events);
     } else {
@@ -86,7 +88,6 @@ int main(int argc, char* argv[]) {
     } else {
         fitter.SetDoTimeIndependentFit(false);
     }
-    if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
     if (options.fix_set) {
         if (fitter.FixParameters(options.fix)) {
             return 1;

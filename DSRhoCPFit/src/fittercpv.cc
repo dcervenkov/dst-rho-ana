@@ -1382,6 +1382,7 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
     RooDataSet* temp_dataset =
         new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_, common_cuts);
+    printf("DBG: Num events passing common cuts: %i\n", temp_dataset->numEntries());
 
     //  separate conditional vars from stuff like thetat
 
@@ -1413,6 +1414,8 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     delete dataset_b;
     dataset_->append(*dataset_bb);
     delete dataset_bb;
+
+    printf("DBG: Num events passing all initial cuts: %i\n", dataset_->numEntries());
 
     delete input_tree;
     input_file->Close();

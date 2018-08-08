@@ -69,13 +69,17 @@ class FitterCPV {
     void SetPlotDir(const char* output_dir);
     bool FixParameters(const char* pars);
     std::string CreateResultsString();
-    const void SaveResults();
-    const void SaveTXTResults(const char* filename, const std::string& result_string);
     RooDataSet* ReduceDataToFitRange(const rapidjson::Document& config);
     static rapidjson::Document ReadJSONConfig(const char* filename);
     void ApplyJSONConfig(const rapidjson::Document& config);
-    void SaveEnvironmentMetadata();
-    void SaveCLIArguments(int argc, char* argv[]);
+    const void SaveTXTResults(const char* root_filename);
+
+    void LogEnvironmentMetadata();
+    void LogCLIArguments(int argc, char* argv[]);
+    void LogTextFromFile(const char* field_name, const char* filename);
+    void LogFileCRC(const char* field_name, const char* filename);
+    void LogText(const char* field_name, const char* text);
+    const void LogResults();
 
     RooRealVar* ap_;
     RooRealVar* apa_;

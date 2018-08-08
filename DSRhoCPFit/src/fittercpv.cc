@@ -303,7 +303,6 @@ void FitterCPV::FitSignal() {
                                 RooFit::Hesse(false), RooFit::Minos(false), RooFit::Save(true),
                                 RooFit::NumCPU(num_CPUs_));
         result_->Print();
-        SaveResults();
 
         if (make_plots_) {
             // RooDataSet* dataset_a =
@@ -739,17 +738,11 @@ void FitterCPV::FitAngularCR() {
     sim_pdf.addPdf(pdf_B, "b");
     sim_pdf.addPdf(pdf_B_bar, "bb");
 
-    // std::string ranges_string = SetupFitRange("config.json");
-    // printf("Ranges string = '%s'\n", ranges_string.c_str());
-    // dataset_ = ReduceDataToFitRange("config.json");
-
     result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
                             // RooFit::Range(ranges_string.c_str()),
                             // RooFit::Range("dtFitRange"),
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
     result_->Print();
-
-    SaveResults();
 
     if (make_plots_) {
         // PDF for B_bar differs, so we have to generate them separately. (One
@@ -882,7 +875,7 @@ void FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     }
 }
 
-void FitterCPV::SaveCLIArguments(int argc, char* argv[]) {
+void FitterCPV::LogCLIArguments(int argc, char* argv[]) {
     // Set the current directory back to the one for plots (ugly ROOT stuff)
     if (output_file_) {
         output_file_->cd();
@@ -899,7 +892,7 @@ void FitterCPV::SaveCLIArguments(int argc, char* argv[]) {
     cli_arguments.Write();
 }
 
-void FitterCPV::SaveEnvironmentMetadata() {
+void FitterCPV::LogEnvironmentMetadata() {
     // Set the current directory back to the one for plots (ugly ROOT stuff)
     if (output_file_) {
         output_file_->cd();
@@ -1437,17 +1430,6 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
 
     dataset_->get(1)->Print("v");
 
-    // Set the current directory back to the one for writing (ugly ROOT stuff)
-    if (output_file_) {
-        output_file_->cd();
-    }
-    TNamed input_file_name("input_file_name", file_path);
-    input_file_name.Write();
-
-    char buffer[100];
-    snprintf(buffer, 100, "%lu", cksum(file_path, true));
-    TNamed input_file_crc("input_file_crc", buffer);
-    input_file_crc.Write();
 }
 
 /**
@@ -1601,7 +1583,7 @@ std::string FitterCPV::CreateResultsString() {
 /**
  * Save results to the ROOT outputfile as well as the plain text file
  */
-const void FitterCPV::SaveResults() {
+const void FitterCPV::LogResults() {
     // Set the current directory back to the one for plots (ugly ROOT stuff)
     if (output_file_) {
         output_file_->cd();
@@ -1609,11 +1591,6 @@ const void FitterCPV::SaveResults() {
     result_->Write();
 
     std::string results_string = CreateResultsString();
-    std::string txt_filename(output_file_->GetName());
-    // Remove the .root suffix
-    txt_filename.erase(txt_filename.end()-5, txt_filename.end());
-    SaveTXTResults(txt_filename.c_str(), results_string);
-
     TNamed txt_result("txt_result", results_string);
     txt_result.Write();
 
@@ -1626,9 +1603,10 @@ const void FitterCPV::SaveResults() {
 /**
  * Save results and initial values into a plain file.
  */
-const void FitterCPV::SaveTXTResults(const char* filename, const std::string& result_string) {
+const void FitterCPV::SaveTXTResults(const char* filename) {
+    std::string results_string = CreateResultsString();
     std::ofstream file(filename);
-    file << result_string;
+    file << results_string;
     file.close();
 }
 
@@ -1681,4 +1659,29 @@ void FitterCPV::PlotEfficiency() {
     tools::PlotVars2D(*thetat_, *thetab_, eff_roohisto);
     tools::PlotVars2D(*thetat_, *phit_, eff_roohisto);
     tools::PlotVars2D(*thetab_, *phit_, eff_roohisto);
+}
+
+void FitterCPV::LogTextFromFile(const char* field_name, const char* filename) {
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+    std::ifstream file;
+    file.open(filename);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    TNamed text(field_name, buffer.str());
+    text.Write();
+}
+
+void FitterCPV::LogFileCRC(const char* field_name, const char* filename) {
+    char buffer[100];
+    snprintf(buffer, 100, "%lu", cksum(filename, true));
+    TNamed crc(field_name, buffer);
+    crc.Write();
+}
+
+void FitterCPV::LogText(const char* field_name, const char* text) {
+    TNamed text_field(field_name, text);
+    text_field.Write();
 }

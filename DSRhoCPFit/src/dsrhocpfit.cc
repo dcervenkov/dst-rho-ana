@@ -11,9 +11,13 @@
 
 // Standard includes
 #include <array>
+#include <cstdio>
 #include <cstring>
 #include <getopt.h>
 #include <stdio.h>
+
+// ROOT includes
+#include "TSystem.h"
 
 // Local includes
 #include "colors.h"
@@ -22,6 +26,14 @@
 #include "tools.h"
 
 int main(int argc, char* argv[]) {
+    // Redirect all output to a temporary file. This file will later be read and
+    // saved to the results ROOT file. It must be done in this inelegant way,
+    // because ROOT doesn't support redirection to anything else than a file.
+    char tmp_filename[100];
+    std::tmpnam(tmp_filename);
+    printf("Temporary file's name: %s\n", tmp_filename);
+    gSystem->RedirectOutput(tmp_filename);
+
     char** optionless_argv = NULL;
     // The {} causes the struct's members to be initialized to 0. Without it
     // they would have unspecified values
@@ -98,8 +110,6 @@ int main(int argc, char* argv[]) {
         options.fit = (char*)"all";
     }
 
-    fitter.SaveCLIArguments(argc, argv);
-    fitter.SaveEnvironmentMetadata();
     // fitter.TestEfficiency();
     // fitter.PlotEfficiency();
 
@@ -125,6 +135,17 @@ int main(int argc, char* argv[]) {
         }
     }
     // fitter.GenerateToys(10000, 10);
+
+    fitter.LogCLIArguments(argc, argv);
+    fitter.LogEnvironmentMetadata();
+    fitter.LogTextFromFile("log", tmp_filename);
+    fitter.LogText("input_file_name", file_path);
+    fitter.LogFileCRC("input_file_crc", file_path);
+    fitter.LogResults();
+
+    fitter.SaveTXTResults(results_path);
+
+    std::remove(tmp_filename);
 
     return 0;
 }

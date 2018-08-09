@@ -1645,7 +1645,7 @@ std::string FitterCPV::CreateLatexPullTableString() {
 
         // Skip 'x' and 'y' pars if we are doing a time-independent fit
         if (do_time_independent_fit_) {
-            if (name.front() == 'x' || name.front() == 'y') continue;
+            if (name.find('x') != std::string::npos || name.find('y') != std::string::npos) continue;
         }
 
         double tru = par_input_[i];

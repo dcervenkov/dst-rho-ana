@@ -136,9 +136,9 @@ int main(int argc, char* argv[]) {
     }
     // fitter.GenerateToys(10000, 10);
 
+    fitter.LogTextFromFile("log", tmp_filename);
     fitter.LogCLIArguments(argc, argv);
     fitter.LogEnvironmentMetadata();
-    fitter.LogTextFromFile("log", tmp_filename);
     fitter.LogText("input_file_name", file_path);
     fitter.LogFileCRC("input_file_crc", file_path);
     fitter.LogText("efficiency_model", std::to_string(fitter.GetEfficiencyModel()).c_str());
@@ -146,6 +146,7 @@ int main(int argc, char* argv[]) {
     fitter.LogFileCRC("meerkat_efficiency_crc", "efficiency");
     fitter.LogFileCRC("histo_efficiency_crc", "efficiency.root");
     fitter.LogResults();
+    fitter.LogText("pull_table", fitter.CreatePullTableString().c_str());
 
     fitter.SaveTXTResults(results_path);
 

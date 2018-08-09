@@ -1580,6 +1580,48 @@ std::string FitterCPV::CreateResultsString() {
     return results;
 }
 
+std::string FitterCPV::CreatePullTableString() {
+    std::stringstream ss;
+    ss << "Var | True    | Fit     | Err    | Pull\n";
+    ss << ":---|:-------:|:-------:|:------:|-----:\n";
+    bool at_not_processed = true;
+    for (unsigned int i = 0; i < parameters_.size(); i++) {
+        std::string name = (*parameters_[i])->GetName();
+
+        // Skip 'x' and 'y' pars if we are doing a time-independent fit
+        if (do_time_independent_fit_) {
+            if (name.front() == 'x' || name.front() == 'y') continue;
+        }
+
+        double tru = par_input_[i];
+        double fit = (*parameters_[i])->getVal();
+        double err = (*parameters_[i])->getError();
+
+        // Parameter 'at' is completely determined by 'ap' and 'a0', so it is
+        // treated differently. It's not a member of parameters_ so it must be
+        // added by hand.
+        if (name == "ata" && at_not_processed) {
+            name = "at";
+            tru = sqrt(1 - par_input_[0] * par_input_[0] - par_input_[2] * par_input_[2]);
+            fit = at_->getVal();
+            err = at_->getPropagatedError(*result_);
+            at_not_processed = false;
+            i--;
+        }
+
+        ss << std::setw(3) << std::left << name << " | ";
+        ss << std::fixed;
+        ss << std::setprecision(4);
+        ss << std::showpos;
+        ss << tru << " | ";
+        ss << fit << " | ";
+        ss << std::noshowpos << err << " | ";
+        ss << std::setprecision(2) << std::showpos;
+        ss << (fit-tru)/err << std::endl;
+    }
+    return ss.str();
+}
+
 /**
  * Save results to the ROOT outputfile as well as the plain text file
  */

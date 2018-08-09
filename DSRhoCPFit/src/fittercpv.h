@@ -70,6 +70,7 @@ class FitterCPV {
     bool FixParameters(const char* pars);
     std::string CreateResultsString();
     std::string CreatePullTableString();
+    std::string CreateLatexPullTableString();
     RooDataSet* ReduceDataToFitRange(const rapidjson::Document& config);
     static rapidjson::Document ReadJSONConfig(const char* filename);
     void ApplyJSONConfig(const rapidjson::Document& config);

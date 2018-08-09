@@ -67,28 +67,28 @@
 #include "tools.h"
 
 FitterCPV::FitterCPV(std::array<double, 16> par_input) {
-    ap_ = new RooRealVar("ap", "ap", par_input[0], 0, 0.5);
-    apa_ = new RooRealVar("apa", "apa", par_input[1], 0, 1);
-    a0_ = new RooRealVar("a0", "a0", par_input[2], 0.8, 1);
-    a0a_ = new RooRealVar("a0a", "a0a", 0);
+    ap_ = new RooRealVar("ap", "|a_{#parallel}|", par_input[0], 0, 0.5);
+    apa_ = new RooRealVar("apa", "#arg(a_{#parallel})", par_input[1], 0, 1);
+    a0_ = new RooRealVar("a0", "|a_{0}|", par_input[2], 0.8, 1);
+    a0a_ = new RooRealVar("a0a", "#arg(a_{0})", 0);
     at_ = new RooFormulaVar("at", "sqrt(1-ap*ap-a0*a0)", RooArgSet(*ap_, *a0_));
-    ata_ = new RooRealVar("ata", "ata", par_input[3], 2, 4);
+    ata_ = new RooRealVar("ata", "#arg(a_{#perp})", par_input[3], 2, 4);
 
-    xp_ = new RooRealVar("xp", "xp", par_input[4], -0.4, 0.4);
-    x0_ = new RooRealVar("x0", "x0", par_input[5], -0.4, 0.4);
-    xt_ = new RooRealVar("xt", "xt", par_input[6], -0.4, 0.4);
+    xp_ = new RooRealVar("xp", "x_{#parallel}", par_input[4], -0.4, 0.4);
+    x0_ = new RooRealVar("x0", "x_{0}", par_input[5], -0.4, 0.4);
+    xt_ = new RooRealVar("xt", "x_{#perp}", par_input[6], -0.4, 0.4);
 
-    yp_ = new RooRealVar("yp", "yp", par_input[7], -0.4, 0.4);
-    y0_ = new RooRealVar("y0", "y0", par_input[8], -0.4, 0.4);
-    yt_ = new RooRealVar("yt", "yt", par_input[9], -0.4, 0.4);
+    yp_ = new RooRealVar("yp", "y_{#parallel}", par_input[7], -0.4, 0.4);
+    y0_ = new RooRealVar("y0", "y_{0}", par_input[8], -0.4, 0.4);
+    yt_ = new RooRealVar("yt", "y_{#perp}", par_input[9], -0.4, 0.4);
 
-    xpb_ = new RooRealVar("xpb", "xpb", par_input[10], -0.4, 0.4);
-    x0b_ = new RooRealVar("x0b", "x0b", par_input[11], -0.4, 0.4);
-    xtb_ = new RooRealVar("xtb", "xtb", par_input[12], -0.4, 0.4);
+    xpb_ = new RooRealVar("xpb", "#bar x_{#parallel}", par_input[10], -0.4, 0.4);
+    x0b_ = new RooRealVar("x0b", "#bar x_{0}", par_input[11], -0.4, 0.4);
+    xtb_ = new RooRealVar("xtb", "#bar x_{#perp}", par_input[12], -0.4, 0.4);
 
-    ypb_ = new RooRealVar("ypb", "ypb", par_input[13], -0.4, 0.4);
-    y0b_ = new RooRealVar("y0b", "y0b", par_input[14], -0.4, 0.4);
-    ytb_ = new RooRealVar("ytb", "ytb", par_input[15], -0.4, 0.4);
+    ypb_ = new RooRealVar("ypb", "#bar y_{#parallel}", par_input[13], -0.4, 0.4);
+    y0b_ = new RooRealVar("y0b", "#bar y_{0}", par_input[14], -0.4, 0.4);
+    ytb_ = new RooRealVar("ytb", "#bar y_{#perp}", par_input[15], -0.4, 0.4);
 
     dt_ = new RooRealVar("dt", "dt", constants::fit_range_dt_low, constants::fit_range_dt_high);
     thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", 0, TMath::Pi());
@@ -1580,6 +1580,9 @@ std::string FitterCPV::CreateResultsString() {
     return results;
 }
 
+/**
+ * Create a Markdown table with fit results and pulls and return it in a string.
+ */
 std::string FitterCPV::CreatePullTableString() {
     std::stringstream ss;
     ss << "Var | True    | Fit     | Err    | Pull\n";
@@ -1619,6 +1622,62 @@ std::string FitterCPV::CreatePullTableString() {
         ss << std::setprecision(2) << std::showpos;
         ss << (fit-tru)/err << std::endl;
     }
+    return ss.str();
+}
+
+/**
+ * Create a LaTeX table with fit results and pulls and return it in a string.
+ */
+std::string FitterCPV::CreateLatexPullTableString() {
+    std::stringstream ss;
+    ss << "\\begin{table}\n";
+    ss << "\t\\small\n";
+    ss << "\t\\begin{tabular}[]{lcccr}\n";
+    ss << "\t\t\\toprule\n";
+    ss << "\t\tVar & Fit & Err. & Pull \\\\\n";
+    ss << "\t\t\\midrule\n";
+    bool at_not_processed = true;
+    for (unsigned int i = 0; i < parameters_.size(); i++) {
+        std::string name = "$";
+        name += (*parameters_[i])->GetTitle();
+        name += "$";
+        std::replace(name.begin(), name.end(), '#', '\\');
+
+        // Skip 'x' and 'y' pars if we are doing a time-independent fit
+        if (do_time_independent_fit_) {
+            if (name.front() == 'x' || name.front() == 'y') continue;
+        }
+
+        double tru = par_input_[i];
+        double fit = (*parameters_[i])->getVal();
+        double err = (*parameters_[i])->getError();
+
+        // Parameter 'at' is completely determined by 'ap' and 'a0', so it is
+        // treated differently. It's not a member of parameters_ so it must be
+        // added by hand.
+        if (name == "$\\arg(a_{\\perp})$" && at_not_processed) {
+            name = "$|a_{\\perp}|$";
+            tru = sqrt(1 - par_input_[0] * par_input_[0] - par_input_[2] * par_input_[2]);
+            fit = at_->getVal();
+            err = at_->getPropagatedError(*result_);
+            at_not_processed = false;
+            i--;
+        }
+
+        ss << "\t\t";
+        ss << std::setw(21) << std::left << name << " & ";
+        ss << std::fixed;
+        ss << std::setprecision(4);
+        ss << std::showpos;
+        ss << tru << " & ";
+        ss << fit << " & ";
+        ss << std::noshowpos << err << " & ";
+        ss << std::setprecision(2) << std::showpos;
+        ss << (fit-tru)/err << " \\\\" << std::endl;
+    }
+    ss << "\t\t\\botomrule\n";
+    ss << "\t\\end{tabular}\n";
+    ss << "\\end{table}\n";
     return ss.str();
 }
 

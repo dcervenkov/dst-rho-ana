@@ -147,6 +147,7 @@ int main(int argc, char* argv[]) {
     fitter.LogFileCRC("histo_efficiency_crc", "efficiency.root");
     fitter.LogResults();
     fitter.LogText("pull_table", fitter.CreatePullTableString().c_str());
+    fitter.LogText("latex_pull_table", fitter.CreateLatexPullTableString().c_str());
 
     fitter.SaveTXTResults(results_path);
 

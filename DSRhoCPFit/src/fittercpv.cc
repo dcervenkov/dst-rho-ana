@@ -875,7 +875,7 @@ void FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     }
 }
 
-void FitterCPV::LogCLIArguments(int argc, char* argv[]) {
+const void FitterCPV::LogCLIArguments(int argc, char* argv[]) {
     // Set the current directory back to the one for plots (ugly ROOT stuff)
     if (output_file_) {
         output_file_->cd();
@@ -892,7 +892,7 @@ void FitterCPV::LogCLIArguments(int argc, char* argv[]) {
     cli_arguments.Write();
 }
 
-void FitterCPV::LogEnvironmentMetadata() {
+const void FitterCPV::LogEnvironmentMetadata() {
     // Set the current directory back to the one for plots (ugly ROOT stuff)
     if (output_file_) {
         output_file_->cd();
@@ -1661,7 +1661,7 @@ void FitterCPV::PlotEfficiency() {
     tools::PlotVars2D(*thetab_, *phit_, eff_roohisto);
 }
 
-void FitterCPV::LogTextFromFile(const char* field_name, const char* filename) {
+const void FitterCPV::LogTextFromFile(const char* field_name, const char* filename) {
     // Set the current directory back to the one for plots (ugly ROOT stuff)
     if (output_file_) {
         output_file_->cd();
@@ -1674,14 +1674,14 @@ void FitterCPV::LogTextFromFile(const char* field_name, const char* filename) {
     text.Write();
 }
 
-void FitterCPV::LogFileCRC(const char* field_name, const char* filename) {
+const void FitterCPV::LogFileCRC(const char* field_name, const char* filename) {
     char buffer[100];
     snprintf(buffer, 100, "%lu", cksum(filename, true));
     TNamed crc(field_name, buffer);
     crc.Write();
 }
 
-void FitterCPV::LogText(const char* field_name, const char* text) {
+const void FitterCPV::LogText(const char* field_name, const char* text) {
     TNamed text_field(field_name, text);
     text_field.Write();
 }

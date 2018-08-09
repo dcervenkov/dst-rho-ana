@@ -74,11 +74,11 @@ class FitterCPV {
     void ApplyJSONConfig(const rapidjson::Document& config);
     const void SaveTXTResults(const char* root_filename);
 
-    void LogEnvironmentMetadata();
-    void LogCLIArguments(int argc, char* argv[]);
-    void LogTextFromFile(const char* field_name, const char* filename);
-    void LogFileCRC(const char* field_name, const char* filename);
-    void LogText(const char* field_name, const char* text);
+    const void LogEnvironmentMetadata();
+    const void LogCLIArguments(int argc, char* argv[]);
+    const void LogTextFromFile(const char* field_name, const char* filename);
+    const void LogFileCRC(const char* field_name, const char* filename);
+    const void LogText(const char* field_name, const char* text);
     const void LogResults();
 
     RooRealVar* ap_;

@@ -141,6 +141,10 @@ int main(int argc, char* argv[]) {
     fitter.LogTextFromFile("log", tmp_filename);
     fitter.LogText("input_file_name", file_path);
     fitter.LogFileCRC("input_file_crc", file_path);
+    fitter.LogText("efficiency_model", std::to_string(fitter.GetEfficiencyModel()).c_str());
+    // TODO: This definitely shouldnt't be hardcoded
+    fitter.LogFileCRC("meerkat_efficiency_crc", "efficiency");
+    fitter.LogFileCRC("histo_efficiency_crc", "efficiency.root");
     fitter.LogResults();
 
     fitter.SaveTXTResults(results_path);

@@ -136,7 +136,6 @@ int main(int argc, char* argv[]) {
     }
     // fitter.GenerateToys(10000, 10);
 
-    fitter.LogTextFromFile("log", tmp_filename);
     fitter.LogCLIArguments(argc, argv);
     fitter.LogEnvironmentMetadata();
     fitter.LogText("input_file_name", file_path);
@@ -151,6 +150,10 @@ int main(int argc, char* argv[]) {
 
     fitter.SaveTXTResults(results_path);
 
+    // We must flush, otherwise the log file might not be complete when we save
+    // it to the ROOT file.
+    std::fflush(stdout);
+    fitter.LogTextFromFile("log", tmp_filename);
     std::remove(tmp_filename);
 
     return 0;

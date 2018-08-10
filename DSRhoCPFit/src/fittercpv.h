@@ -68,9 +68,9 @@ class FitterCPV {
     void ReadInFile(const char* file_path, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);
     bool FixParameters(const char* pars);
-    std::string CreateResultsString();
-    std::string CreatePullTableString();
-    std::string CreateLatexPullTableString();
+    const std::string CreateResultsString();
+    const std::string CreatePullTableString(const bool asymmetric = false);
+    const std::string CreateLatexPullTableString(const bool asymmetric = false);
     RooDataSet* ReduceDataToFitRange(const rapidjson::Document& config);
     static rapidjson::Document ReadJSONConfig(const char* filename);
     void ApplyJSONConfig(const rapidjson::Document& config);

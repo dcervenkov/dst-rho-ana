@@ -1485,7 +1485,7 @@ void FitterCPV::SetOutputFile(const char* filename) {
 /**
  * Create a string that holds initial values, fit results and errors.
  */
-std::string FitterCPV::CreateResultsString() {
+const std::string FitterCPV::CreateResultsString() {
     int numParameters = 54;
     double* parameters = new double[numParameters];
 
@@ -1583,10 +1583,15 @@ std::string FitterCPV::CreateResultsString() {
 /**
  * Create a Markdown table with fit results and pulls and return it in a string.
  */
-std::string FitterCPV::CreatePullTableString() {
+const std::string FitterCPV::CreatePullTableString(const bool asymmetric) {
     std::stringstream ss;
-    ss << "Var | True    | Fit     | Err    | Pull\n";
-    ss << ":---|:-------:|:-------:|:------:|-----:\n";
+    if (asymmetric) {
+        ss << "Var | True    | Fit     | Err Lo  | Err Hi | Pull\n";
+        ss << ":---|:-------:|:-------:|:-------:|:------:|-----:\n";
+    } else {
+        ss << "Var | True    | Fit     | Err    | Pull\n";
+        ss << ":---|:-------:|:-------:|:------:|-----:\n";
+    }
     bool at_not_processed = true;
     for (unsigned int i = 0; i < parameters_.size(); i++) {
         std::string name = (*parameters_[i])->GetName();
@@ -1599,6 +1604,8 @@ std::string FitterCPV::CreatePullTableString() {
         double tru = par_input_[i];
         double fit = (*parameters_[i])->getVal();
         double err = (*parameters_[i])->getError();
+        double err_low = (*parameters_[i])->getAsymErrorLo();
+        double err_high = (*parameters_[i])->getAsymErrorHi();
 
         // Parameter 'at' is completely determined by 'ap' and 'a0', so it is
         // treated differently. It's not a member of parameters_ so it must be
@@ -1608,6 +1615,8 @@ std::string FitterCPV::CreatePullTableString() {
             tru = sqrt(1 - par_input_[0] * par_input_[0] - par_input_[2] * par_input_[2]);
             fit = at_->getVal();
             err = at_->getPropagatedError(*result_);
+            err_low = -err;
+            err_high = err;
             at_not_processed = false;
             i--;
         }
@@ -1618,9 +1627,23 @@ std::string FitterCPV::CreatePullTableString() {
         ss << std::showpos;
         ss << tru << " | ";
         ss << fit << " | ";
-        ss << std::noshowpos << err << " | ";
+        if (asymmetric) {
+            ss << std::noshowpos << err_low << " | ";
+            ss << std::noshowpos << err_high << " | ";
+        } else {
+            ss << std::noshowpos << err << " | ";
+        }
         ss << std::setprecision(2) << std::showpos;
-        ss << (fit-tru)/err << std::endl;
+        if (asymmetric) {
+            if (fit > tru) {
+                ss << (fit-tru)/err_high;
+            } else {
+                ss << (fit-tru)/fabs(err_low);
+            }
+        } else {
+            ss << (fit-tru)/err;
+        }
+        ss << std::endl;
     }
     return ss.str();
 }
@@ -1628,13 +1651,21 @@ std::string FitterCPV::CreatePullTableString() {
 /**
  * Create a LaTeX table with fit results and pulls and return it in a string.
  */
-std::string FitterCPV::CreateLatexPullTableString() {
+const std::string FitterCPV::CreateLatexPullTableString(const bool asymmetric) {
     std::stringstream ss;
     ss << "\\begin{table}\n";
     ss << "\t\\small\n";
-    ss << "\t\\begin{tabular}[]{lcccr}\n";
+    if (asymmetric) {
+        ss << "\t\\begin{tabular}[]{lccccr}\n";
+    } else {
+        ss << "\t\\begin{tabular}[]{lcccr}\n";
+    }
     ss << "\t\t\\toprule\n";
-    ss << "\t\tVar & Fit & Err. & Pull \\\\\n";
+    if (asymmetric) {
+        ss << "\t\tVar & Fit & Err. Low & Err. High & Pull \\\\\n";
+    } else {
+        ss << "\t\tVar & Fit & Err. & Pull \\\\\n";
+    }
     ss << "\t\t\\midrule\n";
     bool at_not_processed = true;
     for (unsigned int i = 0; i < parameters_.size(); i++) {
@@ -1651,6 +1682,8 @@ std::string FitterCPV::CreateLatexPullTableString() {
         double tru = par_input_[i];
         double fit = (*parameters_[i])->getVal();
         double err = (*parameters_[i])->getError();
+        double err_low = (*parameters_[i])->getAsymErrorLo();
+        double err_high = (*parameters_[i])->getAsymErrorHi();
 
         // Parameter 'at' is completely determined by 'ap' and 'a0', so it is
         // treated differently. It's not a member of parameters_ so it must be
@@ -1660,6 +1693,8 @@ std::string FitterCPV::CreateLatexPullTableString() {
             tru = sqrt(1 - par_input_[0] * par_input_[0] - par_input_[2] * par_input_[2]);
             fit = at_->getVal();
             err = at_->getPropagatedError(*result_);
+            err_low = -err;
+            err_high = err;
             at_not_processed = false;
             i--;
         }
@@ -1671,9 +1706,23 @@ std::string FitterCPV::CreateLatexPullTableString() {
         ss << std::showpos;
         ss << tru << " & ";
         ss << fit << " & ";
-        ss << std::noshowpos << err << " & ";
+        if (asymmetric) {
+            ss << std::noshowpos << err_low << " & ";
+            ss << std::noshowpos << err_high << " & ";
+        } else {
+            ss << std::noshowpos << err << " & ";
+        }
         ss << std::setprecision(2) << std::showpos;
-        ss << (fit-tru)/err << " \\\\" << std::endl;
+        if (asymmetric) {
+            if (fit > tru) {
+                ss << (fit-tru)/err_high;
+            } else {
+                ss << (fit-tru)/fabs(err_low);
+            }
+        } else {
+            ss << (fit-tru)/err;
+        }
+        ss << " \\\\" << std::endl;
     }
     ss << "\t\t\\botomrule\n";
     ss << "\t\\end{tabular}\n";

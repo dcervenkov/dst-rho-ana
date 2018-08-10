@@ -31,7 +31,10 @@ int main(int argc, char* argv[]) {
     // because ROOT doesn't support redirection to anything else than a file.
     char tmp_filename[100];
     std::tmpnam(tmp_filename);
+    printf("Processing...\n");
     printf("Temporary file's name: %s\n", tmp_filename);
+    printf("All following messages will be saved to the temporary file and "
+        "then copied to the results ROOT file.\n");
     gSystem->RedirectOutput(tmp_filename);
 
     char** optionless_argv = NULL;
@@ -146,7 +149,9 @@ int main(int argc, char* argv[]) {
     fitter.LogFileCRC("histo_efficiency_crc", "efficiency.root");
     fitter.LogResults();
     fitter.LogText("pull_table", fitter.CreatePullTableString().c_str());
+    fitter.LogText("pull_table_asym", fitter.CreatePullTableString(true).c_str());
     fitter.LogText("latex_pull_table", fitter.CreateLatexPullTableString().c_str());
+    fitter.LogText("latex_pull_table_asym", fitter.CreateLatexPullTableString(true).c_str());
 
     fitter.SaveTXTResults(results_path);
 

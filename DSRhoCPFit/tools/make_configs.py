@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+
+"""Create JSON configs with systematically excluded fit regions."""
 
 import json
 
@@ -35,6 +37,9 @@ def make_configs(var_name, begin, end, steps, config_template, filename_base):
 NUM_STEPS = 5
 CONFIG_TEMPLATE = "config_template.json"
 
-make_configs("thetat", 0, 3.1415, NUM_STEPS, CONFIG_TEMPLATE, "cfg_exc_thetat_")
-make_configs("thetab", 0.5, 2.95, NUM_STEPS, CONFIG_TEMPLATE, "cfg_exc_thetab_")
-make_configs("phit", -3.1415, 3.1415, NUM_STEPS, CONFIG_TEMPLATE, "cfg_exc_phit_")
+make_configs("thetat", 0, 3.1415, NUM_STEPS,
+             CONFIG_TEMPLATE, "cfg_exc_thetat_")
+make_configs("thetab", 0.5, 2.95, NUM_STEPS,
+             CONFIG_TEMPLATE, "cfg_exc_thetab_")
+make_configs("phit", -3.1415, 3.1415, NUM_STEPS,
+             CONFIG_TEMPLATE, "cfg_exc_phit_")

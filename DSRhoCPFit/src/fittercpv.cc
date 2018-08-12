@@ -1212,8 +1212,10 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
     plot->GetYaxis()->SetTitleOffset(1.60);
     plot->Draw();
 
-    const double chi2 = plot->chiSquare();
-    TPaveText* stat_box = CreateStatBox(chi2, true, true);
+    const int num_floating_pars = result_ ? result_->floatParsFinal().getSize() : 0;
+    const int ndof = var.getBinning().numBins() - num_floating_pars;
+    const double chi2 = plot->chiSquare(num_floating_pars) * ndof;
+    TPaveText* stat_box = CreateStatBox(chi2, ndof, true, true);
     if (stat_box) {
         stat_box->Draw();
     }
@@ -1264,7 +1266,7 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
  * @param position_top Should the box be displayed at the top or bottom of the plot
  * @param position_left Should the box be displayed at the left or right of the plot
  */
-TPaveText* FitterCPV::CreateStatBox(const double chi2, const bool position_top,
+TPaveText* FitterCPV::CreateStatBox(const double chi2, const int ndof, const bool position_top,
                                     const bool position_left) const {
 
     RooArgList results = result_ ? result_->floatParsFinal() : RooArgList();
@@ -1274,10 +1276,10 @@ TPaveText* FitterCPV::CreateStatBox(const double chi2, const bool position_top,
 
     if (position_top) {
         y_top = 0.9;
-        y_bottom = y_top - results.getSize() * line_height;
+        y_bottom = y_top - (results.getSize() + 2)* line_height;
     } else {
         y_bottom = 0.023;
-        y_top = y_bottom + results.getSize() * line_height;
+        y_top = y_bottom + (results.getSize() + 2)* line_height;
     }
 
     if (position_left) {
@@ -1303,7 +1305,9 @@ TPaveText* FitterCPV::CreateStatBox(const double chi2, const bool position_top,
                  dynamic_cast<RooRealVar&>(results[i]).getError());
         stat_box->AddText(line);
     }
-    snprintf(line, 1000, "#chi^{2} = %.2f\n", chi2);
+    snprintf(line, 1000, "#chi^{2}/ndof = %.2f (%.1f/%i)\n", chi2/ndof, chi2, ndof);
+    stat_box->AddText(line);
+    snprintf(line, 1000, "p = %.2f\n", TMath::Prob(chi2, ndof));
     stat_box->AddText(line);
     return stat_box;
 }

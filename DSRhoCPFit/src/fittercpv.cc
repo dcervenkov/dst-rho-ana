@@ -1266,10 +1266,8 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
  */
 TPaveText* FitterCPV::CreateStatBox(const double chi2, const bool position_top,
                                     const bool position_left) const {
-    RooArgList results;
-    if (result_) {
-        results = result_->floatParsFinal();
-    }
+
+    RooArgList results = result_ ? result_->floatParsFinal() : RooArgList();
 
     double x_left, x_right, y_bottom, y_top;
     const double line_height = 0.06;

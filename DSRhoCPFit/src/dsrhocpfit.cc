@@ -147,14 +147,15 @@ int main(int argc, char* argv[]) {
     // TODO: This definitely shouldnt't be hardcoded
     fitter.LogFileCRC("meerkat_efficiency_crc", "efficiency");
     fitter.LogFileCRC("histo_efficiency_crc", "efficiency.root");
-    fitter.LogResults();
-    fitter.LogText("pull_table", fitter.CreatePullTableString().c_str());
-    fitter.LogText("pull_table_asym", fitter.CreatePullTableString(true).c_str());
-    fitter.LogText("latex_pull_table", fitter.CreateLatexPullTableString().c_str());
-    fitter.LogText("latex_pull_table_asym", fitter.CreateLatexPullTableString(true).c_str());
+    if (fitter.ResultExists()) {
+        fitter.LogResults();
+        fitter.LogText("pull_table", fitter.CreatePullTableString().c_str());
+        fitter.LogText("pull_table_asym", fitter.CreatePullTableString(true).c_str());
+        fitter.LogText("latex_pull_table", fitter.CreateLatexPullTableString().c_str());
+        fitter.LogText("latex_pull_table_asym", fitter.CreateLatexPullTableString(true).c_str());
 
-    fitter.SaveTXTResults(results_path);
-
+        fitter.SaveTXTResults(results_path);
+    }
     // We must flush, otherwise the log file might not be complete when we save
     // it to the ROOT file.
     std::fflush(stdout);
@@ -192,7 +193,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"mixing", no_argument, 0, 'm'},
         {"time-independent", no_argument, 0, 'i'},
         {"perfect-tag", no_argument, 0, 't'},
-        {"plot", required_argument, 0, 'p'},
+        {"plot-dir", required_argument, 0, 'p'},
         {"help", no_argument, 0, 'h'},
         {NULL, no_argument, NULL, 0}};
     int option_index = 0;
@@ -254,7 +255,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-i, --time-independent           make a time-independent fit\n");
                 printf("-m, --mixing                     make a mixing fit\n");
                 printf("-n, --events=NUM_EVENTS          number of events to be imported from the input file\n");
-                printf("-p, --plot=PLOT_DIR              create lifetime/mixing plots\n");
+                printf("-p, --plot-dir=PLOT_DIR          create lifetime/mixing plots\n");
                 printf("-t, --perfect-tag                use MC info to get perfect tagging\n");
                 printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit\n");
                 exit(0);

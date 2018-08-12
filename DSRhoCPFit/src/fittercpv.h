@@ -65,6 +65,8 @@ class FitterCPV {
     void SetPerfectTagging(const bool& perfect_tagging) { perfect_tagging_ = perfect_tagging; };
     int GetPerfectTagging() const { return perfect_tagging_; };
 
+    bool ResultExists() const { return result_ ? true : false; };
+
     void ReadInFile(const char* file_path, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);
     bool FixParameters(const char* pars);

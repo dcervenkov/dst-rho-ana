@@ -742,7 +742,9 @@ void FitterCPV::FitAngularCR() {
                             // RooFit::Range(ranges_string.c_str()),
                             // RooFit::Range("dtFitRange"),
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-    result_->Print();
+    if (result_) {
+        result_->Print();
+    }
 
     if (make_plots_) {
         // PDF for B_bar differs, so we have to generate them separately. (One
@@ -1264,13 +1266,11 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
  */
 TPaveText* FitterCPV::CreateStatBox(const double chi2, const bool position_top,
                                     const bool position_left) const {
-    // If no fit result exists return a null pointer
-    if (!result_) {
-        printf("WARNING: No result exists, can't create stat box!\n");
-        return NULL;
+    RooArgList results;
+    if (result_) {
+        results = result_->floatParsFinal();
     }
 
-    const RooArgList results = result_->floatParsFinal();
     double x_left, x_right, y_bottom, y_top;
     const double line_height = 0.06;
 

@@ -1212,6 +1212,10 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
     plot->GetYaxis()->SetTitleOffset(1.60);
     plot->Draw();
 
+    // This is not an OK way of calculating ndof - e.g., in a case where the PDF
+    // is defined only on a subset of the var range, or there are empty bins,
+    // etc. it will be wrong. However, RooFit doesn't give access to anything
+    // like ndof itself, so this will have to do for now.
     const int num_floating_pars = result_ ? result_->floatParsFinal().getSize() : 0;
     const int ndof = var.getBinning().numBins() - num_floating_pars;
     const double chi2 = plot->chiSquare(num_floating_pars) * ndof;
@@ -1726,7 +1730,7 @@ const std::string FitterCPV::CreateLatexPullTableString(const bool asymmetric) {
         }
         ss << " \\\\" << std::endl;
     }
-    ss << "\t\t\\botomrule\n";
+    ss << "\t\t\\bottomrule\n";
     ss << "\t\\end{tabular}\n";
     ss << "\\end{table}\n";
     return ss.str();

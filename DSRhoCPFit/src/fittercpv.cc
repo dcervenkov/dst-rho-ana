@@ -1737,7 +1737,7 @@ const std::string FitterCPV::CreateLatexPullTableString(const bool asymmetric) {
 }
 
 /**
- * Save results to the ROOT outputfile as well as the plain text file
+ * Save results, status codes, covariance matrix quality to the ROOT output file
  */
 const void FitterCPV::LogResults() {
     // Set the current directory back to the one for plots (ugly ROOT stuff)
@@ -1754,6 +1754,11 @@ const void FitterCPV::LogResults() {
     snprintf(buffer, 100, "%i", result_->covQual());
     TNamed cov_qual("cov_qual", buffer);
     cov_qual.Write();
+
+    for (uint i = 0; i < result_->numStatusHistory(); i++) {
+        TNamed status(result_->statusLabelHistory(i), std::to_string(result_->statusCodeHistory(i)));
+        status.Write();
+    }
 }
 
 /**

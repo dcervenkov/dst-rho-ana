@@ -1860,32 +1860,51 @@ const void FitterCPV::LogText(const char* field_name, const char* text) {
 
 /**
  * Save -2 log(likelihood) scan of a single variable.
+ *
+ * @param pdf PDF to be used for likelihood calculation
+ * @param var Variable to scan
+ * @param margin [optional] Set plot range [var_value - margin, var_value + margin]
  */
-const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var) {
+const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var, const double margin) {
     TString name;
     name = "nll_";
     name += var->GetName();
 
     TCanvas canvas(name, name, 500, 500);
-    const int steps = 100;
-    Double_t stepsize = (var->getMax() - var->getMin()) / steps;
-    Double_t orig_val = var->getVal();
 
-    TH1D h1_nll("h1_" + name, "h1_" + name, steps, var->getMin(), var->getMax());
+    const int steps = 100;
+    const double orig_val = var->getVal();
+    const double min = margin ? orig_val - margin : var->getMin();
+    const double max = margin ? orig_val + margin : var->getMax();
+    const double stepsize = (max - min) / steps;
+
+    TH1D h1_nll("h1_" + name, "h1_" + name, steps, min, max);
     RooAbsReal* nll;
     nll = pdf.createNLL(*dataset_, RooFit::NumCPU(num_CPUs_));
 
     for (Int_t i = 0; i < steps; i++) {
-        var->setVal(i * stepsize + var->getMin() + stepsize / 2);
+        var->setVal(i * stepsize + min + stepsize / 2);
         printf("Computing %i/%i likelihood function.\n", i + 1, steps);
-        if (!std::isnan(nll->getVal())) {
-            h1_nll.Fill(var->getVal(), nll->getVal());
+        const double nll_val = 2 * nll->getVal();
+        if (!std::isnan(nll_val)) {
+            h1_nll.Fill(var->getVal(), nll_val);
         }
     }
 
+    // Set optimal y-axis range, while ignoring empty bins
+    double min_bin_content = h1_nll.GetMaximum();
+    for (int i = 1; i < h1_nll.GetSize(); i++) {
+        printf("in for: i[%i] = %f\n", i, h1_nll.GetBinContent(i));
+        if (min_bin_content > h1_nll.GetBinContent(i) && h1_nll.GetBinContent(i) != 0) {
+            min_bin_content = h1_nll.GetBinContent(i);
+        }
+    }
+    const double ymargin = (h1_nll.GetMaximum() - min_bin_content) * 0.05;
+    h1_nll.GetYaxis()->SetRangeUser(min_bin_content - ymargin, h1_nll.GetMaximum() + ymargin);
+
     delete nll;
     h1_nll.GetXaxis()->SetTitle(var->GetTitle());
-    h1_nll.GetZaxis()->SetTitle("");
+    h1_nll.GetYaxis()->SetTitle("");
     h1_nll.SetTitle("");
     h1_nll.SetStats(kFALSE);
     h1_nll.Draw("HIST");
@@ -1896,8 +1915,15 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var) {
 
 /**
  * Save -2 log(likelihood) scan of a two variables.
+ *
+ * @param pdf PDF to be used for likelihood calculation
+ * @param var1 x-axis variable to scan
+ * @param var2 y-axis variable to scan
+ * @param margin1 [optional] Set plot range [var1_value - margin1, var1_value + margin1]
+ * @param margin2 [optional] Set plot range [var2_value - margin2, var2_value + margin2]
  */
-const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRealVar* var2) {
+const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRealVar* var2,
+                                         const double margin1, const double margin2) {
     TString name;
     name = "nll2_";
     name += var1->GetName();
@@ -1905,12 +1931,18 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRe
     name += var2->GetName();
 
     TCanvas canvas(name, name, 500, 500);
+
     const int steps1 = 30;
+    const double orig_val1 = var1->getVal();
+    const double min1 = margin1 ? orig_val1 - margin1 : var1->getMin();
+    const double max1 = margin1 ? orig_val1 + margin1 : var1->getMax();
+    const double stepsize1 = (max1 - min1) / steps1;
+
     const int steps2 = 30;
-    Double_t stepsize1 = (var1->getMax() - var1->getMin()) / steps1;
-    Double_t stepsize2 = (var2->getMax() - var2->getMin()) / steps2;
-    Double_t orig_val1 = var1->getVal();
-    Double_t orig_val2 = var2->getVal();
+    const double orig_val2 = var2->getVal();
+    const double min2 = margin2 ? orig_val2 - margin2 : var2->getMin();
+    const double max2 = margin2 ? orig_val2 + margin2 : var2->getMax();
+    const double stepsize2 = (max2 - min2) / steps2;
 
     TH2F h2_nll("h2_" + name, "h2_" + name, steps1, var1->getMin(), var1->getMax(), steps2,
                 var2->getMin(), var2->getMax());
@@ -1919,8 +1951,8 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRe
 
     for (Int_t i = 0; i < steps1; i++) {
         for (Int_t j = 0; j < steps2; j++) {
-            var1->setVal(i * stepsize1 + var1->getMin() + stepsize1 / 2);
-            var2->setVal(j * stepsize2 + var2->getMin() + stepsize2 / 2);
+            var1->setVal(i * stepsize1 + min1 + stepsize1 / 2);
+            var2->setVal(j * stepsize2 + min2 + stepsize2 / 2);
             printf("Computing %i/%i likelihood function.\n", i * steps2 + j + 1, steps1 * steps2);
             h2_nll.Fill(var1->getVal(), var2->getVal(), 2 * nll->getVal());
         }

@@ -10,18 +10,19 @@
 #include "fittercpv.h"
 
 // Standard includes
+#include <unistd.h>
 #include <array>
 #include <boost/filesystem.hpp>
 #include <ctime>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <unistd.h>
 
 // Belle includes
 #include "tatami/tatami.h"
 
 // ROOT includes
+#include "RVersion.h"
 #include "RooArgSet.h"
 #include "RooBifurGauss.h"
 #include "RooCategory.h"
@@ -41,7 +42,6 @@
 #include "RooTFnBinding.h"
 #include "RooTreeDataStore.h"
 #include "RooVoigtian.h"
-#include "RVersion.h"
 #include "TAxis.h"
 #include "TCanvas.h"
 #include "TEnv.h"
@@ -56,14 +56,14 @@
 
 // Local includes
 #include "angularpdf.h"
-#include "constants.h"
 #include "cksum.h"
+#include "constants.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
 #include "gitversion.h"
 #include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
+#include "rapidjson/stringbuffer.h"
 #include "tools.h"
 
 FitterCPV::FitterCPV(std::array<double, 16> par_input) {
@@ -738,10 +738,10 @@ void FitterCPV::FitAngularCR() {
     sim_pdf.addPdf(pdf_B, "b");
     sim_pdf.addPdf(pdf_B_bar, "bb");
 
-    result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
+    result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(true),
                             // RooFit::Range(ranges_string.c_str()),
                             // RooFit::Range("dtFitRange"),
-                            RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+                            RooFit::Minos(true), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
     if (result_) {
         result_->Print();
     }
@@ -764,6 +764,18 @@ void FitterCPV::FitAngularCR() {
         if (output_file_) {
             output_file_->cd();
         }
+
+        SaveLikelihoodScan(sim_pdf, ap_);
+        SaveLikelihoodScan(sim_pdf, apa_);
+        SaveLikelihoodScan(sim_pdf, a0_);
+        SaveLikelihoodScan(sim_pdf, ata_);
+        SaveLikelihoodScan(sim_pdf, ap_, apa_);
+        SaveLikelihoodScan(sim_pdf, ap_, a0_);
+        SaveLikelihoodScan(sim_pdf, ap_, ata_);
+        SaveLikelihoodScan(sim_pdf, apa_, a0_);
+        SaveLikelihoodScan(sim_pdf, apa_, ata_);
+        SaveLikelihoodScan(sim_pdf, a0_, ata_);
+
         PlotWithPull(*thetat_, *dataset_, cr_histpdf);
         PlotWithPull(*thetab_, *dataset_, cr_histpdf);
         PlotWithPull(*phit_, *dataset_, cr_histpdf);
@@ -826,13 +838,12 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
             reduce_string << "(";
             const rapidjson::SizeType num_ranges = config["fitRanges"][var_name].Size();
             for (rapidjson::SizeType i = 0; i < num_ranges; i++) {
-
                 double low, high;
                 low = config["fitRanges"][var_name][i][0].GetDouble();
                 high = config["fitRanges"][var_name][i][1].GetDouble();
 
                 reduce_string << "(" << var_name << " > " << low << " && " << var_name << " < "
-                                << high << ")";
+                              << high << ")";
                 if (i < num_ranges - 1) {
                     reduce_string << " || ";
                 }
@@ -912,7 +923,7 @@ const void FitterCPV::LogEnvironmentMetadata() {
     const char* local_time_string = ctime(&now);
     TNamed local_date("local_date", local_time_string);
 
-    tm *gmtm = gmtime(&now);
+    tm* gmtm = gmtime(&now);
     const char* utc_time_string = asctime(gmtm);
     TNamed utc_date("utc_date", utc_time_string);
 
@@ -925,10 +936,10 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
 
     // vars with phiweak = phiweak + pi, r = 0.01
     double par_input[] = {
-        0.269,        // ap
-        0.56,         // apa
-        0.941,        // a0
-        3.11,         // ata
+        0.269,  // ap
+        0.56,   // apa
+        0.941,  // a0
+        3.11,   // ata
 
         0.00816649,   // xp
         0.00532961,   // x0
@@ -1272,7 +1283,6 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
  */
 TPaveText* FitterCPV::CreateStatBox(const double chi2, const int ndof, const bool position_top,
                                     const bool position_left) const {
-
     RooArgList results = result_ ? result_->floatParsFinal() : RooArgList();
 
     double x_left, x_right, y_bottom, y_top;
@@ -1280,10 +1290,10 @@ TPaveText* FitterCPV::CreateStatBox(const double chi2, const int ndof, const boo
 
     if (position_top) {
         y_top = 0.9;
-        y_bottom = y_top - (results.getSize() + 2)* line_height;
+        y_bottom = y_top - (results.getSize() + 2) * line_height;
     } else {
         y_bottom = 0.023;
-        y_top = y_bottom + (results.getSize() + 2)* line_height;
+        y_top = y_bottom + (results.getSize() + 2) * line_height;
     }
 
     if (position_left) {
@@ -1309,7 +1319,7 @@ TPaveText* FitterCPV::CreateStatBox(const double chi2, const int ndof, const boo
                  dynamic_cast<RooRealVar&>(results[i]).getError());
         stat_box->AddText(line);
     }
-    snprintf(line, 1000, "#chi^{2}/ndof = %.2f (%.1f/%i)\n", chi2/ndof, chi2, ndof);
+    snprintf(line, 1000, "#chi^{2}/ndof = %.2f (%.1f/%i)\n", chi2 / ndof, chi2, ndof);
     stat_box->AddText(line);
     snprintf(line, 1000, "p = %.2f\n", TMath::Prob(chi2, ndof));
     stat_box->AddText(line);
@@ -1435,7 +1445,6 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     }
 
     dataset_->get(1)->Print("v");
-
 }
 
 /**
@@ -1574,9 +1583,9 @@ const std::string FitterCPV::CreateResultsString() {
 
         if (i == numParameters - 1) continue;
         if (separators[i] == 1)
-            results +=  "| ";
+            results += "| ";
         else if (separators[i] == 2)
-            results +=  "|| ";
+            results += "|| ";
     }
     delete[] parameters;
 
@@ -1642,12 +1651,12 @@ const std::string FitterCPV::CreatePullTableString(const bool asymmetric) {
         ss << std::setprecision(2) << std::showpos;
         if (asymmetric) {
             if (fit > tru) {
-                ss << (fit-tru)/err_high;
+                ss << (fit - tru) / err_high;
             } else {
-                ss << (fit-tru)/fabs(err_low);
+                ss << (fit - tru) / fabs(err_low);
             }
         } else {
-            ss << (fit-tru)/err;
+            ss << (fit - tru) / err;
         }
         ss << std::endl;
     }
@@ -1682,7 +1691,8 @@ const std::string FitterCPV::CreateLatexPullTableString(const bool asymmetric) {
 
         // Skip 'x' and 'y' pars if we are doing a time-independent fit
         if (do_time_independent_fit_) {
-            if (name.find('x') != std::string::npos || name.find('y') != std::string::npos) continue;
+            if (name.find('x') != std::string::npos || name.find('y') != std::string::npos)
+                continue;
         }
 
         double tru = par_input_[i];
@@ -1721,12 +1731,12 @@ const std::string FitterCPV::CreateLatexPullTableString(const bool asymmetric) {
         ss << std::setprecision(2) << std::showpos;
         if (asymmetric) {
             if (fit > tru) {
-                ss << (fit-tru)/err_high;
+                ss << (fit - tru) / err_high;
             } else {
-                ss << (fit-tru)/fabs(err_low);
+                ss << (fit - tru) / fabs(err_low);
             }
         } else {
-            ss << (fit-tru)/err;
+            ss << (fit - tru) / err;
         }
         ss << " \\\\" << std::endl;
     }
@@ -1756,7 +1766,8 @@ const void FitterCPV::LogResults() {
     cov_qual.Write();
 
     for (uint i = 0; i < result_->numStatusHistory(); i++) {
-        TNamed status(result_->statusLabelHistory(i), std::to_string(result_->statusCodeHistory(i)));
+        TNamed status(result_->statusLabelHistory(i),
+                      std::to_string(result_->statusCodeHistory(i)));
         status.Write();
     }
 }
@@ -1845,4 +1856,88 @@ const void FitterCPV::LogFileCRC(const char* field_name, const char* filename) {
 const void FitterCPV::LogText(const char* field_name, const char* text) {
     TNamed text_field(field_name, text);
     text_field.Write();
+}
+
+/**
+ * Save -2 log(likelihood) scan of a single variable.
+ */
+const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var) {
+    TString name;
+    name = "nll_";
+    name += var->GetName();
+
+    TCanvas canvas(name, name, 500, 500);
+    const int steps = 100;
+    Double_t stepsize = (var->getMax() - var->getMin()) / steps;
+    Double_t orig_val = var->getVal();
+
+    TH1D h1_nll("h1_" + name, "h1_" + name, steps, var->getMin(), var->getMax());
+    RooAbsReal* nll;
+    nll = pdf.createNLL(*dataset_, RooFit::NumCPU(num_CPUs_));
+
+    for (Int_t i = 0; i < steps; i++) {
+        var->setVal(i * stepsize + var->getMin() + stepsize / 2);
+        printf("Computing %i/%i likelihood function.\n", i + 1, steps);
+        if (!std::isnan(nll->getVal())) {
+            h1_nll.Fill(var->getVal(), nll->getVal());
+        }
+    }
+
+    delete nll;
+    h1_nll.GetXaxis()->SetTitle(var->GetTitle());
+    h1_nll.GetZaxis()->SetTitle("");
+    h1_nll.SetTitle("");
+    h1_nll.SetStats(kFALSE);
+    h1_nll.Draw("HIST");
+    h1_nll.Write();
+    canvas.SaveAs(constants::format);
+    var->setVal(orig_val);
+}
+
+/**
+ * Save -2 log(likelihood) scan of a two variables.
+ */
+const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRealVar* var2) {
+    TString name;
+    name = "nll2_";
+    name += var1->GetName();
+    name += "_";
+    name += var2->GetName();
+
+    TCanvas canvas(name, name, 500, 500);
+    const int steps1 = 30;
+    const int steps2 = 30;
+    Double_t stepsize1 = (var1->getMax() - var1->getMin()) / steps1;
+    Double_t stepsize2 = (var2->getMax() - var2->getMin()) / steps2;
+    Double_t orig_val1 = var1->getVal();
+    Double_t orig_val2 = var2->getVal();
+
+    TH2F h2_nll("h2_" + name, "h2_" + name, steps1, var1->getMin(), var1->getMax(), steps2,
+                var2->getMin(), var2->getMax());
+    RooAbsReal* nll;
+    nll = pdf.createNLL(*dataset_, RooFit::NumCPU(num_CPUs_));
+
+    for (Int_t i = 0; i < steps1; i++) {
+        for (Int_t j = 0; j < steps2; j++) {
+            var1->setVal(i * stepsize1 + var1->getMin() + stepsize1 / 2);
+            var2->setVal(j * stepsize2 + var2->getMin() + stepsize2 / 2);
+            printf("Computing %i/%i likelihood function.\n", i * steps2 + j + 1, steps1 * steps2);
+            h2_nll.Fill(var1->getVal(), var2->getVal(), 2 * nll->getVal());
+        }
+    }
+
+    delete nll;
+
+    canvas.SetRightMargin(0.14);
+    h2_nll.GetXaxis()->SetTitle(var1->GetTitle());
+    h2_nll.GetYaxis()->SetTitle(var2->GetTitle());
+    h2_nll.GetZaxis()->SetTitle("");
+    h2_nll.SetTitle("");
+    h2_nll.SetStats(kFALSE);
+    h2_nll.SetOption("colz");
+    h2_nll.Draw();
+    h2_nll.Write();
+    canvas.SaveAs(constants::format);
+    var1->setVal(orig_val1);
+    var2->setVal(orig_val2);
 }

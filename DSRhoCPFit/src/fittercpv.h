@@ -160,6 +160,8 @@ class FitterCPV {
                              const bool position_left) const;
     TString GetCommonCutsString() const;
     TH3D* GetBinnedEfficiency();
+    const void SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var);
+    const void SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRealVar* var2);
 
     std::vector<RooRealVar**> conditional_vars_;
     std::vector<RooRealVar**> dataset_vars_;

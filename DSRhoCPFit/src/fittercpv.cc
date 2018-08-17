@@ -1894,7 +1894,6 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var, const 
     // Set optimal y-axis range, while ignoring empty bins
     double min_bin_content = h1_nll.GetMaximum();
     for (int i = 1; i < h1_nll.GetSize(); i++) {
-        printf("in for: i[%i] = %f\n", i, h1_nll.GetBinContent(i));
         if (min_bin_content > h1_nll.GetBinContent(i) && h1_nll.GetBinContent(i) != 0) {
             min_bin_content = h1_nll.GetBinContent(i);
         }
@@ -1944,8 +1943,7 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRe
     const double max2 = margin2 ? orig_val2 + margin2 : var2->getMax();
     const double stepsize2 = (max2 - min2) / steps2;
 
-    TH2F h2_nll("h2_" + name, "h2_" + name, steps1, var1->getMin(), var1->getMax(), steps2,
-                var2->getMin(), var2->getMax());
+    TH2F h2_nll("h2_" + name, "h2_" + name, steps1, min1, max1, steps2, min2, max2);
     RooAbsReal* nll;
     nll = pdf.createNLL(*dataset_, RooFit::NumCPU(num_CPUs_));
 

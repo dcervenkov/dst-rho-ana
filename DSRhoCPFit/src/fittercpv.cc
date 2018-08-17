@@ -738,10 +738,10 @@ void FitterCPV::FitAngularCR() {
     sim_pdf.addPdf(pdf_B, "b");
     sim_pdf.addPdf(pdf_B_bar, "bb");
 
-    result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(true),
+    result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
                             // RooFit::Range(ranges_string.c_str()),
                             // RooFit::Range("dtFitRange"),
-                            RooFit::Minos(true), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+                            RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
     if (result_) {
         result_->Print();
     }

@@ -25,10 +25,13 @@
 #include "fittercpv.h"
 #include "tools.h"
 
+#define REDIRECT_LOG
+
 int main(int argc, char* argv[]) {
     // Redirect all output to a temporary file. This file will later be read and
     // saved to the results ROOT file. It must be done in this inelegant way,
     // because ROOT doesn't support redirection to anything else than a file.
+    #ifdef REDIRECT_LOG
     char tmp_filename[100];
     std::tmpnam(tmp_filename);
     printf("Processing...\n");
@@ -36,6 +39,7 @@ int main(int argc, char* argv[]) {
     printf("All following messages will be saved to the temporary file and "
         "then copied to the results ROOT file.\n");
     gSystem->RedirectOutput(tmp_filename);
+    #endif
 
     char** optionless_argv = NULL;
     // The {} causes the struct's members to be initialized to 0. Without it
@@ -158,9 +162,11 @@ int main(int argc, char* argv[]) {
     }
     // We must flush, otherwise the log file might not be complete when we save
     // it to the ROOT file.
+    #ifdef REDIRECT_LOG
     std::fflush(stdout);
     fitter.LogTextFromFile("log", tmp_filename);
     std::remove(tmp_filename);
+    #endif
 
     return 0;
 }

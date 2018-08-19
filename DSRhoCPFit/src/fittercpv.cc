@@ -68,11 +68,11 @@
 
 FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     ap_ = new RooRealVar("ap", "|a_{#parallel}|", par_input[0], 0, 0.5);
-    apa_ = new RooRealVar("apa", "#arg(a_{#parallel})", par_input[1], 0, 1);
+    apa_ = new RooRealVar("apa", "arg(a_{#parallel})", par_input[1], 0, 1);
     a0_ = new RooRealVar("a0", "|a_{0}|", par_input[2], 0.8, 1);
-    a0a_ = new RooRealVar("a0a", "#arg(a_{0})", 0);
+    a0a_ = new RooRealVar("a0a", "arg(a_{0})", 0);
     at_ = new RooFormulaVar("at", "sqrt(1-ap*ap-a0*a0)", RooArgSet(*ap_, *a0_));
-    ata_ = new RooRealVar("ata", "#arg(a_{#perp})", par_input[3], 2, 4);
+    ata_ = new RooRealVar("ata", "arg(a_{#perp})", par_input[3], 2, 4);
 
     xp_ = new RooRealVar("xp", "x_{#parallel}", par_input[4], -0.4, 0.4);
     x0_ = new RooRealVar("x0", "x_{0}", par_input[5], -0.4, 0.4);

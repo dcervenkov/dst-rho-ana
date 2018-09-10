@@ -26,6 +26,7 @@
 #include "RooArgSet.h"
 #include "RooBifurGauss.h"
 #include "RooCategory.h"
+#include "RooChi2Var.h"
 #include "RooDataHist.h"
 #include "RooDataSet.h"
 #include "RooExponential.h"
@@ -742,6 +743,7 @@ void FitterCPV::FitAngularCR() {
                             // RooFit::Range(ranges_string.c_str()),
                             // RooFit::Range("dtFitRange"),
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+
     if (result_) {
         result_->Print();
     }
@@ -765,16 +767,20 @@ void FitterCPV::FitAngularCR() {
             output_file_->cd();
         }
 
-        SaveLikelihoodScan(sim_pdf, ap_);
-        SaveLikelihoodScan(sim_pdf, apa_);
-        SaveLikelihoodScan(sim_pdf, a0_);
-        SaveLikelihoodScan(sim_pdf, ata_);
-        SaveLikelihoodScan(sim_pdf, ap_, apa_);
-        SaveLikelihoodScan(sim_pdf, ap_, a0_);
-        SaveLikelihoodScan(sim_pdf, ap_, ata_);
-        SaveLikelihoodScan(sim_pdf, apa_, a0_);
-        SaveLikelihoodScan(sim_pdf, apa_, ata_);
-        SaveLikelihoodScan(sim_pdf, a0_, ata_);
+        const double margin_ap = 0.005;
+        const double margin_apa = 0.25;
+        const double margin_a0 = 0.0015;
+        const double margin_ata = 0.3;
+        SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
+        SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
+        SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
+        SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
+        SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
+        SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
+        SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
+        SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
+        SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
+        SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
 
         PlotWithPull(*thetat_, *dataset_, cr_histpdf);
         PlotWithPull(*thetab_, *dataset_, cr_histpdf);
@@ -815,6 +821,14 @@ void FitterCPV::FitAngularCR() {
         tools::PlotPull2D(*thetat_, *thetab_, hist, *cr_hist);
         tools::PlotPull2D(*thetat_, *phit_, hist, *cr_hist);
         tools::PlotPull2D(*thetab_, *phit_, hist, *cr_hist);
+
+        const double chi2 = Calculate3DChi2(hist, *cr_hist);
+        printf("Chi2 = %f\n", chi2);
+
+        SaveChi2Scan(sim_pdf, ap_, margin_apa);
+        SaveChi2Scan(sim_pdf, apa_, margin_apa);
+        SaveChi2Scan(sim_pdf, a0_, margin_a0);
+        SaveChi2Scan(sim_pdf, ata_, margin_ata);
 
         delete dataset_B;
         delete dataset_B_bar;
@@ -1970,4 +1984,96 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRe
     canvas.SaveAs(constants::format);
     var1->setVal(orig_val1);
     var2->setVal(orig_val2);
+}
+
+const double FitterCPV::Calculate3DChi2(const RooDataHist& data, const RooDataHist& pdf) {
+    TH1I h_bin_content("h_bin_content", "Bin Content", 100, 0, 99);
+    double chi2 = 0;
+    int bins_used = 0;
+    for(int i = 0; i < data.numEntries(); i++) {
+        data.get(i);
+        pdf.get(i);
+        double data_bin = data.weight();
+        double pdf_bin = pdf.weight();
+        h_bin_content.Fill(data_bin);
+        if (data_bin > 5) {
+            chi2 += (data_bin - pdf_bin)*(data_bin - pdf_bin)/pdf_bin;
+            bins_used++;
+        }
+    }
+    h_bin_content.GetXaxis()->SetTitle("bin content");
+    h_bin_content.GetYaxis()->SetTitle("");
+    h_bin_content.SetTitle("");
+    h_bin_content.SetStats(kFALSE);
+    h_bin_content.Draw("HIST");
+    h_bin_content.Write();
+    h_bin_content.SaveAs(constants::format);
+    printf("Bins used for chi2: %i/%i (%.1f%%)\n", bins_used, data.numEntries(), (double) bins_used / data.numEntries() * 100);
+
+    return chi2;
+}
+
+/**
+ * Save chi2 scan of a single variable.
+ */
+const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const double margin) {
+    TString name;
+    name = "chi2_";
+    name += var->GetName();
+
+    TCanvas canvas(name, name, 500, 500);
+
+    const int steps = 100;
+    const double orig_val = var->getVal();
+    const double min = margin ? orig_val - margin : var->getMin();
+    const double max = margin ? orig_val + margin : var->getMax();
+    const double stepsize = (max - min) / steps;
+
+    RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
+        dataset_->reduce("decaytype==decaytype::a||decaytype==decaytype::b"));
+    RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(
+        dataset_->reduce("decaytype==decaytype::ab||decaytype==decaytype::bb"));
+
+    RooDataHist hist("hist", "hist", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_);
+
+    RooAbsPdf* pdf_B = pdf.getPdf("a");
+    RooAbsPdf* pdf_B_bar = pdf.getPdf("ab");
+
+    TH1D h1_chi2("h1_" + name, "h1_" + name, steps, min, max);
+
+    for (Int_t i = 0; i < steps; i++) {
+        var->setVal(i * stepsize + min + stepsize / 2);
+        printf("Computing chi2 %i/%i.\n", i + 1, steps);
+
+        RooDataHist* cr_hist = pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+                                       dataset_B->sumEntries(), RooFit::ExpectedData(true));
+        RooDataHist* cr_hist_B_bar =
+            pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+                                     dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
+        cr_hist->add(*cr_hist_B_bar);
+
+        const double chi2 = Calculate3DChi2(hist, *cr_hist);
+        if (!std::isnan(chi2)) {
+            h1_chi2.Fill(var->getVal(), chi2);
+        }
+    }
+
+    // Set optimal y-axis range, while ignoring empty bins
+    double min_bin_content = h1_chi2.GetMaximum();
+    for (int i = 1; i < h1_chi2.GetSize(); i++) {
+        if (min_bin_content > h1_chi2.GetBinContent(i) && h1_chi2.GetBinContent(i) != 0) {
+            min_bin_content = h1_chi2.GetBinContent(i);
+        }
+    }
+    const double ymargin = (h1_chi2.GetMaximum() - min_bin_content) * 0.05;
+    h1_chi2.GetYaxis()->SetRangeUser(min_bin_content - ymargin, h1_chi2.GetMaximum() + ymargin);
+
+    h1_chi2.GetXaxis()->SetTitle(var->GetTitle());
+    h1_chi2.GetYaxis()->SetTitle("");
+    h1_chi2.SetTitle("");
+    h1_chi2.SetStats(kFALSE);
+    h1_chi2.Draw("HIST");
+    h1_chi2.Write();
+    canvas.SaveAs(constants::format);
+    var->setVal(orig_val);
 }

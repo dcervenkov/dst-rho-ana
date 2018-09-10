@@ -15,6 +15,7 @@
 
 // ROOT includes
 #include "RooRealVar.h"
+#include "RooSimultaneous.h"
 #include "TCanvas.h"
 #include "TH3D.h"
 #include "TPaveText.h"
@@ -163,6 +164,8 @@ class FitterCPV {
     const void SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var, const double margin = 0);
     const void SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRealVar* var2,
                                   const double margin1 = 0, const double margin2 = 0);
+    const double Calculate3DChi2(const RooDataHist& data, const RooDataHist& pdf);
+    const void SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const double margin = 0);
 
     std::vector<RooRealVar**> conditional_vars_;
     std::vector<RooRealVar**> dataset_vars_;

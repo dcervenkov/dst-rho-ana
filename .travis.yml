@@ -54,7 +54,7 @@ install:
   # Download and compile Meerkat
   - mkdir -p ~/bin/belle/packages
   - cd ~/bin/belle/packages
-  - wget http://www.hepforge.org/archive/meerkat/meerkat-1.3.0.tar.gz
+  - wget https://meerkat.hepforge.org/downloads/\?f\=meerkat-1.3.0.tar.gz -O meerkat-1.3.0.tar.gz
   - tar xzf meerkat-1.3.0.tar.gz
   - cd Meerkat
   - make

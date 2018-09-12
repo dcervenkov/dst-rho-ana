@@ -14,6 +14,8 @@
 #include <cstdio>
 #include <cstring>
 #include <getopt.h>
+#include <ostream>
+#include <sstream>
 #include <stdio.h>
 
 // ROOT includes

@@ -23,23 +23,23 @@
 #include "colors.h"
 #include "constants.h"
 #include "fittercpv.h"
+#include "log.h"
+#include "teebuf.h"
 #include "tools.h"
 
 #define REDIRECT_LOG
 
 int main(int argc, char* argv[]) {
-    // Redirect all output to a temporary file. This file will later be read and
-    // saved to the results ROOT file. It must be done in this inelegant way,
-    // because ROOT doesn't support redirection to anything else than a file.
     #ifdef REDIRECT_LOG
-    char tmp_filename[100];
-    std::tmpnam(tmp_filename);
-    printf("Processing...\n");
-    printf("Temporary file's name: %s\n", tmp_filename);
-    printf("All following messages will be saved to the temporary file and "
-        "then copied to the results ROOT file.\n");
-    gSystem->RedirectOutput(tmp_filename);
+    std::ostringstream sout;
+    teebuf sbuf(sout.rdbuf(), std::cout.rdbuf());
+    std::ostream out(&sbuf);
+
+    std::streambuf* orig_cout_streambuf = std::cout.rdbuf();
+    std::cout.rdbuf( out.rdbuf() );
     #endif
+
+    Log::setLogLevel(Log::debug);
 
     char** optionless_argv = NULL;
     // The {} causes the struct's members to be initialized to 0. Without it
@@ -160,12 +160,11 @@ int main(int argc, char* argv[]) {
 
         fitter.SaveTXTResults(results_path);
     }
-    // We must flush, otherwise the log file might not be complete when we save
-    // it to the ROOT file.
+
     #ifdef REDIRECT_LOG
-    std::fflush(stdout);
-    fitter.LogTextFromFile("log", tmp_filename);
-    std::remove(tmp_filename);
+    std::cout.rdbuf(orig_cout_streambuf);
+    Log::print(Log::info, "Saving log to ROOT file\n");
+    fitter.LogText("log", sout.str().c_str());
     #endif
 
     return 0;

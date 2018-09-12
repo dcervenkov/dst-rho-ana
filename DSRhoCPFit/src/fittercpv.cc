@@ -62,6 +62,7 @@
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
 #include "gitversion.h"
+#include "log.h"
 #include "rapidjson/document.h"
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/stringbuffer.h"
@@ -728,6 +729,8 @@ void FitterCPV::FitAngularCR() {
     RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
     dataset_ = temp_dataset;
 
+    Log::print(Log::debug, "DC: Fitting %i events.\n", dataset_->numEntries());
+
     AngularPDF pdf_B("pdf_B", "pdf_B", false, efficiency_model_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
     AngularPDF pdf_B_bar("pdf_B_bar", "pdf_B_bar", true, efficiency_model_, *thetat_, *thetab_,
@@ -867,8 +870,8 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
     }
 
     reduced_dataset = dynamic_cast<RooDataSet*>(dataset_->reduce(reduce_string.str().c_str()));
-    printf("dataset after reduce: %i\n", reduced_dataset->numEntries());
-    printf("reduce string: %s\n", reduce_string.str().c_str());
+    Log::print(Log::info, "dataset after reduce: %i\n", reduced_dataset->numEntries());
+    Log::print(Log::info, "reduce string: %s\n", reduce_string.str().c_str());
     return reduced_dataset;
 }
 
@@ -1405,7 +1408,7 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
     RooDataSet* temp_dataset =
         new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_, common_cuts);
-    printf("DBG: Num events passing common cuts: %i\n", temp_dataset->numEntries());
+    Log::print(Log::debug, "DBG: Num events passing common cuts: %i\n", temp_dataset->numEntries());
 
     //  separate conditional vars from stuff like thetat
 
@@ -1438,7 +1441,7 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     dataset_->append(*dataset_bb);
     delete dataset_bb;
 
-    printf("DBG: Num events passing all initial cuts: %i\n", dataset_->numEntries());
+    Log::print(Log::debug, "Num events passing all initial cuts: %i\n", dataset_->numEntries());
 
     delete input_tree;
     input_file->Close();

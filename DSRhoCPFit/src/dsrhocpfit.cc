@@ -29,17 +29,15 @@
 #include "teebuf.h"
 #include "tools.h"
 
-#define REDIRECT_LOG
 
 int main(int argc, char* argv[]) {
-    #ifdef REDIRECT_LOG
+    // This block sets up an alternative ostream that can be used to duplicate
+    // cout to both the screen and a stringstream. We use this to save a copy of
+    // the log to the resulting ROOT file.
     std::ostringstream sout;
     teebuf sbuf(sout.rdbuf(), std::cout.rdbuf());
     std::ostream out(&sbuf);
-
     std::streambuf* orig_cout_streambuf = std::cout.rdbuf();
-    std::cout.rdbuf( out.rdbuf() );
-    #endif
 
     Log::setLogLevel(Log::debug);
 
@@ -71,6 +69,11 @@ int main(int argc, char* argv[]) {
     } else {
         par_input = constants::par_input;
     }
+
+    if (options.save_log_set && options.save_log) {
+        std::cout.rdbuf(out.rdbuf());
+    }
+
     tools::SetupPlotStyle();
     colors::setColors();
 
@@ -163,11 +166,13 @@ int main(int argc, char* argv[]) {
         fitter.SaveTXTResults(results_path);
     }
 
-    #ifdef REDIRECT_LOG
-    std::cout.rdbuf(orig_cout_streambuf);
-    Log::print(Log::info, "Saving log to ROOT file\n");
-    fitter.LogText("log", sout.str().c_str());
-    #endif
+    if (options.save_log_set && options.save_log) {
+        // We have to restore cout's buffer to the original, otherwise we would
+        // get a segfault as our object goes out of scope sooner than cout
+        std::cout.rdbuf(orig_cout_streambuf);
+        Log::print(Log::info, "Saving log to ROOT file\n");
+        fitter.LogText("log", sout.str().c_str());
+    }
 
     return 0;
 }
@@ -197,6 +202,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"events", required_argument, 0, 'n'},
         {"fit", required_argument, 0, 'f'},
         {"fix", required_argument, 0, 'x'},
+        {"log", no_argument, 0, 'l'},
         {"mixing", no_argument, 0, 'm'},
         {"time-independent", no_argument, 0, 'i'},
         {"perfect-tag", no_argument, 0, 't'},
@@ -204,7 +210,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"help", no_argument, 0, 'h'},
         {NULL, no_argument, NULL, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:f:e:x:p:lmith", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:g:e:n:f:x:p:lmith", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -239,6 +245,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.plot_dir = optarg;
                 options.plot_dir_set = true;
                 break;
+            case 'l':
+                options.save_log = true;
+                options.save_log_set = true;
+                break;
             case 'm':
                 options.do_mixing_fit = true;
                 options.do_mixing_fit_set = true;
@@ -260,6 +270,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-g, --config=CONFIG_FILE         read in configuration from the specified file");
                 printf("-h, --help                       display this text and exit\n");
                 printf("-i, --time-independent           make a time-independent fit\n");
+                printf("-l, --log                        save copy of log to results file\n");
                 printf("-m, --mixing                     make a mixing fit\n");
                 printf("-n, --events=NUM_EVENTS          number of events to be imported from the input file\n");
                 printf("-p, --plot-dir=PLOT_DIR          create lifetime/mixing plots\n");

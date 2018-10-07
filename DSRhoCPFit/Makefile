@@ -35,6 +35,9 @@ obj:
 src/gitversion.cc: ../.git/HEAD ../.git/index $(filter-out src/gitversion.cc, $(CXX_FILES))
 	echo "const char* gitversion = \"$(shell git rev-parse HEAD)$(shell git diff --quiet || echo '-dirty')\";" > $@
 
+tidy: $(CXX_FILES)
+	clang-tidy $^ -- $(CXX_FLAGS) $(INCS) $(BELLE_INCS) $(ROOT_FLAGS)
+
 clean::
 	rm -f $(OBJ_FILES) $(DEP_FILES) $(TARGET) src/gitversion.cc
 

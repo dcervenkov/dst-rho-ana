@@ -129,14 +129,15 @@ int main(int argc, char* argv[]) {
         if (fitter.GetDoTimeIndependentFit()) {
             fitter.FitAngularCR();
         } else {
-            fitter.FitSignal();
+            fitter.FitCR();
         }
     } else if (std::strcmp(options.fit, "CRSCF") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {
-            printf("ERROR: Time independent CRSCF fit not implemented!\n");
-            return 2;
+            // printf("ERROR: Time independent CRSCF fit not implemented!\n");
+            // return 2;
+            fitter.FitAngularCRSCF();
         } else {
-            fitter.FitSCF();
+            fitter.FitCRSCF();
         }
     } else if (std::strcmp(options.fit, "all") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {

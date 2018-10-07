@@ -262,7 +262,7 @@ void FitterCPV::PlotVar(RooRealVar& var, const RooAbsData& data) const {
 }
 
 // TODO: Remove/refactor
-void FitterCPV::FitSignal() {
+void FitterCPV::FitCR() {
     RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
     dataset_ = temp_dataset;
 
@@ -339,7 +339,7 @@ void FitterCPV::FitSignal() {
 }
 
 // TODO: Remove/refactor
-void FitterCPV::FitSCF() {
+void FitterCPV::FitCRSCF() {
     RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag!=1"));
     dataset_ = temp_dataset;
 
@@ -735,6 +735,161 @@ void FitterCPV::FitAngularCR() {
                      *apa_, *a0_, *ata_);
     AngularPDF pdf_B_bar("pdf_B_bar", "pdf_B_bar", true, efficiency_model_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
+
+    RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
+    sim_pdf.addPdf(pdf_B, "a");
+    sim_pdf.addPdf(pdf_B_bar, "ab");
+    sim_pdf.addPdf(pdf_B, "b");
+    sim_pdf.addPdf(pdf_B_bar, "bb");
+
+    result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
+                            // RooFit::Range(ranges_string.c_str()),
+                            // RooFit::Range("dtFitRange"),
+                            RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+
+    if (result_) {
+        result_->Print();
+    }
+
+    if (make_plots_) {
+        // PDF for B_bar differs, so we have to generate them separately. (One
+        // could also use *extended* RooSimultaneous or 'ProtoData' for
+        // RooSimultaneous.)
+        RooDataHist* cr_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+                                                    RooFit::ExpectedData(true));
+        RooDataHist* cr_hist_B_bar = pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+                                                              1000, RooFit::ExpectedData(true));
+        // Add histos from both particle and anti-particle PDFs to create the
+        // final RooHistPdf.
+        cr_hist->add(*cr_hist_B_bar);
+        RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
+                              *cr_hist);
+
+        // Set the current directory back to the one for plots (ugly ROOT stuff)
+        if (output_file_) {
+            output_file_->cd();
+        }
+
+        const double margin_ap = 0.005;
+        const double margin_apa = 0.25;
+        const double margin_a0 = 0.0015;
+        const double margin_ata = 0.3;
+        SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
+        SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
+        SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
+        SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
+        SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
+        SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
+        SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
+        SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
+        SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
+        SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
+
+        PlotWithPull(*thetat_, *dataset_, cr_histpdf);
+        PlotWithPull(*thetab_, *dataset_, cr_histpdf);
+        PlotWithPull(*phit_, *dataset_, cr_histpdf);
+
+        // We need this to get the exact number of events to be generated for
+        // the PDF distribution. This is unnecessary for the above, because we
+        // create a RooHistPdf from it and that is normalized to the data when
+        // plotted.
+        RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
+            dataset_->reduce("decaytype==decaytype::a||decaytype==decaytype::b"));
+        RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(
+            dataset_->reduce("decaytype==decaytype::ab||decaytype==decaytype::bb"));
+
+        thetat_->setBins(40);
+        thetab_->setBins(40);
+        phit_->setBins(40);
+        RooDataHist hist("hist", "hist", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_);
+        tools::PlotVars2D(*thetat_, *thetab_, hist);
+        tools::PlotVars2D(*thetat_, *phit_, hist);
+        tools::PlotVars2D(*thetab_, *phit_, hist);
+
+        // We change the binning for 2D plots, so we have to generate new binned
+        // dataset, to avoid dealing with rebinning.
+        delete cr_hist;
+        delete cr_hist_B_bar;
+        cr_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+                                       dataset_B->sumEntries(), RooFit::ExpectedData(true));
+        cr_hist_B_bar =
+            pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+                                     dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
+        cr_hist->add(*cr_hist_B_bar);
+
+        // Set the current directory back to the one for plots (ugly ROOT stuff)
+        if (output_file_) {
+            output_file_->cd();
+        }
+        tools::PlotPull2D(*thetat_, *thetab_, hist, *cr_hist);
+        tools::PlotPull2D(*thetat_, *phit_, hist, *cr_hist);
+        tools::PlotPull2D(*thetab_, *phit_, hist, *cr_hist);
+
+        const double chi2 = Calculate3DChi2(hist, *cr_hist);
+        printf("Chi2 = %f\n", chi2);
+
+        SaveChi2Scan(sim_pdf, ap_, margin_apa);
+        SaveChi2Scan(sim_pdf, apa_, margin_apa);
+        SaveChi2Scan(sim_pdf, a0_, margin_a0);
+        SaveChi2Scan(sim_pdf, ata_, margin_ata);
+
+        delete dataset_B;
+        delete dataset_B_bar;
+    }
+}
+
+void FitterCPV::FitAngularCRSCF() {
+    Log::print(Log::info, "DC: Fitting %i events.\n", dataset_->numEntries());
+
+    AngularPDF cr_pdf_B("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, *thetat_, *thetab_, *phit_, *ap_,
+                     *apa_, *a0_, *ata_);
+    AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, *thetat_, *thetab_,
+                         *phit_, *ap_, *apa_, *a0_, *ata_);
+
+    // Self-cross-feed phit model
+    RooRealVar scf_phit_poly_p2("scf_phit_poly_p2", "p_(2)", 0.856);
+    RooRealVar scf_phit_f("scf_phit_f", "f_(poly)", 0.147);
+    RooPolynomial scf_phit_poly("scf_phit_poly", "scf_phit_poly", *phit_, scf_phit_poly_p2, 2);
+    RooRealVar scf_phit_offset("scf_phit_offset", "#phi_(t)^(offset)", 0.056);
+    RooFormulaVar scf_phit_phit("scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
+                                RooArgList(*phit_, scf_phit_offset));
+    RooGenericPdf scf_phit_cos("scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2",
+                               RooArgList(scf_phit_phit));
+    RooAddPdf scf_phit_model("scf_phit_model", "scf_phit_model",
+                             RooArgList(scf_phit_poly, scf_phit_cos), RooArgList(scf_phit_f));
+
+    // Self-cross-feed thetat model
+    RooRealVar scf_thetat_f("scf_thetat_f", "#theta_(t)^(w)", -0.051);
+    RooFormulaVar scf_thetat_thetat("scf_thetat_thetat", "scf_thetat_thetat",
+                                    "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
+                                    RooArgList(*thetat_, scf_thetat_f));
+    RooGenericPdf scf_thetat_model("scf_thetat_model", "scf_thetat_model",
+                                   "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat));
+
+    // Self-cross-feed thetab model
+    RooRealVar scf_thetab_gaus_mu("scf_thetab_gaus_mu", "#mu", 2.885);
+    RooRealVar scf_thetab_gaus_sigma_l("scf_thetab_gaus_sigma_l", "#sigma_(L)", 0.411);
+    RooRealVar scf_thetab_gaus_sigma_r("scf_thetab_gaus_sigma_r", "#sigma_(R)", 0.094);
+    RooBifurGauss scf_thetab_gaus("scf_thetab_gaus", "scf_thetab_gaus", *thetab_,
+                                  scf_thetab_gaus_mu, scf_thetab_gaus_sigma_l,
+                                  scf_thetab_gaus_sigma_r);
+    RooRealVar scf_thetab_exp_alpha("scf_thetab_exp_alpha", "#alpha", -4.63);
+    RooExponential scf_thetab_exp("scf_thetab_exp", "scf_thetab_exp", *thetab_,
+                                  scf_thetab_exp_alpha);
+    RooRealVar scf_thetab_f("scf_thetab_f", "f_(exp)", 0.625);
+
+    RooAddPdf scf_thetab_model("scf_thetab_model", "scf_thetab_model",
+                               RooArgList(scf_thetab_exp, scf_thetab_gaus),
+                               RooArgList(scf_thetab_f));
+
+    RooProdPdf scf_pdf(
+        "scf_pdf", "scf_pdf",
+        RooArgList(scf_thetat_model, scf_thetab_model, scf_phit_model));
+
+    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.8);
+
+    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, scf_pdf), RooArgList(cr_scf_f));
+    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B, scf_pdf), RooArgList(cr_scf_f));
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(pdf_B, "a");

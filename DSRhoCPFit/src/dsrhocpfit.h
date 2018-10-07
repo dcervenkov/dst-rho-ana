@@ -31,6 +31,8 @@ struct fitter_options {
     bool fit_set;
     char* config_file;
     bool config_file_set;
+    bool save_log;
+    bool save_log_set;
 };
 
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,

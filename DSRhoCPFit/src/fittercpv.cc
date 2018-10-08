@@ -2074,6 +2074,12 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var, const 
     h1_nll.GetYaxis()->SetRangeUser(min_bin_content - ymargin, h1_nll.GetMaximum() + ymargin);
 
     delete nll;
+
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+
     h1_nll.GetXaxis()->SetTitle(var->GetTitle());
     h1_nll.GetYaxis()->SetTitle("");
     h1_nll.SetTitle("");
@@ -2129,6 +2135,11 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRe
     }
 
     delete nll;
+
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
 
     canvas.SetRightMargin(0.14);
     h2_nll.GetXaxis()->SetTitle(var1->GetTitle());
@@ -2232,6 +2243,12 @@ const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const 
     h1_chi2.SetTitle("");
     h1_chi2.SetStats(kFALSE);
     h1_chi2.Draw("HIST");
+
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+
     h1_chi2.Write();
     canvas.SaveAs(constants::format);
     var->setVal(orig_val);

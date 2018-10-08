@@ -828,7 +828,7 @@ void FitterCPV::FitAngularCR() {
         const double chi2 = Calculate3DChi2(hist, *cr_hist);
         printf("Chi2 = %f\n", chi2);
 
-        SaveChi2Scan(sim_pdf, ap_, margin_apa);
+        SaveChi2Scan(sim_pdf, ap_, margin_ap);
         SaveChi2Scan(sim_pdf, apa_, margin_apa);
         SaveChi2Scan(sim_pdf, a0_, margin_a0);
         SaveChi2Scan(sim_pdf, ata_, margin_ata);
@@ -2145,7 +2145,8 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRe
 }
 
 const double FitterCPV::Calculate3DChi2(const RooDataHist& data, const RooDataHist& pdf) {
-    TH1I h_bin_content("h_bin_content", "Bin Content", 100, 0, 99);
+    // TODO: Remove the commented histogram lines
+    // TH1I h_bin_content("h_bin_content", "Bin Content", 100, 0, 99);
     double chi2 = 0;
     int bins_used = 0;
     for(int i = 0; i < data.numEntries(); i++) {
@@ -2153,19 +2154,19 @@ const double FitterCPV::Calculate3DChi2(const RooDataHist& data, const RooDataHi
         pdf.get(i);
         double data_bin = data.weight();
         double pdf_bin = pdf.weight();
-        h_bin_content.Fill(data_bin);
+        // h_bin_content.Fill(data_bin);
         if (data_bin > 5) {
             chi2 += (data_bin - pdf_bin)*(data_bin - pdf_bin)/pdf_bin;
             bins_used++;
         }
     }
-    h_bin_content.GetXaxis()->SetTitle("bin content");
-    h_bin_content.GetYaxis()->SetTitle("");
-    h_bin_content.SetTitle("");
-    h_bin_content.SetStats(kFALSE);
-    h_bin_content.Draw("HIST");
-    h_bin_content.Write();
-    h_bin_content.SaveAs(constants::format);
+    // h_bin_content.GetXaxis()->SetTitle("bin content");
+    // h_bin_content.GetYaxis()->SetTitle("");
+    // h_bin_content.SetTitle("");
+    // h_bin_content.SetStats(kFALSE);
+    // h_bin_content.Draw("HIST");
+    // h_bin_content.Write();
+    // h_bin_content.SaveAs(constants::format);
     printf("Bins used for chi2: %i/%i (%.1f%%)\n", bins_used, data.numEntries(), (double) bins_used / data.numEntries() * 100);
 
     return chi2;

@@ -135,6 +135,7 @@ FitterBKG::FitterBKG() {
 }
 
 FitterBKG::~FitterBKG() {
+    output_file_->Close();
 }
 
 /**

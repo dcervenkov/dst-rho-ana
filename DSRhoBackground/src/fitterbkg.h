@@ -46,7 +46,7 @@ class FitterBKG {
 
     RooRealVar dt_{"dt", "dt", constants::fit_range_dt_low, constants::fit_range_dt_high};
     RooRealVar thetat_{"thetat", "thetat", 0, constants::pi};
-    RooRealVar thetab_{"thetab", "thetab", 0.5, constants::pi};
+    RooRealVar thetab_{"thetab", "thetab", constants::cuts::thetab_low, constants::cuts::thetab_high};
     RooRealVar phit_{"phit", "phit", -constants::pi, constants::pi};
 
     RooRealVar* expno_;

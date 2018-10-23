@@ -32,6 +32,9 @@ namespace cuts {
 const double dt_low = -20; // [ps]
 const double dt_high = 20; // [ps]
 
+const double thetab_low = 0.5;
+const double thetab_high = pi;
+
 const int sig_vtx_h = 50;
 const int tag_vtx_h = 50;
 

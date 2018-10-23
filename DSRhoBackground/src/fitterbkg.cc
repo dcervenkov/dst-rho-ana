@@ -415,5 +415,5 @@ void FitterBKG::SetPlotDir(const char* plot_dir) {
  * All the variables are already defined in the PDF.
  */
 void FitterBKG::Fit(RooAbsPdf* pdf, RooDataSet* data) {
-    result_ = pdf->fitTo(*data, RooFit::Save());
+    result_ = pdf->fitTo(*data, RooFit::Save(), RooFit::Minimizer("Minuit2"));
 }

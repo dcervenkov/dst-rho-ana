@@ -520,38 +520,37 @@ void DSRhoModule::saveToTuple(Particle Bcand, BelleTuple* tuple) {
 
 	// Save generated vertices for tag-side, if genHepevt link exists
 	// Also save the btag mclink
+	Gen_hepevt* genBTagDaughter = NULL;
+	Gen_hepevt* genBtag = NULL;
 	if (Bcand.genHepevt()) {
 		Gen_hepevt_Manager& GenMgr = Gen_hepevt_Manager::get_manager();
-		Gen_hepevt* genBtag;
 		const int BcandID = Bcand.genHepevt().get_ID();
 		if (Bcand.genHepevt().mother()) {
 			const int UpsilonFirstDaughterID = Bcand.genHepevt().mother().daFirst();
 			const int UpsilonLastDaughterID = Bcand.genHepevt().mother().daLast();
-			if (UpsilonLastDaughterID - UpsilonFirstDaughterID != 1) {
-				printf("WARNING: Bcand's mother has more than two children!\n");
-			}
 			if (BcandID == UpsilonFirstDaughterID) {
 				genBtag = &GenMgr(Panther_ID(UpsilonLastDaughterID));
 			} else {
 				genBtag = &GenMgr(Panther_ID(UpsilonFirstDaughterID));
 			}
 
-			Gen_hepevt* genBTagDaughter = &GenMgr(Panther_ID(genBtag->daFirst()));
-
-			tuple->column("vtgexist", 1);
-			tuple->column("vtgvtxx", genBTagDaughter->VX());
-			tuple->column("vtgvtxy", genBTagDaughter->VY());
-			tuple->column("vtgvtxz", genBTagDaughter->VZ());
-			tuple->column("btagmclink", genBtag->idhep());
-			tuple->column("dtg", Bcand.child(0).genHepevt().T() - genBTagDaughter->T());
-		} else {
-			tuple->column("vtgexist", 0);
-			tuple->column("vtgvtxx", 100);
-			tuple->column("vtgvtxy", 100);
-			tuple->column("vtgvtxz", 100);
-			tuple->column("btagmclink", 0);
-			tuple->column("dtg", 100);
+			if (UpsilonLastDaughterID - UpsilonFirstDaughterID != 1) {
+				printf("WARNING: Bcand's mother has more than two children!\n");
+				printf("UpsilonFirstDaughterID = %i\n", UpsilonFirstDaughterID);
+				printf("UpsilonLastDaughterID = %i\n", UpsilonLastDaughterID);
+				printEvent(Bcand);
+			} else {
+				genBTagDaughter = &GenMgr(Panther_ID(genBtag->daFirst()));
+			}
 		}
+	}
+	if (genBTagDaughter && genBtag) {
+		tuple->column("vtgexist", 1);
+		tuple->column("vtgvtxx", genBTagDaughter->VX());
+		tuple->column("vtgvtxy", genBTagDaughter->VY());
+		tuple->column("vtgvtxz", genBTagDaughter->VZ());
+		tuple->column("btagmclink", genBtag->idhep());
+		tuple->column("dtg", Bcand.child(0).genHepevt().T() - genBTagDaughter->T());
 	} else {
 		tuple->column("vtgexist", 0);
 		tuple->column("vtgvtxx", 100);
@@ -559,7 +558,6 @@ void DSRhoModule::saveToTuple(Particle Bcand, BelleTuple* tuple) {
 		tuple->column("vtgvtxz", 100);
 		tuple->column("btagmclink", 0);
 		tuple->column("dtg", 100);
-
 	}
 
 

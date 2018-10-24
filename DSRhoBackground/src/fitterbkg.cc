@@ -27,6 +27,7 @@
 #include "RooTreeDataStore.h"
 #include "TAxis.h"
 #include "TCanvas.h"
+#include "TChain.h"
 #include "TEnv.h"
 #include "TFile.h"
 #include "TH1D.h"
@@ -135,7 +136,9 @@ FitterBKG::FitterBKG() {
 }
 
 FitterBKG::~FitterBKG() {
-    output_file_->Close();
+    if (output_file_) {
+        output_file_->Close();
+    }
 }
 
 /**
@@ -335,16 +338,19 @@ TString FitterBKG::GetCommonCutsString() const {
  * @param file_path Path to the ROOT file
  * @param num_events [optional] Maximum number of events to use (0 to read all)
  */
-void FitterBKG::ReadInFile(const char* file_path, const int& num_events) {
-    TFile* input_file = new TFile(file_path);
-    TTree* input_tree = dynamic_cast<TTree*>(input_file->Get("h2000"));
+void FitterBKG::ReadInFile(std::vector<const char*> file_names, const int& num_events) {
+    TChain* input_tree = new TChain("h2000");
+    for (auto file_name : file_names) {
+        input_tree->Add(file_name);
+    }
+    input_tree->Print();
     //  TTree* input_tree = dynamic_cast<TTree*>(input_file->Get("mixing_pdf_aData"));
 
-    if (num_events) {
-        TTree* temp_tree = input_tree;
-        input_tree = temp_tree->CloneTree(num_events);
-        delete temp_tree;
-    }
+    // if (num_events) {
+    //     TTree* temp_tree = input_tree;
+    //     input_tree = temp_tree->CloneTree(num_events);
+    //     delete temp_tree;
+    // }
 
     TString common_cuts = GetCommonCutsString();
 
@@ -382,7 +388,7 @@ void FitterBKG::ReadInFile(const char* file_path, const int& num_events) {
     dataset_bb_->SetName("dataset_bb");
 
     delete input_tree;
-    input_file->Close();
+    // input_file->Close();
 
     // Bind the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
     const RooArgSet* vars = dataset_->get();

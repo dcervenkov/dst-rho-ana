@@ -40,7 +40,7 @@ class FitterBKG {
     void PlotWithPull(const RooRealVar& var, const RooDataSet*, const RooAbsPdf* pdf,
                       const char* title = "") const;
 
-    void ReadInFile(const char* file_path, const int& num_events = 0);
+    void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);
     void Fit(RooAbsPdf* pdf, RooDataSet* data);
 
@@ -128,7 +128,7 @@ class FitterBKG {
                                 RooArgList(scf_phit_phit_)};
 
     // Self-cross-feed thetat model
-    RooRealVar scf_thetat_f_{"scf_thetat_f", "#theta_{t}^{w}", -0.051, -0.1, 0.1};
+    RooRealVar scf_thetat_f_{"scf_thetat_f", "#theta_{t}^{w}", -0.051, -0.5, 0.5};
     RooFormulaVar scf_thetat_thetat_{"scf_thetat_thetat", "scf_thetat_thetat",
                                      "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
                                      RooArgList(thetat_, scf_thetat_f_)};

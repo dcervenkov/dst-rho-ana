@@ -23,7 +23,7 @@
 
 int main(int argc, char* argv[]) {
     char** optionless_argv = NULL;
-    fitter_options options;
+    fitter_options options = {};
     const int optionless_argc = ProcessCmdLineOptions(argc, argv, optionless_argv, options);
 
     if (optionless_argc != 4) {

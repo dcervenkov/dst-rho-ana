@@ -43,19 +43,12 @@ int main(int argc, char* argv[]) {
     fitter.ReadInFile(file_names);
 
     // fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_);
-
     // fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_a_);
-
     // fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_ab_);
-
     // fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_b_);
-
     // fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_bb_);
-
     fitter.Fit(&fitter.scf_phit_model_, fitter.dataset_);
-
     fitter.Fit(&fitter.scf_thetat_model_, fitter.dataset_);
-
     fitter.Fit(&fitter.scf_thetab_model_, fitter.dataset_);
 
     if (options.plot_dir_set) {
@@ -65,7 +58,7 @@ int main(int argc, char* argv[]) {
         // fitter.PlotWithPull(fitter.dt_, fitter.dataset_a_, &fitter.scf_dt_model_);
         // fitter.PlotWithPull(fitter.dt_, fitter.dataset_ab_, &fitter.scf_dt_model_);
         // fitter.PlotWithPull(fitter.dt_, fitter.dataset_b_, &fitter.scf_dt_model_);
-        // fitter.PlotWithPull(fitter.dt_, fitter.dataset_bb_, &fitter.scf_dt_model_, "test");
+        // fitter.PlotWithPull(fitter.dt_, fitter.dataset_bb_, &fitter.scf_dt_model_);
         fitter.PlotWithPull(fitter.phit_, fitter.dataset_, &fitter.scf_phit_model_);
         fitter.PlotWithPull(fitter.thetat_, fitter.dataset_, &fitter.scf_thetat_model_);
         fitter.PlotWithPull(fitter.thetab_, fitter.dataset_, &fitter.scf_thetab_model_);

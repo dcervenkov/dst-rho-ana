@@ -143,7 +143,7 @@ class FitterBKG {
     RooRealVar scf_thetab_exp_alpha_{"scf_thetab_exp_alpha", "#alpha", -4.63, -10, 0.0};
     RooExponential scf_thetab_exp_{"scf_thetab_exp", "scf_thetab_exp", thetab_,
                                    scf_thetab_exp_alpha_};
-    RooRealVar scf_thetab_f_{"scf_thetab_f", "f_{exp}", 0.625, 0, 1};
+    RooRealVar scf_thetab_f_{"scf_thetab_f", "f_{exp}", 0.625, 0, 0.8};
 
    public:
     // RooAddPdf scf_dt_model_{"scf_dt_model", "scf_dt_model",

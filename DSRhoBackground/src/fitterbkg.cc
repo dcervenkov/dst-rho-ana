@@ -335,7 +335,7 @@ TString FitterBKG::GetCommonCutsString() const {
  * Reads in data from a ROOT file. Constructs separate datasets for the 4 categories.
  * Binds the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
  *
- * @param file_path Path to the ROOT file
+ * @param file_names Vector of paths to the ROOT files
  * @param num_events [optional] Maximum number of events to use (0 to read all)
  */
 void FitterBKG::ReadInFile(std::vector<const char*> file_names, const int& num_events) {
@@ -343,8 +343,6 @@ void FitterBKG::ReadInFile(std::vector<const char*> file_names, const int& num_e
     for (auto file_name : file_names) {
         input_tree->Add(file_name);
     }
-    input_tree->Print();
-    //  TTree* input_tree = dynamic_cast<TTree*>(input_file->Get("mixing_pdf_aData"));
 
     // if (num_events) {
     //     TTree* temp_tree = input_tree;
@@ -411,9 +409,11 @@ void FitterBKG::SetPlotDir(const char* plot_dir) {
     if (!boost::filesystem::is_directory(plot_dir)) {
         boost::filesystem::create_directories(plot_dir);
     }
+    TString root_filename(boost::filesystem::path(plot_dir).filename().string());
+    root_filename += ".root";
     gEnv->SetValue("Canvas.PrintDirectory", plot_dir);
     printf("print dir: %s\n", gEnv->GetValue("Canvas.PrintDirectory", "not found"));
-    output_file_ = new TFile(TString(plot_dir) + "/plots.root", "RECREATE");
+    output_file_ = new TFile(TString(plot_dir) + "/" + root_filename, "RECREATE");
 }
 
 /**

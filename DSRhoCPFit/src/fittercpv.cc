@@ -774,16 +774,16 @@ void FitterCPV::FitAngularCR() {
         const double margin_apa = 0.25;
         const double margin_a0 = 0.0015;
         const double margin_ata = 0.3;
-        SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
-        SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
-        SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
-        SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
-        SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
-        SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
-        SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
-        SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
-        SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
-        SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
+        // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
+        // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
+        // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
+        // SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
+        // SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
+        // SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
+        // SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
+        // SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
+        // SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
+        // SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
 
         PlotWithPull(*thetat_, *dataset_, cr_histpdf);
         PlotWithPull(*thetab_, *dataset_, cr_histpdf);
@@ -828,10 +828,14 @@ void FitterCPV::FitAngularCR() {
         const double chi2 = Calculate3DChi2(hist, *cr_hist);
         printf("Chi2 = %f\n", chi2);
 
-        SaveChi2Scan(sim_pdf, ap_, margin_ap);
-        SaveChi2Scan(sim_pdf, apa_, margin_apa);
-        SaveChi2Scan(sim_pdf, a0_, margin_a0);
-        SaveChi2Scan(sim_pdf, ata_, margin_ata);
+        // SaveChi2Scan(sim_pdf, ap_);
+        // SaveChi2Scan(sim_pdf, apa_);
+        // SaveChi2Scan(sim_pdf, a0_);
+        // SaveChi2Scan(sim_pdf, ata_);
+        // SaveChi2Scan(sim_pdf, ap_, margin_ap);
+        // SaveChi2Scan(sim_pdf, apa_, margin_apa);
+        // SaveChi2Scan(sim_pdf, a0_, margin_a0);
+        // SaveChi2Scan(sim_pdf, ata_, margin_ata);
 
         delete dataset_B;
         delete dataset_B_bar;
@@ -886,10 +890,10 @@ void FitterCPV::FitAngularCRSCF() {
         "scf_pdf", "scf_pdf",
         RooArgList(scf_thetat_model, scf_thetab_model, scf_phit_model));
 
-    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.8);
+    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.90, 0.8, 0.99);
 
     RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, scf_pdf), RooArgList(cr_scf_f));
-    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B, scf_pdf), RooArgList(cr_scf_f));
+    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, scf_pdf), RooArgList(cr_scf_f));
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(pdf_B, "a");
@@ -910,15 +914,24 @@ void FitterCPV::FitAngularCRSCF() {
         // PDF for B_bar differs, so we have to generate them separately. (One
         // could also use *extended* RooSimultaneous or 'ProtoData' for
         // RooSimultaneous.)
-        RooDataHist* cr_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+        RooDataHist* cr_hist = cr_pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                     RooFit::ExpectedData(true));
-        RooDataHist* cr_hist_B_bar = pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+        RooDataHist* cr_hist_B_bar = cr_pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                                               1000, RooFit::ExpectedData(true));
         // Add histos from both particle and anti-particle PDFs to create the
         // final RooHistPdf.
         cr_hist->add(*cr_hist_B_bar);
         RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                               *cr_hist);
+
+        RooDataHist* scf_hist = scf_pdf.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+                                                       RooFit::ExpectedData(true));
+        RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
+                               *scf_hist);
+
+        RooRealVar cr_scf_f_gen("cr_scf_f_gen", "cr_scf_f_gen", (1 + cr_scf_f.getVal())/2);
+        RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf),
+                              cr_scf_f);
 
         // Set the current directory back to the one for plots (ugly ROOT stuff)
         if (output_file_) {
@@ -929,20 +942,30 @@ void FitterCPV::FitAngularCRSCF() {
         const double margin_apa = 0.25;
         const double margin_a0 = 0.0015;
         const double margin_ata = 0.3;
-        SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
-        SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
-        SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
-        SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
-        SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
-        SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
-        SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
-        SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
-        SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
-        SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
+        // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
+        // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
+        // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
+        // SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
+        // SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
+        // SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
+        // SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
+        // SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
+        // SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
+        // SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
 
-        PlotWithPull(*thetat_, *dataset_, cr_histpdf);
-        PlotWithPull(*thetab_, *dataset_, cr_histpdf);
-        PlotWithPull(*phit_, *dataset_, cr_histpdf);
+        // PlotWithPull(*thetat_, *dataset_, cr_histpdf);
+        // PlotWithPull(*thetab_, *dataset_, cr_histpdf);
+        // PlotWithPull(*phit_, *dataset_, cr_histpdf);
+
+        // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
+        // *phit_), *all_hist);
+        std::vector<RooAbsPdf*> components;
+        components.push_back(&cr_histpdf);
+        components.push_back(&scf_histpdf);
+        // thetab_->setBins(100);
+        PlotWithPull(*thetat_, *dataset_, all_histpdf, components);
+        PlotWithPull(*thetab_, *dataset_, all_histpdf, components);
+        PlotWithPull(*phit_, *dataset_, all_histpdf, components);
 
         // We need this to get the exact number of events to be generated for
         // the PDF distribution. This is unnecessary for the above, because we
@@ -981,12 +1004,12 @@ void FitterCPV::FitAngularCRSCF() {
         tools::PlotPull2D(*thetab_, *phit_, hist, *cr_hist);
 
         const double chi2 = Calculate3DChi2(hist, *cr_hist);
-        printf("Chi2 = %f\n", chi2);
+        std::cout << "Chi2 = " << chi2 << std::endl;
 
-        SaveChi2Scan(sim_pdf, ap_, margin_apa);
-        SaveChi2Scan(sim_pdf, apa_, margin_apa);
-        SaveChi2Scan(sim_pdf, a0_, margin_a0);
-        SaveChi2Scan(sim_pdf, ata_, margin_ata);
+        // SaveChi2Scan(sim_pdf, ap_, margin_apa);
+        // SaveChi2Scan(sim_pdf, apa_, margin_apa);
+        // SaveChi2Scan(sim_pdf, a0_, margin_a0);
+        // SaveChi2Scan(sim_pdf, ata_, margin_ata);
 
         delete dataset_B;
         delete dataset_B_bar;

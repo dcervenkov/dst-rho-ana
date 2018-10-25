@@ -1,27 +1,34 @@
 #!/bin/bash
 
-DIR="$1"
+DIRS="$@"
 STRING="Total On4S lum"
 
-if ! [ -d $DIR ]; then
-	echo "ERROR: $DIR is not a directory."
-	exit 2
+if [[ $# < 1 ]]; then
+	echo "USAGE: $0 DIR(S)..."
+	exit 1
 fi
 
-COUNT=0
-COUNTBAD=0
-for FILE in $DIR/*.log; do
-	if ! [ -f $FILE ]; then
+for DIR in $DIRS; do
+	if ! [ -d $DIR ]; then
+		echo "ERROR: $DIR is not a directory."
 		continue
 	fi
-	
-	let 'COUNT = COUNT + 1'
 
-	grep "$STRING" $FILE > /dev/null
-	if [[ "$?" != "0" ]]; then
-		echo "File $FILE doesn't contain '$STRING'"
-		let 'COUNTBAD = COUNTBAD + 1'
-	fi
+	COUNT=0
+	COUNTBAD=0
+	for FILE in $DIR/*.log; do
+		if ! [ -f $FILE ]; then
+			continue
+		fi
+
+		let 'COUNT = COUNT + 1'
+
+		tail -n 20 $FILE | grep "$STRING" > /dev/null
+		if [[ "$?" != "0" ]]; then
+			echo "File $FILE doesn't contain '$STRING'"
+			let 'COUNTBAD = COUNTBAD + 1'
+		fi
+	done
+
+	echo "$COUNTBAD/$COUNT bad log file(s) found in $DIR"
 done
-
-echo "$COUNTBAD/$COUNT bad log files found."

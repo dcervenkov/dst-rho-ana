@@ -62,30 +62,30 @@ int main(int argc, char* argv[]) {
         fitter.PlotWithPull(fitter.thetab_, fitter.dataset_, &fitter.scf_thetab_model_);
     }
 
-    // fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_);
-    // if (options.plot_dir_set) {
-    //     fitter.PlotWithPull(fitter.dt_, fitter.dataset_, &fitter.scf_dt_model_);
-    // }
+    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_);
+    if (options.plot_dir_set) {
+        fitter.PlotWithPull(fitter.dt_, fitter.dataset_, &fitter.scf_dt_model_);
+    }
 
-    // fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_a_);
-    // if (options.plot_dir_set) {
-    //     fitter.PlotWithPull(fitter.dt_, fitter.dataset_a_, &fitter.scf_dt_model_);
-    // }
+    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_a_);
+    if (options.plot_dir_set) {
+        fitter.PlotWithPull(fitter.dt_, fitter.dataset_a_, &fitter.scf_dt_model_);
+    }
 
-    // fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_ab_);
-    // if (options.plot_dir_set) {
-    //     fitter.PlotWithPull(fitter.dt_, fitter.dataset_ab_, &fitter.scf_dt_model_);
-    // }
+    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_ab_);
+    if (options.plot_dir_set) {
+        fitter.PlotWithPull(fitter.dt_, fitter.dataset_ab_, &fitter.scf_dt_model_);
+    }
 
-    // fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_b_);
-    // if (options.plot_dir_set) {
-    //     fitter.PlotWithPull(fitter.dt_, fitter.dataset_b_, &fitter.scf_dt_model_);
-    // }
+    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_b_);
+    if (options.plot_dir_set) {
+        fitter.PlotWithPull(fitter.dt_, fitter.dataset_b_, &fitter.scf_dt_model_);
+    }
 
-    // fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_bb_);
-    // if (options.plot_dir_set) {
-    //     fitter.PlotWithPull(fitter.dt_, fitter.dataset_bb_, &fitter.scf_dt_model_);
-    // }
+    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_bb_);
+    if (options.plot_dir_set) {
+        fitter.PlotWithPull(fitter.dt_, fitter.dataset_bb_, &fitter.scf_dt_model_);
+    }
 
 
     return 0;

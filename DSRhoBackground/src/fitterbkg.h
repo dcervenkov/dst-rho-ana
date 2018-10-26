@@ -36,8 +36,12 @@ class FitterBKG {
     FitterBKG();
     virtual ~FitterBKG();
 
+    void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
+    int GetNumCPUs() { return num_CPUs_; };
+
     void PlotVar(RooRealVar& var, const RooDataSet* data) const;
-    void PlotWithPull(const RooRealVar& var, const RooDataSet*, const RooAbsPdf* pdf,
+    void PlotWithPull(const RooRealVar& var, const RooDataSet&, const RooAbsPdf& pdf,
+                      const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
                       const char* title = "") const;
 
     void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
@@ -92,7 +96,7 @@ class FitterBKG {
     RooDataSet* dataset_bb_ = NULL;
 
    private:
-    TPaveText* CreateStatBox(const double chi2, const bool position_top,
+    TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
                              const bool position_left) const;
     TString GetCommonCutsString() const;
 
@@ -100,6 +104,8 @@ class FitterBKG {
     std::vector<RooRealVar**> dataset_vars_;
     RooArgSet conditional_vars_argset_;
     RooArgSet dataset_vars_argset_;
+
+    int num_CPUs_;
 
     RooFitResult* result_ = NULL;
 

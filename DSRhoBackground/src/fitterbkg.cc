@@ -30,6 +30,7 @@
 #include "TChain.h"
 #include "TEnv.h"
 #include "TFile.h"
+#include "TMath.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TPaveText.h"
@@ -133,6 +134,7 @@ FitterBKG::FitterBKG() {
     dataset_vars_argset_.add(thetab_);
     dataset_vars_argset_.add(phit_);
 
+    num_CPUs_ = 1;
 }
 
 FitterBKG::~FitterBKG() {
@@ -172,13 +174,14 @@ void FitterBKG::PlotVar(RooRealVar& var, const RooDataSet* data) const {
  * @param var Variable to be plotted
  * @param data Dataset against which to plot
  * @param pdf PDF to use for plotting and pull calculation
+ * @param components [optional] Component PDFs to plot alongside the full PDF
  * @param title [optional] Title for the y-axis
  */
-void FitterBKG::PlotWithPull(const RooRealVar& var, const RooDataSet* data, const RooAbsPdf* pdf,
-                             const char* title) const {
-    TString name = pdf->GetName();
+void FitterBKG::PlotWithPull(const RooRealVar& var, const RooDataSet& data, const RooAbsPdf& pdf,
+                             const std::vector<RooAbsPdf*> components, const char* title) const {
+    TString name = pdf.GetName();
     name += "_";
-    name += data->GetName();
+    name += data.GetName();
     TCanvas canvas(name, name, 500, 500);
 
     RooPlot* plot = var.frame();
@@ -193,8 +196,20 @@ void FitterBKG::PlotWithPull(const RooRealVar& var, const RooDataSet* data, cons
     pad_var->SetBottomMargin(0.0);
     pad_var->SetLeftMargin(0.12);
 
-    data->plotOn(plot);
-    pdf->plotOn(plot);
+    data.plotOn(plot);
+
+    // Plot components before the total PDF as the pull plots are made from the
+    // last plotted PDF
+    const int colors[] = {4, 7, 5};
+    int i = 0;
+    for (auto component : components) {
+        pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
+                   RooFit::NumCPU(num_CPUs_), RooFit::LineColor(colors[i++]),
+                   RooFit::Components(*component));
+    }
+
+    pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
+               RooFit::NumCPU(num_CPUs_));
 
     plot->GetXaxis()->SetTitle("");
     plot->GetXaxis()->SetLabelSize(0);
@@ -206,8 +221,14 @@ void FitterBKG::PlotWithPull(const RooRealVar& var, const RooDataSet* data, cons
     plot->GetYaxis()->SetTitleOffset(1.60);
     plot->Draw();
 
-    const double chi2 = plot->chiSquare();
-    TPaveText* stat_box = CreateStatBox(chi2, true, true);
+    // This is not an OK way of calculating ndof - e.g., in a case where the PDF
+    // is defined only on a subset of the var range, or there are empty bins,
+    // etc. it will be wrong. However, RooFit doesn't give access to anything
+    // like ndof itself, so this will have to do for now.
+    const int num_floating_pars = result_ ? result_->floatParsFinal().getSize() : 0;
+    const int ndof = var.getBinning().numBins() - num_floating_pars;
+    const double chi2 = plot->chiSquare(num_floating_pars) * ndof;
+    TPaveText* stat_box = CreateStatBox(chi2, ndof, true, true);
     if (stat_box) {
         stat_box->Draw();
     }
@@ -236,7 +257,7 @@ void FitterBKG::PlotWithPull(const RooRealVar& var, const RooDataSet* data, cons
     RooHist* hpull_clone = dynamic_cast<RooHist*>(hpull->Clone());
 
     // We plot again without bars, so the points are not half covered by bars
-    plot_pull_->addPlotable( hpull_clone, "P");  
+    plot_pull_->addPlotable(hpull_clone, "P");
 
     plot_pull_->GetXaxis()->SetTickLength(0.03 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
     plot_pull_->GetXaxis()->SetTitle(TString(var.GetTitle()));
@@ -255,27 +276,23 @@ void FitterBKG::PlotWithPull(const RooRealVar& var, const RooDataSet* data, cons
  * if no fit result exist.
  *
  * @param chi2 Reduced chi2 of the projection plot
+ * @param ndof Number of degrees of freedom (used for p-value computation)
  * @param position_top Should the box be displayed at the top or bottom of the plot
  * @param position_left Should the box be displayed at the left or right of the plot
  */
-TPaveText* FitterBKG::CreateStatBox(const double chi2, const bool position_top,
+TPaveText* FitterBKG::CreateStatBox(const double chi2, const int ndof, const bool position_top,
                                     const bool position_left) const {
-    // If no fit result exists return a null pointer
-    if (!result_) {
-        printf("WARNING: No result exists, can't create stat box!\n");
-        return NULL;
-    }
+    RooArgList results = result_ ? result_->floatParsFinal() : RooArgList();
 
-    const RooArgList results = result_->floatParsFinal();
     double x_left, x_right, y_bottom, y_top;
     const double line_height = 0.06;
 
     if (position_top) {
         y_top = 0.9;
-        y_bottom = y_top - results.getSize() * line_height;
+        y_bottom = y_top - (results.getSize() + 2) * line_height;
     } else {
         y_bottom = 0.023;
-        y_top = y_bottom + results.getSize() * line_height;
+        y_top = y_bottom + (results.getSize() + 2) * line_height;
     }
 
     if (position_left) {
@@ -301,7 +318,9 @@ TPaveText* FitterBKG::CreateStatBox(const double chi2, const bool position_top,
                  dynamic_cast<RooRealVar&>(results[i]).getError());
         stat_box->AddText(line);
     }
-    snprintf(line, 1000, "#chi^{2} = %.2f\n", chi2);
+    snprintf(line, 1000, "#chi^{2}/ndof = %.2f (%.1f/%i)\n", chi2 / ndof, chi2, ndof);
+    stat_box->AddText(line);
+    snprintf(line, 1000, "p = %.2f\n", TMath::Prob(chi2, ndof));
     stat_box->AddText(line);
     return stat_box;
 }
@@ -422,5 +441,5 @@ void FitterBKG::SetPlotDir(const char* plot_dir) {
  * All the variables are already defined in the PDF.
  */
 void FitterBKG::Fit(RooAbsPdf* pdf, RooDataSet* data) {
-    result_ = pdf->fitTo(*data, RooFit::Save(), RooFit::Minimizer("Minuit2"));
+    result_ = pdf->fitTo(*data, RooFit::Save(), RooFit::Minimizer("Minuit2"), RooFit::NumCPU(num_CPUs_));
 }

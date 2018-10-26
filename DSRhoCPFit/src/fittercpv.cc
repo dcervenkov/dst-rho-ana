@@ -1473,6 +1473,7 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
  * if no fit result exist.
  *
  * @param chi2 Reduced chi2 of the projection plot
+ * @param ndof Number of degrees of freedom (used for p-value computation)
  * @param position_top Should the box be displayed at the top or bottom of the plot
  * @param position_left Should the box be displayed at the left or right of the plot
  */

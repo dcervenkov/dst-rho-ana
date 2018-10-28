@@ -1105,14 +1105,14 @@ void FitterCPV::FitAngularAll() {
         "bkg_pdf", "bkg_pdf",
         RooArgList(bkg_thetat_model, bkg_thetab_model, bkg_phit_model));
 
-    RooRealVar cr_scf_f("cr_scf_f", "f_{scf}", 0.10, 0.7, 0.99);
-    RooRealVar cr_bkg_f("cr_bkg_f", "f_{bkg}", 0.10, 0.3, 0.99);
+    RooRealVar cr_f("cr_f", "f_{cr}", 0.10, 0.7, 0.99);
+    RooRealVar scf_f("scf_f", "f_{scf}", 0.10, 0.1, 0.99);
 
-    cr_scf_f.setConstant();
-    cr_bkg_f.setConstant();
+    // cr_f.setConstant();
+    // scf_f.setConstant();
 
-    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, scf_pdf, bkg_pdf), RooArgList(cr_scf_f, cr_bkg_f));
-    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, scf_pdf, bkg_pdf), RooArgList(cr_scf_f, cr_bkg_f));
+    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, scf_pdf, bkg_pdf), RooArgList(cr_f, scf_f));
+    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, scf_pdf, bkg_pdf), RooArgList(cr_f, scf_f));
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(pdf_B, "a");
@@ -1148,19 +1148,13 @@ void FitterCPV::FitAngularAll() {
         RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                                *scf_hist);
 
-        RooRealVar cr_scf_f_gen("cr_scf_f_gen", "cr_scf_f_gen", (1 + cr_scf_f.getVal())/2);
-
-
         RooDataHist* bkg_hist = bkg_pdf.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                        RooFit::ExpectedData(true));
         RooHistPdf bkg_histpdf("bkg_histpdf", "bkg_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                                *bkg_hist);
 
-        RooRealVar cr_bkg_f_gen("cr_bkg_f_gen", "cr_bkg_f_gen", (1 + cr_bkg_f.getVal())/2);
-
-
         RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf, bkg_histpdf),
-                              RooArgList(cr_scf_f, cr_bkg_f));
+                              RooArgList(cr_f, scf_f));
 
         // Set the current directory back to the one for plots (ugly ROOT stuff)
         if (output_file_) {

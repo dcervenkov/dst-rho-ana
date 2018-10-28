@@ -1212,22 +1212,23 @@ void FitterCPV::FitAngularAll() {
         // dataset, to avoid dealing with rebinning.
         delete cr_hist;
         delete cr_hist_B_bar;
-        cr_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+
+        RooDataHist* all_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                        dataset_B->sumEntries(), RooFit::ExpectedData(true));
-        cr_hist_B_bar =
+        RooDataHist* all_hist_B_bar =
             pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                      dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
-        cr_hist->add(*cr_hist_B_bar);
+        all_hist->add(*all_hist_B_bar);
 
         // Set the current directory back to the one for plots (ugly ROOT stuff)
         if (output_file_) {
             output_file_->cd();
         }
-        tools::PlotPull2D(*thetat_, *thetab_, hist, *cr_hist);
-        tools::PlotPull2D(*thetat_, *phit_, hist, *cr_hist);
-        tools::PlotPull2D(*thetab_, *phit_, hist, *cr_hist);
+        tools::PlotPull2D(*thetat_, *thetab_, hist, *all_hist);
+        tools::PlotPull2D(*thetat_, *phit_, hist, *all_hist);
+        tools::PlotPull2D(*thetab_, *phit_, hist, *all_hist);
 
-        const double chi2 = Calculate3DChi2(hist, *cr_hist);
+        const double chi2 = Calculate3DChi2(hist, *all_hist);
         std::cout << "Chi2 = " << chi2 << std::endl;
 
         // SaveChi2Scan(sim_pdf, ap_, margin_apa);

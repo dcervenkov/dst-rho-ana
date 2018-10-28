@@ -351,7 +351,7 @@ TString FitterBKG::GetCommonCutsString() const {
 }
 
 /**
- * Reads in data from a ROOT file. Constructs separate datasets for the 4 categories.
+ * Reads in data from ROOT file(s). Constructs separate datasets for the 4 categories.
  * Binds the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
  *
  * @param file_names Vector of paths to the ROOT files

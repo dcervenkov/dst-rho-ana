@@ -132,8 +132,6 @@ int main(int argc, char* argv[]) {
         }
     } else if (std::strcmp(options.fit, "CRSCF") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {
-            // printf("ERROR: Time independent CRSCF fit not implemented!\n");
-            // return 2;
             fitter.FitAngularCRSCF();
         } else {
             fitter.FitCRSCF();

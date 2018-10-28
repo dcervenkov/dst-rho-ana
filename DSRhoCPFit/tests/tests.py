@@ -12,9 +12,9 @@ import sys
 test_configs = {
     "td_cr_fit": ["--efficiency-model=6", "--fit=CR", "--mixing", "--events=1000",
                   "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
-                  "tests/signalMC_data.root"],
+                  "tests/current_result", "tests/signalMC_data.root"],
     "ti_cr_fit": ["--efficiency-model=6", "--fit=CR", "--time-independent", "--events=1000",
-                  "tests/signalMC_data.root"],
+                  "tests/current_result", "tests/signalMC_data.root"],
 }
 
 
@@ -22,7 +22,6 @@ def run_test(name, config):
     """Run a single test defined by its name and config."""
     print("Running " + name)
     config.insert(0, "./DSRhoCPFit")
-    config.append("tests/current_result")
     return_code = subprocess.call(config, cwd="../.")
 
     reference_result = ""

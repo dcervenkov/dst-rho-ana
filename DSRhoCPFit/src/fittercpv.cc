@@ -1772,22 +1772,23 @@ TString FitterCPV::GetCommonCutsString() const {
 }
 
 /**
- * Reads in data from a ROOT file. Constructs separate datasets for the 4 categories.
+ * Reads in data from ROOT file(s). Constructs separate datasets for the 4 categories.
  * Binds the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
  *
- * @param file_path Path to the ROOT file
+ * @param file_names Vector of paths to the ROOT files
  * @param num_events [optional] Maximum number of events to use (0 to read all)
  */
-void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
-    TFile* input_file = new TFile(file_path);
-    TTree* input_tree = dynamic_cast<TTree*>(input_file->Get("h2000"));
-    //  TTree* input_tree = dynamic_cast<TTree*>(input_file->Get("mixing_pdf_aData"));
-
-    if (num_events) {
-        TTree* temp_tree = input_tree;
-        input_tree = temp_tree->CloneTree(num_events);
-        delete temp_tree;
+void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_events) {
+    TChain* input_tree = new TChain("h2000");
+    for (auto file_name : file_names) {
+        input_tree->Add(file_name);
     }
+
+    // if (num_events) {
+    //     TTree* temp_tree = input_tree;
+    //     input_tree = temp_tree->CloneTree(num_events);
+    //     delete temp_tree;
+    // }
 
     TString common_cuts = GetCommonCutsString();
 
@@ -1847,7 +1848,6 @@ void FitterCPV::ReadInFile(const char* file_path, const int& num_events) {
     Log::print(Log::debug, "Num events passing all initial cuts: %i\n", dataset_->numEntries());
 
     delete input_tree;
-    input_file->Close();
 
     vrzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vrzerr_formula_));
     vrzerr_->setRange(0, 10000);

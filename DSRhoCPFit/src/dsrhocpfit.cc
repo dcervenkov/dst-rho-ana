@@ -47,28 +47,27 @@ int main(int argc, char* argv[]) {
     fitter_options options = {};
     const int optionless_argc = ProcessCmdLineOptions(argc, argv, optionless_argv, options);
 
-    if (optionless_argc != 19 && optionless_argc != 3) {
-        printf("ERROR: Wrong number of arguments.\n");
+    if (optionless_argc < 3) {
+        printf("ERROR: Not enough arguments.\n");
         printf(
-            "Usage: %s [OPTION]... -- INPUT-FILE OUTPUT_DIR "
-            "[AP APA A0 ATA XP X0 XT YP Y0 YT XPB X0B XTB YPB Y0B YTB]\n",
+            "Usage: %s [OPTION]... OUTPUT_FILE INPUT-FILE(s)\n",
             optionless_argv[0]);
         return 2;
     }
 
     /// This is so I have to change only the next block if I change the
     /// ordering, etc. of arguments
-    const char* file_path = optionless_argv[1];
-    const char* results_path = optionless_argv[2];
+    const char* results_path = optionless_argv[1];
+
+    // TODO: Move par_input to option parameter string
     std::array<double, 16> par_input;
 
-    if (optionless_argc == 19) {
-        for (size_t i = 0; i < par_input.size(); i++) {
-            par_input[i] = atof(optionless_argv[i + 3]);
-        }
-    } else {
-        par_input = constants::par_input;
+    std::vector<const char*> file_names;
+    for (int i = 2; i < optionless_argc; i++) {
+        file_names.push_back(optionless_argv[i]);
     }
+
+    par_input = constants::par_input;
 
     if (options.save_log_set && options.save_log) {
         std::cout.rdbuf(out.rdbuf());
@@ -86,9 +85,9 @@ int main(int argc, char* argv[]) {
     if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
 
     if (options.num_events_set) {
-        fitter.ReadInFile(file_path, options.num_events);
+        fitter.ReadInFile(file_names, options.num_events);
     } else {
-        fitter.ReadInFile(file_path);
+        fitter.ReadInFile(file_names);
     }
 
     // Config from file is applied first, so that it can be overriden by CLI
@@ -150,8 +149,10 @@ int main(int argc, char* argv[]) {
 
     fitter.LogCLIArguments(argc, argv);
     fitter.LogEnvironmentMetadata();
-    fitter.LogText("input_file_name", file_path);
-    fitter.LogFileCRC("input_file_crc", file_path);
+    for (auto file_name : file_names) {
+        fitter.LogText("input_file_name", file_name);
+        fitter.LogFileCRC("input_file_crc", file_name);
+    }
     fitter.LogText("efficiency_model", std::to_string(fitter.GetEfficiencyModel()).c_str());
     // TODO: This definitely shouldnt't be hardcoded
     fitter.LogFileCRC("meerkat_efficiency_crc", "efficiency");

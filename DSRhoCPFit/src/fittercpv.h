@@ -70,7 +70,7 @@ class FitterCPV {
 
     bool ResultExists() const { return result_ ? true : false; };
 
-    void ReadInFile(const char* file_path, const int& num_events = 0);
+    void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);
     bool FixParameters(const char* pars);
     const std::string CreateResultsString();

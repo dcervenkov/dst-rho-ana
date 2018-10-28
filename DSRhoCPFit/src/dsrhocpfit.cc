@@ -141,8 +141,7 @@ int main(int argc, char* argv[]) {
         }
     } else if (std::strcmp(options.fit, "all") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {
-            printf("ERROR: Full time independent fit not implemented!\n");
-            return 2;
+            fitter.FitAngularAll();
         } else {
             fitter.FitAll();
         }

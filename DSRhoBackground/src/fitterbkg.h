@@ -127,7 +127,7 @@ class FitterBKG {
     RooRealVar scf_phit_poly_p2_{"scf_phit_poly_p2", "p_{2}", 0.856, -0.1, 2};
     RooRealVar scf_phit_f_{"scf_phit_f", "f_{poly}", 0.147, 0.1, 0.9};
     RooPolynomial scf_phit_poly_{"scf_phit_poly", "scf_phit_poly", phit_, scf_phit_poly_p2_, 2};
-    RooRealVar scf_phit_offset_{"scf_phit_offset", "#phi_{t}^{offset}", 0.056, -0.1, 0.1};
+    RooRealVar scf_phit_offset_{"scf_phit_offset", "#phi_{t}^{offset}", 0.056, -0.2, 0.2};
     RooFormulaVar scf_phit_phit_{"scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
                                  RooArgList(phit_, scf_phit_offset_)};
     RooGenericPdf scf_phit_cos_{"scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2",

@@ -304,33 +304,33 @@ void FitterCPV::FitCR() {
                                 RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
                                 RooFit::Hesse(false), RooFit::Minos(false), RooFit::Save(true),
                                 RooFit::NumCPU(num_CPUs_));
-        result_->Print();
+        if (result_) {
+            result_->Print();
+        }
 
         if (make_plots_) {
-            // RooDataSet* dataset_a =
-            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
-            // PlotWithPull(*dt_, *dataset_a, mixing_pdf_a);
+            RooDataSet* dataset_a =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
+            PlotWithPull(*dt_, *dataset_a, mixing_pdf_a);
 
-            // RooDataSet* dataset_b =
-            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
-            // PlotWithPull(*dt_, *dataset_b, mixing_pdf_b);
+            RooDataSet* dataset_b =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
+            PlotWithPull(*dt_, *dataset_b, mixing_pdf_b);
 
-            // RooDataSet* dataset_ab =
-            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
-            // PlotWithPull(*dt_, *dataset_ab, mixing_pdf_ab);
+            RooDataSet* dataset_ab =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
+            PlotWithPull(*dt_, *dataset_ab, mixing_pdf_ab);
 
-            // RooDataSet* dataset_bb =
-            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
-            // PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
+            RooDataSet* dataset_bb =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
+            PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
 
             RooDataHist* cr_hist = mixing_pdf_a.generateBinned(
                 RooArgSet(*thetat_, *thetab_, *phit_), 1000, RooFit::ExpectedData(true));
 
-            // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
-            // *phit_), *all_hist);
             RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                                   *cr_hist);
-            // thetab_->setBins(100);
+
             PlotWithPull(*thetat_, *dataset_, cr_histpdf);
             PlotWithPull(*thetab_, *dataset_, cr_histpdf);
             PlotWithPull(*phit_, *dataset_, cr_histpdf);
@@ -459,12 +459,14 @@ void FitterCPV::FitCRSCF() {
     dm_->setConstant(true);
 
     if (do_mixing_fit_) {
-        // result_ = sim_pdf.fitTo(*dataset_,
-        // RooFit::ConditionalObservables(conditional_vars_argset_),
-        //                         RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
-        //                         RooFit::Hesse(false), RooFit::Minos(false),
-        //                         RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-        // result_->Print();
+        result_ = sim_pdf.fitTo(*dataset_,
+        RooFit::ConditionalObservables(conditional_vars_argset_),
+                                RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
+                                RooFit::Hesse(false), RooFit::Minos(false),
+                                RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+        if (result_) {
+            result_->Print();
+        }
 
         if (make_plots_) {
             RooDataSet* dataset_a =
@@ -656,7 +658,9 @@ void FitterCPV::FitAll() {
             sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
                           RooFit::Hesse(false), RooFit::Minos(false), RooFit::Minimizer("Minuit2"),
                           RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-        result_->Print();
+        if (result_) {
+            result_->Print();
+        }
 
         if (make_plots_) {
             RooDataSet* cr_dataset_ = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));

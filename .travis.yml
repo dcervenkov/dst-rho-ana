@@ -33,6 +33,7 @@ before_install:
 install:
   # Install Belle libraries
   - export BASF_DIR=$HOME/bin/belle/packages/basf
+  - mkdir -p $BASF_DIR
   - dpkg -x belle-b20091203-2126_11061-2_amd64.deb $BASF_DIR
   - dpkg -x belle-cernlib2006_2006-9_amd64.deb $BASF_DIR
   - export BELLE_TOP_DIR=$BASF_DIR/belle/belle/b20091203_2126

@@ -45,6 +45,7 @@ public:
 	void SPlotSB(TChain* chain);
 	void SPlotCB(TChain* chain);
 	double GetCorrelation(TChain* chain, const RooRealVar& var1, const RooRealVar& var2, bool save_plot = false);
+	void PrintResults();
 
 	RooRealVar de_ { "de", "#DeltaE [GeV]", -0.14, 0.10 };
 	RooRealVar candsel_ { "candsel", "candsel", 0, 4 };
@@ -114,6 +115,24 @@ private:
 	const char* data_cut_ = NULL;
 
 	TFile* output_file_ = NULL;
+
+	// Helper variables which are used to calculate final results with their uncertainties
+	RooFormulaVar f_cr_{"f_cr", "f_cr",
+						"(n_signal_plus_cross_model * signal_plus_cross_f) / (n_signal_plus_cross_model + n_bkg)",
+						RooArgList(n_signal_plus_cross_model_, signal_plus_cross_f_, n_bkg_)};
+
+	RooFormulaVar f_scf_{"f_scf", "f_scf",
+						"(n_signal_plus_cross_model * (1 - signal_plus_cross_f)) / (n_signal_plus_cross_model + n_bkg)",
+						RooArgList(n_signal_plus_cross_model_, signal_plus_cross_f_, n_bkg_)};
+
+	RooFormulaVar f_bkg_{"f_bkg", "f_bkg", "(n_bkg) / (n_signal_plus_cross_model + n_bkg)",
+						RooArgList(n_signal_plus_cross_model_, n_bkg_)};
+
+	RooFormulaVar n_cr_{"n_cr", "n_cr", "n_signal_plus_cross_model * signal_plus_cross_f",
+						RooArgList(n_signal_plus_cross_model_, signal_plus_cross_f_)};
+
+	RooFormulaVar n_scf_{"n_scf", "n_scf", "n_signal_plus_cross_model * (1 - signal_plus_cross_f)",
+						RooArgList(n_signal_plus_cross_model_, signal_plus_cross_f_)};
 };
 
 #endif /* FITTER_H_ */

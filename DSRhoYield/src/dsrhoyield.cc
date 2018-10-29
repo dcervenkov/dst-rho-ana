@@ -92,6 +92,8 @@ int main(int argc, char* argv[]) {
 	fitter.WriteFitResults();
 	fitter.Plot();
 
+	fitter.PrintResults();
+
 //	fitter.SPlotFull(data);
 //	fitter.SPlotSB(data);
 //	fitter.SPlotSC(data);

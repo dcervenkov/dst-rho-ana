@@ -505,3 +505,18 @@ double Fitter::GetCorrelation(TChain* chain, const RooRealVar& var1, const RooRe
 	delete correlation_histo;
 	return correlation;
 }
+
+/**
+ * Print the resulting number of events and fractions
+ */
+void Fitter::PrintResults() {
+	printf("\nResults:\n");
+
+	printf("f_cr  = %f +- %f\n", f_cr_.getVal(), f_cr_.getPropagatedError(*fit_result_));
+	printf("f_scf = %f +- %f\n", f_scf_.getVal(), f_scf_.getPropagatedError(*fit_result_));
+	printf("f_bkg = %f +- %f\n", f_bkg_.getVal(), f_bkg_.getPropagatedError(*fit_result_));
+
+	printf("n_cr  = %.0f +- %.0f\n", n_cr_.getVal(), n_cr_.getPropagatedError(*fit_result_));
+	printf("n_scf = %.0f +- %.0f\n", n_scf_.getVal(), n_scf_.getPropagatedError(*fit_result_));
+	printf("n_bkg = %.0f +- %.0f\n", n_bkg_.getVal(), n_bkg_.getError());
+}

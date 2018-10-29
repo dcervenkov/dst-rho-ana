@@ -1,9 +1,10 @@
 dist: trusty
+sudo: false
 
 language: cpp
 
 before_install:
-  - sudo apt-get -qq update
+  - apt-get -qq update
 
   - mkdir $HOME/downloads && cd $HOME/downloads
   # Download Belle libraries
@@ -26,20 +27,20 @@ before_install:
 
 install:
   # Install required dependencies
-  - sudo apt --yes install libboost-filesystem-dev libtbb2 xutils-dev
+  - apt --yes install libboost-filesystem-dev libtbb2 xutils-dev
 
   # Install Belle libraries
-  - sudo dpkg -i *.deb
+  - dpkg -i *.deb
   - export BELLE_TOP_DIR=/belle/belle/b20091203_2126
   - export BELLE_RUN_DIR=/belle/belle/b20091203_2126/x86_64-unknown-linux-gnu/opt
 
   # Patch Belle libraries (the deb packages contain old library versions)
-  - sudo patch ${BELLE_TOP_DIR}/src/anal/kfitter/src/kvertexfitter.cc kvertexfitter.cc.patch
-  - sudo patch ${BELLE_TOP_DIR}/src/anal/kfitter/kfitter/kvertexfitter.h kvertexfitter.h.patch
-  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h panther_manager.h.patch
-  - sudo patch ${BELLE_TOP_DIR}/src/util/panther/panther/Panther_String.h Panther_String.h.patch
-  - sudo patch ${BELLE_TOP_DIR}/src/anal/tagv/src/TagV.cc TagV.cc.patch
-  - sudo patch ${BELLE_TOP_DIR}/src/anal/tagv/tagv/TagV.h TagV.h.patch
+  - patch ${BELLE_TOP_DIR}/src/anal/kfitter/src/kvertexfitter.cc kvertexfitter.cc.patch
+  - patch ${BELLE_TOP_DIR}/src/anal/kfitter/kfitter/kvertexfitter.h kvertexfitter.h.patch
+  - patch ${BELLE_TOP_DIR}/src/util/panther/panther/panther_manager.h panther_manager.h.patch
+  - patch ${BELLE_TOP_DIR}/src/util/panther/panther/Panther_String.h Panther_String.h.patch
+  - patch ${BELLE_TOP_DIR}/src/anal/tagv/src/TagV.cc TagV.cc.patch
+  - patch ${BELLE_TOP_DIR}/src/anal/tagv/tagv/TagV.h TagV.h.patch
 
   # Unpack ROOT and activate it
   - tar xzf root*.tar.gz -C ~/bin/.

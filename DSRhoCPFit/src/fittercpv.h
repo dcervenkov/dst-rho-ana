@@ -169,6 +169,9 @@ class FitterCPV {
     const double Calculate3DChi2(const RooDataHist& data, const RooDataHist& pdf);
     const void SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const double margin = 0);
 
+    RooAbsPdf* CreateAngularSCFPDF();
+    RooAbsPdf* CreateAngularBKGPDF();
+
     std::vector<RooRealVar**> conditional_vars_;
     std::vector<RooRealVar**> dataset_vars_;
     std::vector<RooRealVar**> parameters_;

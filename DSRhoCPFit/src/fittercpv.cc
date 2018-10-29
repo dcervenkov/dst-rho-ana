@@ -850,50 +850,13 @@ void FitterCPV::FitAngularCRSCF() {
     AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
-    // Self-cross-feed phit model
-    RooRealVar scf_phit_poly_p2("scf_phit_poly_p2", "p_(2)", 0.856);
-    RooRealVar scf_phit_f("scf_phit_f", "f_(poly)", 0.147);
-    RooPolynomial scf_phit_poly("scf_phit_poly", "scf_phit_poly", *phit_, scf_phit_poly_p2, 2);
-    RooRealVar scf_phit_offset("scf_phit_offset", "#phi_(t)^(offset)", 0.056);
-    RooFormulaVar scf_phit_phit("scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
-                                RooArgList(*phit_, scf_phit_offset));
-    RooGenericPdf scf_phit_cos("scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2",
-                               RooArgList(scf_phit_phit));
-    RooAddPdf scf_phit_model("scf_phit_model", "scf_phit_model",
-                             RooArgList(scf_phit_poly, scf_phit_cos), RooArgList(scf_phit_f));
+    RooAbsPdf* scf_pdf = CreateAngularSCFPDF();
 
-    // Self-cross-feed thetat model
-    RooRealVar scf_thetat_f("scf_thetat_f", "#theta_(t)^(w)", -0.051);
-    RooFormulaVar scf_thetat_thetat("scf_thetat_thetat", "scf_thetat_thetat",
-                                    "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
-                                    RooArgList(*thetat_, scf_thetat_f));
-    RooGenericPdf scf_thetat_model("scf_thetat_model", "scf_thetat_model",
-                                   "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat));
+    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.90, 0.860, 0.99);
+    cr_scf_f.setConstant();
 
-    // Self-cross-feed thetab model
-    RooRealVar scf_thetab_gaus_mu("scf_thetab_gaus_mu", "#mu", 2.885);
-    RooRealVar scf_thetab_gaus_sigma_l("scf_thetab_gaus_sigma_l", "#sigma_(L)", 0.411);
-    RooRealVar scf_thetab_gaus_sigma_r("scf_thetab_gaus_sigma_r", "#sigma_(R)", 0.094);
-    RooBifurGauss scf_thetab_gaus("scf_thetab_gaus", "scf_thetab_gaus", *thetab_,
-                                  scf_thetab_gaus_mu, scf_thetab_gaus_sigma_l,
-                                  scf_thetab_gaus_sigma_r);
-    RooRealVar scf_thetab_exp_alpha("scf_thetab_exp_alpha", "#alpha", -4.63);
-    RooExponential scf_thetab_exp("scf_thetab_exp", "scf_thetab_exp", *thetab_,
-                                  scf_thetab_exp_alpha);
-    RooRealVar scf_thetab_f("scf_thetab_f", "f_(exp)", 0.625);
-
-    RooAddPdf scf_thetab_model("scf_thetab_model", "scf_thetab_model",
-                               RooArgList(scf_thetab_exp, scf_thetab_gaus),
-                               RooArgList(scf_thetab_f));
-
-    RooProdPdf scf_pdf(
-        "scf_pdf", "scf_pdf",
-        RooArgList(scf_thetat_model, scf_thetab_model, scf_phit_model));
-
-    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.90, 0.8, 0.99);
-
-    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, scf_pdf), RooArgList(cr_scf_f));
-    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, scf_pdf), RooArgList(cr_scf_f));
+    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_pdf), RooArgList(cr_scf_f));
+    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, *scf_pdf), RooArgList(cr_scf_f));
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(pdf_B, "a");
@@ -924,7 +887,7 @@ void FitterCPV::FitAngularCRSCF() {
         RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                               *cr_hist);
 
-        RooDataHist* scf_hist = scf_pdf.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+        RooDataHist* scf_hist = scf_pdf->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                        RooFit::ExpectedData(true));
         RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                                *scf_hist);
@@ -1024,86 +987,8 @@ void FitterCPV::FitAngularAll() {
     AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
-    // Self-cross-feed phit model
-    RooRealVar scf_phit_poly_p2("scf_phit_poly_p2", "p_(2)", 0.856);
-    RooRealVar scf_phit_f("scf_phit_f", "f_(poly)", 0.147);
-    RooPolynomial scf_phit_poly("scf_phit_poly", "scf_phit_poly", *phit_, scf_phit_poly_p2, 2);
-    RooRealVar scf_phit_offset("scf_phit_offset", "#phi_(t)^(offset)", 0.056);
-    RooFormulaVar scf_phit_phit("scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
-                                RooArgList(*phit_, scf_phit_offset));
-    RooGenericPdf scf_phit_cos("scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2",
-                               RooArgList(scf_phit_phit));
-    RooAddPdf scf_phit_model("scf_phit_model", "scf_phit_model",
-                             RooArgList(scf_phit_poly, scf_phit_cos), RooArgList(scf_phit_f));
-
-    // Self-cross-feed thetat model
-    RooRealVar scf_thetat_f("scf_thetat_f", "#theta_(t)^(w)", -0.051);
-    RooFormulaVar scf_thetat_thetat("scf_thetat_thetat", "scf_thetat_thetat",
-                                    "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
-                                    RooArgList(*thetat_, scf_thetat_f));
-    RooGenericPdf scf_thetat_model("scf_thetat_model", "scf_thetat_model",
-                                   "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat));
-
-    // Self-cross-feed thetab model
-    RooRealVar scf_thetab_gaus_mu("scf_thetab_gaus_mu", "#mu", 2.885);
-    RooRealVar scf_thetab_gaus_sigma_l("scf_thetab_gaus_sigma_l", "#sigma_(L)", 0.411);
-    RooRealVar scf_thetab_gaus_sigma_r("scf_thetab_gaus_sigma_r", "#sigma_(R)", 0.094);
-    RooBifurGauss scf_thetab_gaus("scf_thetab_gaus", "scf_thetab_gaus", *thetab_,
-                                  scf_thetab_gaus_mu, scf_thetab_gaus_sigma_l,
-                                  scf_thetab_gaus_sigma_r);
-    RooRealVar scf_thetab_exp_alpha("scf_thetab_exp_alpha", "#alpha", -4.63);
-    RooExponential scf_thetab_exp("scf_thetab_exp", "scf_thetab_exp", *thetab_,
-                                  scf_thetab_exp_alpha);
-    RooRealVar scf_thetab_f("scf_thetab_f", "f_(exp)", 0.625);
-
-    RooAddPdf scf_thetab_model("scf_thetab_model", "scf_thetab_model",
-                               RooArgList(scf_thetab_exp, scf_thetab_gaus),
-                               RooArgList(scf_thetab_f));
-
-    RooProdPdf scf_pdf(
-        "scf_pdf", "scf_pdf",
-        RooArgList(scf_thetat_model, scf_thetab_model, scf_phit_model));
-
-
-    // Background phit model
-    RooRealVar bkg_phit_poly_p2("bkg_phit_poly_p2", "p_(2)", 0.040);
-    RooRealVar bkg_phit_f("bkg_phit_f", "f_(poly)", 0.660);
-    RooPolynomial bkg_phit_poly("bkg_phit_poly", "bkg_phit_poly", *phit_, bkg_phit_poly_p2, 2);
-    RooRealVar bkg_phit_offset("bkg_phit_offset", "#phi_(t)^(offset)", 0.103);
-    RooFormulaVar bkg_phit_phit("bkg_phit_phit", "bkg_phit_phit", "phit - bkg_phit_offset",
-                                RooArgList(*phit_, bkg_phit_offset));
-    RooGenericPdf bkg_phit_cos("bkg_phit_cos", "bkg_phit_cos", "cos(bkg_phit_phit)^2",
-                               RooArgList(bkg_phit_phit));
-    RooAddPdf bkg_phit_model("bkg_phit_model", "bkg_phit_model",
-                             RooArgList(bkg_phit_poly, bkg_phit_cos), RooArgList(bkg_phit_f));
-
-    // Background thetat model
-    RooRealVar bkg_thetat_f("bkg_thetat_f", "#theta_(t)^(w)", -0.207);
-    RooFormulaVar bkg_thetat_thetat("bkg_thetat_thetat", "bkg_thetat_thetat",
-                                    "(thetat - 1.5708)*(1+bkg_thetat_f) + 1.5708",
-                                    RooArgList(*thetat_, bkg_thetat_f));
-    RooGenericPdf bkg_thetat_model("bkg_thetat_model", "bkg_thetat_model",
-                                   "sin(bkg_thetat_thetat)^3", RooArgList(bkg_thetat_thetat));
-
-    // Background thetab model
-    RooRealVar bkg_thetab_gaus_mu("bkg_thetab_gaus_mu", "#mu", 2.895);
-    RooRealVar bkg_thetab_gaus_sigma_l("bkg_thetab_gaus_sigma_l", "#sigma_(L)", 0.902);
-    RooRealVar bkg_thetab_gaus_sigma_r("bkg_thetab_gaus_sigma_r", "#sigma_(R)", 0.089);
-    RooBifurGauss bkg_thetab_gaus("bkg_thetab_gaus", "bkg_thetab_gaus", *thetab_,
-                                  bkg_thetab_gaus_mu, bkg_thetab_gaus_sigma_l,
-                                  bkg_thetab_gaus_sigma_r);
-    RooRealVar bkg_thetab_exp_alpha("bkg_thetab_exp_alpha", "#alpha", -2.182);
-    RooExponential bkg_thetab_exp("bkg_thetab_exp", "bkg_thetab_exp", *thetab_,
-                                  bkg_thetab_exp_alpha);
-    RooRealVar bkg_thetab_f("bkg_thetab_f", "f_(exp)", 0.661);
-
-    RooAddPdf bkg_thetab_model("bkg_thetab_model", "bkg_thetab_model",
-                               RooArgList(bkg_thetab_exp, bkg_thetab_gaus),
-                               RooArgList(bkg_thetab_f));
-
-    RooProdPdf bkg_pdf(
-        "bkg_pdf", "bkg_pdf",
-        RooArgList(bkg_thetat_model, bkg_thetab_model, bkg_phit_model));
+    RooAbsPdf* scf_pdf = CreateAngularSCFPDF();
+    RooAbsPdf* bkg_pdf = CreateAngularBKGPDF();
 
     RooRealVar cr_f("cr_f", "f_{cr}", 0.10, 0.7833, 0.99);
     RooRealVar scf_f("scf_f", "f_{scf}", 0.10, 0.1279, 0.99);
@@ -1111,8 +996,8 @@ void FitterCPV::FitAngularAll() {
     cr_f.setConstant();
     scf_f.setConstant();
 
-    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, scf_pdf, bkg_pdf), RooArgList(cr_f, scf_f));
-    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, scf_pdf, bkg_pdf), RooArgList(cr_f, scf_f));
+    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_pdf, *bkg_pdf), RooArgList(cr_f, scf_f));
+    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, *scf_pdf, *bkg_pdf), RooArgList(cr_f, scf_f));
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(pdf_B, "a");
@@ -1143,12 +1028,12 @@ void FitterCPV::FitAngularAll() {
         RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                               *cr_hist);
 
-        RooDataHist* scf_hist = scf_pdf.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+        RooDataHist* scf_hist = scf_pdf->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                        RooFit::ExpectedData(true));
         RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                                *scf_hist);
 
-        RooDataHist* bkg_hist = bkg_pdf.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+        RooDataHist* bkg_hist = bkg_pdf->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                        RooFit::ExpectedData(true));
         RooHistPdf bkg_histpdf("bkg_histpdf", "bkg_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                                *bkg_hist);
@@ -2501,4 +2386,102 @@ const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const 
     h1_chi2.Write();
     canvas.SaveAs(constants::format);
     var->setVal(orig_val);
+}
+
+RooAbsPdf* FitterCPV::CreateAngularBKGPDF() {
+    // Background phit model
+    RooRealVar* bkg_phit_poly_p2 = new RooRealVar("bkg_phit_poly_p2", "p_(2)", 0.040);
+    RooRealVar* bkg_phit_f = new RooRealVar("bkg_phit_f", "f_(poly)", 0.660);
+    RooPolynomial* bkg_phit_poly =
+        new RooPolynomial("bkg_phit_poly", "bkg_phit_poly", *phit_, *bkg_phit_poly_p2, 2);
+    RooRealVar* bkg_phit_offset = new RooRealVar("bkg_phit_offset", "#phi_(t)^(offset)", 0.103);
+    RooFormulaVar* bkg_phit_phit =
+        new RooFormulaVar("bkg_phit_phit", "bkg_phit_phit", "phit - bkg_phit_offset",
+                          RooArgList(*phit_, *bkg_phit_offset));
+    RooGenericPdf* bkg_phit_cos = new RooGenericPdf(
+        "bkg_phit_cos", "bkg_phit_cos", "cos(bkg_phit_phit)^2", RooArgList(*bkg_phit_phit));
+    RooAddPdf* bkg_phit_model =
+        new RooAddPdf("bkg_phit_model", "bkg_phit_model", RooArgList(*bkg_phit_poly, *bkg_phit_cos),
+                      RooArgList(*bkg_phit_f));
+
+    // Background thetat model
+    RooRealVar* bkg_thetat_f = new RooRealVar("bkg_thetat_f", "#theta_(t)^(w)", -0.207);
+    RooFormulaVar* bkg_thetat_thetat = new RooFormulaVar(
+        "bkg_thetat_thetat", "bkg_thetat_thetat", "(thetat - 1.5708)*(1+bkg_thetat_f) + 1.5708",
+        RooArgList(*thetat_, *bkg_thetat_f));
+    RooGenericPdf* bkg_thetat_model =
+        new RooGenericPdf("bkg_thetat_model", "bkg_thetat_model", "sin(bkg_thetat_thetat)^3",
+                          RooArgList(*bkg_thetat_thetat));
+
+    // Background thetab model
+    RooRealVar* bkg_thetab_gaus_mu = new RooRealVar("bkg_thetab_gaus_mu", "#mu", 2.895);
+    RooRealVar* bkg_thetab_gaus_sigma_l =
+        new RooRealVar("bkg_thetab_gaus_sigma_l", "#sigma_(L)", 0.902);
+    RooRealVar* bkg_thetab_gaus_sigma_r =
+        new RooRealVar("bkg_thetab_gaus_sigma_r", "#sigma_(R)", 0.089);
+    RooBifurGauss* bkg_thetab_gaus =
+        new RooBifurGauss("bkg_thetab_gaus", "bkg_thetab_gaus", *thetab_, *bkg_thetab_gaus_mu,
+                          *bkg_thetab_gaus_sigma_l, *bkg_thetab_gaus_sigma_r);
+    RooRealVar* bkg_thetab_exp_alpha = new RooRealVar("bkg_thetab_exp_alpha", "#alpha", -2.182);
+    RooExponential* bkg_thetab_exp =
+        new RooExponential("bkg_thetab_exp", "bkg_thetab_exp", *thetab_, *bkg_thetab_exp_alpha);
+    RooRealVar* bkg_thetab_f = new RooRealVar("bkg_thetab_f", "f_(exp)", 0.661);
+
+    RooAddPdf* bkg_thetab_model =
+        new RooAddPdf("bkg_thetab_model", "bkg_thetab_model",
+                      RooArgList(*bkg_thetab_exp, *bkg_thetab_gaus), RooArgList(*bkg_thetab_f));
+
+    RooProdPdf* bkg_pdf = new RooProdPdf(
+        "bkg_pdf", "bkg_pdf", RooArgList(*bkg_thetat_model, *bkg_thetab_model, *bkg_phit_model));
+
+    return bkg_pdf;
+}
+
+RooAbsPdf* FitterCPV::CreateAngularSCFPDF() {
+    // Self-cross-feed phit model
+    RooRealVar* scf_phit_poly_p2 = new RooRealVar("scf_phit_poly_p2", "p_(2)", 0.856);
+    RooRealVar* scf_phit_f = new RooRealVar("scf_phit_f", "f_(poly)", 0.147);
+    RooPolynomial* scf_phit_poly =
+        new RooPolynomial("scf_phit_poly", "scf_phit_poly", *phit_, *scf_phit_poly_p2, 2);
+    RooRealVar* scf_phit_offset = new RooRealVar("scf_phit_offset", "#phi_(t)^(offset)", 0.056);
+    RooFormulaVar* scf_phit_phit =
+        new RooFormulaVar("scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
+                          RooArgList(*phit_, *scf_phit_offset));
+    RooGenericPdf* scf_phit_cos = new RooGenericPdf(
+        "scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2", RooArgList(*scf_phit_phit));
+    RooAddPdf* scf_phit_model =
+        new RooAddPdf("scf_phit_model", "scf_phit_model", RooArgList(*scf_phit_poly, *scf_phit_cos),
+                      RooArgList(*scf_phit_f));
+
+    // Self-cross-feed thetat model
+    RooRealVar* scf_thetat_f = new RooRealVar("scf_thetat_f", "#theta_(t)^(w)", -0.051);
+    RooFormulaVar* scf_thetat_thetat = new RooFormulaVar(
+        "scf_thetat_thetat", "scf_thetat_thetat", "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
+        RooArgList(*thetat_, *scf_thetat_f));
+    RooGenericPdf* scf_thetat_model =
+        new RooGenericPdf("scf_thetat_model", "scf_thetat_model", "sin(scf_thetat_thetat)^3",
+                          RooArgList(*scf_thetat_thetat));
+
+    // Self-cross-feed thetab model
+    RooRealVar* scf_thetab_gaus_mu = new RooRealVar("scf_thetab_gaus_mu", "#mu", 2.885);
+    RooRealVar* scf_thetab_gaus_sigma_l =
+        new RooRealVar("scf_thetab_gaus_sigma_l", "#sigma_(L)", 0.411);
+    RooRealVar* scf_thetab_gaus_sigma_r =
+        new RooRealVar("scf_thetab_gaus_sigma_r", "#sigma_(R)", 0.094);
+    RooBifurGauss* scf_thetab_gaus =
+        new RooBifurGauss("scf_thetab_gaus", "scf_thetab_gaus", *thetab_, *scf_thetab_gaus_mu,
+                          *scf_thetab_gaus_sigma_l, *scf_thetab_gaus_sigma_r);
+    RooRealVar* scf_thetab_exp_alpha = new RooRealVar("scf_thetab_exp_alpha", "#alpha", -4.63);
+    RooExponential* scf_thetab_exp =
+        new RooExponential("scf_thetab_exp", "scf_thetab_exp", *thetab_, *scf_thetab_exp_alpha);
+    RooRealVar* scf_thetab_f = new RooRealVar("scf_thetab_f", "f_(exp)", 0.625);
+
+    RooAddPdf* scf_thetab_model =
+        new RooAddPdf("scf_thetab_model", "scf_thetab_model",
+                      RooArgList(*scf_thetab_exp, *scf_thetab_gaus), RooArgList(*scf_thetab_f));
+
+    RooProdPdf* scf_pdf = new RooProdPdf(
+        "scf_pdf", "scf_pdf", RooArgList(*scf_thetat_model, *scf_thetab_model, *scf_phit_model));
+
+    return scf_pdf;
 }

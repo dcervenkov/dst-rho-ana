@@ -1105,11 +1105,11 @@ void FitterCPV::FitAngularAll() {
         "bkg_pdf", "bkg_pdf",
         RooArgList(bkg_thetat_model, bkg_thetab_model, bkg_phit_model));
 
-    RooRealVar cr_f("cr_f", "f_{cr}", 0.10, 0.7, 0.99);
-    RooRealVar scf_f("scf_f", "f_{scf}", 0.10, 0.1, 0.99);
+    RooRealVar cr_f("cr_f", "f_{cr}", 0.10, 0.7833, 0.99);
+    RooRealVar scf_f("scf_f", "f_{scf}", 0.10, 0.1279, 0.99);
 
-    // cr_f.setConstant();
-    // scf_f.setConstant();
+    cr_f.setConstant();
+    scf_f.setConstant();
 
     RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, scf_pdf, bkg_pdf), RooArgList(cr_f, scf_f));
     RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, scf_pdf, bkg_pdf), RooArgList(cr_f, scf_f));

@@ -852,7 +852,7 @@ void FitterCPV::FitAngularCRSCF() {
 
     RooAbsPdf* scf_pdf = CreateAngularSCFPDF();
 
-    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.90, 0.860, 0.99);
+    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.860, 0.80, 0.99);
     cr_scf_f.setConstant();
 
     RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_pdf), RooArgList(cr_scf_f));
@@ -990,8 +990,8 @@ void FitterCPV::FitAngularAll() {
     RooAbsPdf* scf_pdf = CreateAngularSCFPDF();
     RooAbsPdf* bkg_pdf = CreateAngularBKGPDF();
 
-    RooRealVar cr_f("cr_f", "f_{cr}", 0.10, 0.7833, 0.99);
-    RooRealVar scf_f("scf_f", "f_{scf}", 0.10, 0.1279, 0.99);
+    RooRealVar cr_f("cr_f", "f_{cr}", 0.7833, 0.10, 0.99);
+    RooRealVar scf_f("scf_f", "f_{scf}", 0.1279, 0.10, 0.99);
 
     cr_f.setConstant();
     scf_f.setConstant();

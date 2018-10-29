@@ -32,12 +32,12 @@ before_install:
 
 install:
   # Install Belle libraries
-  - export BASF_DIR=$HOME/bin/belle/packages/basf
-  - mkdir -p $BASF_DIR
-  - dpkg -x belle-b20091203-2126_11061-2_amd64.deb $BASF_DIR
-  - dpkg -x belle-cernlib2006_2006-9_amd64.deb $BASF_DIR
-  - export BELLE_TOP_DIR=$BASF_DIR/belle/belle/b20091203_2126
-  - export BELLE_RUN_DIR=$BASF_DIR/belle/belle/b20091203_2126/x86_64-unknown-linux-gnu/opt
+  - export BELLE_LIB_DIR=$HOME/bin/belle/packages/basf/belle
+  - mkdir -p $HOME/bin/belle/packages/basf
+  - dpkg -x belle-b20091203-2126_11061-2_amd64.deb $HOME/bin/belle/packages/basf
+  - dpkg -x belle-cernlib2006_2006-9_amd64.deb $HOME/bin/belle/packages/basf
+  - export BELLE_TOP_DIR=$BELLE_LIB_DIR/belle/b20091203_2126
+  - export BELLE_RUN_DIR=$BELLE_LIB_DIR/belle/b20091203_2126/x86_64-unknown-linux-gnu/opt
 
   # Patch Belle libraries (the deb packages contain old library versions)
   - patch ${BELLE_TOP_DIR}/src/anal/kfitter/src/kvertexfitter.cc kvertexfitter.cc.patch

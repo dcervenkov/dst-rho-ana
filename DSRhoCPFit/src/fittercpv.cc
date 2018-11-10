@@ -560,105 +560,102 @@ void FitterCPV::FitAll() {
                            *vtistagl_);
 
     // Self-cross-feed dt CF model
-    RooRealVar scf_dt_cf_voigt_mu("scf_dt_cf_voigt_mu", "v_{#mu}", -0.303);
-    RooRealVar scf_dt_cf_voigt_sigma("scf_dt_cf_voigt_sigma_", "v_{#sigma}", 2.323);
-    RooRealVar scf_dt_cf_voigt_width("scf_dt_cf_voigt_width_", "v_{w}", 0.851);
+    RooRealVar scf_dt_cf_voigt_mu("scf_dt_cf_voigt_mu", "v_{#mu}", -0.249);
+    RooRealVar scf_dt_cf_voigt_sigma("scf_dt_cf_voigt_sigma_", "v_{#sigma}", 1.910);
+    RooRealVar scf_dt_cf_voigt_width("scf_dt_cf_voigt_width_", "v_{w}", 0.684);
     RooVoigtian scf_dt_cf_voigt("scf_dt_cf_voigt", "scf_dt_cf_voigt", *dt_, scf_dt_cf_voigt_mu,
                                 scf_dt_cf_voigt_width, scf_dt_cf_voigt_sigma);
 
-    RooRealVar scf_dt_cf_gaus_mu("scf_dt_cf_gaus_mu", "g_{#mu}", -0.161);
-    RooRealVar scf_dt_cf_gaus_sigma("scf_dt_cf_gaus_sigma_", "g_{#sigma}", 1.096);
+    RooRealVar scf_dt_cf_gaus_mu("scf_dt_cf_gaus_mu", "g_{#mu}", -0.105);
+    RooRealVar scf_dt_cf_gaus_sigma("scf_dt_cf_gaus_sigma_", "g_{#sigma}", 0.881);
     RooGaussian scf_dt_cf_gaus("scf_dt_cf_gaus", "scf_dt_cf_gaus", *dt_, scf_dt_cf_gaus_mu,
                                scf_dt_cf_gaus_sigma);
 
-    RooRealVar scf_dt_cf_f("scf_dt_cf_f", "f_{v/g}", 0.631);
+    RooRealVar scf_dt_cf_f("scf_dt_cf_f", "f_{v/g}", 0.720);
     RooAddPdf scf_dt_cf_model("scf_dt_cf_model", "scf_dt_cf_model",
                               RooArgList(scf_dt_cf_voigt, scf_dt_cf_gaus), RooArgList(scf_dt_cf_f));
 
     // Self-cross-feed dt DCS model
     RooRealVar scf_dt_dcs_voigt_mu("scf_dt_dcs_voigt_mu", "v_{#mu}", -0.303);
-    RooRealVar scf_dt_dcs_voigt_sigma("scf_dt_dcs_voigt_sigma_", "v_{#sigma}", 2.323);
-    RooRealVar scf_dt_dcs_voigt_width("scf_dt_dcs_voigt_width_", "v_{w}", 0.851);
+    RooRealVar scf_dt_dcs_voigt_sigma("scf_dt_dcs_voigt_sigma_", "v_{#sigma}", 2.739);
+    RooRealVar scf_dt_dcs_voigt_width("scf_dt_dcs_voigt_width_", "v_{w}", 0.712);
     RooVoigtian scf_dt_dcs_voigt("scf_dt_dcs_voigt", "scf_dt_dcs_voigt", *dt_, scf_dt_dcs_voigt_mu,
                                  scf_dt_dcs_voigt_width, scf_dt_dcs_voigt_sigma);
 
-    RooRealVar scf_dt_dcs_gaus_mu("scf_dt_dcs_gaus_mu", "g_{#mu}", -0.161);
-    RooRealVar scf_dt_dcs_gaus_sigma("scf_dt_dcs_gaus_sigma_", "g_{#sigma}", 1.096);
+    RooRealVar scf_dt_dcs_gaus_mu("scf_dt_dcs_gaus_mu", "g_{#mu}", -0.177);
+    RooRealVar scf_dt_dcs_gaus_sigma("scf_dt_dcs_gaus_sigma_", "g_{#sigma}", 1.156);
     RooGaussian scf_dt_dcs_gaus("scf_dt_dcs_gaus", "scf_dt_dcs_gaus", *dt_, scf_dt_dcs_gaus_mu,
                                 scf_dt_dcs_gaus_sigma);
 
-    RooRealVar scf_dt_dcs_f("scf_dt_dcs_f", "f_{v/g}", 0.631);
+    RooRealVar scf_dt_dcs_f("scf_dt_dcs_f", "f_{v/g}", 0.712);
     RooAddPdf scf_dt_dcs_model("scf_dt_dcs_model", "scf_dt_dcs_model",
                                RooArgList(scf_dt_dcs_voigt, scf_dt_dcs_gaus),
                                RooArgList(scf_dt_dcs_f));
 
-    // Self-cross-feed phit model
-    RooRealVar scf_phit_poly_p2("scf_phit_poly_p2", "p_(2)", 0.856);
-    RooRealVar scf_phit_f("scf_phit_f", "f_(poly)", 0.147);
-    RooPolynomial scf_phit_poly("scf_phit_poly", "scf_phit_poly", *phit_, scf_phit_poly_p2, 2);
-    RooRealVar scf_phit_offset("scf_phit_offset", "#phi_(t)^(offset)", 0.056);
-    RooFormulaVar scf_phit_phit("scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
-                                RooArgList(*phit_, scf_phit_offset));
-    RooGenericPdf scf_phit_cos("scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2",
-                               RooArgList(scf_phit_phit));
-    RooAddPdf scf_phit_model("scf_phit_model", "scf_phit_model",
-                             RooArgList(scf_phit_poly, scf_phit_cos), RooArgList(scf_phit_f));
+    RooAbsPdf* scf_angular_pdf = CreateAngularSCFPDF();
 
-    // Self-cross-feed thetat model
-    RooRealVar scf_thetat_f("scf_thetat_f", "#theta_(t)^(w)", -0.051);
-    RooFormulaVar scf_thetat_thetat("scf_thetat_thetat", "scf_thetat_thetat",
-                                    "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
-                                    RooArgList(*thetat_, scf_thetat_f));
-    RooGenericPdf scf_thetat_model("scf_thetat_model", "scf_thetat_model",
-                                   "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat));
+    RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a", RooArgList(scf_dt_cf_model, *scf_angular_pdf));
+    RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab", RooArgList(scf_dt_cf_model, *scf_angular_pdf));
+    RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b", RooArgList(scf_dt_dcs_model, *scf_angular_pdf));
+    RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb", RooArgList(scf_dt_dcs_model, *scf_angular_pdf));
 
-    // Self-cross-feed thetab model
-    RooRealVar scf_thetab_gaus_mu("scf_thetab_gaus_mu", "#mu", 2.885);
-    RooRealVar scf_thetab_gaus_sigma_l("scf_thetab_gaus_sigma_l", "#sigma_(L)", 0.411);
-    RooRealVar scf_thetab_gaus_sigma_r("scf_thetab_gaus_sigma_r", "#sigma_(R)", 0.094);
-    RooBifurGauss scf_thetab_gaus("scf_thetab_gaus", "scf_thetab_gaus", *thetab_,
-                                  scf_thetab_gaus_mu, scf_thetab_gaus_sigma_l,
-                                  scf_thetab_gaus_sigma_r);
-    RooRealVar scf_thetab_exp_alpha("scf_thetab_exp_alpha", "#alpha", -4.63);
-    RooExponential scf_thetab_exp("scf_thetab_exp", "scf_thetab_exp", *thetab_,
-                                  scf_thetab_exp_alpha);
-    RooRealVar scf_thetab_f("scf_thetab_f", "f_(exp)", 0.625);
+    // RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a", RooArgList(scf_dt_pdf_a, *scf_angular_pdf));
+    // RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab", RooArgList(scf_dt_pdf_ab, *scf_angular_pdf));
+    // RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b", RooArgList(scf_dt_pdf_b, *scf_angular_pdf));
+    // RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb", RooArgList(scf_dt_pdf_bb, *scf_angular_pdf));
 
-    RooAddPdf scf_thetab_model("scf_thetab_model", "scf_thetab_model",
-                               RooArgList(scf_thetab_exp, scf_thetab_gaus),
-                               RooArgList(scf_thetab_f));
 
-    // RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a",
-    //                      RooArgList(scf_dt_pdf_a, scf_thetat_model, scf_thetab_model,
-    //                      scf_phit_model));
-    // RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab",
-    //                      RooArgList(scf_dt_pdf_ab, scf_thetat_model, scf_thetab_model,
-    //                      scf_phit_model));
-    // RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b",
-    //                      RooArgList(scf_dt_pdf_b, scf_thetat_model, scf_thetab_model,
-    //                      scf_phit_model));
-    // RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb",
-    //                  RooArgList(scf_dt_pdf_bb, scf_thetat_model, scf_thetab_model,
-    //                  scf_phit_model));
-    RooProdPdf scf_pdf_a(
-        "scf_pdf_a", "scf_pdf_a",
-        RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
-    RooProdPdf scf_pdf_ab(
-        "scf_pdf_ab", "scf_pdf_ab",
-        RooArgList(scf_dt_cf_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
-    RooProdPdf scf_pdf_b(
-        "scf_pdf_b", "scf_pdf_b",
-        RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
-    RooProdPdf scf_pdf_bb(
-        "scf_pdf_bb", "scf_pdf_bb",
-        RooArgList(scf_dt_dcs_model, scf_thetat_model, scf_thetab_model, scf_phit_model));
+    // Background dt CF model
+    RooRealVar bkg_dt_cf_voigt_mu("bkg_dt_cf_voigt_mu", "v_{#mu}", -0.159);
+    RooRealVar bkg_dt_cf_voigt_sigma("bkg_dt_cf_voigt_sigma_", "v_{#sigma}", 1.644);
+    RooRealVar bkg_dt_cf_voigt_width("bkg_dt_cf_voigt_width_", "v_{w}", 0.874);
+    RooVoigtian bkg_dt_cf_voigt("bkg_dt_cf_voigt", "bkg_dt_cf_voigt", *dt_, bkg_dt_cf_voigt_mu,
+                                bkg_dt_cf_voigt_width, bkg_dt_cf_voigt_sigma);
 
-    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.8);
+    RooRealVar bkg_dt_cf_gaus_mu("bkg_dt_cf_gaus_mu", "g_{#mu}", -0.026);
+    RooRealVar bkg_dt_cf_gaus_sigma("bkg_dt_cf_gaus_sigma_", "g_{#sigma}", 0.613);
+    RooGaussian bkg_dt_cf_gaus("bkg_dt_cf_gaus", "bkg_dt_cf_gaus", *dt_, bkg_dt_cf_gaus_mu,
+                               bkg_dt_cf_gaus_sigma);
 
-    RooAddPdf pdf_a("pdf_a", "pdf_a", RooArgList(cr_pdf_a, scf_pdf_a), RooArgList(cr_scf_f));
-    RooAddPdf pdf_ab("pdf_ab", "pdf_ab", RooArgList(cr_pdf_ab, scf_pdf_ab), RooArgList(cr_scf_f));
-    RooAddPdf pdf_b("pdf_b", "pdf_b", RooArgList(cr_pdf_b, scf_pdf_b), RooArgList(cr_scf_f));
-    RooAddPdf pdf_bb("pdf_bb", "pdf_bb", RooArgList(cr_pdf_bb, scf_pdf_bb), RooArgList(cr_scf_f));
+    RooRealVar bkg_dt_cf_f("bkg_dt_cf_f", "f_{v/g}", 0.632);
+    RooAddPdf bkg_dt_cf_model("bkg_dt_cf_model", "bkg_dt_cf_model",
+                              RooArgList(bkg_dt_cf_voigt, bkg_dt_cf_gaus), RooArgList(bkg_dt_cf_f));
+
+    // Background dt DCS model
+    RooRealVar bkg_dt_dcs_voigt_mu("bkg_dt_dcs_voigt_mu", "v_{#mu}", -0.234);
+    RooRealVar bkg_dt_dcs_voigt_sigma("bkg_dt_dcs_voigt_sigma_", "v_{#sigma}", 2.210);
+    RooRealVar bkg_dt_dcs_voigt_width("bkg_dt_dcs_voigt_width_", "v_{w}", 1.143);
+    RooVoigtian bkg_dt_dcs_voigt("bkg_dt_dcs_voigt", "bkg_dt_dcs_voigt", *dt_, bkg_dt_dcs_voigt_mu,
+                                 bkg_dt_dcs_voigt_width, bkg_dt_dcs_voigt_sigma);
+
+    RooRealVar bkg_dt_dcs_gaus_mu("bkg_dt_dcs_gaus_mu", "g_{#mu}", -0.020);
+    RooRealVar bkg_dt_dcs_gaus_sigma("bkg_dt_dcs_gaus_sigma_", "g_{#sigma}", 0.639);
+    RooGaussian bkg_dt_dcs_gaus("bkg_dt_dcs_gaus", "bkg_dt_dcs_gaus", *dt_, bkg_dt_dcs_gaus_mu,
+                                bkg_dt_dcs_gaus_sigma);
+
+    RooRealVar bkg_dt_dcs_f("bkg_dt_dcs_f", "f_{v/g}", 0.632);
+    RooAddPdf bkg_dt_dcs_model("bkg_dt_dcs_model", "bkg_dt_dcs_model",
+                               RooArgList(bkg_dt_dcs_voigt, bkg_dt_dcs_gaus),
+                               RooArgList(bkg_dt_dcs_f));
+
+    RooAbsPdf* bkg_angular_pdf = CreateAngularBKGPDF();
+
+    RooProdPdf bkg_pdf_a("bkg_pdf_a", "bkg_pdf_a", RooArgList(bkg_dt_cf_model, *bkg_angular_pdf));
+    RooProdPdf bkg_pdf_ab("bkg_pdf_ab", "bkg_pdf_ab", RooArgList(bkg_dt_cf_model, *bkg_angular_pdf));
+    RooProdPdf bkg_pdf_b("bkg_pdf_b", "bkg_pdf_b", RooArgList(bkg_dt_dcs_model, *bkg_angular_pdf));
+    RooProdPdf bkg_pdf_bb("bkg_pdf_bb", "bkg_pdf_bb", RooArgList(bkg_dt_dcs_model, *bkg_angular_pdf));
+
+
+    RooRealVar cr_f("cr_f", "f_{cr}", 0.7833, 0.10, 0.99);
+    RooRealVar scf_f("scf_f", "f_{scf}", 0.1279, 0.10, 0.99);
+
+    cr_f.setConstant();
+    scf_f.setConstant();
+
+    RooAddPdf pdf_a("pdf_a", "pdf_a", RooArgList(cr_pdf_a, scf_pdf_a, bkg_pdf_a), RooArgList(cr_f, scf_f));
+    RooAddPdf pdf_ab("pdf_ab", "pdf_ab", RooArgList(cr_pdf_ab, scf_pdf_ab, bkg_pdf_a), RooArgList(cr_f, scf_f));
+    RooAddPdf pdf_b("pdf_b", "pdf_b", RooArgList(cr_pdf_b, scf_pdf_b, bkg_pdf_a), RooArgList(cr_f, scf_f));
+    RooAddPdf pdf_bb("pdf_bb", "pdf_bb", RooArgList(cr_pdf_bb, scf_pdf_bb, bkg_pdf_a), RooArgList(cr_f, scf_f));
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(pdf_a, "a");
@@ -681,6 +678,8 @@ void FitterCPV::FitAll() {
         }
 
         if (make_plots_) {
+            // TODO: Refactor. Now! Really!
+            // This plotting code actually works! In finite time! Have to start from here.
             RooDataSet* cr_dataset_ = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
             RooDataSet* scf_dataset_ = static_cast<RooDataSet*>(dataset_->reduce("evmcflag!=1"));
 
@@ -728,14 +727,19 @@ void FitterCPV::FitAll() {
             RooDataHist* scf_hist = scf_pdf_a.generateBinned(
                 RooArgSet(*thetat_, *thetab_, *phit_), 1000 * 0.2, RooFit::ExpectedData(true));
 
+            RooDataHist* bkg_hist = bkg_pdf_a.generateBinned(
+                RooArgSet(*thetat_, *thetab_, *phit_), 1000 * 0.2, RooFit::ExpectedData(true));
+
             // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
             // *phit_), *all_hist);
             RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                                   *cr_hist);
             RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf",
                                    RooArgSet(*thetat_, *thetab_, *phit_), *scf_hist);
-            RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf),
-                                  cr_scf_f);
+            RooHistPdf bkg_histpdf("bkg_histpdf", "bkg_histpdf",
+                                   RooArgSet(*thetat_, *thetab_, *phit_), *bkg_hist);
+            RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf, bkg_histpdf),
+                                  RooArgList(cr_f, scf_f));
             std::vector<RooAbsPdf*> components;
             components.push_back(&cr_histpdf);
             components.push_back(&scf_histpdf);

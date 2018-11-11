@@ -2009,9 +2009,9 @@ const std::string FitterCPV::CreateLatexPullTableString(const bool asymmetric) {
     }
     ss << "\t\t\\toprule\n";
     if (asymmetric) {
-        ss << "\t\tVar & Fit & Err. Low & Err. High & Pull \\\\\n";
+        ss << "\t\tVar & True & Fit & Err. Low & Err. High & Pull \\\\\n";
     } else {
-        ss << "\t\tVar & Fit & Err. & Pull \\\\\n";
+        ss << "\t\tVar & True & Fit & Err. & Pull \\\\\n";
     }
     ss << "\t\t\\midrule\n";
     bool at_not_processed = true;

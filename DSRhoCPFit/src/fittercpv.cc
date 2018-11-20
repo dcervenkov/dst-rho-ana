@@ -1982,7 +1982,7 @@ const std::string FitterCPV::CreatePullTableString(const bool asymmetric) {
         }
         ss << std::setprecision(2) << std::showpos;
         if (asymmetric) {
-            if (fit > tru) {
+            if (fit < tru) {
                 ss << (fit - tru) / err_high;
             } else {
                 ss << (fit - tru) / fabs(err_low);
@@ -2062,7 +2062,7 @@ const std::string FitterCPV::CreateLatexPullTableString(const bool asymmetric) {
         }
         ss << std::setprecision(2) << std::showpos;
         if (asymmetric) {
-            if (fit > tru) {
+            if (fit < tru) {
                 ss << (fit - tru) / err_high;
             } else {
                 ss << (fit - tru) / fabs(err_low);

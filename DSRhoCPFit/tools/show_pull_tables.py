@@ -2,17 +2,33 @@
 
 """This script prints pull tables from all supplied ROOT result files."""
 
+import argparse
 from rootpy.io import root_open
 import sys
 
-if len(sys.argv) == 1:
-    print("ERROR: No arguments supplied!")
-    print("USAGE: " + sys.argv[0] + " FILE(S)...")
-    sys.exit(1)
+def decode_arguments():
+    """Decode CLI arguments"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("files", nargs="+")
+    parser.add_argument("-l", "--latex", action="store_true",
+                        help="output in LaTeX format")
+    args = parser.parse_args()
 
-for path in sys.argv[1:]:
-    with root_open(path, 'r') as f:
-        print(path)
-        print()
-        print(f.pull_table.GetTitle())
-        print()
+    return args.latex, args.files
+
+def main():
+    latex, files = decode_arguments()
+
+    for path in files:
+        with root_open(path, 'r') as f:
+            print(path)
+            print
+            
+            if latex:
+                print(f.latex_pull_table.GetTitle())
+            else:
+                print(f.pull_table.GetTitle())
+
+            print
+
+main()

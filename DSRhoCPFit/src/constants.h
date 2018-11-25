@@ -32,6 +32,8 @@ namespace cuts {
 
 extern const double dt_low;
 extern const double dt_high;
+extern const double thetab_low;
+extern const double thetab_high;
 extern const int sig_vtx_h;
 extern const int tag_vtx_h;
 extern const double sig_vtx_multitrack_sigma_z;

@@ -680,70 +680,78 @@ void FitterCPV::FitAll() {
         if (make_plots_) {
             // TODO: Refactor. Now! Really!
             // This plotting code actually works! In finite time! Have to start from here.
-            RooDataSet* cr_dataset_ = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
-            RooDataSet* scf_dataset_ = static_cast<RooDataSet*>(dataset_->reduce("evmcflag!=1"));
+            // RooDataSet* cr_dataset_ = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
+            // RooDataSet* scf_dataset_ = static_cast<RooDataSet*>(dataset_->reduce("evmcflag!=1"));
 
-            RooDataSet* cr_dataset_a =
-                static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::a"));
-            PlotWithPull(*dt_, *cr_dataset_a, cr_pdf_a);
+            // RooDataSet* cr_dataset_a =
+            //     static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::a"));
+            // PlotWithPull(*dt_, *cr_dataset_a, cr_pdf_a);
 
-            RooDataSet* cr_dataset_b =
-                static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::b"));
-            PlotWithPull(*dt_, *cr_dataset_b, cr_pdf_b);
+            // RooDataSet* cr_dataset_b =
+            //     static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::b"));
+            // PlotWithPull(*dt_, *cr_dataset_b, cr_pdf_b);
 
-            RooDataSet* cr_dataset_ab =
-                static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::ab"));
-            PlotWithPull(*dt_, *cr_dataset_ab, cr_pdf_ab);
+            // RooDataSet* cr_dataset_ab =
+            //     static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::ab"));
+            // PlotWithPull(*dt_, *cr_dataset_ab, cr_pdf_ab);
 
-            RooDataSet* cr_dataset_bb =
-                static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::bb"));
-            PlotWithPull(*dt_, *cr_dataset_bb, cr_pdf_bb);
+            // RooDataSet* cr_dataset_bb =
+            //     static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::bb"));
+            // PlotWithPull(*dt_, *cr_dataset_bb, cr_pdf_bb);
 
-            RooDataSet* scf_dataset_a =
-                static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::a"));
-            PlotWithPull(*dt_, *scf_dataset_a, scf_pdf_a);
+            // RooDataSet* scf_dataset_a =
+            //     static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::a"));
+            // PlotWithPull(*dt_, *scf_dataset_a, scf_pdf_a);
 
-            RooDataSet* scf_dataset_b =
-                static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::b"));
-            PlotWithPull(*dt_, *scf_dataset_b, scf_pdf_b);
+            // RooDataSet* scf_dataset_b =
+            //     static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::b"));
+            // PlotWithPull(*dt_, *scf_dataset_b, scf_pdf_b);
 
-            RooDataSet* scf_dataset_ab =
-                static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::ab"));
-            PlotWithPull(*dt_, *scf_dataset_ab, scf_pdf_ab);
+            // RooDataSet* scf_dataset_ab =
+            //     static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::ab"));
+            // PlotWithPull(*dt_, *scf_dataset_ab, scf_pdf_ab);
 
-            RooDataSet* scf_dataset_bb =
-                static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::bb"));
-            PlotWithPull(*dt_, *scf_dataset_bb, scf_pdf_bb);
+            // RooDataSet* scf_dataset_bb =
+            //     static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::bb"));
+            // PlotWithPull(*dt_, *scf_dataset_bb, scf_pdf_bb);
 
-            // PlotWithPull(*thetat_, *cr_dataset_, cr_pdf_a);
-            // PlotWithPull(*thetab_, *cr_dataset_, cr_pdf_a);
-            // PlotWithPull(*phit_, *cr_dataset_, cr_pdf_a);
-            PlotWithPull(*thetat_, *scf_dataset_, scf_pdf_a);
-            PlotWithPull(*thetab_, *scf_dataset_, scf_pdf_a);
-            PlotWithPull(*phit_, *scf_dataset_, scf_pdf_a);
             // thetab_->setBins(300);
-            RooDataHist* cr_hist = cr_pdf_a.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
-                                                           1000 * 0.8, RooFit::ExpectedData(true));
+            RooDataHist* cr_hist =
+                cr_pdf_a.generateBinned(RooArgSet(*dt_, *thetat_, *thetab_, *phit_), 1000 * cr_f.getVal(),
+                                        RooFit::ExpectedData(true));
+
             RooDataHist* scf_hist = scf_pdf_a.generateBinned(
-                RooArgSet(*thetat_, *thetab_, *phit_), 1000 * 0.2, RooFit::ExpectedData(true));
+                RooArgSet(*dt_, *thetat_, *thetab_, *phit_), 1000 * scf_f.getVal(),
+                RooFit::ExpectedData(true));
 
             RooDataHist* bkg_hist = bkg_pdf_a.generateBinned(
-                RooArgSet(*thetat_, *thetab_, *phit_), 1000 * 0.2, RooFit::ExpectedData(true));
+                RooArgSet(*dt_, *thetat_, *thetab_, *phit_), 1000 * (1 - cr_f.getVal() - scf_f.getVal()),
+                RooFit::ExpectedData(true));
 
             // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
             // *phit_), *all_hist);
-            RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
+            RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*dt_, *thetat_, *thetab_, *phit_),
                                   *cr_hist);
             RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf",
-                                   RooArgSet(*thetat_, *thetab_, *phit_), *scf_hist);
+                                   RooArgSet(*dt_, *thetat_, *thetab_, *phit_), *scf_hist);
             RooHistPdf bkg_histpdf("bkg_histpdf", "bkg_histpdf",
-                                   RooArgSet(*thetat_, *thetab_, *phit_), *bkg_hist);
+                                   RooArgSet(*dt_, *thetat_, *thetab_, *phit_), *bkg_hist);
             RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf, bkg_histpdf),
                                   RooArgList(cr_f, scf_f));
+
             std::vector<RooAbsPdf*> components;
             components.push_back(&cr_histpdf);
             components.push_back(&scf_histpdf);
+            components.push_back(&bkg_histpdf);
+
             // thetab_->setBins(100);
+
+            // Set the current directory back to the one for plots (ugly ROOT stuff)
+            if (output_file_) {
+                output_file_->cd();
+            }
+
+            PlotWithPull(*dt_, *dataset_, all_histpdf, components);
             PlotWithPull(*thetat_, *dataset_, all_histpdf, components);
             PlotWithPull(*thetab_, *dataset_, all_histpdf, components);
             PlotWithPull(*phit_, *dataset_, all_histpdf, components);

@@ -310,7 +310,7 @@ void FitterCPV::FitCR() {
 
     if (do_mixing_fit_) {
         result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
-                                RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
+                                RooFit::Minimizer("Minuit2"),
                                 RooFit::Hesse(false), RooFit::Minos(false), RooFit::Save(true),
                                 RooFit::NumCPU(num_CPUs_));
         if (result_) {
@@ -672,8 +672,6 @@ void FitterCPV::FitAll() {
     sim_pdf.addPdf(pdf_b, "b");
     sim_pdf.addPdf(pdf_bb, "bb");
 
-    dt_->setRange("dtFitRange", -15, 15);
-
     tau_->setConstant(true);
     dm_->setConstant(true);
 
@@ -786,8 +784,6 @@ void FitterCPV::FitAngularCR() {
     sim_pdf.addPdf(pdf_B_bar, "bb");
 
     result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
-                            // RooFit::Range(ranges_string.c_str()),
-                            // RooFit::Range("dtFitRange"),
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
     if (result_) {
@@ -908,8 +904,6 @@ void FitterCPV::FitAngularCRSCF() {
     sim_pdf.addPdf(pdf_B_bar, "bb");
 
     result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
-                            // RooFit::Range(ranges_string.c_str()),
-                            // RooFit::Range("dtFitRange"),
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
     if (result_) {
@@ -1049,8 +1043,6 @@ void FitterCPV::FitAngularAll() {
     sim_pdf.addPdf(pdf_B_bar, "bb");
 
     result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
-                            // RooFit::Range(ranges_string.c_str()),
-                            // RooFit::Range("dtFitRange"),
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
     if (result_) {
@@ -1520,7 +1512,7 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     //  result_ = mixing_pdf_a.fitTo(*new_dataset,
     // RooFit::ConditionalObservables(conditional_vars_argset_),
     //          RooFit::Minimizer("Minuit2"), RooFit::Hesse(false), RooFit::Minos(false),
-    //          RooFit::Range("dtFitRange"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+    //          RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 }
 
 /**
@@ -1540,7 +1532,7 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
     name += var.GetName();
     TCanvas canvas(name, name, 500, 500);
 
-    RooPlot* plot = var.frame(RooFit::Range("dtFitRange"));
+    RooPlot* plot = var.frame();
     TPad* pad_var;
     TPad* pad_pull;
     pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
@@ -1568,13 +1560,11 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
     for (auto component : components) {
         pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
                    RooFit::NumCPU(num_CPUs_), RooFit::LineColor(colors[i++]),
-                   RooFit::NormRange("dtFitRange"), RooFit::Components(*component),
-                   RooFit::Normalization(norm));
+                   RooFit::Components(*component), RooFit::Normalization(norm));
     }
 
     pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
-               RooFit::NumCPU(num_CPUs_), RooFit::NormRange("dtFitRange"),
-               RooFit::Normalization(norm));
+               RooFit::NumCPU(num_CPUs_), RooFit::Normalization(norm));
 
     plot->GetXaxis()->SetTitle("");
     plot->GetXaxis()->SetLabelSize(0);
@@ -1604,8 +1594,7 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
     pad_pull->SetLeftMargin(0.12);
 
     // Create a new frame to draw the pull distribution and add the distribution to the frame
-    RooPlot* plot_pull_ =
-        var.frame(RooFit::Title("Pull Distribution"), RooFit::Range("dtFitRange"));
+    RooPlot* plot_pull_ = var.frame(RooFit::Title("Pull Distribution"));
     plot_pull_->SetTitle("");
     RooHist* hpull = plot->pullHist();
     hpull->SetFillColor(kGray);

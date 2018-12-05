@@ -144,6 +144,35 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     decaytype_->defineType("b", 3);
     decaytype_->defineType("bb", 4);
 
+    // Make a copy of the input parameters for saving results, etc.
+    par_input_ = par_input;
+
+    PrepareVarArgsets();
+
+    num_CPUs_ = 1;
+    do_lifetime_fit_ = false;
+    do_mixing_fit_ = false;
+    make_plots_ = false;
+    perfect_tagging_ = false;
+
+    vrzerr_ = NULL;
+    vtzerr_ = NULL;
+}
+
+FitterCPV::~FitterCPV() {
+    if (output_file_) {
+        if (output_file_->IsOpen()) {
+            output_file_->Close();
+        }
+    }
+}
+
+/**
+ * Populate various vectors and argsets with all parameters
+ * This populates conditional_vars_, dataset_vars_, parameters_ and their pair
+ * argsets which are used elsewhere.
+ */
+void FitterCPV::PrepareVarArgsets() {
     // All the variables present in the ntuple are added to a vector so we can later
     // iterate through them for convenience
     conditional_vars_.push_back(&expno_);
@@ -201,9 +230,6 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     parameters_.push_back(&y0b_);
     parameters_.push_back(&ytb_);
 
-    // Make a copy of the input parameters for saving results, etc.
-    par_input_ = par_input;
-
     // The variables present in the ntuple are added to an RooArgSet that will be needed
     // when we create a RooDataSet from the input_tree
     for (auto var : conditional_vars_) {
@@ -217,23 +243,6 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
 
     for (auto par : parameters_) {
         parameters_argset_.add(**par);
-    }
-
-    num_CPUs_ = 1;
-    do_lifetime_fit_ = false;
-    do_mixing_fit_ = false;
-    make_plots_ = false;
-    perfect_tagging_ = false;
-
-    vrzerr_ = NULL;
-    vtzerr_ = NULL;
-}
-
-FitterCPV::~FitterCPV() {
-    if (output_file_) {
-        if (output_file_->IsOpen()) {
-            output_file_->Close();
-        }
     }
 }
 
@@ -1223,7 +1232,22 @@ void FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     json_config.Write();
 
     if (config.HasMember("fitRanges")) {
-        dataset_ = ReduceDataToFitRange(config);
+        ChangeFitRanges(config);
+        // dataset_ = ReduceDataToFitRange(config);
+    }
+}
+
+void FitterCPV::ChangeFitRanges(const rapidjson::Document& config) {
+    for (auto var : dataset_vars_) {
+        const char* var_name = (**var).GetName();
+        if (config["fitRanges"].HasMember(var_name)) {
+            if (config["fitRanges"][var_name].HasMember("min")) {
+                (**var).setMin(config["fitRanges"][var_name]["min"].GetDouble());
+            }
+            if (config["fitRanges"][var_name].HasMember("max")) {
+                (**var).setMax(config["fitRanges"][var_name]["max"].GetDouble());
+            }
+        }
     }
 }
 

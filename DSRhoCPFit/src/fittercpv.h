@@ -159,6 +159,8 @@ class FitterCPV {
     RooCategory* decaytype_;
 
    private:
+    void PrepareVarArgsets();
+    void ChangeFitRanges(const rapidjson::Document& config);
     TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
                              const bool position_left) const;
     TString GetCommonCutsString() const;

@@ -82,20 +82,17 @@ int main(int argc, char* argv[]) {
     output_filename += ".root";
     fitter.SetOutputFile(output_filename.c_str());
 
+    if (options.config_file_set) {
+        rapidjson::Document config = FitterCPV::ReadJSONConfig(options.config_file);
+        fitter.ApplyJSONConfig(config);
+    }
+
     if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
 
     if (options.num_events_set) {
         fitter.ReadInFile(file_names, options.num_events);
     } else {
         fitter.ReadInFile(file_names);
-    }
-
-    // Config from file is applied first, so that it can be overriden by CLI
-    // switches. However, ReadInFile() has to be called first, as some parts of
-    // a config need the data to be present.
-    if (options.config_file_set) {
-        rapidjson::Document config = FitterCPV::ReadJSONConfig(options.config_file);
-        fitter.ApplyJSONConfig(config);
     }
 
     if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);

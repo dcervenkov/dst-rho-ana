@@ -15,6 +15,7 @@
 #include <boost/filesystem.hpp>
 #include <ctime>
 #include <fstream>
+#include <regex>
 #include <sstream>
 #include <string>
 
@@ -1814,9 +1815,22 @@ void FitterCPV::SetPlotDir(const char* plot_dir) {
 
 /**
  * Fix requested parameters.
+ *
+ * Pars can be composed of a comma separated list of parameter names and/or the
+ * following short-hand keywords which are expanded: all, xy, trans, nota0.
  */
 bool FitterCPV::FixParameters(const char* pars) {
     std::string input = pars;
+
+    // These are helper short-hand options to save some typing
+    input = std::regex_replace(input, std::regex("all"),
+                               "ap,apa,a0,ata,xp,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb");
+    input = std::regex_replace(input, std::regex("xy"),
+                               "xp,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb");
+    input = std::regex_replace(input, std::regex("trans"), "ap,apa,a0,ata");
+    input = std::regex_replace(input, std::regex("nota0"),
+                               "ap,apa,ata,xp,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb");
+
     std::istringstream ss(input);
     std::string token;
     std::vector<std::string> par_vector;

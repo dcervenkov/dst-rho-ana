@@ -263,7 +263,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
                 printf("-e, --efficiency-model=MODEL_NUM number of the efficiency model to be used\n");
                 printf("-f, --fit=CR|CRSCF|all           do a specified fit type\n");
-                printf("-g, --config=CONFIG_FILE         read in configuration from the specified file");
+                printf("-g, --config=CONFIG_FILE         read in configuration from the specified file\n");
                 printf("-h, --help                       display this text and exit\n");
                 printf("-i, --time-independent           make a time-independent fit\n");
                 printf("-l, --log                        save copy of log to results file\n");
@@ -271,7 +271,8 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-n, --events=NUM_EVENTS          number of events to be imported from the input file\n");
                 printf("-p, --plot-dir=PLOT_DIR          create lifetime/mixing plots\n");
                 printf("-t, --perfect-tag                use MC info to get perfect tagging\n");
-                printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit\n");
+                printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit;\n");
+                printf("                                 additional short-hand ARGs are: all, xy, trans and nota0\n");
                 exit(0);
                 break;
             default:

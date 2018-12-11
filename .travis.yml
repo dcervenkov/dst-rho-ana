@@ -13,7 +13,7 @@ addons:
 before_install:
   - mkdir $HOME/downloads && cd $HOME/downloads
   # Download Belle libraries
-  - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/belle-b20091203-2126_11061-2_amd64.deb
+  - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/belle-b20091203-2126_181211_amd64.deb
   - wget http://www-ucjf.troja.mff.cuni.cz/~cervenkov/belle_packages/belle-cernlib2006_2006-9_amd64.deb
 
   # Download patches (the deb packages contain old library versions)

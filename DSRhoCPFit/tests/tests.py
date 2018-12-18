@@ -33,14 +33,15 @@ def run_test(name, config):
     with open("current_result", "r") as f:
         current_result = f.readline()
 
-    os.remove("current_result")
-    os.remove("current_result.root")
-
     if return_code == 0 and reference_result == current_result:
         print("The result matches the reference result.")
+        os.remove("current_result")
+        os.remove("current_result.root")
         return 0, name
     else:
         print("The result does NOT match the reference result!")
+        os.rename("current_result", name + ".result")
+        os.rename("current_result.root", name + ".result.root")
         return 1, name
 
 
@@ -73,7 +74,7 @@ print_results_table(test_results)
 
 
 # Return code for Travis automation
-if any([x[0] for x in test_results]):
+if any([result[0] for result in test_results]):
     sys.exit(1)
 else:
     sys.exit(0)

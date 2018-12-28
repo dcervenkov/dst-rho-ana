@@ -16,10 +16,10 @@ def setup_plot_style():
     ROOT.gROOT.ProcessLine("colors::setColors()")
     ROOT.gROOT.ProcessLine(".L src/tools.cc")
     ROOT.gROOT.ProcessLine("tools::SetupPlotStyle()")
-    ROOT.gStyle.SetOptStat(0)
+    # ROOT.gStyle.SetOptStat(0)
 
 
-def create_legend(plot_data):
+def create_legend(plot_data, canvas):
     """Create a legend based on labels in plot_data"""
     # Default legend placement is top right
     x_min = 0.75
@@ -61,11 +61,14 @@ def create_legend(plot_data):
 
     # Color changes must be done after Draw() because of ROOT
     num_histos_found = 0
-    for i in range(len(ROOT.gPad.GetListOfPrimitives())):
+    for i in range(len(canvas.GetListOfPrimitives())):
         # Not all objects in the list are the ones we are looking for
-        if ROOT.gPad.GetListOfPrimitives().At(i).GetName() == 'htemp':
-            legend.AddEntry(ROOT.gPad.GetListOfPrimitives().At(i),
-                            plot_data['elements'][num_histos_found]['label'], "L")
+        if canvas.GetListOfPrimitives().At(i).GetName() == 'htemp':
+            # This allows plot elements without labels. Useful when plotting a
+            # single element.
+            if 'label' in plot_data['elements'][num_histos_found]:
+                legend.AddEntry(canvas.GetListOfPrimitives().At(i),
+                                plot_data['elements'][num_histos_found]['label'], "L")
             num_histos_found += 1
 
     return legend
@@ -96,6 +99,8 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
     if 'files' in plot_data:
         for root_file in plot_data['files']:
             tree.Add(root_file)
+    else:
+        raise Exception("No 'files' array in '{}' plot data".format(plot_data['fileName']))
 
     canvas_width = 500
     canvas_height = 500
@@ -115,17 +120,18 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
 
         draw_element(tree, element, plot_data, same_opt)
 
-    histograms = get_histograms()
+
+    histograms = get_histograms(canvas)
 
     # 2D plots don't need legends as there is only a single element and it
     # would look bad
     if ':' not in plot_data['formula']:
         change_line_colors(plot_data, histograms)
-        set_optimal_histogram_range(histograms)
-        legend = create_legend(plot_data)
+        set_optimal_histogram_yrange(histograms)
+        legend = create_legend(plot_data, canvas)
         legend.Draw()
 
-    histo = ROOT.gPad.GetPrimitive("htemp")
+    histo = canvas.GetPrimitive("htemp")
     set_histogram_titles(histo, plot_data)
 
     output_file.cd()
@@ -143,20 +149,20 @@ def change_line_colors(plot_data, histograms):
         histo.SetLineColor(plot_data['elements'][i]['color'])
 
 
-def set_optimal_histogram_range(histograms):
+def set_optimal_histogram_yrange(histograms):
     """Set an optimal histogram Y axis range"""
     max_value = max([histo.GetMaximum() for histo in histograms])
     for histo in histograms:
         histo.GetYaxis().SetRangeUser(0, max_value * 1.05)
 
 
-def get_histograms():
+def get_histograms(canvas):
     """Return a list of all current histograms (htemp(s))"""
     histograms = []
-    for i in range(ROOT.gPad.GetListOfPrimitives().GetEntries()):
+    for i in range(canvas.GetListOfPrimitives().GetEntries()):
         # There are other things than histos in the list
-        if ROOT.gPad.GetListOfPrimitives().At(i).GetName() == 'htemp':
-            histograms.append(ROOT.gPad.GetListOfPrimitives().At(i))
+        if canvas.GetListOfPrimitives().At(i).GetName() == 'htemp':
+            histograms.append(canvas.GetListOfPrimitives().At(i))
 
     return histograms
 

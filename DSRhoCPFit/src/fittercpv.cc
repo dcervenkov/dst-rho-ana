@@ -271,6 +271,34 @@ void FitterCPV::PlotVar(RooRealVar& var, const RooAbsData& data) const {
     canvas->SaveAs(constants::format);
 }
 
+/**
+ * Make a simple plot of a variable and save it to a file
+ * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
+ */
+void FitterCPV::PlotVar(RooRealVar& var, const RooAbsPdf& pdf) const {
+    TString name = pdf.GetName();
+    name += "_";
+    name += var.GetName();
+    TCanvas canvas(name, name, 500, 500);
+
+    RooPlot* plot = var.frame();
+
+    // From RooFit manual: "No variables are projected by default when PDF is
+    // plotted on an empty frame" One has to be careful to explicitly project
+    // over intended variables in this case, otherwise they are only slices.
+    plot->updateNormVars(dataset_vars_argset_);
+
+    pdf.plotOn(plot);
+    plot->Draw();
+
+    plot->SetTitle("");
+    plot->GetXaxis()->SetTitle(TString(var.GetTitle()));
+    plot->GetYaxis()->SetTitle("");
+
+    canvas.Write();
+    canvas.SaveAs(constants::format);
+}
+
 // TODO: Remove/refactor
 void FitterCPV::FitCR() {
     RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
@@ -829,6 +857,10 @@ void FitterCPV::FitAngularCR() {
         PlotWithPull(*thetab_, *dataset_, cr_histpdf);
         PlotWithPull(*phit_, *dataset_, cr_histpdf);
 
+        PlotVar(*thetat_, pdf_B);
+        PlotVar(*thetab_, pdf_B);
+        PlotVar(*phit_, pdf_B);
+
         // We need this to get the exact number of events to be generated for
         // the PDF distribution. This is unnecessary for the above, because we
         // create a RooHistPdf from it and that is normalized to the data when
@@ -864,6 +896,10 @@ void FitterCPV::FitAngularCR() {
         tools::PlotPull2D(*thetat_, *thetab_, hist, *cr_hist);
         tools::PlotPull2D(*thetat_, *phit_, hist, *cr_hist);
         tools::PlotPull2D(*thetab_, *phit_, hist, *cr_hist);
+
+        tools::PlotVars2D(*thetat_, *thetab_, *cr_hist);
+        tools::PlotVars2D(*thetat_, *phit_, *cr_hist);
+        tools::PlotVars2D(*thetab_, *phit_, *cr_hist);
 
         const double chi2 = Calculate3DChi2(hist, *cr_hist);
         printf("Chi2 = %f\n", chi2);

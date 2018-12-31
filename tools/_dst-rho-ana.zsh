@@ -8,7 +8,20 @@
 
 _dsrhocpfit_complete()
 {
-	_arguments '--cpus=[number of CPU cores to use for fitting and plotting]' '--efficiency-model=[number of the efficiency model to be used]:model:->effmodel' '--fit=[do a specified fit type]:type:->fittype' '--config=[read in configuration from the specified file]:filename:->jsonfiles''--help[display help]' '--time-independent[make a time-independent fit]' '--log[save copy of log to results file]' '--mixing[make a mixing fit]' '--events=[number of events to be imported from the input file]' '--plot-dir=[create lifetime/mixing plots]:directory:_files' '--perfect-tag[use MC info to get perfect tagging]' '--fix=[fix specified argument(s) to input values in the fit]:parameter:->parameters'
+	_arguments \
+	'--cpus=[number of CPU cores to use for fitting and plotting]' \
+	'--efficiency-model=[number of the efficiency model to be used]:model:->effmodel' \
+	'--fit=[do a specified fit type]:type:->fittype' \
+	'--config=[read in configuration from the specified file]:filename:->jsonfiles' \
+	'--help[display help]' \
+	'--time-independent[make a time-independent fit]' \
+	'--log[save copy of log to results file]' \
+	'--mixing[make a mixing fit]' \
+	'--events=[number of events to be imported from the input file]' \
+	'--plot-dir=[create lifetime/mixing plots]:directory:_files' \
+	'--perfect-tag[use MC info to get perfect tagging]' \
+	'--fix=[fix specified argument(s) to input values in the fit]:parameter:->parameters'
+
 	case "$state" in
 		effmodel)
 			_values -s ' ' 'model' 0 1 2 3 4 5 6

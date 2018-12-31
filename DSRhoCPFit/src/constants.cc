@@ -46,15 +46,12 @@ const int btype = 0;
 const double dm = 0.507;     // [ps^-1]
 const double tau = 1.53439;  // [ps]
 
-const double fit_range_dt_low = -10;  // [ps]
-const double fit_range_dt_high = 10;  // [ps]
-
 const double c = 0.0299792458;  // [cm/ps]
 
 namespace cuts {
 
-const double dt_low = -20;  // [ps]
-const double dt_high = 20;  // [ps]
+const double dt_low = -10;  // [ps]
+const double dt_high = 10;  // [ps]
 
 const double thetab_low = 0.5;    // [rad]
 const double thetab_high = 2.95;  // [rad]

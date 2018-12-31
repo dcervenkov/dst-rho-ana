@@ -93,7 +93,7 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     y0b_ = new RooRealVar("y0b", "#bar y_{0}", par_input[14], -0.4, 0.4);
     ytb_ = new RooRealVar("ytb", "#bar y_{#perp}", par_input[15], -0.4, 0.4);
 
-    dt_ = new RooRealVar("dt", "dt", constants::fit_range_dt_low, constants::fit_range_dt_high);
+    dt_ = new RooRealVar("dt", "#Deltat [ps]", constants::cuts::dt_low, constants::cuts::dt_high);
     thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", 0, TMath::Pi());
     thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high);
     // thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", 0, TMath::Pi());

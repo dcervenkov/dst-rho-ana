@@ -24,8 +24,6 @@ extern const char format[];
 extern const int btype;
 extern const double dm;
 extern const double tau;
-extern const double fit_range_dt_low;
-extern const double fit_range_dt_high;
 extern const double c;
 
 namespace cuts {

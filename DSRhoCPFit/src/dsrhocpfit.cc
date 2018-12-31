@@ -258,7 +258,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.perfect_tagging_set = true;
                 break;
             case 'h':
-                printf("Usage: %s [OPTION]... INPUT-FILE OUTPUT_DIR\n\n", argv[0]);
+                printf("Usage: %s [OPTION]... RESULTS-FILE INPUT-FILES\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
                 printf("-e, --efficiency-model=MODEL_NUM number of the efficiency model to be used\n");

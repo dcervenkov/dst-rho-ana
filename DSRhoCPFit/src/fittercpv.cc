@@ -853,10 +853,12 @@ void FitterCPV::FitAngularCR() {
         // SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
         // SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
 
+        // Plot data with PDF averaged over B and Bbar (just like in a standard dataset)
         PlotWithPull(*thetat_, *dataset_, cr_histpdf);
         PlotWithPull(*thetab_, *dataset_, cr_histpdf);
         PlotWithPull(*phit_, *dataset_, cr_histpdf);
 
+        // Plot 1D PDF (just for a B not Bbar) projections
         PlotVar(*thetat_, pdf_B);
         PlotVar(*thetab_, pdf_B);
         PlotVar(*phit_, pdf_B);

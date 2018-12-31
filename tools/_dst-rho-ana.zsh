@@ -20,7 +20,9 @@ _dsrhocpfit_complete()
 	'--events=[number of events to be imported from the input file]' \
 	'--plot-dir=[create lifetime/mixing plots]:directory:_files' \
 	'--perfect-tag[use MC info to get perfect tagging]' \
-	'--fix=[fix specified argument(s) to input values in the fit]:parameter:->parameters'
+	'--fix=[fix specified argument(s) to input values in the fit]:parameter:->parameters' \
+	'1:result file:_files' \
+	'*:input files:_files'
 
 	case "$state" in
 		effmodel)

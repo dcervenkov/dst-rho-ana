@@ -14,7 +14,7 @@
 
 //ClassImp(AngularPDF)
 
-AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _efficiency_model,
+AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _efficiency_model, const char* _efficiency_file,
                    RooAbsReal& _tht,
                    RooAbsReal& _thb,
                    RooAbsReal& _phit,
@@ -31,7 +31,8 @@ AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _ef
     a0("a0","a0",this,_a0),
     ata("ata","ata",this,_ata),
     B_bar(_B_bar),
-    efficiency_model(_efficiency_model)
+    efficiency_model(_efficiency_model),
+    eff(_efficiency_file)
 {
     // The rest of this constructor computes angular integration
     // of certain terms of the PDF. This is used to speed up
@@ -73,7 +74,8 @@ AngularPDF::AngularPDF(const AngularPDF& other, const char* name) :
     a0("a0",this,other.a0),
     ata("ata",this,other.ata),
     B_bar(other.B_bar),
-    efficiency_model(other.efficiency_model)
+    efficiency_model(other.efficiency_model),
+    eff(other.eff)
 {
     for (int i = 0; i < 6; i++) {
         int_tht_thb_phit[i] = other.int_tht_thb_phit[i];

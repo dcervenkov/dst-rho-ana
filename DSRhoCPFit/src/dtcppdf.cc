@@ -26,7 +26,7 @@
 Double_t DtCPPDF::int_tht_thb_phit[6];
 bool DtCPPDF::efficiency_integrals_ready = false;
 
-DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_favored, bool _perfect_tagging, int _efficiency_model,
+DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_favored, bool _perfect_tagging, int _efficiency_model, const char* _efficiency_file,
         RooAbsReal& _tht,
         RooAbsReal& _thb,
         RooAbsReal& _phit,
@@ -94,6 +94,7 @@ DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_fav
             vtistagl("vtistagl","vtistagl",this,_vtistagl),
 
             efficiency_model(_efficiency_model),
+            eff(_efficiency_file),
             mixing(true),
             B_bar(_B_bar),
             CKM_favored(_CKM_favored),
@@ -102,7 +103,6 @@ DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_fav
     // The rest of this constructor computes angular integrals
     // of certain terms of the PDF. This is used to speed up
     // computation of normalization; see DtCPPDF::analyticalIntegral
-
     if (efficiency_integrals_ready == false) {
         ROOT::Math::Functor wf1(this, &DtCPPDF::f1, 3);
         ROOT::Math::Functor wf2(this, &DtCPPDF::f2, 3);
@@ -213,6 +213,7 @@ DtCPPDF::DtCPPDF(const DtCPPDF& other, const char* name) :
             vtistagl("vtistagl",this,other.vtistagl),
 
             efficiency_model(other.efficiency_model),
+            eff(other.eff),
             mixing(other.mixing),
             B_bar(other.B_bar),
             CKM_favored(other.CKM_favored),

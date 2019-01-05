@@ -25,6 +25,8 @@ struct fitter_options {
     bool num_events_set;
     bool perfect_tagging;
     bool perfect_tagging_set;
+    char* efficiency_file;
+    bool efficiency_file_set;
     int efficiency_model;
     bool efficiency_model_set;
     char* fit;

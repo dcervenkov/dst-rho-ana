@@ -10,9 +10,10 @@ _dsrhocpfit_complete()
 {
 	_arguments \
 	'--cpus=[number of CPU cores to use for fitting and plotting]' \
+	'--efficiency-file=[file from which to read in efficiency histogram]:filename:_files' \
 	'--efficiency-model=[number of the efficiency model to be used]:model:->effmodel' \
 	'--fit=[do a specified fit type]:type:->fittype' \
-	'--config=[read in configuration from the specified file]:filename:->jsonfiles' \
+	'--config=[read in configuration from the specified file]:filename:_files' \
 	'--help[display help]' \
 	'--time-independent[make a time-independent fit]' \
 	'--log[save copy of log to results file]' \
@@ -35,6 +36,11 @@ _dsrhocpfit_complete()
 			local -a json_files
 			json_files=(*.json)
 			_multi_parts / json_files
+			;;
+		rootfiles)
+			local -a root_files
+			root_files=(*.root)
+			_multi_parts / root_files
 			;;
 		parameters)
 			_values -s ',' 'parameters' all xy trans nota0 ap apa a0 ata xp x0 xt yp y0 yt xpb x0b xtb ypb y0b ytb

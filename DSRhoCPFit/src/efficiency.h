@@ -31,6 +31,7 @@
 class Efficiency {
 public:
 	Efficiency();
+	Efficiency(const char* filename);
 	virtual ~Efficiency();
 	double GetEfficiency(double thetat, double thetab, double phit, int efficiency_model) const;
 	double EfficiencyInterface(double* x, double* p) const;

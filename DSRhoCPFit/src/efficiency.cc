@@ -14,9 +14,12 @@
 #include "TFile.h"
 
 Efficiency::Efficiency() {
+}
+
+Efficiency::Efficiency(const char* filename) {
     binned_efficiency = new BinnedDensity("binned_efficiency", &phasespace, "efficiency");
 
-    TFile efficiency_file("efficiency.root", "read");
+    TFile efficiency_file(filename, "read");
     histo_efficiency = (TH3F*)efficiency_file.Get("eff_histo");
     histo_efficiency->SetDirectory(0);
     efficiency_file.Close();

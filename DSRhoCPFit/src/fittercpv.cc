@@ -304,25 +304,25 @@ void FitterCPV::FitCR() {
     RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
     dataset_ = temp_dataset;
 
-    DtCPPDF cr_pdf_a("cr_pdf_a", "cr_pdf_a", false, true, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_a("cr_pdf_a", "cr_pdf_a", false, true, perfect_tagging_, efficiency_model_, efficiency_file_,
                      *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_,
                      *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
                      *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
                      *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_ab("cr_pdf_ab", "cr_pdf_ab", true, true, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_ab("cr_pdf_ab", "cr_pdf_ab", true, true, perfect_tagging_, efficiency_model_, efficiency_file_,
                       *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_,
                       *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
                       *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
                       *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_b("cr_pdf_b", "cr_pdf_b", false, false, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_b("cr_pdf_b", "cr_pdf_b", false, false, perfect_tagging_, efficiency_model_, efficiency_file_,
                      *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_,
                      *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
                      *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
                      *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_bb("cr_pdf_bb", "cr_pdf_bb", true, false, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_bb("cr_pdf_bb", "cr_pdf_bb", true, false, perfect_tagging_, efficiency_model_, efficiency_file_,
                       *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_,
                       *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
                       *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
@@ -381,25 +381,25 @@ void FitterCPV::FitCRSCF() {
     // RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag!=1"));
     // dataset_ = temp_dataset;
 
-    DtCPPDF cr_pdf_a("cr_pdf_a", "cr_pdf_a", false, true, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_a("cr_pdf_a", "cr_pdf_a", false, true, perfect_tagging_, efficiency_model_, efficiency_file_,
                      *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_,
                      *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
                      *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
                      *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_ab("cr_pdf_ab", "cr_pdf_ab", true, true, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_ab("cr_pdf_ab", "cr_pdf_ab", true, true, perfect_tagging_, efficiency_model_, efficiency_file_,
                       *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_,
                       *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
                       *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
                       *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_b("cr_pdf_b", "cr_pdf_b", false, false, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_b("cr_pdf_b", "cr_pdf_b", false, false, perfect_tagging_, efficiency_model_, efficiency_file_,
                      *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_,
                      *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
                      *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
                      *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_bb("cr_pdf_bb", "cr_pdf_bb", true, false, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_bb("cr_pdf_bb", "cr_pdf_bb", true, false, perfect_tagging_, efficiency_model_, efficiency_file_,
                       *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_,
                       *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
                       *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
@@ -549,25 +549,25 @@ void FitterCPV::FitCRSCF() {
 }
 
 void FitterCPV::FitAll() {
-    DtCPPDF cr_pdf_a("cr_pdf_a", "cr_pdf_a", false, true, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_a("cr_pdf_a", "cr_pdf_a", false, true, perfect_tagging_, efficiency_model_, efficiency_file_,
                      *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_,
                      *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
                      *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
                      *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_ab("cr_pdf_ab", "cr_pdf_ab", true, true, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_ab("cr_pdf_ab", "cr_pdf_ab", true, true, perfect_tagging_, efficiency_model_, efficiency_file_,
                       *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_,
                       *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
                       *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
                       *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_b("cr_pdf_b", "cr_pdf_b", false, false, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_b("cr_pdf_b", "cr_pdf_b", false, false, perfect_tagging_, efficiency_model_, efficiency_file_,
                      *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_,
                      *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
                      *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
                      *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF cr_pdf_bb("cr_pdf_bb", "cr_pdf_bb", true, false, perfect_tagging_, efficiency_model_,
+    DtCPPDF cr_pdf_bb("cr_pdf_bb", "cr_pdf_bb", true, false, perfect_tagging_, efficiency_model_, efficiency_file_,
                       *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_,
                       *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
                       *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
@@ -801,9 +801,9 @@ void FitterCPV::FitAngularCR() {
 
     Log::print(Log::debug, "DC: Fitting %i events.\n", dataset_->numEntries());
 
-    AngularPDF pdf_B("pdf_B", "pdf_B", false, efficiency_model_, *thetat_, *thetab_, *phit_, *ap_,
+    AngularPDF pdf_B("pdf_B", "pdf_B", false, efficiency_model_, efficiency_file_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
-    AngularPDF pdf_B_bar("pdf_B_bar", "pdf_B_bar", true, efficiency_model_, *thetat_, *thetab_,
+    AngularPDF pdf_B_bar("pdf_B_bar", "pdf_B_bar", true, efficiency_model_, efficiency_file_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
@@ -923,9 +923,9 @@ void FitterCPV::FitAngularCR() {
 void FitterCPV::FitAngularCRSCF() {
     Log::print(Log::info, "DC: Fitting %i events.\n", dataset_->numEntries());
 
-    AngularPDF cr_pdf_B("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, *thetat_, *thetab_, *phit_, *ap_,
+    AngularPDF cr_pdf_B("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_file_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
-    AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, *thetat_, *thetab_,
+    AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_file_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
     RooAbsPdf* scf_pdf = CreateAngularSCFPDF();
@@ -1058,9 +1058,9 @@ void FitterCPV::FitAngularCRSCF() {
 void FitterCPV::FitAngularAll() {
     Log::print(Log::info, "DC: Fitting %i events.\n", dataset_->numEntries());
 
-    AngularPDF cr_pdf_B("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, *thetat_, *thetab_, *phit_, *ap_,
+    AngularPDF cr_pdf_B("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_file_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
-    AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, *thetat_, *thetab_,
+    AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_file_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
     RooAbsPdf* scf_pdf = CreateAngularSCFPDF();
@@ -1396,25 +1396,25 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     RooRealVar ytb("ytb", "ytb", par_input[15], -0.2, 0.2);
 
     DtCPPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_,
-                         efficiency_model_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xp, x0,
+                         efficiency_model_, efficiency_file_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xp, x0,
                          xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
                          *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
                          *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_ab("mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_,
-                          efficiency_model_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xpb, x0b,
+                          efficiency_model_, efficiency_file_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xpb, x0b,
                           xtb, ypb, y0b, ytb, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
                           *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_,
                           *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_b("mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_,
-                         efficiency_model_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xp, x0,
+                         efficiency_model_, efficiency_file_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xp, x0,
                          xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
                          *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
                          *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_bb("mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_,
-                          efficiency_model_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xpb, x0b,
+                          efficiency_model_, efficiency_file_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xpb, x0b,
                           xtb, ypb, y0b, ytb, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
                           *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_,
                           *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);

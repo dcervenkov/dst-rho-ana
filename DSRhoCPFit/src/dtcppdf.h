@@ -48,7 +48,7 @@ public:
             RooAbsReal& _vtndf,
             RooAbsReal& _vtistagl);
 
-    DtCPPDF(const char *name, const char *title, bool B_bar, bool CKM_favored, bool perfect_tagging, const int efficiency_model,
+    DtCPPDF(const char *name, const char *title, bool B_bar, bool CKM_favored, bool perfect_tagging, const int efficiency_model, const char* efficiency_file,
             RooAbsReal& _tht,
             RooAbsReal& _thb,
             RooAbsReal& _phit,
@@ -135,12 +135,12 @@ protected:
                                  const double& sin) const;
 
     int efficiency_model;
+    Efficiency eff;
     bool mixing;
     bool B_bar;
     bool CKM_favored;
     bool perfect_tagging;
 
-    Efficiency eff;
 
     // Angular terms from PDF x Efficiency
     Double_t f1 (const double * vars);

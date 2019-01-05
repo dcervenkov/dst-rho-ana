@@ -101,6 +101,11 @@ int main(int argc, char* argv[]) {
     } else {
         fitter.SetEfficiencyModel(1);
     }
+    if (options.efficiency_file_set) {
+        fitter.SetEfficiencyFile(options.efficiency_file);
+    } else {
+        fitter.SetEfficiencyFile("efficiency.root");
+    }
     if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
     if (options.do_mixing_fit_set) fitter.SetDoMixingFit(options.do_mixing_fit);
     if (options.do_time_independent_fit_set) {
@@ -194,6 +199,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     struct option long_options[] = {
         {"cpus", required_argument, 0, 'c'},
         {"config", required_argument, 0, 'g'},
+        {"efficiency-file", required_argument, 0, 'y'},
         {"efficiency-model", required_argument, 0, 'e'},
         {"events", required_argument, 0, 'n'},
         {"fit", required_argument, 0, 'f'},
@@ -206,7 +212,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"help", no_argument, 0, 'h'},
         {NULL, no_argument, NULL, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:e:n:f:x:p:lmith", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:g:y:e:n:f:x:p:lmith", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -224,6 +230,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'e':
                 options.efficiency_model = atoi(optarg);
                 options.efficiency_model_set = true;
+                break;
+            case 'y':
+                options.efficiency_file = optarg;
+                options.efficiency_file_set = true;
                 break;
             case 'n':
                 options.num_events = atoi(optarg);
@@ -261,18 +271,19 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("Usage: %s [OPTION]... RESULTS-FILE INPUT-FILES\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
-                printf("-e, --efficiency-model=MODEL_NUM number of the efficiency model to be used\n");
+                printf("-e, --efficiency-model=MODEL-NUM number of the efficiency model to be used\n");
                 printf("-f, --fit=CR|CRSCF|all           do a specified fit type\n");
-                printf("-g, --config=CONFIG_FILE         read in configuration from the specified file\n");
+                printf("-g, --config=CONFIG-FILE         read in configuration from the specified file\n");
                 printf("-h, --help                       display this text and exit\n");
                 printf("-i, --time-independent           make a time-independent fit\n");
                 printf("-l, --log                        save copy of log to results file\n");
                 printf("-m, --mixing                     make a mixing fit\n");
-                printf("-n, --events=NUM_EVENTS          number of events to be imported from the input file\n");
-                printf("-p, --plot-dir=PLOT_DIR          create lifetime/mixing plots\n");
+                printf("-n, --events=NUM-EVENTS          number of events to be imported from the input file\n");
+                printf("-p, --plot-dir=PLOT-DIR          create lifetime/mixing plots\n");
                 printf("-t, --perfect-tag                use MC info to get perfect tagging\n");
                 printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit;\n");
                 printf("                                 additional short-hand ARGs are: all, xy, trans and nota0\n");
+                printf("-y, --efficiency-file=ROOT-FILE  file from which to read in efficiency histogram\n");
                 exit(0);
                 break;
             default:

@@ -24,6 +24,7 @@
 #include "RooPlot.h"
 #include "RooProdPdf.h"
 #include "RooRealVar.h"
+#include "RooTreeDataStore.h"
 #include "TAxis.h"
 #include "TCanvas.h"
 #include "TEfficiency.h"
@@ -1206,8 +1207,11 @@ TH3F* Fitter::GetKDEHisto(RooDataSet* dataset, const std::array<double, 6> bin_k
                                   &phasespace_phit);
     
     // This line needs to be here to make the new dataset have TTree as a storage backend
+    RooAbsData::setDefaultStorageType(RooAbsData::Tree);
     RooDataSet* dataset_with_tree = new RooDataSet("dataset_with_tree", "dataset_with_tree", dataset, *dataset->get()); 
-    TTree* double_tree = (TTree*)dataset_with_tree->tree();
+    // TTree* double_tree = (TTree*)((RooTreeDataStore*)dataset_with_tree->store())->tree();
+    RooAbsDataStore* ds = dataset_with_tree->store();
+    TTree* double_tree = const_cast<TTree*>(ds->tree());
 
     // KernelDensity takes float TTrees not double TTrees
     TTree* tree = DoubleTreeToFloatTree(double_tree);

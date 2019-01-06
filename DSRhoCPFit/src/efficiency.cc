@@ -10,6 +10,9 @@
 
 #include "efficiency.h"
 
+// Boost includes
+#include <boost/algorithm/string/predicate.hpp>
+
 // ROOT includes
 #include "TFile.h"
 
@@ -17,12 +20,14 @@ Efficiency::Efficiency() {
 }
 
 Efficiency::Efficiency(const char* filename) {
-    binned_efficiency = new BinnedDensity("binned_efficiency", &phasespace, "efficiency");
-
-    TFile efficiency_file(filename, "read");
-    histo_efficiency = (TH3F*)efficiency_file.Get("eff_histo");
-    histo_efficiency->SetDirectory(0);
-    efficiency_file.Close();
+    if (boost::algorithm::ends_with(filename, ".root")) {
+        TFile efficiency_file(filename, "read");
+        histo_efficiency = (TH3F*)efficiency_file.Get("eff_histo");
+        histo_efficiency->SetDirectory(0);
+        efficiency_file.Close();
+    } else {
+        binned_efficiency = new BinnedDensity("binned_efficiency", &phasespace, "efficiency");
+    }
 }
 
 Efficiency::~Efficiency() {
@@ -51,6 +56,7 @@ double Efficiency::GetEfficiency(double thetat, double thetab, double phit,
         case 4:
             return GetModel4Efficiency();
         case 5: {
+            assert(binned_efficiency != NULL);
             std::vector<Double_t> coords(3);
             coords[0] = thetat;
             coords[1] = thetab;
@@ -65,6 +71,7 @@ double Efficiency::GetEfficiency(double thetat, double thetab, double phit,
             return eff;
         }
         case 6:
+            assert(histo_efficiency != NULL);
             double eff = 0;
             // double transtht = thetat / TMath::Pi() * 2 - 1;
             // double transthb = thetab / TMath::Pi() * 2 - 1;

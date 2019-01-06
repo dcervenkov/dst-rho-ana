@@ -122,9 +122,9 @@ protected:
     OneDimPhaseSpace phasespace_phit{"phasespace_phit", phit_->getMin(), phit_->getMax()};
     CombinedPhaseSpace phasespace{"phasespace", &phasespace_thetat, &phasespace_thetab,
                                   &phasespace_phit};
-	BinnedDensity* binned_efficiency;
+	BinnedDensity* binned_efficiency = NULL;
 
-	TH3F* histo_efficiency;
+	TH3F* histo_efficiency = NULL;
 	bool CanUseInterpolation(const double& phit, const double& transtht, const double& transthb) const;
 	
 };

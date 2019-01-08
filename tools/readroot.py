@@ -18,12 +18,15 @@ from contextlib import contextmanager
 def decode_arguments():
     """Decode CLI arguments"""
     parser = argparse.ArgumentParser()
-    parser.add_argument("file", metavar='ROOT-FILE', nargs='+')
-    parser.add_argument("-n", "--name", type=str, action='append', default=['pull_table'],
+    parser.add_argument('files', metavar='FILE', nargs='+')
+    parser.add_argument("-n", "--name", type=str, action='append',
                         help="name of the object whose title to print (can be used multiple times)")
     args = parser.parse_args()
 
-    return args.file, args.name
+    if not args.name:
+        args.name = ['pull_table']
+
+    return args.files, args.name
 
 
 def root_print(filename, names):

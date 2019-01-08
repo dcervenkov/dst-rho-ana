@@ -126,7 +126,7 @@ protected:
 
 	TH3F* histo_efficiency = NULL;
 	bool CanUseInterpolation(const double& phit, const double& transtht, const double& transthb) const;
-	
+	int CloseToEdge(const std::vector<Double_t> vals, const double margin) const;
 };
 
 #endif /* EFFICIENCY_H_ */

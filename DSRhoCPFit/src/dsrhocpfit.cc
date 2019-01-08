@@ -155,8 +155,7 @@ int main(int argc, char* argv[]) {
     }
     fitter.LogText("efficiency_model", std::to_string(fitter.GetEfficiencyModel()).c_str());
     // TODO: This definitely shouldnt't be hardcoded
-    fitter.LogFileCRC("meerkat_efficiency_crc", "efficiency");
-    fitter.LogFileCRC("histo_efficiency_crc", "efficiency.root");
+    fitter.LogFileCRC("efficiency_crc", fitter.GetEfficiencyFile());
     if (fitter.ResultExists()) {
         fitter.LogResults();
         fitter.LogText("pull_table", fitter.CreatePullTableString().c_str());

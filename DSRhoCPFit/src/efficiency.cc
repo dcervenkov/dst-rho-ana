@@ -26,7 +26,7 @@ Efficiency::Efficiency(const char* filename) {
         histo_efficiency->SetDirectory(0);
         efficiency_file.Close();
     } else {
-        binned_efficiency = new BinnedDensity("binned_efficiency", &phasespace, "efficiency");
+        binned_efficiency = new BinnedDensity("binned_efficiency", &phasespace, filename);
     }
 }
 
@@ -64,8 +64,8 @@ double Efficiency::GetEfficiency(double thetat, double thetab, double phit,
             // printf("EFFDBG: model4 = %f, model5 = %f\n", GetModel4Efficiency(),
             // binned_efficiency->density(coords));
             double eff = binned_efficiency->density(coords);
-            if (eff == 0) {
-                eff = GetModel4Efficiency();
+            if (eff == 0 || CloseToEdge(coords, 0.05)) {
+                eff = GetModel3Efficiency();
             }
             // printf("Model 5: %f\n", eff);
             return eff;
@@ -146,4 +146,19 @@ void Efficiency::RescaleVars(double& thetat, double& thetab, double& phit, const
 	thetat = new_vars[0];
 	thetab = new_vars[1];
 	phit = new_vars[2];
+}
+
+int Efficiency::CloseToEdge(const std::vector<Double_t> vals, const double margin) const {
+    RooRealVar* vars[3] = {thetat_, thetab_, phit_};
+    for (int var_num = 0; var_num < 3; var_num++) {
+        const double min = vars[var_num]->getMin();
+        const double max = vars[var_num]->getMax();
+        const double range = max - min;
+        if (vals[var_num] < min + range * margin) {
+            return 1;
+        } else if (vals[var_num] > max - range * margin) {
+            return 2;
+        }
+    }
+    return 0;
 }

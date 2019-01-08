@@ -54,7 +54,7 @@ class Fitter {
     void ProcessNormalizedEfficiency(const char* efficiency_file);
     
     RooRealVar thetat_{"thetat", "#theta_{t} [rad]", 0, kPi};
-    RooRealVar thetab_{"thetab", "#theta_{b} [rad]", 0, kPi};
+    RooRealVar thetab_{"thetab", "#theta_{b} [rad]", 0.5, 2.95};
     RooRealVar phit_{"phit", "#phi_{t} [rad]", -kPi, kPi};
     RooRealVar dt_{"dt", "dt", -15, +15};
     RooCategory dec_type_{"dec_type", "dec_type"};

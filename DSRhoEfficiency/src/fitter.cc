@@ -772,16 +772,16 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
                                    "(x - 1.57)^2 * (y - 1.57)^2 * (z)^2");
 
     TH3F* eff_histo = GetBinned3DEfficiency();
-    // TTree* eff_tree = Histogram2TTree(eff_histo);
+    TTree* eff_tree = Histogram2TTree(eff_histo);
 
-    // BinnedKernelDensity bin_kde("BinKernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
-    //                             "weight", bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
-    //                             bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], 0);
+    BinnedKernelDensity bin_kde("BinKernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
+                                "weight", bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
+                                bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], 0);
 
-    // AdaptiveKernelDensity kde("KernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
-    //                           "weight", ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2],
-    //                           ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
-    // kde.writeToTextFile(efficiency_file);
+    AdaptiveKernelDensity kde("KernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
+                              "weight", ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2],
+                              ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
+    kde.writeToTextFile(efficiency_file);
 
     if (mirror_margin) {
         thetat_.setMin(0);
@@ -800,16 +800,16 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
         eff_histo = GetBinned3DEfficiency();
     }
 
-    TFile new_efficiency_file("efficiency.root", "read");
-    TH3F* trans_histo = (TH3F*)new_efficiency_file.Get("eff_histo");
-    trans_histo->SetDirectory(0);
-    new_efficiency_file.Close();
-    TH3F* binned_pdf = ConvertTransHisto(trans_histo);
+    // TFile new_efficiency_file("efficiency.root", "read");
+    // TH3F* trans_histo = (TH3F*)new_efficiency_file.Get("eff_histo");
+    // trans_histo->SetDirectory(0);
+    // new_efficiency_file.Close();
+    // TH3F* binned_pdf = ConvertTransHisto(trans_histo);
 
 
     TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
     TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
-    // TH3F* binned_pdf = ConvertDensityToHisto(kde);
+    TH3F* binned_pdf = ConvertDensityToHisto(kde);
     TH3F* simulated_histo = Create3DHisto(evtgen_dataset_);
     simulated_histo->Multiply(binned_pdf);
     simulated_histo->Scale(gsim_histo->GetSumOfWeights() / simulated_histo->GetSumOfWeights());

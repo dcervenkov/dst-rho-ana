@@ -6,6 +6,7 @@ objects. (The recommended way to store text in ROOT files is to create a TNamed
 object and store the text in its title member.)
 """
 
+from __future__ import print_function
 import argparse
 import rootpy
 import os
@@ -17,23 +18,31 @@ from contextlib import contextmanager
 def decode_arguments():
     """Decode CLI arguments"""
     parser = argparse.ArgumentParser()
-    parser.add_argument("root_file")
-    parser.add_argument("-n", "--name", type=str,
-                        help="name of the object whose title to print")
+    parser.add_argument("file", metavar='ROOT-FILE', nargs='+')
+    parser.add_argument("-n", "--name", type=str, action='append', default=['pull_table'],
+                        help="name of the object whose title to print (can be used multiple times)")
     args = parser.parse_args()
 
-    if not args.name:
-        args.name = 'pull_table'
-
-    return args.root_file, args.name
+    return args.file, args.name
 
 
-def root_print(filename, name):
+def root_print(filename, names):
     with root_open(filename, 'r') as root_file:
-        if name in root_file:
-            print(root_file[name].GetTitle())
-        else:
-            sys.exit(1)
+        for name in names:
+            if name in root_file:
+                value = root_file[name].GetTitle()
+            else:
+                print("ERROR: '" + name + "' not present in file '" + filename + "'", file=sys.stderr)
+                print("The following objects are present in the file:\n" + "\n".join([obj.GetName() for obj in root_file]), file=sys.stderr)
+                sys.exit(1)
+
+            if len(names) > 1:
+                if '\n' in value:
+                    print(name + ':')
+                else:
+                    print(name + ':', end=' ')
+
+            print(value)
 
 
 @contextmanager
@@ -66,15 +75,19 @@ def stdout_redirected(to=os.devnull):
                                             # CLOEXEC may be different
 
 def main():
-    filename, name = decode_arguments()
+    filenames, names = decode_arguments()
 
     # This crazy thing is in here to prevent RooFit from printing its intro
     # message, which can't be disabled (?!).
     with stdout_redirected():
         # Couldn't figure anything simpler to try to init RooFit. without other
         # side-effects as in the case of rootpy.ROOT.RooRealVar, etc.
-        root_print(filename, name)
+        root_print(filenames[0], names)
 
-    root_print(filename, name)
+    for filename in filenames:
+        if len(filenames) > 1:
+            print("=" * 40)
+            print(filename)
+        root_print(filename, names)
 
 main()

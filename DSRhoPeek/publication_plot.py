@@ -187,7 +187,12 @@ def draw_element(tree, element, plot_data, same_opt):
             tree.Add(root_file)
 
     cuts = get_cut_string(plot_data, element)
-    num_passing = tree.Draw(plot_data['formula'], cuts, same_opt)
+
+    formula = plot_data['formula']
+    if 'formula' in element:
+        formula = element['formula']
+
+    num_passing = tree.Draw(formula, cuts, same_opt)
     if num_passing == 0:
         print("WARNING: No events are passing the following cut: " + cuts)
 

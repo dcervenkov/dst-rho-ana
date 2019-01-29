@@ -169,7 +169,8 @@ class FitterCPV {
 
    private:
     void PrepareVarArgsets();
-    void ChangeFitRanges(const rapidjson::Document& config);
+    void ChangeFitRanges(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config);
+    void ChangeModelParameters(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config);
     TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
                              const bool position_left) const;
     TString GetCommonCutsString() const;
@@ -182,6 +183,10 @@ class FitterCPV {
 
     RooAbsPdf* CreateAngularSCFPDF();
     RooAbsPdf* CreateAngularBKGPDF();
+    RooAbsPdf* scf_angular_pdf_;
+    RooAbsPdf* bkg_angular_pdf_;
+    RooArgSet scf_parameters_argset_;
+    RooArgSet bkg_parameters_argset_;
 
     std::vector<RooRealVar**> conditional_vars_;
     std::vector<RooRealVar**> dataset_vars_;

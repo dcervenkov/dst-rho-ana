@@ -12,5 +12,25 @@
             "min": 0.5,
             "max": 2.95
         }
+    },
+    "modelParameters": {
+        "scf_phit_poly_p2": 0.856,
+        "scf_phit_f": 0.147,
+        "scf_phit_offset": 0.056,
+        "scf_thetat_f": -0.051,
+        "scf_thetab_gaus_mu": 2.885,
+        "scf_thetab_gaus_sigma_l": 0.411,
+        "scf_thetab_gaus_sigma_r": 0.094,
+        "scf_thetab_exp_alpha": -4.63,
+        "scf_thetab_f": 0.625,
+        "bkg_phit_poly_p2": 0.040,
+        "bkg_phit_f": 0.660,
+        "bkg_phit_offset": 0.103,
+        "bkg_thetat_f": -0.207,
+        "bkg_thetab_gaus_mu": 2.895,
+        "bkg_thetab_gaus_sigma_l": 0.902,
+        "bkg_thetab_gaus_sigma_r": 0.089,
+        "bkg_thetab_exp_alpha": -2.182,
+        "bkg_thetab_f": 0.661
     }
 }

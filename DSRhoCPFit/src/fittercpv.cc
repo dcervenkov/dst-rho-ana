@@ -175,6 +175,9 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
     par_input_ = par_input;
 
     PrepareVarArgsets();
+
+    scf_angular_pdf_ = CreateAngularSCFPDF();
+    bkg_angular_pdf_ = CreateAngularBKGPDF();
 }
 /**
  * Populate various vectors and argsets with all parameters
@@ -466,12 +469,10 @@ void FitterCPV::FitCRSCF() {
                                RooArgList(scf_dt_dcs_voigt, scf_dt_dcs_gaus),
                                RooArgList(scf_dt_dcs_f));
 
-    RooAbsPdf* scf_angular_pdf = CreateAngularSCFPDF();
-
-    RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a", RooArgList(scf_dt_cf_model, *scf_angular_pdf));
-    RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab", RooArgList(scf_dt_cf_model, *scf_angular_pdf));
-    RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b", RooArgList(scf_dt_dcs_model, *scf_angular_pdf));
-    RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb", RooArgList(scf_dt_dcs_model, *scf_angular_pdf));
+    RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a", RooArgList(scf_dt_cf_model, *scf_angular_pdf_));
+    RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab", RooArgList(scf_dt_cf_model, *scf_angular_pdf_));
+    RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b", RooArgList(scf_dt_dcs_model, *scf_angular_pdf_));
+    RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb", RooArgList(scf_dt_dcs_model, *scf_angular_pdf_));
 
     // RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a", RooArgList(scf_dt_pdf_a, *scf_angular_pdf));
     // RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab", RooArgList(scf_dt_pdf_ab, *scf_angular_pdf));
@@ -638,12 +639,10 @@ void FitterCPV::FitAll() {
                                RooArgList(scf_dt_dcs_voigt, scf_dt_dcs_gaus),
                                RooArgList(scf_dt_dcs_f));
 
-    RooAbsPdf* scf_angular_pdf = CreateAngularSCFPDF();
-
-    RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a", RooArgList(scf_dt_cf_model, *scf_angular_pdf));
-    RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab", RooArgList(scf_dt_cf_model, *scf_angular_pdf));
-    RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b", RooArgList(scf_dt_dcs_model, *scf_angular_pdf));
-    RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb", RooArgList(scf_dt_dcs_model, *scf_angular_pdf));
+    RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a", RooArgList(scf_dt_cf_model, *scf_angular_pdf_));
+    RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab", RooArgList(scf_dt_cf_model, *scf_angular_pdf_));
+    RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b", RooArgList(scf_dt_dcs_model, *scf_angular_pdf_));
+    RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb", RooArgList(scf_dt_dcs_model, *scf_angular_pdf_));
 
     // RooProdPdf scf_pdf_a("scf_pdf_a", "scf_pdf_a", RooArgList(scf_dt_pdf_a, *scf_angular_pdf));
     // RooProdPdf scf_pdf_ab("scf_pdf_ab", "scf_pdf_ab", RooArgList(scf_dt_pdf_ab, *scf_angular_pdf));
@@ -684,12 +683,10 @@ void FitterCPV::FitAll() {
                                RooArgList(bkg_dt_dcs_voigt, bkg_dt_dcs_gaus),
                                RooArgList(bkg_dt_dcs_f));
 
-    RooAbsPdf* bkg_angular_pdf = CreateAngularBKGPDF();
-
-    RooProdPdf bkg_pdf_a("bkg_pdf_a", "bkg_pdf_a", RooArgList(bkg_dt_cf_model, *bkg_angular_pdf));
-    RooProdPdf bkg_pdf_ab("bkg_pdf_ab", "bkg_pdf_ab", RooArgList(bkg_dt_cf_model, *bkg_angular_pdf));
-    RooProdPdf bkg_pdf_b("bkg_pdf_b", "bkg_pdf_b", RooArgList(bkg_dt_dcs_model, *bkg_angular_pdf));
-    RooProdPdf bkg_pdf_bb("bkg_pdf_bb", "bkg_pdf_bb", RooArgList(bkg_dt_dcs_model, *bkg_angular_pdf));
+    RooProdPdf bkg_pdf_a("bkg_pdf_a", "bkg_pdf_a", RooArgList(bkg_dt_cf_model, *bkg_angular_pdf_));
+    RooProdPdf bkg_pdf_ab("bkg_pdf_ab", "bkg_pdf_ab", RooArgList(bkg_dt_cf_model, *bkg_angular_pdf_));
+    RooProdPdf bkg_pdf_b("bkg_pdf_b", "bkg_pdf_b", RooArgList(bkg_dt_dcs_model, *bkg_angular_pdf_));
+    RooProdPdf bkg_pdf_bb("bkg_pdf_bb", "bkg_pdf_bb", RooArgList(bkg_dt_dcs_model, *bkg_angular_pdf_));
 
 
     RooRealVar cr_f("cr_f", "f_{cr}", 0.7833, 0.10, 0.99);
@@ -936,13 +933,11 @@ void FitterCPV::FitAngularCRSCF() {
     AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_file_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
-    RooAbsPdf* scf_pdf = CreateAngularSCFPDF();
-
     RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.860, 0.80, 0.99);
     cr_scf_f.setConstant();
 
-    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_pdf), RooArgList(cr_scf_f));
-    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, *scf_pdf), RooArgList(cr_scf_f));
+    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_angular_pdf_), RooArgList(cr_scf_f));
+    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, *scf_angular_pdf_), RooArgList(cr_scf_f));
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(pdf_B, "a");
@@ -971,7 +966,7 @@ void FitterCPV::FitAngularCRSCF() {
         RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                               *cr_hist);
 
-        RooDataHist* scf_hist = scf_pdf->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+        RooDataHist* scf_hist = scf_angular_pdf_->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                        RooFit::ExpectedData(true));
         RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                                *scf_hist);
@@ -1071,17 +1066,14 @@ void FitterCPV::FitAngularAll() {
     AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_file_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
-    RooAbsPdf* scf_pdf = CreateAngularSCFPDF();
-    RooAbsPdf* bkg_pdf = CreateAngularBKGPDF();
-
     RooRealVar cr_f("cr_f", "f_{cr}", 0.7833, 0.10, 0.99);
     RooRealVar scf_f("scf_f", "f_{scf}", 0.1279, 0.10, 0.99);
 
     cr_f.setConstant();
     scf_f.setConstant();
 
-    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_pdf, *bkg_pdf), RooArgList(cr_f, scf_f));
-    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, *scf_pdf, *bkg_pdf), RooArgList(cr_f, scf_f));
+    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_angular_pdf_, *bkg_angular_pdf_), RooArgList(cr_f, scf_f));
+    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, *scf_angular_pdf_, *bkg_angular_pdf_), RooArgList(cr_f, scf_f));
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(pdf_B, "a");
@@ -1110,12 +1102,12 @@ void FitterCPV::FitAngularAll() {
         RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                               *cr_hist);
 
-        RooDataHist* scf_hist = scf_pdf->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+        RooDataHist* scf_hist = scf_angular_pdf_->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                        RooFit::ExpectedData(true));
         RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                                *scf_hist);
 
-        RooDataHist* bkg_hist = bkg_pdf->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+        RooDataHist* bkg_hist = bkg_angular_pdf_->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                        RooFit::ExpectedData(true));
         RooHistPdf bkg_histpdf("bkg_histpdf", "bkg_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                                *bkg_hist);
@@ -1271,22 +1263,35 @@ void FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     json_config.Write();
 
     if (config.HasMember("fitRanges")) {
-        ChangeFitRanges(config);
+        ChangeFitRanges(config["fitRanges"]);
         // dataset_ = ReduceDataToFitRange(config);
+    }
+
+    if (config.HasMember("modelParameters")) {
+        ChangeModelParameters(config["modelParameters"]);
     }
 }
 
-void FitterCPV::ChangeFitRanges(const rapidjson::Document& config) {
+void FitterCPV::ChangeFitRanges(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config) {
     for (auto var : dataset_vars_) {
         const char* var_name = (**var).GetName();
-        if (config["fitRanges"].HasMember(var_name)) {
-            if (config["fitRanges"][var_name].HasMember("min")) {
-                (**var).setMin(config["fitRanges"][var_name]["min"].GetDouble());
+        if (config.HasMember(var_name)) {
+            if (config[var_name].HasMember("min")) {
+                (**var).setMin(config[var_name]["min"].GetDouble());
             }
-            if (config["fitRanges"][var_name].HasMember("max")) {
-                (**var).setMax(config["fitRanges"][var_name]["max"].GetDouble());
+            if (config[var_name].HasMember("max")) {
+                (**var).setMax(config[var_name]["max"].GetDouble());
             }
         }
+    }
+}
+
+void FitterCPV::ChangeModelParameters(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config) {
+    for (rapidjson::Value::ConstMemberIterator itr = config.MemberBegin();
+         itr != config.MemberEnd(); ++itr) {
+        assert(scf_parameters_argset_.find(itr->name.GetString()) ||
+               bkg_parameters_argset_.find(itr->name.GetString()));
+        scf_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
     }
 }
 
@@ -2526,6 +2531,10 @@ RooAbsPdf* FitterCPV::CreateAngularBKGPDF() {
         new RooAddPdf("bkg_phit_model", "bkg_phit_model", RooArgList(*bkg_phit_poly, *bkg_phit_cos),
                       RooArgList(*bkg_phit_f));
 
+    bkg_parameters_argset_.add(*bkg_phit_poly_p2);
+    bkg_parameters_argset_.add(*bkg_phit_f);
+    bkg_parameters_argset_.add(*bkg_phit_offset);
+
     // Background thetat model
     RooRealVar* bkg_thetat_f = new RooRealVar("bkg_thetat_f", "#theta_(t)^(w)", -0.207);
     RooFormulaVar* bkg_thetat_thetat = new RooFormulaVar(
@@ -2534,6 +2543,8 @@ RooAbsPdf* FitterCPV::CreateAngularBKGPDF() {
     RooGenericPdf* bkg_thetat_model =
         new RooGenericPdf("bkg_thetat_model", "bkg_thetat_model", "sin(bkg_thetat_thetat)^3",
                           RooArgList(*bkg_thetat_thetat));
+
+    bkg_parameters_argset_.add(*bkg_thetat_f);
 
     // Background thetab model
     RooRealVar* bkg_thetab_gaus_mu = new RooRealVar("bkg_thetab_gaus_mu", "#mu", 2.895);
@@ -2552,6 +2563,12 @@ RooAbsPdf* FitterCPV::CreateAngularBKGPDF() {
     RooAddPdf* bkg_thetab_model =
         new RooAddPdf("bkg_thetab_model", "bkg_thetab_model",
                       RooArgList(*bkg_thetab_exp, *bkg_thetab_gaus), RooArgList(*bkg_thetab_f));
+
+    bkg_parameters_argset_.add(*bkg_thetab_gaus_mu);
+    bkg_parameters_argset_.add(*bkg_thetab_gaus_sigma_l);
+    bkg_parameters_argset_.add(*bkg_thetab_gaus_sigma_r);
+    bkg_parameters_argset_.add(*bkg_thetab_exp_alpha);
+    bkg_parameters_argset_.add(*bkg_thetab_f);
 
     RooProdPdf* bkg_pdf = new RooProdPdf(
         "bkg_pdf", "bkg_pdf", RooArgList(*bkg_thetat_model, *bkg_thetab_model, *bkg_phit_model));
@@ -2575,6 +2592,10 @@ RooAbsPdf* FitterCPV::CreateAngularSCFPDF() {
         new RooAddPdf("scf_phit_model", "scf_phit_model", RooArgList(*scf_phit_poly, *scf_phit_cos),
                       RooArgList(*scf_phit_f));
 
+    scf_parameters_argset_.add(*scf_phit_poly_p2);
+    scf_parameters_argset_.add(*scf_phit_f);
+    scf_parameters_argset_.add(*scf_phit_offset);
+
     // Self-cross-feed thetat model
     RooRealVar* scf_thetat_f = new RooRealVar("scf_thetat_f", "#theta_(t)^(w)", -0.051);
     RooFormulaVar* scf_thetat_thetat = new RooFormulaVar(
@@ -2583,6 +2604,8 @@ RooAbsPdf* FitterCPV::CreateAngularSCFPDF() {
     RooGenericPdf* scf_thetat_model =
         new RooGenericPdf("scf_thetat_model", "scf_thetat_model", "sin(scf_thetat_thetat)^3",
                           RooArgList(*scf_thetat_thetat));
+
+    scf_parameters_argset_.add(*scf_thetat_f);
 
     // Self-cross-feed thetab model
     RooRealVar* scf_thetab_gaus_mu = new RooRealVar("scf_thetab_gaus_mu", "#mu", 2.885);
@@ -2601,6 +2624,12 @@ RooAbsPdf* FitterCPV::CreateAngularSCFPDF() {
     RooAddPdf* scf_thetab_model =
         new RooAddPdf("scf_thetab_model", "scf_thetab_model",
                       RooArgList(*scf_thetab_exp, *scf_thetab_gaus), RooArgList(*scf_thetab_f));
+
+    scf_parameters_argset_.add(*scf_thetab_gaus_mu);
+    scf_parameters_argset_.add(*scf_thetab_gaus_sigma_l);
+    scf_parameters_argset_.add(*scf_thetab_gaus_sigma_r);
+    scf_parameters_argset_.add(*scf_thetab_exp_alpha);
+    scf_parameters_argset_.add(*scf_thetab_f);
 
     RooProdPdf* scf_pdf = new RooProdPdf(
         "scf_pdf", "scf_pdf", RooArgList(*scf_thetat_model, *scf_thetab_model, *scf_phit_model));

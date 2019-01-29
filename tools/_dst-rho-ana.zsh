@@ -22,6 +22,7 @@ _dsrhocpfit_complete()
 	'--plot-dir=[create lifetime/mixing plots]:directory:_files' \
 	'--perfect-tag[use MC info to get perfect tagging]' \
 	'--fix=[fix specified argument(s) to input values in the fit]:parameter:->parameters' \
+	'--generator-level[do a generator level fit]' \
 	'1:result file:_files' \
 	'*:input files:_files'
 

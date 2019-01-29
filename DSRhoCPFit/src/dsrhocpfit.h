@@ -29,6 +29,8 @@ struct fitter_options {
     bool efficiency_file_set;
     int efficiency_model;
     bool efficiency_model_set;
+    bool generator_level;
+    bool generator_level_set;
     char* fit;
     bool fit_set;
     char* config_file;

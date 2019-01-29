@@ -26,8 +26,10 @@
 
 class FitterCPV {
    public:
-    FitterCPV(std::array<double, 16> par_input);
+    FitterCPV();
     virtual ~FitterCPV();
+
+    void InitVars(std::array<double, 16> par_input);
 
     void PlotVar(RooRealVar& var, const RooAbsData&) const;
     void PlotVar(RooRealVar& var, const RooAbsPdf&) const;
@@ -71,6 +73,9 @@ class FitterCPV {
 
     void SetPerfectTagging(const bool& perfect_tagging) { perfect_tagging_ = perfect_tagging; };
     int GetPerfectTagging() const { return perfect_tagging_; };
+
+    void SetGeneratorLevel(const bool& generator_level) { generator_level_ = generator_level; };
+    int GetGeneratorLevel() const { return generator_level_; };
 
     bool ResultExists() const { return result_ ? true : false; };
 
@@ -200,6 +205,7 @@ class FitterCPV {
     bool do_time_independent_fit_;
     bool make_plots_;
     bool perfect_tagging_;
+    bool generator_level_;
 };
 
 #endif /* FITTERCPV_H_ */

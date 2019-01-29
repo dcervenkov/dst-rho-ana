@@ -69,7 +69,27 @@
 #include "rapidjson/stringbuffer.h"
 #include "tools.h"
 
-FitterCPV::FitterCPV(std::array<double, 16> par_input) {
+FitterCPV::FitterCPV() {
+
+    num_CPUs_ = 1;
+    do_lifetime_fit_ = false;
+    do_mixing_fit_ = false;
+    make_plots_ = false;
+    perfect_tagging_ = false;
+
+    vrzerr_ = NULL;
+    vtzerr_ = NULL;
+}
+
+FitterCPV::~FitterCPV() {
+    if (output_file_) {
+        if (output_file_->IsOpen()) {
+            output_file_->Close();
+        }
+    }
+}
+
+void FitterCPV::InitVars(std::array<double, 16> par_input) {
     ap_ = new RooRealVar("ap", "|a_{#parallel}|", par_input[0], 0, 0.5);
     apa_ = new RooRealVar("apa", "arg(a_{#parallel})", par_input[1], 0, 1);
     a0_ = new RooRealVar("a0", "|a_{0}|", par_input[2], 0.8, 1);
@@ -94,10 +114,16 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     ytb_ = new RooRealVar("ytb", "#bar y_{#perp}", par_input[15], -0.4, 0.4);
 
     dt_ = new RooRealVar("dt", "#Deltat [ps]", constants::cuts::dt_low, constants::cuts::dt_high);
-    thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", 0, TMath::Pi());
-    thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high);
-    // thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", 0, TMath::Pi());
-    phit_ = new RooRealVar("phit", "#phi_{t} [rad]", -TMath::Pi(), TMath::Pi());
+
+    if (generator_level_) {
+        thetat_ = new RooRealVar("thetatg", "#theta_{t}^{g} [rad]", 0, TMath::Pi());
+        thetab_ = new RooRealVar("thetabg", "#theta_{b}^{g} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high);
+        phit_ = new RooRealVar("phitg", "#phi_{t}^{g} [rad]", -TMath::Pi(), TMath::Pi());
+    } else {
+        thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", 0, TMath::Pi());
+        thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high);
+        phit_ = new RooRealVar("phit", "#phi_{t} [rad]", -TMath::Pi(), TMath::Pi());
+    }
 
     vrusable_ = new RooRealVar("vrusable", "vrusable", 0, 1);
     vrvtxz_ = new RooRealVar("vrvtxz", "vrvtxz", -10, 10);
@@ -149,25 +175,7 @@ FitterCPV::FitterCPV(std::array<double, 16> par_input) {
     par_input_ = par_input;
 
     PrepareVarArgsets();
-
-    num_CPUs_ = 1;
-    do_lifetime_fit_ = false;
-    do_mixing_fit_ = false;
-    make_plots_ = false;
-    perfect_tagging_ = false;
-
-    vrzerr_ = NULL;
-    vtzerr_ = NULL;
 }
-
-FitterCPV::~FitterCPV() {
-    if (output_file_) {
-        if (output_file_->IsOpen()) {
-            output_file_->Close();
-        }
-    }
-}
-
 /**
  * Populate various vectors and argsets with all parameters
  * This populates conditional_vars_, dataset_vars_, parameters_ and their pair
@@ -838,10 +846,10 @@ void FitterCPV::FitAngularCR() {
             output_file_->cd();
         }
 
-        const double margin_ap = 0.005;
-        const double margin_apa = 0.25;
-        const double margin_a0 = 0.0015;
-        const double margin_ata = 0.3;
+        // const double margin_ap = 0.005;
+        // const double margin_apa = 0.25;
+        // const double margin_a0 = 0.0015;
+        // const double margin_ata = 0.3;
         // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
         // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
         // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
@@ -859,9 +867,9 @@ void FitterCPV::FitAngularCR() {
         PlotWithPull(*phit_, *dataset_, cr_histpdf);
 
         // Plot 1D PDF (just for a B not Bbar) projections
-        PlotVar(*thetat_, pdf_B);
-        PlotVar(*thetab_, pdf_B);
-        PlotVar(*phit_, pdf_B);
+        // PlotVar(*thetat_, pdf_B);
+        // PlotVar(*thetab_, pdf_B);
+        // PlotVar(*phit_, pdf_B);
 
         // We need this to get the exact number of events to be generated for
         // the PDF distribution. This is unnecessary for the above, because we
@@ -977,10 +985,10 @@ void FitterCPV::FitAngularCRSCF() {
             output_file_->cd();
         }
 
-        const double margin_ap = 0.005;
-        const double margin_apa = 0.25;
-        const double margin_a0 = 0.0015;
-        const double margin_ata = 0.3;
+        // const double margin_ap = 0.005;
+        // const double margin_apa = 0.25;
+        // const double margin_a0 = 0.0015;
+        // const double margin_ata = 0.3;
         // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
         // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
         // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
@@ -1120,10 +1128,10 @@ void FitterCPV::FitAngularAll() {
             output_file_->cd();
         }
 
-        const double margin_ap = 0.005;
-        const double margin_apa = 0.25;
-        const double margin_a0 = 0.0015;
-        const double margin_ata = 0.3;
+        // const double margin_ap = 0.005;
+        // const double margin_apa = 0.25;
+        // const double margin_a0 = 0.0015;
+        // const double margin_ata = 0.3;
         // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
         // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
         // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
@@ -1808,6 +1816,21 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
 
     delete temp_dataset;
 
+    // thetat_->setBins(10);
+    // thetab_->setBins(10);
+    // phit_->setBins(10);
+    // RooDataHist datahist_a("datahist_a", "datahist_a", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_a);
+    // RooDataHist datahist_ab("datahist_ab", "datahist_ab", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_ab);
+    // RooDataHist datahist_b("datahist_b", "datahist_b", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_b);
+    // RooDataHist datahist_bb("datahist_bb", "datahist_bb", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_bb);
+    // tools::PlotPull2D(*thetat_, *thetab_, datahist_a, datahist_ab);
+    // tools::PlotPull2D(*thetat_, *phit_, datahist_a, datahist_ab);
+    // tools::PlotPull2D(*thetab_, *phit_, datahist_a, datahist_ab);
+    // tools::PlotPull2D(*thetat_, *thetab_, datahist_b, datahist_bb);
+    // tools::PlotPull2D(*thetat_, *phit_, datahist_b, datahist_bb);
+    // tools::PlotPull2D(*thetab_, *phit_, datahist_b, datahist_bb);
+
+    // dataset_ = static_cast<RooDataSet*>(dataset_bb->Clone());
     dataset_ = static_cast<RooDataSet*>(dataset_a->Clone());
     delete dataset_a;
     dataset_->append(*dataset_ab);

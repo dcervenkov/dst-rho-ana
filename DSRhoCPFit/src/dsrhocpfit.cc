@@ -76,11 +76,15 @@ int main(int argc, char* argv[]) {
     tools::SetupPlotStyle();
     colors::setColors();
 
-    FitterCPV fitter(par_input);
+    FitterCPV fitter;
 
     std::string output_filename(results_path);
     output_filename += ".root";
     fitter.SetOutputFile(output_filename.c_str());
+
+    if (options.generator_level_set) fitter.SetGeneratorLevel(options.generator_level);
+
+    fitter.InitVars(par_input);
 
     if (options.config_file_set) {
         rapidjson::Document config = FitterCPV::ReadJSONConfig(options.config_file);
@@ -203,6 +207,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"events", required_argument, 0, 'n'},
         {"fit", required_argument, 0, 'f'},
         {"fix", required_argument, 0, 'x'},
+        {"generator-level", no_argument, 0, 'r'},
         {"log", no_argument, 0, 'l'},
         {"mixing", no_argument, 0, 'm'},
         {"time-independent", no_argument, 0, 'i'},
@@ -266,6 +271,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.perfect_tagging = true;
                 options.perfect_tagging_set = true;
                 break;
+            case 'r':
+                options.generator_level = true;
+                options.generator_level_set = true;
+                break;
             case 'h':
                 printf("Usage: %s [OPTION]... RESULTS-FILE INPUT-FILES\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
@@ -279,6 +288,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-m, --mixing                     make a mixing fit\n");
                 printf("-n, --events=NUM-EVENTS          number of events to be imported from the input file\n");
                 printf("-p, --plot-dir=PLOT-DIR          create lifetime/mixing plots\n");
+                printf("-r, --generator-level            do a generator level fit\n");
                 printf("-t, --perfect-tag                use MC info to get perfect tagging\n");
                 printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit;\n");
                 printf("                                 additional short-hand ARGs are: all, xy, trans and nota0\n");

@@ -145,7 +145,8 @@ def objective_function(pars, config_filename, result_filename, data_filenames):
 def main():
     # os.chdir("../.")
     config_file, result_file, data_files = decode_arguments()
-    os.remove(result_file + "_best")
+    if os.path.isfile(result_file + "_best"):
+        os.remove(result_file + "_best")
 
     x0 = np.array([0.856, 0.147, 0.056, -0.051,
                    2.885, 0.411, 0.094, -4.63, 0.625])

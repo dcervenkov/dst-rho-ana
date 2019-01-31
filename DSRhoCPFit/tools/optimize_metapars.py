@@ -22,9 +22,9 @@ def decode_arguments():
     """Decode CLI arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument("files", nargs="+")
-    parser.add_argument("-c", "--config", default="config_opt_temp.json",
+    parser.add_argument("-c", "--config", default="../config_opt_temp.json",
                         help="filename to use for temporary JSON configs")
-    parser.add_argument("-r", "--result", default="results/opt_temp",
+    parser.add_argument("-r", "--result", default="../results/opt_temp",
                         help="filename to use for temporary results")
     args = parser.parse_args()
 
@@ -32,7 +32,7 @@ def decode_arguments():
 
 
 def run_fit(config):
-    subprocess.check_call(config)
+    subprocess.check_call(config, cwd='../.')
 
 
 def get_pull_metric(filename):
@@ -45,7 +45,7 @@ def get_pull_metric(filename):
             pull2 += df[pull_key][0]**2
 
     if pull2 == 0:
-        pull2 = 100
+        pull2 = 1000
     return pull2
 
 
@@ -113,15 +113,19 @@ def create_json(pars, filename):
 def objective_function(pars, config_filename, result_filename, data_filenames):
     create_json(pars, config_filename)
 
+    config_filename_mod = config_filename[3:]
+    result_filename_mod = result_filename[3:]
+    data_filenames_mod = [filename[3:] for filename in data_filenames]
+
     config = ["./DSRhoCPFit",
               "--fit=CRSCF",
               "--efficiency-file=efficiency_new",
-              "--config=" + config_filename,
+              "--config=" + config_filename_mod,
               "--efficiency-model=5",
               "--time-independent",
               "--cpus=2",
-              result_filename,
-              *data_filenames]
+              result_filename_mod,
+              *data_filenames_mod]
 
     run_fit(config)
     metric = get_pull_metric(result_filename)
@@ -131,19 +135,21 @@ def objective_function(pars, config_filename, result_filename, data_filenames):
     return metric
 
 
-def main():
-    os.chdir("../.")
+def main(stdscr):
+    # os.chdir("../.")
     config_file, result_file, data_files = decode_arguments()
 
     x0 = np.array([0.856, 0.147, 0.056, -0.051,
                    2.885, 0.411, 0.094, -4.63, 0.625])
     result = minimize(objective_function, x0, args=(config_file, result_file, data_files), method='BFGS',
                       options={'disp': True, 'eps': 0.1})
+    # result = minimize(objective_function, x0, args=(config_file, result_file, data_files), method='Nelder-Mead',
+    #                   options={'disp': True, 'xtol': 1.0})
     print(result.x)
 
-    print("Steps:")
-    for tuple in STEPS:
-        print(tuple[0], tuple[1])
+    # print("Steps:")
+    # for tuple in STEPS:
+    #     print(tuple[0], tuple[1])
 
 
 main()

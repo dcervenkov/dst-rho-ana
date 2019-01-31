@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import argparse
 import itertools
 import json
 import logging
+import os
 import subprocess
 
 import numpy as np
@@ -15,25 +17,35 @@ VAR_NAMES = ("ap", "apa", "a0", "a0a", "at", "ata", "xp", "x0", "xt", "yp",
 
 STEPS = []
 
-def run_fit():
-    config = ["./DSRhoCPFit", "--fit=CRSCF", "--efficiency-file=efficiency_new", "--config=config_optimization.json", "--efficiency-model=5",
-              "--time-independent", "--cpus=2", "results/test", "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"]
 
-    subprocess.check_call(config, cwd='../.')
+def decode_arguments():
+    """Decode CLI arguments"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("files", nargs="+")
+    parser.add_argument("-c", "--config", default="config_opt_temp.json",
+                        help="filename to use for temporary JSON configs")
+    parser.add_argument("-r", "--result", default="results/opt_temp",
+                        help="filename to use for temporary results")
+    args = parser.parse_args()
+
+    return args.config, args.result, args.files
+
+
+def run_fit(config):
+    subprocess.check_call(config)
 
 
 def get_pull_metric(filename):
-    df = read_in_file("../results/test")
+    df = read_in_file(filename)
     add_pulls_to_dataframe(df)
     pull_keys = [key for key in df.keys() if 'pull' in key]
     pull2 = 0
     for pull_key in pull_keys:
         if not pd.isna(df[pull_key][0]):
             pull2 += df[pull_key][0]**2
-    
+
     if pull2 == 0:
         pull2 = 100
-    print(pull2)
     return pull2
 
 
@@ -56,7 +68,7 @@ def add_pulls_to_dataframe(df):
                              df[var + "_true"]) / df[var + "_error"]
 
 
-def create_json(pars):
+def create_json(pars, filename):
     config = {
         "fitRanges": {
             "dt": {
@@ -94,28 +106,44 @@ def create_json(pars):
         }
     }
 
-    with open("../config_optimization.json", 'w') as f:
+    with open(filename, 'w') as f:
         json.dump(config, f, sort_keys=True, indent=4, separators=(',', ': '))
 
 
-def fit_and_report(pars):
-    print(pars)
-    create_json(pars)
-    run_fit()
-    metric = get_pull_metric("../results/test.root")
+def objective_function(pars, config_filename, result_filename, data_filenames):
+    create_json(pars, config_filename)
+
+    config = ["./DSRhoCPFit",
+              "--fit=CRSCF",
+              "--efficiency-file=efficiency_new",
+              "--config=" + config_filename,
+              "--efficiency-model=5",
+              "--time-independent",
+              "--cpus=2",
+              result_filename,
+              *data_filenames]
+
+    run_fit(config)
+    metric = get_pull_metric(result_filename)
+    print("metric = " + str(metric))
+    print("pars = [" + ", ".join(map(str, pars)) + "]")
     STEPS.append((metric, pars))
     return metric
 
 
 def main():
-    # x0 = np.array([0.856, 0.147, 0.056, -0.051, 2.885, 0.411, 0.094, -4.63, -0.051])
-    x0 = np.array([0.856, 0.147, 0.056, -0.051, 2.885, 0.411, 0.094, -4.63, 0.625])
-    result = minimize(fit_and_report, x0, method='BFGS',
+    os.chdir("../.")
+    config_file, result_file, data_files = decode_arguments()
+
+    x0 = np.array([0.856, 0.147, 0.056, -0.051,
+                   2.885, 0.411, 0.094, -4.63, 0.625])
+    result = minimize(objective_function, x0, args=(config_file, result_file, data_files), method='BFGS',
                       options={'disp': True, 'eps': 0.1})
     print(result.x)
 
     print("Steps:")
     for tuple in STEPS:
         print(tuple[0], tuple[1])
+
 
 main()

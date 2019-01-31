@@ -99,8 +99,6 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
     if 'files' in plot_data:
         for root_file in plot_data['files']:
             tree.Add(root_file)
-    else:
-        raise Exception("No 'files' array in '{}' plot data".format(plot_data['fileName']))
 
     canvas_width = 500
     canvas_height = 500
@@ -117,6 +115,9 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
         same_opt = "same colz"
         if i == 0:
             same_opt = "colz"
+
+        if 'files' not in element and 'files' not in plot_data:
+            raise Exception("No 'files' array in '{}' plot or element data".format(plot_data['fileName']))
 
         draw_element(tree, element, plot_data, same_opt)
 

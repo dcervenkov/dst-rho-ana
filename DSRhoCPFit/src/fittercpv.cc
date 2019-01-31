@@ -1292,6 +1292,7 @@ void FitterCPV::ChangeModelParameters(const rapidjson::GenericValue<rapidjson::U
         assert(scf_parameters_argset_.find(itr->name.GetString()) ||
                bkg_parameters_argset_.find(itr->name.GetString()));
         scf_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
+        bkg_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
     }
 }
 

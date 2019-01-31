@@ -16,6 +16,7 @@ VAR_NAMES = ("ap", "apa", "a0", "a0a", "at", "ata", "xp", "x0", "xt", "yp",
              "y0", "yt", "xpb", "x0b", "xtb", "ypb", "y0b", "ytb")
 
 STEPS = []
+BEST = 10000000
 
 
 def decode_arguments():
@@ -132,12 +133,19 @@ def objective_function(pars, config_filename, result_filename, data_filenames):
     print("metric = " + str(metric))
     print("pars = [" + ", ".join(map(str, pars)) + "]")
     STEPS.append((metric, pars))
+    global BEST
+    if metric < BEST:
+        BEST = metric
+        with open(result_filename + "_best", "a") as f:
+            f.write("metric = " + str(metric) + ", ")
+            f.write("pars = [" + ", ".join(map(str, pars)) + "]\n")
     return metric
 
 
-def main(stdscr):
+def main():
     # os.chdir("../.")
     config_file, result_file, data_files = decode_arguments()
+    os.remove(result_file + "_best")
 
     x0 = np.array([0.856, 0.147, 0.056, -0.051,
                    2.885, 0.411, 0.094, -4.63, 0.625])

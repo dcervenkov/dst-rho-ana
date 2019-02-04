@@ -76,6 +76,7 @@ FitterCPV::FitterCPV() {
     do_mixing_fit_ = false;
     make_plots_ = false;
     perfect_tagging_ = false;
+    generator_level_ = false;
 
     vrzerr_ = NULL;
     vtzerr_ = NULL;

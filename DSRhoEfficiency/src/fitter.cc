@@ -60,7 +60,12 @@ Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const cha
 
     if (strstr(evtgen_filepath, ".root")) {
         TFile* evtgen_file = new TFile(evtgen_filepath);
-        evtgen_dataset_ = dynamic_cast<RooDataSet*>(evtgen_file->Get("dataset"));
+	TTree* evtgen_tree = dynamic_cast<TTree*>(evtgen_file->Get("h2000"));
+	evtgen_dataset_ = new RooDataSet("evtgen_dataset", "evtgen dataset", evtgen_tree,
+			RooArgSet(thetat_, thetab_, phit_, vrvtxz_, vtvtxz_, evmcflag_),
+			"evmcflag==1");
+	delete evtgen_tree;
+	evtgen_file->Close();
     } else {
         evtgen_dataset_ =
             RooDataSet::read(evtgen_filepath, RooArgList(thetat_, thetab_, phit_, dt_, dec_type_));
@@ -72,7 +77,7 @@ Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const cha
                                    RooArgSet(thetat_, thetab_, phit_, vrvtxz_, vtvtxz_, evmcflag_),
                                    "evmcflag==1");
     // Add calculated dt to the dataset
-    gsim_dataset_->addColumn(dt_formula_);
+    // gsim_dataset_->addColumn(dt_formula_);
     delete gsim_tree;
     gsim_file->Close();
 

@@ -792,7 +792,7 @@
                 {
                     "label": "BKG",
                     "color": 7,
-                    "cut": "evmcflag!=1"
+                    "cut": "evmcflag!=1&&thetab>0.5"
                 }
             ]
         },
@@ -856,7 +856,7 @@
                 {
                     "label": "BKG",
                     "color": 7,
-                    "cut": "evmcflag!=1"
+                    "cut": "evmcflag!=1&&thetab>0.5"
                 }
             ]
         },
@@ -920,7 +920,7 @@
                 {
                     "label": "BKG",
                     "color": 7,
-                    "cut": "evmcflag!=1"
+                    "cut": "evmcflag!=1&&thetab>0.5"
                 }
             ]
         },

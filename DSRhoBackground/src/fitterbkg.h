@@ -26,7 +26,11 @@
 #include "RooVoigtian.h"
 #include "RooRealVar.h"
 #include "TCanvas.h"
+#include "TChain.h"
 #include "TPaveText.h"
+
+// Meerkat include
+#include "AdaptiveKernelDensity.hh"
 
 // Local includes
 #include "constants.h"
@@ -43,10 +47,12 @@ class FitterBKG {
     void PlotWithPull(const RooRealVar& var, const RooDataSet&, const RooAbsPdf& pdf,
                       const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
                       const char* title = "") const;
+    void PlotKDE(const AdaptiveKernelDensity kde) const;
 
     void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);
     void Fit(RooAbsPdf* pdf, RooDataSet* data);
+    AdaptiveKernelDensity FitKDE(RooDataSet* data);
 
     RooRealVar dt_{"dt", "dt", constants::fit_range_dt_low, constants::fit_range_dt_high};
     RooRealVar thetat_{"thetat", "thetat", 0, constants::pi};
@@ -99,6 +105,8 @@ class FitterBKG {
     TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
                              const bool position_left) const;
     TString GetCommonCutsString() const;
+    TH3F* ConvertDensityToHisto(AdaptiveKernelDensity pdf) const;
+    TH3F* Create3DHisto(const RooDataSet* dataset) const;
 
     std::vector<RooRealVar**> conditional_vars_;
     std::vector<RooRealVar**> dataset_vars_;
@@ -110,6 +118,8 @@ class FitterBKG {
     RooFitResult* result_ = NULL;
 
     TFile* output_file_ = NULL;
+    TChain* input_tree = NULL;
+    TTree* data_tree = NULL;
 
     // Self-cross-feed dt model
     RooRealVar scf_dt_voigt_mu_{"scf_dt_voigt_mu", "v_{#mu}", -0.303, -1, 1};

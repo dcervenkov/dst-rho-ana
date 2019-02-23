@@ -49,4 +49,26 @@ _dsrhocpfit_complete()
 	esac
 }
 
+_dsrhobackground_complete()
+{
+	_arguments \
+	'--cpus=[number of CPU cores to use for fitting and plotting]' \
+	'--help[display help]' \
+	'--plot-dir=[create lifetime/mixing plots]:directory:_files' \
+	'*:input files:_files'
+
+	case "$state" in
+		jsonfiles)
+			local -a json_files
+			json_files=(*.json)
+			_multi_parts / json_files
+			;;
+		rootfiles)
+			local -a root_files
+			root_files=(*.root)
+			_multi_parts / root_files
+			;;
+	esac
+}
 compdef _dsrhocpfit_complete DSRhoCPFit
+compdef _dsrhobackground_complete DSRhoBackground

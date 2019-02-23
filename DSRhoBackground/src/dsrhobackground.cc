@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <vector>
 
+#include "AdaptiveKernelDensity.hh"
+
 // Local includes
 #include "colors.h"
 #include "constants.h"
@@ -49,48 +51,55 @@ int main(int argc, char* argv[]) {
         fitter.SetNumCPUs(options.num_CPUs);
     }
 
-    // We must plot after each fit otherwise the results printed on the plot
-    // would be of the last fit
-    fitter.Fit(&fitter.scf_phit_model_, fitter.dataset_);
-    if (options.plot_dir_set) {
-        fitter.PlotWithPull(fitter.phit_, *fitter.dataset_, fitter.scf_phit_model_);
-    }
+    if (options.KDE == false) {
+        // We must plot after each fit otherwise the results printed on the plot
+        // would be of the last fit
+        fitter.Fit(&fitter.scf_phit_model_, fitter.dataset_);
+        if (options.plot_dir_set) {
+            fitter.PlotWithPull(fitter.phit_, *fitter.dataset_, fitter.scf_phit_model_);
+        }
 
-    fitter.Fit(&fitter.scf_thetat_model_, fitter.dataset_);
-    if (options.plot_dir_set) {
-        fitter.PlotWithPull(fitter.thetat_, *fitter.dataset_, fitter.scf_thetat_model_);
-    }
+        fitter.Fit(&fitter.scf_thetat_model_, fitter.dataset_);
+        if (options.plot_dir_set) {
+            fitter.PlotWithPull(fitter.thetat_, *fitter.dataset_, fitter.scf_thetat_model_);
+        }
 
-    fitter.Fit(&fitter.scf_thetab_model_, fitter.dataset_);
-    if (options.plot_dir_set) {
-        fitter.PlotWithPull(fitter.thetab_, *fitter.dataset_, fitter.scf_thetab_model_);
-    }
+        fitter.Fit(&fitter.scf_thetab_model_, fitter.dataset_);
+        if (options.plot_dir_set) {
+            fitter.PlotWithPull(fitter.thetab_, *fitter.dataset_, fitter.scf_thetab_model_);
+        }
 
-    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_);
-    if (options.plot_dir_set) {
-        fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, fitter.scf_dt_model_);
-    }
+        fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_);
+        if (options.plot_dir_set) {
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, fitter.scf_dt_model_);
+        }
 
-    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_a_);
-    if (options.plot_dir_set) {
-        fitter.PlotWithPull(fitter.dt_, *fitter.dataset_a_, fitter.scf_dt_model_);
-    }
+        fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_a_);
+        if (options.plot_dir_set) {
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_a_, fitter.scf_dt_model_);
+        }
 
-    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_ab_);
-    if (options.plot_dir_set) {
-        fitter.PlotWithPull(fitter.dt_, *fitter.dataset_ab_, fitter.scf_dt_model_);
-    }
+        fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_ab_);
+        if (options.plot_dir_set) {
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_ab_, fitter.scf_dt_model_);
+        }
 
-    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_b_);
-    if (options.plot_dir_set) {
-        fitter.PlotWithPull(fitter.dt_, *fitter.dataset_b_, fitter.scf_dt_model_);
-    }
+        fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_b_);
+        if (options.plot_dir_set) {
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_b_, fitter.scf_dt_model_);
+        }
 
-    fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_bb_);
-    if (options.plot_dir_set) {
-        fitter.PlotWithPull(fitter.dt_, *fitter.dataset_bb_, fitter.scf_dt_model_);
+        fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_bb_);
+        if (options.plot_dir_set) {
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_bb_, fitter.scf_dt_model_);
+        }
+    } else {
+        fitter.thetat_.setBins(50);
+        fitter.thetab_.setBins(50);
+        fitter.phit_.setBins(50);
+        AdaptiveKernelDensity kde = fitter.FitKDE(fitter.dataset_);
+        fitter.PlotKDE(kde);
     }
-
 
     return 0;
 }
@@ -114,6 +123,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                           fitter_options& options) {
     int c;
     struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
+                                    {"kde", no_argument, 0, 'k'},
                                     {"plot-dir", required_argument, 0, 'p'},
                                     {"help", no_argument, 0, 'h'},
                                     {NULL, no_argument, NULL, 0}};
@@ -129,6 +139,9 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.num_CPUs = atoi(optarg);
                 options.num_CPUs_set = true;
                 break;
+            case 'k':
+                options.KDE = true;
+                break;
             case 'p':
                 options.plot_dir = optarg;
                 options.plot_dir_set = true;
@@ -137,6 +150,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("Usage: %s [OPTION]... INPUT-FILES\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS       number of CPU cores to use for fitting and plotting\n");
+                printf("-k, --kde                 use kernel density estimation\n");
                 printf("-h, --help                display this text and exit\n");
                 printf("-p, --plot-dir=PLOT_DIR   create lifetime/mixing plots\n");
                 exit(0);

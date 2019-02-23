@@ -11,6 +11,7 @@
 #define DSRHOBACKGROUND_H_
 
 struct fitter_options {
+    bool KDE;
     int num_CPUs;
     bool num_CPUs_set;
     char* plot_dir;

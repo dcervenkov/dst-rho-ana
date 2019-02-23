@@ -18,6 +18,7 @@
 // ROOT includes
 #include "RooArgSet.h"
 #include "RooCategory.h"
+#include "RooDataHist.h"
 #include "RooDataSet.h"
 #include "RooFitResult.h"
 #include "RooGenericPdf.h"
@@ -33,12 +34,24 @@
 #include "TMath.h"
 #include "TH1D.h"
 #include "TH2D.h"
+#include "TH3F.h"
 #include "TPaveText.h"
 #include "TStyle.h"
 #include "TTree.h"
 
+// Meerkat includes
+#include "AbsDensity.hh"
+#include "AdaptiveKernelDensity.hh"
+#include "BinnedKernelDensity.hh"
+#include "CombinedPhaseSpace.hh"
+#include "FormulaDensity.hh"
+#include "KernelDensity.hh"
+#include "OneDimPhaseSpace.hh"
+#include "UniformDensity.hh"
+
 // Local includes
 #include "constants.h"
+#include "tools.h"
 
 FitterBKG::FitterBKG() {
     vrusable_ = new RooRealVar("vrusable", "vrusable", 0, 1);
@@ -358,7 +371,7 @@ TString FitterBKG::GetCommonCutsString() const {
  * @param num_events [optional] Maximum number of events to use (0 to read all)
  */
 void FitterBKG::ReadInFile(std::vector<const char*> file_names, const int& num_events) {
-    TChain* input_tree = new TChain("h2000");
+    input_tree = new TChain("h2000");
     for (auto file_name : file_names) {
         input_tree->Add(file_name);
     }
@@ -404,6 +417,7 @@ void FitterBKG::ReadInFile(std::vector<const char*> file_names, const int& num_e
     dataset_bb_->addColumn(*decaytype_);
     dataset_bb_->SetName("dataset_bb");
 
+    data_tree = input_tree->CopyTree(common_cuts);
     delete input_tree;
     // input_file->Close();
 
@@ -437,9 +451,123 @@ void FitterBKG::SetPlotDir(const char* plot_dir) {
 
 /**
  * Fit a given PDF to a given dataset
- * 
+ *
  * All the variables are already defined in the PDF.
  */
 void FitterBKG::Fit(RooAbsPdf* pdf, RooDataSet* data) {
     result_ = pdf->fitTo(*data, RooFit::Save(), RooFit::Minimizer("Minuit2"), RooFit::NumCPU(num_CPUs_));
+}
+
+AdaptiveKernelDensity FitterBKG::FitKDE(RooDataSet* data) {
+    OneDimPhaseSpace* phasespace_thetat = new OneDimPhaseSpace("phasespace_thetat", thetat_.getMin(), thetat_.getMax());
+    OneDimPhaseSpace* phasespace_thetab = new OneDimPhaseSpace("phasespace_thetab", thetab_.getMin(), thetab_.getMax());
+    OneDimPhaseSpace* phasespace_phit = new OneDimPhaseSpace("phasespace_phit", phit_.getMin(), phit_.getMax());
+    CombinedPhaseSpace* phasespace = new CombinedPhaseSpace("phasespace", phasespace_thetat, phasespace_thetab,
+                                  phasespace_phit);
+    // UniformDensity uniform_density("Uniform Density", &phasespace);
+    // FormulaDensity formula_density("Formula Density", &phasespace,
+    //                                "(x - 1.57)^2 * (y - 1.57)^2 * (z)^2");
+
+    // RooAbsData::setDefaultStorageType(RooAbsData::Tree);
+    // RooDataSet* dataNew = new RooDataSet("dataNew","dataNew", data, *data->get());
+    // TTree* eff_tree = const_cast<TTree*>(dataNew->tree())->CloneTree();
+
+    // TTree* eff_tree = data->GetClonedTree();
+    TTree* eff_tree = data_tree;
+
+    std::array<double, 6> bin_kde_pars = {50, 50, 50, 0.2, 0.2, 0.4};
+    std::array<double, 6> ada_kde_pars = {50, 50, 50, 0.1, 0.1, 0.2};
+
+    BinnedKernelDensity bin_kde("BinKernelPDF", phasespace, eff_tree, "thetat", "thetab", "phit",
+                                "weight", bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
+                                bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], 0);
+
+    AdaptiveKernelDensity kde("KernelPDF", phasespace, eff_tree, "thetat", "thetab", "phit",
+                              "weight", ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2],
+                              ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
+
+    const char* output_file = "scf_kde";
+    kde.writeToTextFile(output_file);
+
+    return kde;
+
+}
+
+TH3F* FitterBKG::ConvertDensityToHisto(AdaptiveKernelDensity pdf) const {
+    const int num_bins = 50;
+
+    assert(num_bins == thetat_.getBins());
+    assert(num_bins == thetab_.getBins());
+    assert(num_bins == phit_.getBins());
+
+    TH3F* pdf_histo =
+        new TH3F("pdf_histo", "pdf_histo", num_bins, thetat_.getMin(), thetat_.getMax(), num_bins,
+                 thetab_.getMin(), thetab_.getMax(), num_bins, phit_.getMin(), phit_.getMax());
+
+    double thetat;
+    double thetab;
+    double phit;
+    for (int x = 1; x <= pdf_histo->GetXaxis()->GetNbins(); x++) {
+        for (int y = 1; y <= pdf_histo->GetYaxis()->GetNbins(); y++) {
+            for (int z = 1; z <= pdf_histo->GetZaxis()->GetNbins(); z++) {
+                thetat = pdf_histo->GetXaxis()->GetBinCenter(x);
+                thetab = pdf_histo->GetYaxis()->GetBinCenter(y);
+                phit = pdf_histo->GetZaxis()->GetBinCenter(z);
+                std::vector<double> coords;
+                coords.push_back(thetat);
+                coords.push_back(thetab);
+                coords.push_back(phit);
+                pdf_histo->SetBinContent(pdf_histo->GetBin(x, y, z), pdf.density(coords));
+            }
+        }
+    }
+
+    return pdf_histo;
+}
+
+TH3F* FitterBKG::Create3DHisto(const RooDataSet* dataset) const {
+    const int num_bins = 50;
+
+    assert(num_bins == thetat_.getBins());
+    assert(num_bins == thetab_.getBins());
+    assert(num_bins == phit_.getBins());
+
+    TH3F* histo = new TH3F(dataset->GetName(), dataset->GetTitle(), num_bins, thetat_.getMin(),
+                           thetat_.getMax(), num_bins, thetab_.getMin(), thetab_.getMax(), num_bins,
+                           phit_.getMin(), phit_.getMax());
+    for (int i = 0; i < dataset->numEntries(); i++) {
+        const RooArgSet* row = dataset->get(i);
+        double thetat = row->getRealValue("thetat");
+        double thetab = row->getRealValue("thetab");
+        double phit = row->getRealValue("phit");
+        histo->Fill(thetat, thetab, phit);
+    }
+
+    return histo;
+}
+
+void FitterBKG::PlotKDE(const AdaptiveKernelDensity kde) const {
+    TH3F* model = ConvertDensityToHisto(kde);
+    TH3F* data = Create3DHisto(dataset_);
+    printf("model = %f\n", model->GetEntries());
+    printf("data = %f\n", data->GetEntries());
+    // model->Scale(data->GetEntries()/model->GetEntries());
+    model->Scale(2);
+    data->Scale(0.3);
+    printf("model = %f\n", model->GetEntries());
+    printf("data = %f\n", data->GetEntries());
+
+    RooDataHist roo_model("roo_model", "roo_model", RooArgList(thetat_, thetab_, phit_), model);
+    RooDataHist roo_data("roo_data", "roo_data", RooArgList(thetat_, thetab_, phit_), data);
+
+    RooRealVar vars[] = {thetat_, thetab_, phit_};
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = i + 1; j < 3; j++) {
+            tools::PlotVars2D(vars[i], vars[j], roo_model);
+            tools::PlotVars2D(vars[i], vars[j], roo_data);
+            tools::PlotPull2D(vars[i], vars[j], roo_model, roo_data);
+        }
+    }
+
 }

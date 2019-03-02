@@ -16,6 +16,7 @@
 #include <string>
 
 // ROOT includes
+#include "RooHistPdf.h"
 #include "RooArgSet.h"
 #include "RooCategory.h"
 #include "RooDataHist.h"
@@ -48,6 +49,7 @@
 #include "KernelDensity.hh"
 #include "OneDimPhaseSpace.hh"
 #include "UniformDensity.hh"
+#include "RooMeerkatPdf.hh"
 
 // Local includes
 #include "constants.h"
@@ -195,6 +197,8 @@ void FitterBKG::PlotWithPull(const RooRealVar& var, const RooDataSet& data, cons
     TString name = pdf.GetName();
     name += "_";
     name += data.GetName();
+    name += "_";
+    name += var.GetName();
     TCanvas canvas(name, name, 500, 500);
 
     RooPlot* plot = var.frame();
@@ -467,6 +471,8 @@ AdaptiveKernelDensity FitterBKG::FitKDE(RooDataSet* data) {
     // UniformDensity uniform_density("Uniform Density", &phasespace);
     // FormulaDensity formula_density("Formula Density", &phasespace,
     //                                "(x - 1.57)^2 * (y - 1.57)^2 * (z)^2");
+    FormulaDensity formula_density("Formula Density", phasespace,
+                                   "(x > 0 ? 1 : 0) * (x < TMath::Pi() ? 1 : 0) * (y > 0.5 ? 1 : 0) * (y < 2.95 ? 1 : 0) * (z > -TMath::Pi() ? 1 : 0) * (z < TMath::Pi() ? 1 : 0)");
 
     // RooAbsData::setDefaultStorageType(RooAbsData::Tree);
     // RooDataSet* dataNew = new RooDataSet("dataNew","dataNew", data, *data->get());
@@ -479,11 +485,11 @@ AdaptiveKernelDensity FitterBKG::FitKDE(RooDataSet* data) {
     std::array<double, 6> ada_kde_pars = {50, 50, 50, 0.1, 0.1, 0.2};
 
     BinnedKernelDensity bin_kde("BinKernelPDF", phasespace, eff_tree, "thetat", "thetab", "phit",
-                                "weight", bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
-                                bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], 0);
+                                bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
+                                bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], &formula_density);
 
     AdaptiveKernelDensity kde("KernelPDF", phasespace, eff_tree, "thetat", "thetab", "phit",
-                              "weight", ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2],
+                              ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2],
                               ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
 
     const char* output_file = "scf_kde";
@@ -546,7 +552,7 @@ TH3F* FitterBKG::Create3DHisto(const RooDataSet* dataset) const {
     return histo;
 }
 
-void FitterBKG::PlotKDE(const AdaptiveKernelDensity kde) const {
+void FitterBKG::PlotKDE(AdaptiveKernelDensity kde) const {
     TH3F* model = ConvertDensityToHisto(kde);
     TH3F* data = Create3DHisto(dataset_);
     printf("model = %f\n", model->GetEntries());
@@ -561,6 +567,14 @@ void FitterBKG::PlotKDE(const AdaptiveKernelDensity kde) const {
     RooDataHist roo_data("roo_data", "roo_data", RooArgList(thetat_, thetab_, phit_), data);
 
     RooRealVar vars[] = {thetat_, thetab_, phit_};
+
+    RooArgList list(thetat_, thetab_, phit_);
+    RooMeerkatPdf meerkat_pdf("meerkat_pdf", "meerkat_pdf", list, &kde);
+    RooHistPdf meerkat_histpdf("meerkat_histpdf", "meerkat_histpdf", RooArgSet(thetat_, thetab_, phit_), roo_model);
+    for (auto var : vars) {
+        // PlotWithPull(var, *dataset_, meerkat_pdf);
+        PlotWithPull(var, *dataset_, meerkat_histpdf);
+    }
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {

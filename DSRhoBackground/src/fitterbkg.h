@@ -47,7 +47,7 @@ class FitterBKG {
     void PlotWithPull(const RooRealVar& var, const RooDataSet&, const RooAbsPdf& pdf,
                       const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
                       const char* title = "") const;
-    void PlotKDE(const AdaptiveKernelDensity kde) const;
+    void PlotKDE(AdaptiveKernelDensity kde) const;
 
     void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);

@@ -53,6 +53,7 @@
 
 // Local includes
 #include "constants.h"
+#include "log.h"
 #include "tools.h"
 
 FitterBKG::FitterBKG() {
@@ -449,7 +450,7 @@ void FitterBKG::SetPlotDir(const char* plot_dir) {
     TString root_filename(boost::filesystem::path(plot_dir).filename().string());
     root_filename += ".root";
     gEnv->SetValue("Canvas.PrintDirectory", plot_dir);
-    printf("print dir: %s\n", gEnv->GetValue("Canvas.PrintDirectory", "not found"));
+    Log::print(Log::info, "print dir: %s\n", gEnv->GetValue("Canvas.PrintDirectory", "not found"));
     output_file_ = new TFile(TString(plot_dir) + "/" + root_filename, "RECREATE");
 }
 
@@ -555,13 +556,13 @@ TH3F* FitterBKG::Create3DHisto(const RooDataSet* dataset) const {
 void FitterBKG::PlotKDE(AdaptiveKernelDensity kde) const {
     TH3F* model = ConvertDensityToHisto(kde);
     TH3F* data = Create3DHisto(dataset_);
-    printf("model = %f\n", model->GetEntries());
-    printf("data = %f\n", data->GetEntries());
+    Log::print(Log::debug, "model = %f\n", model->GetEntries());
+    Log::print(Log::debug, "data = %f\n", data->GetEntries());
     // model->Scale(data->GetEntries()/model->GetEntries());
     model->Scale(2);
     data->Scale(0.3);
-    printf("model = %f\n", model->GetEntries());
-    printf("data = %f\n", data->GetEntries());
+    Log::print(Log::debug, "model = %f\n", model->GetEntries());
+    Log::print(Log::debug, "data = %f\n", data->GetEntries());
 
     RooDataHist roo_model("roo_model", "roo_model", RooArgList(thetat_, thetab_, phit_), model);
     RooDataHist roo_data("roo_data", "roo_data", RooArgList(thetat_, thetab_, phit_), data);

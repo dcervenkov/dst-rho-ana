@@ -20,9 +20,11 @@
 #include "colors.h"
 #include "constants.h"
 #include "fitterbkg.h"
+#include "log.h"
 #include "tools.h"
 
 int main(int argc, char* argv[]) {
+    Log::setLogLevel(Log::debug);
     char** optionless_argv = NULL;
     fitter_options options = {};
     const int optionless_argc = ProcessCmdLineOptions(argc, argv, optionless_argv, options);

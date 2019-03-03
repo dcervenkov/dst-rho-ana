@@ -398,8 +398,10 @@ void FitterBKG::ReadInFile(std::vector<const char*> file_names, const int& num_e
     b_cuts = "brecflav==1&&tagqr>0";
     bb_cuts = "brecflav==-1&&tagqr<0";
 
+    Log::print(Log::info, "Reading input files...\n");
     dataset_ = new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_, common_cuts);
 
+    Log::print(Log::info, "Creating a, ab, b, bb labels...\n");
     // We add an identifying label to each of the 4 categories and then combine it into a single
     // dataset for RooSimultaneous fitting
     dataset_a_ = static_cast<RooDataSet*>(dataset_->reduce(a_cuts));
@@ -438,6 +440,7 @@ void FitterBKG::ReadInFile(std::vector<const char*> file_names, const int& num_e
     if (output_file_) {
         output_file_->cd();
     }
+    Log::print(Log::info, "Input dataset ready\n");
 }
 
 /**
@@ -472,8 +475,12 @@ AdaptiveKernelDensity FitterBKG::FitKDE(RooDataSet* data) {
     // UniformDensity uniform_density("Uniform Density", &phasespace);
     // FormulaDensity formula_density("Formula Density", &phasespace,
     //                                "(x - 1.57)^2 * (y - 1.57)^2 * (z)^2");
-    FormulaDensity formula_density("Formula Density", phasespace,
-                                   "(x > 0 ? 1 : 0) * (x < TMath::Pi() ? 1 : 0) * (y > 0.5 ? 1 : 0) * (y < 2.95 ? 1 : 0) * (z > -TMath::Pi() ? 1 : 0) * (z < TMath::Pi() ? 1 : 0)");
+    FormulaDensity formula_density(
+        "Formula Density", phasespace,
+        "(x > 0 ? 1 : 0) * (x < TMath::Pi() ? 1 : 0) * "
+        "(y > 0.5 ? 1 : 0) * (y < 2.95 ? 1 : 0) * "
+        // "((cos(z))^2 + 0.1) * (z > -TMath::Pi() ? 1 : 0) * (z < TMath::Pi() ? 1 : 0.01)");
+        "(z > -TMath::Pi() ? 1 : 0) * (z < TMath::Pi() ? 1 : 0)");
 
     // RooAbsData::setDefaultStorageType(RooAbsData::Tree);
     // RooDataSet* dataNew = new RooDataSet("dataNew","dataNew", data, *data->get());
@@ -483,15 +490,16 @@ AdaptiveKernelDensity FitterBKG::FitKDE(RooDataSet* data) {
     TTree* eff_tree = data_tree;
 
     std::array<double, 6> bin_kde_pars = {50, 50, 50, 0.2, 0.2, 0.4};
-    std::array<double, 6> ada_kde_pars = {50, 50, 50, 0.1, 0.1, 0.2};
+    std::array<double, 6> ada_kde_pars = {100, 100, 100, 0.1, 0.05, 0.1};
 
-    BinnedKernelDensity bin_kde("BinKernelPDF", phasespace, eff_tree, "thetat", "thetab", "phit",
-                                bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
-                                bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], &formula_density);
+    // BinnedKernelDensity bin_kde("BinKernelPDF", phasespace, eff_tree, "thetat", "thetab", "phit",
+    //                             bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
+    //                             bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], &formula_density);
 
     AdaptiveKernelDensity kde("KernelPDF", phasespace, eff_tree, "thetat", "thetab", "phit",
                               ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2],
-                              ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
+                              ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &formula_density);
+                            //   ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
 
     const char* output_file = "scf_kde";
     kde.writeToTextFile(output_file);
@@ -556,15 +564,9 @@ TH3F* FitterBKG::Create3DHisto(const RooDataSet* dataset) const {
 void FitterBKG::PlotKDE(AdaptiveKernelDensity kde) const {
     TH3F* model = ConvertDensityToHisto(kde);
     TH3F* data = Create3DHisto(dataset_);
-    Log::print(Log::debug, "model = %f\n", model->GetEntries());
-    Log::print(Log::debug, "data = %f\n", data->GetEntries());
-    // model->Scale(data->GetEntries()/model->GetEntries());
-    model->Scale(2);
-    data->Scale(0.3);
-    Log::print(Log::debug, "model = %f\n", model->GetEntries());
-    Log::print(Log::debug, "data = %f\n", data->GetEntries());
+    const double scale = data->GetEntries()/model->GetEntries();
 
-    RooDataHist roo_model("roo_model", "roo_model", RooArgList(thetat_, thetab_, phit_), model);
+    RooDataHist roo_model("roo_model", "roo_model", RooArgList(thetat_, thetab_, phit_), model, scale);
     RooDataHist roo_data("roo_data", "roo_data", RooArgList(thetat_, thetab_, phit_), data);
 
     RooRealVar vars[] = {thetat_, thetab_, phit_};

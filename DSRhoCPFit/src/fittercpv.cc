@@ -1766,16 +1766,17 @@ TString FitterCPV::GetCommonCutsString() const {
  * @param num_events [optional] Maximum number of events to use (0 to read all)
  */
 void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_events) {
-    TChain* input_tree = new TChain("h2000");
+    TChain* input_chain = new TChain("h2000");
     for (auto file_name : file_names) {
-        input_tree->Add(file_name);
+        input_chain->Add(file_name);
     }
 
-    // if (num_events) {
-    //     TTree* temp_tree = input_tree;
-    //     input_tree = temp_tree->CloneTree(num_events);
-    //     delete temp_tree;
-    // }
+    TTree* input_tree;
+    if (num_events) {
+        input_tree = input_chain->CloneTree(num_events);
+    } else {
+        input_tree = input_chain->CloneTree();
+    }
 
     TString common_cuts = GetCommonCutsString();
 
@@ -1789,6 +1790,11 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
         b_cuts = "brecflav==1&&btagmcli>0";
         bb_cuts = "brecflav==-1&&btagmcli<0";
     } else {
+        if (generator_level_) {
+            Log::print(Log::warning,
+                       "Attempting to use realistic tagging with generator level fit. This will "
+                       "probably end badly. Consider using the '--perfect-tag' switch.\n");
+        }
         a_cuts = "brecflav==1&&tagqr<0";
         ab_cuts = "brecflav==-1&&tagqr>0";
         b_cuts = "brecflav==1&&tagqr>0";

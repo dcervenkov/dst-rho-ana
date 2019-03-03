@@ -51,6 +51,8 @@
 // Local includes
 #include "colors.h"
 #include "constants.h"
+#include "log.h"
+#include "tools.h"
 
 Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const char* output_dir) {
     dec_type_.defineType("a", 1);
@@ -81,8 +83,8 @@ Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const cha
     delete gsim_tree;
     gsim_file->Close();
 
-    gEnv->SetValue("Canvas.PrintDirectory", output_dir);
-    printf("print dir: %s\n", gEnv->GetValue("Canvas.PrintDirectory", "not found"));
+    tools::SetPlotDir(output_dir);
+
     output_file_ = new TFile(TString(output_dir) + "/plots.root", "RECREATE");
 }
 
@@ -262,10 +264,15 @@ void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooD
             p1 = data1_histo->GetBinContent(i);
             p2 = data2_histo->GetBinContent(i);
             // pull_histo->SetBinContent(i, p1 / p2);
-            pull_histo->SetBinContent(i, p1 - p2);
+            // pull_histo->SetBinContent(i, p1 - p2);
             // pull_histo->SetBinContent(i, (p1 - p2) / std::sqrt((p1 + p2) / 2));
+            pull_histo->SetBinContent(i, (p1 - p2) / std::sqrt(p2));
+            Log::print(Log::warning,
+                        "In pull calculation - PDF bin content = %f, Poisson approximation "
+                        "questionable!\n",
+                        p2);
         }
-        RooHist* hpull = new RooHist(*pull_histo);
+        RooHist* hpull = new RooHist(*pull_histo, 0, 1, RooAbsData::ErrorType::None);
 
         hpull->SetFillColor(kGray);
         // The only working way to get rid of error bars; HIST draw option doesn't
@@ -313,125 +320,8 @@ void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooD
 }
 
 void Fitter::PlotVars2D(const RooRealVar& var1, const RooRealVar& var2) const {
-    TCanvas canvas(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_evtgen_canvas",
-                   TString(var1.GetTitle()) + "_" + TString(var2.GetName()) + " evtgen canvas", 500,
-                   500);
-
-    TH2D* evtgen_histo = static_cast<TH2D*>(
-        evtgen_dataset_->createHistogram("evtgen_histo", var1, RooFit::YVar(var2)));
-
-    canvas.SetRightMargin(0.14);
-
-    evtgen_histo->SetMinimum(0);
-    evtgen_histo->SetTitle("");
-    evtgen_histo->Draw("colz");
-    evtgen_histo->GetZaxis()->SetTitle("");
-
-    canvas.Write();
-    canvas.SaveAs(format);
-
-    TH2D* gsim_histo =
-        static_cast<TH2D*>(gsim_dataset_->createHistogram("gsim_histo", var1, RooFit::YVar(var2)));
-
-    gsim_histo->SetMinimum(0);
-    gsim_histo->SetTitle("");
-    gsim_histo->Draw("colz");
-    gsim_histo->GetZaxis()->SetTitle("");
-
-    canvas.SetName(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_gsim_canvas");
-    canvas.SetTitle(TString(var1.GetName()) + "_" + TString(var2.GetName()) + " gsim canvas");
-
-    canvas.Write();
-    canvas.SaveAs(format);
-
-    delete evtgen_histo;
-    delete gsim_histo;
-}
-
-void Fitter::PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHist& data1,
-                        const RooDataHist& data2) const {
-    TCanvas canvas(
-        TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_" + TString(data1.GetName()),
-        TString(var1.GetTitle()) + "_" + TString(var2.GetName()) + "_" + TString(data1.GetTitle()),
-        500, 500);
-
-    TH2D* histo1 = static_cast<TH2D*>(data1.createHistogram("histo1", var1, RooFit::YVar(var2)));
-
-    TH2D* histo2 = static_cast<TH2D*>(data2.createHistogram("histo2", var1, RooFit::YVar(var2)));
-
-    // For some reason histo1->Clone("newname") doesn't return anything!
-    TH2D* pull_histo =
-        static_cast<TH2D*>(data2.createHistogram("pull_histo", var1, RooFit::YVar(var2)));
-
-    const double max = std::max(histo1->GetMaximum(), histo2->GetMaximum());
-
-    canvas.SetRightMargin(0.14);
-
-    histo1->SetMinimum(0);
-    histo1->SetMaximum(max);
-    histo1->SetTitle("");
-    histo1->Draw("colz");
-    histo1->GetZaxis()->SetTitle("");
-
-    canvas.Write();
-    canvas.SaveAs(format);
-
-    histo2->SetMinimum(0);
-    histo2->SetMaximum(max);
-    histo2->SetTitle("");
-    histo2->Draw("colz");
-    histo2->GetZaxis()->SetTitle("");
-
-    canvas.SetName(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_" +
-                   TString(data2.GetName()));
-    canvas.SetTitle(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_" +
-                    TString(data2.GetTitle()));
-
-    canvas.Write();
-    canvas.SaveAs(format);
-
-    double p1;
-    double p2;
-    for (int i = 1; i <= pull_histo->GetNbinsX(); i++) {
-        for (int j = 1; j <= pull_histo->GetNbinsY(); j++) {
-            p1 = histo1->GetBinContent(i, j);
-            p2 = histo2->GetBinContent(i, j);
-            // pull_histo->SetBinContent(i, j, p1/p2);
-            pull_histo->SetBinContent(i, j, p1 - p2);
-            // pull_histo->SetBinContent(i, j, (p1 - p2) / std::sqrt((p1 + p2) / 2));
-        }
-    }
-
-// Check if we are running a newer version of ROOT which has new palettes
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 4, 0)
-    gStyle->SetPalette(kLightTemperature);
-#else
-    gStyle->SetPalette(87);
-#endif
-    pull_histo->SetTitle("");
-    // pull_histo->SetMinimum(0.8);
-    // pull_histo->SetMaximum(1.2);
-    const double pull_max = std::max(-pull_histo->GetMinimum(), pull_histo->GetMaximum());
-    pull_histo->SetMinimum(-pull_max);
-    pull_histo->SetMaximum(+pull_max);
-    // pull_histo->SetMinimum(-5);
-    // pull_histo->SetMaximum(5);
-    pull_histo->GetZaxis()->SetTitle("");
-    pull_histo->Draw("colz");
-    pull_histo->Write();
-
-    canvas.SetName(TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_" +
-                   TString(data1.GetName()) + "_" + TString(data2.GetName()));
-    canvas.SetTitle(TString(var1.GetTitle()) + "_" + TString(var2.GetTitle()) + " " +
-                    TString(data1.GetName()) + " " + TString(data2.GetName()));
-
-    canvas.Update();
-    canvas.Write();
-    canvas.SaveAs(format);
-    colors::setColors();
-
-    delete histo1;
-    delete histo2;
+    tools::PlotVars2D(var1, var2, *evtgen_dataset_, format);
+    tools::PlotVars2D(var1, var2, *gsim_dataset_, format);
 }
 
 void Fitter::PlotEfficiency(RooRealVar& var, bool plot_model, bool legend_position_top,
@@ -833,7 +723,8 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, format, true);
         }
     }
 
@@ -861,7 +752,8 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, format, true);
         }
     }
 }
@@ -902,8 +794,10 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            PlotVars2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo);
-            PlotVars2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo, format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo, format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo, format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo, format, true);
         }
     }
 
@@ -929,7 +823,8 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D, format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D, format, true);
         }
     }
 }
@@ -965,7 +860,8 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, format, true);
         }
     }
 
@@ -993,7 +889,8 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, format, true);
         }
     }
 

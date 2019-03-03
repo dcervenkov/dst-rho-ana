@@ -7,17 +7,28 @@
  *
  */
 
-#include "tools.h"
+// Standard includes
+#include <algorithm>
+
+// Boost includes
+#include <boost/filesystem.hpp>
 
 // ROOT includes
+#include "RooAbsData.h"
+#include "RooDataHist.h"
 #include "RooRealVar.h"
 #include "TCanvas.h"
+#include "TChain.h"
+#include "TEnv.h"
 #include "TH2D.h"
 #include "TList.h"
 #include "TPaveStats.h"
 #include "TStyle.h"
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
+
+// Local includes
+#include "log.h"
 
 namespace tools {
 
@@ -85,8 +96,20 @@ void SetupPlotStyle() {
     gStyle->SetPadTickY(1);
     gStyle->SetPadTopMargin(0.05);
     gStyle->SetPadRightMargin(0.05);
+    gStyle->SetPadLeftMargin(0.105);
     gStyle->SetPadBottomMargin(0.1);
     gStyle->SetOptStat(0);
+}
+
+/**
+ * Set the directory to which to ouput ROOT plots
+ */
+void SetPlotDir(const char* plot_dir) {
+    if (!boost::filesystem::is_directory(plot_dir)) {
+        boost::filesystem::create_directories(plot_dir);
+    }
+    gEnv->SetValue("Canvas.PrintDirectory", plot_dir);
+    Log::print(Log::info, "Print directory: %s\n", gEnv->GetValue("Canvas.PrintDirectory", "not found"));
 }
 
 /**
@@ -147,9 +170,10 @@ TPaveText* CreateStatBox(double chi2, RooArgList* results, bool position_top, bo
  * @param var1 First variable.
  * @param var2 Second variable.
  * @param data Data to be plotted.
- * @param format Format in which to save the images.
+ * @param format [optional] Format in which to save the images.
+ * @param max [optional] Maximum of the range
  */
-void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHist& data, const char* format) {
+void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data, const char* format, const double max) {
     TCanvas canvas(TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
                    TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
                    500, 500);
@@ -159,12 +183,14 @@ void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHis
     canvas.SetRightMargin(0.14);
 
     histo->SetMinimum(0);
+    if (max != 0) histo->SetMaximum(max);
     histo->SetTitle("");
     histo->Draw("colz");
     histo->GetZaxis()->SetTitle("");
 
     canvas.Write();
     canvas.SaveAs(format);
+    delete histo;
 }
 
 /*
@@ -174,13 +200,14 @@ void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHis
  * @param var2 Second variable.
  * @param data Data from which to calculate pull
  * @param pdf Histogrammed PDF from which to calculate pull
- * @param format Format in which to save the images.
+ * @param format [optional] Format in which to save the images.
+ * @param residual [optional] Plot a residual instead of a pull
  */
-void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHist& data, const RooDataHist& pdf, const char* format) {
-    TCanvas canvas(TString(data.GetName()) + "_pull_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
-                   TString(data.GetName()) + "_pull_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
+void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data, const RooAbsData& pdf, const char* format, const bool residual) {
+    TString type = residual ? "_residual" : "_pull";
+    TCanvas canvas(TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()) + type,
+                   TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()) + type,
                    500, 500);
-
     gStyle->SetPalette(kLightTemperature);
 
     TH2D* histo1 = static_cast<TH2D*>(data.createHistogram("histo1", var1, RooFit::YVar(var2)));
@@ -196,9 +223,17 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHis
             p1 = histo1->GetBinContent(i, j);
             p2 = histo2->GetBinContent(i, j);
             // pull_histo->SetBinContent(i, j, p1/p2);
-            // pull_histo->SetBinContent(i, j, p1 - p2);
-            pull_histo->SetBinContent(i, j, (p1 - p2) / std::sqrt(p2));
-            // if (p2 < 10) printf("WARNING: In pull calculation - PDF bin content = %f, Poisson approximation questionable!\n", p2);
+            if (residual) {
+                pull_histo->SetBinContent(i, j, p1 - p2);
+            } else {
+                pull_histo->SetBinContent(i, j, (p1 - p2) / std::sqrt(p2));
+                if (p2 < 10) {
+                    Log::print(Log::warning,
+                               "In pull calculation - PDF bin content = %f, Poisson approximation "
+                               "questionable!\n",
+                               p2);
+                }
+            }
         }
     }
 
@@ -213,7 +248,33 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooDataHis
     canvas.Write();
     canvas.SaveAs(format);
 
+    delete histo1;
+    delete histo2;
+    delete pull_histo;
+
     gStyle->SetPalette(kViridis);
+}
+
+/*
+ * Create and save two 2D plots with the SAME range
+ *
+ * @param var1 First variable.
+ * @param var2 Second variable.
+ * @param data1 Data to be plotted.
+ * @param data2 Data to be plotted.
+ * @param format [optional] Format in which to save the images.
+ */
+void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data1,
+                const RooAbsData& data2, const char* format) {
+    
+    double max = 0;
+    TH2D* histo1 = static_cast<TH2D*>(data1.createHistogram("histo1", var1, RooFit::YVar(var2)));
+    TH2D* histo2 = static_cast<TH2D*>(data2.createHistogram("histo2", var1, RooFit::YVar(var2)));
+    max = std::max(histo1->GetMaximum(), histo2->GetMaximum());
+    delete histo1;
+    delete histo2;
+    PlotVars2D(var1, var2, data1, format, max);
+    PlotVars2D(var1, var2, data2, format, max);
 }
 
 }  // namespace tools

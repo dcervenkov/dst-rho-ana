@@ -9,7 +9,7 @@ LD_FLAGS := -Wl,-rpath $(HOME)/bin/belle/packages/Meerkat/lib
 CXX_FLAGS := -std=c++11 -g -Wall -Wno-non-virtual-dtor
 ROOT_FLAGS := $(shell root-config --cflags)
 ROOT_LIBS := $(shell root-config --libs) -lRooFitCore -lRooFit
-LIBS := -L$(HOME)/bin/belle/packages/Meerkat/lib -lMeerkat
+LD_LIBS := -lboost_system -lboost_filesystem -L$(HOME)/bin/belle/packages/Meerkat/lib -lMeerkat
 INCS := -Isrc -I$(HOME)/bin/belle/packages/Meerkat/inc
 
 .PHONY: all clean
@@ -19,7 +19,7 @@ all:: $(TARGET)
 -include $(DEP_FILES)
 
 $(TARGET): $(OBJ_FILES)
-	$(CXX) -o $@ $^ $(LD_FLAGS) $(ROOT_LIBS) $(LIBS)
+	$(CXX) -o $@ $^ $(LD_FLAGS) $(ROOT_LIBS) $(LD_LIBS)
 
 obj/%.o: src/%.cc | obj
 	$(CXX) $(CXX_FLAGS) $(INCS) $(ROOT_FLAGS) -c -MMD -o $@ $<

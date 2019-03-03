@@ -7,9 +7,9 @@ DEP_FILES := $(OBJ_FILES:.o=.d)
 CXX := g++
 #LD_FLAGS := ...
 CXX_FLAGS := -std=c++11 -g -Wall -Wno-non-virtual-dtor
-#BOOST_INC_DIR := /usr/local/include/boost-1_37
 ROOT_FLAGS := $(shell root-config --cflags)
 ROOT_LIBS := $(shell root-config --libs) -lRooFitCore -lRooFit
+LD_LIBS := -lboost_system -lboost_filesystem
 INCS := -Isrc
 
 BELLE_LIB_DIR ?= /belle
@@ -24,7 +24,7 @@ all:: $(TARGET)
 -include $(DEP_FILES)
 
 $(TARGET): $(OBJ_FILES)
-	$(CXX) -o $@ $^ $(LD_FLAGS) $(ROOT_LIBS) $(BELLE_LIBS) $(CERN_LIBS)
+	$(CXX) -o $@ $^ $(LD_FLAGS) $(ROOT_LIBS) $(BELLE_LIBS) $(CERN_LIBS) $(LD_LIBS)
 
 obj/%.o: src/%.cc | obj
 	$(CXX) $(CXX_FLAGS) $(INCS) $(BELLE_INCS) $(ROOT_FLAGS) -c -MMD -o $@ $<

@@ -10,6 +10,7 @@ CXX_FLAGS := -std=c++11 -g -Wall -Wno-non-virtual-dtor
 #BOOST_INC_DIR := /usr/local/include/boost-1_37
 ROOT_FLAGS := $(shell root-config --cflags)
 ROOT_LIBS := $(shell root-config --libs) -lRooFitCore -lRooFit -lRooStats
+LD_LIBS := -lboost_system -lboost_filesystem
 INCS := -Isrc
 
 .PHONY: all clean
@@ -19,7 +20,7 @@ all:: $(TARGET)
 -include $(DEP_FILES)
 
 $(TARGET): $(OBJ_FILES)
-	$(CXX) -o $@ $^ $(LD_FLAGS) $(ROOT_LIBS) 
+	$(CXX) -o $@ $^ $(LD_FLAGS) $(ROOT_LIBS) $(LD_LIBS)
 
 obj/%.o: src/%.cc | obj
 	$(CXX) $(CXX_FLAGS) $(INCS) $(ROOT_FLAGS) -c -MMD -o $@ $<

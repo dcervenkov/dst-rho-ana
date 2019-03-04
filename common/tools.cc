@@ -218,6 +218,8 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
 
     double p1;
     double p2;
+    const int questionable_limit = 10;
+    int questionable_bins = 0;
     for (int i = 1; i <= pull_histo->GetNbinsX(); i++) {
         for (int j = 1; j <= pull_histo->GetNbinsY(); j++) {
             p1 = histo1->GetBinContent(i, j);
@@ -227,14 +229,20 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
                 pull_histo->SetBinContent(i, j, p1 - p2);
             } else {
                 pull_histo->SetBinContent(i, j, (p1 - p2) / std::sqrt(p2));
-                if (p2 < 10) {
-                    Log::print(Log::warning,
-                               "In pull calculation - PDF bin content = %f, Poisson approximation "
-                               "questionable!\n",
-                               p2);
+                if (p2 < questionable_limit) {
+                    questionable_bins++;
                 }
             }
         }
+    }
+
+    if (questionable_bins) {
+        const int total_bins = pull_histo->GetNbinsX() * pull_histo->GetNbinsY();
+        Log::print(Log::warning,
+                   "There were %i/%i (%.0f%%) bins with less than %i events - Poisson approximation "
+                   "questionable! Consider using residuals.\n",
+                   questionable_bins, total_bins, 100 * (double)questionable_bins / total_bins,
+                   questionable_limit);
     }
 
     const double pull_max = std::max(abs(pull_histo->GetMinimum()), abs(pull_histo->GetMaximum()));

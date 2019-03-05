@@ -805,7 +805,7 @@ void FitterCPV::FitAngularCR() {
     RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
     dataset_ = temp_dataset;
 
-    Log::print(Log::debug, "DC: Fitting %i events.\n", dataset_->numEntries());
+    Log::print(Log::debug, "Fitting %i events.\n", dataset_->numEntries());
 
     AngularPDF pdf_B("pdf_B", "pdf_B", false, efficiency_model_, efficiency_file_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
@@ -927,7 +927,7 @@ void FitterCPV::FitAngularCR() {
 }
 
 void FitterCPV::FitAngularCRSCF() {
-    Log::print(Log::info, "DC: Fitting %i events.\n", dataset_->numEntries());
+    Log::print(Log::info, "Fitting %i events.\n", dataset_->numEntries());
 
     AngularPDF cr_pdf_B("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_file_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
@@ -1060,7 +1060,7 @@ void FitterCPV::FitAngularCRSCF() {
 }
 
 void FitterCPV::FitAngularAll() {
-    Log::print(Log::info, "DC: Fitting %i events.\n", dataset_->numEntries());
+    Log::print(Log::info, "Fitting %i events.\n", dataset_->numEntries());
 
     AngularPDF cr_pdf_B("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_file_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
@@ -1233,8 +1233,8 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
     }
 
     reduced_dataset = dynamic_cast<RooDataSet*>(dataset_->reduce(reduce_string.str().c_str()));
-    Log::print(Log::info, "dataset after reduce: %i\n", reduced_dataset->numEntries());
-    Log::print(Log::info, "reduce string: %s\n", reduce_string.str().c_str());
+    Log::print(Log::info, "Dataset after reduce: %i\n", reduced_dataset->numEntries());
+    Log::print(Log::debug, "Reduce string: %s\n", reduce_string.str().c_str());
     return reduced_dataset;
 }
 
@@ -1805,7 +1805,7 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
     // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
     RooDataSet* temp_dataset =
         new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_, common_cuts);
-    Log::print(Log::debug, "DBG: Num events passing common cuts: %i\n", temp_dataset->numEntries());
+    Log::print(Log::debug, "Num events passing common cuts: %i\n", temp_dataset->numEntries());
 
     //  separate conditional vars from stuff like thetat
 
@@ -1853,7 +1853,7 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
     dataset_->append(*dataset_bb);
     delete dataset_bb;
 
-    Log::print(Log::debug, "Num events passing all initial cuts: %i\n", dataset_->numEntries());
+    Log::print(Log::info, "Num events passing all initial cuts: %i\n", dataset_->numEntries());
 
     delete input_tree;
 

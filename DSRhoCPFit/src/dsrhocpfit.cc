@@ -111,6 +111,7 @@ int main(int argc, char* argv[]) {
         fitter.SetEfficiencyFile("efficiency.root");
     }
     if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
+    if (options.scf_kde_file_set) fitter.SetSCFKDE(options.scf_kde_file);
     if (options.do_mixing_fit_set) fitter.SetDoMixingFit(options.do_mixing_fit);
     if (options.do_time_independent_fit_set) {
         fitter.SetDoTimeIndependentFit(options.do_time_independent_fit);
@@ -213,10 +214,11 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"time-independent", no_argument, 0, 'i'},
         {"perfect-tag", no_argument, 0, 't'},
         {"plot-dir", required_argument, 0, 'p'},
+        {"scf-kde", required_argument, 0, 'k'},
         {"help", no_argument, 0, 'h'},
         {NULL, no_argument, NULL, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:y:e:n:f:x:p:lmith", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:g:y:e:n:f:x:p:k:lmith", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -275,6 +277,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.generator_level = true;
                 options.generator_level_set = true;
                 break;
+            case 'k':
+                options.scf_kde_file = optarg;
+                options.scf_kde_file_set = true;
+                break;
             case 'h':
                 printf("Usage: %s [OPTION]... RESULTS-FILE INPUT-FILES\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
@@ -284,6 +290,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-g, --config=CONFIG-FILE         read in configuration from the specified file\n");
                 printf("-h, --help                       display this text and exit\n");
                 printf("-i, --time-independent           make a time-independent fit\n");
+                printf("-k, --scf-kde                    use SCF KDE from file\n");
                 printf("-l, --log                        save copy of log to results file\n");
                 printf("-m, --mixing                     make a mixing fit\n");
                 printf("-n, --events=NUM-EVENTS          number of events to be imported from the input file\n");

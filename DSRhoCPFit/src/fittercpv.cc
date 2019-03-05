@@ -56,6 +56,9 @@
 #include "TStyle.h"
 #include "TTree.h"
 
+// Meerkat includes
+#include "RooMeerkatPdf.hh"
+
 // Local includes
 #include "angularpdf.h"
 #include "cksum.h"
@@ -2643,4 +2646,88 @@ RooAbsPdf* FitterCPV::CreateAngularSCFPDF() {
         "scf_pdf", "scf_pdf", RooArgList(*scf_thetat_model, *scf_thetab_model, *scf_phit_model));
 
     return scf_pdf;
+}
+
+void FitterCPV::SetSCFKDE(const char* file) {
+    Log::print(Log::info, "Setting up KDE SCF model from file '%s'\n", file);
+    OneDimPhaseSpace phasespace_thetat{"phasespace_thetat", thetat_->getMin(), thetat_->getMax()};
+    OneDimPhaseSpace phasespace_thetab{"phasespace_thetab", thetab_->getMin(), thetab_->getMax()};
+    OneDimPhaseSpace phasespace_phit{"phasespace_phit", phit_->getMin(), phit_->getMax()};
+    CombinedPhaseSpace phasespace{"phasespace", &phasespace_thetat, &phasespace_thetab,
+                                  &phasespace_phit};
+    BinnedDensity binned_scf_kde("binned_scf_kde", &phasespace, file);
+
+    TH3D* histo =
+        new TH3D("histo", "histo", 100, thetat_->getMin(), thetat_->getMax(), 100,
+                 thetab_->getMin(), thetab_->getMax(), 100, phit_->getMin(), phit_->getMax());
+
+    double thetat, thetab, phit;
+    int num_replaced = 0;
+    int num_checked = 0;
+    for (int x = 1; x <= histo->GetXaxis()->GetNbins(); x++) {
+        for (int y = 1; y <= histo->GetYaxis()->GetNbins(); y++) {
+            for (int z = 1; z <= histo->GetZaxis()->GetNbins(); z++) {
+                thetat = histo->GetXaxis()->GetBinCenter(x);
+                thetab = histo->GetYaxis()->GetBinCenter(y);
+                phit = histo->GetZaxis()->GetBinCenter(z);
+                std::vector<Double_t> coords(3);
+                coords[0] = thetat;
+                coords[1] = thetab;
+                coords[2] = phit;
+                num_checked++;
+                if (CloseToEdge(coords, 0.0)) {
+                    thetat_->setVal(thetat);
+                    thetab_->setVal(thetab);
+                    phit_->setVal(phit);
+                    RooArgSet set(*thetat_, *thetab_, *phit_);
+                    // scf_angular_pdf_->getObservables();
+                    // Log::print(Log::debug, "Close to edge, %f replaced by %f at [%f, %f, %f]\n",
+                    //            binned_scf_kde.density(coords), scf_angular_pdf_->getVal(),
+                    //            thetat_->getVal(), thetab_->getVal(), phit_->getVal());
+                    // histo->SetBinContent(histo->GetBin(x, y, z), scf_angular_pdf_->getVal());
+                    histo->SetBinContent(histo->GetBin(x, y, z),
+                                         binned_scf_kde.density(coords) * 1.5);
+                    num_replaced++;
+                } else {
+                    histo->SetBinContent(histo->GetBin(x, y, z), binned_scf_kde.density(coords));
+                }
+            }
+        }
+    }
+    Log::print(Log::debug, "Replaced %i/%i (%.1f%%) SCF bins\n", num_replaced, num_checked,
+               (double)num_replaced / num_checked * 100);
+
+    scf_angular_kde_hist_ = new RooDataHist("scf_angular_kde_hist_", "scf_angular_kde_hist_",
+                                            RooArgList(*thetat_, *thetab_, *phit_), histo);
+    scf_angular_kde_ =
+        new RooHistPdf("scf_angular_kde", "scf_angular_kde", RooArgSet(*thetat_, *thetab_, *phit_),
+                       *scf_angular_kde_hist_);
+
+    scf_angular_pdf_ = scf_angular_kde_;
+
+    // OneDimPhaseSpace* phasespace_thetat = new OneDimPhaseSpace{"phasespace_thetat", thetat_->getMin(), thetat_->getMax()};
+    // OneDimPhaseSpace* phasespace_thetab = new OneDimPhaseSpace{"phasespace_thetab", thetab_->getMin(), thetab_->getMax()};
+    // OneDimPhaseSpace* phasespace_phit = new OneDimPhaseSpace{"phasespace_phit", phit_->getMin(), phit_->getMax()};
+    // CombinedPhaseSpace* phasespace = new CombinedPhaseSpace{"phasespace", phasespace_thetat, phasespace_thetab,
+    //                               phasespace_phit};
+	// BinnedDensity* binned_scf_kde = new BinnedDensity("binned_scf_kde", phasespace, file);
+    // RooArgList list(*thetat_, *thetab_, *phit_);
+    // RooMeerkatPdf* meerkat_pdf =
+    //     new RooMeerkatPdf("meerkat_pdf", "meerkat_pdf", list, binned_scf_kde);
+    // scf_angular_pdf_ = meerkat_pdf;
+}
+
+int FitterCPV::CloseToEdge(const std::vector<Double_t> vals, const double margin) const {
+    RooRealVar* vars[3] = {thetat_, thetab_, phit_};
+    for (int var_num = 0; var_num < 3; var_num++) {
+        const double min = vars[var_num]->getMin();
+        const double max = vars[var_num]->getMax();
+        const double range = max - min;
+        if (vals[var_num] < min + range * margin) {
+            return 1;
+        } else if (vals[var_num] > max - range * margin) {
+            return 2;
+        }
+    }
+    return 0;
 }

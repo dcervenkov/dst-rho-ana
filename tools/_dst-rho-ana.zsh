@@ -16,6 +16,7 @@ _dsrhocpfit_complete()
 	'--config=[read in configuration from the specified file]:filename:_files' \
 	'--help[display help]' \
 	'--time-independent[make a time-independent fit]' \
+	'--scf-kde=[use SCF KDE from file]:filename:_files' \
 	'--log[save copy of log to results file]' \
 	'--mixing[make a mixing fit]' \
 	'--events=[number of events to be imported from the input file]' \

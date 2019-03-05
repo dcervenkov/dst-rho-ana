@@ -14,11 +14,14 @@
 #include <array>
 
 // ROOT includes
+#include "RooHistPdf.h"
 #include "RooRealVar.h"
 #include "RooSimultaneous.h"
 #include "TCanvas.h"
+#include "TChain.h"
 #include "TH3D.h"
 #include "TPaveText.h"
+#include "TTree.h"
 
 // Local includes
 #include "constants.h"
@@ -81,6 +84,7 @@ class FitterCPV {
 
     void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);
+    void SetSCFKDE(const char* file);
     bool FixParameters(const char* pars);
     const std::string CreateResultsString();
     const std::string CreatePullTableString(const bool asymmetric = false);
@@ -180,6 +184,7 @@ class FitterCPV {
                                   const double margin1 = 0, const double margin2 = 0);
     const double Calculate3DChi2(const RooDataHist& data, const RooDataHist& pdf);
     const void SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const double margin = 0);
+    int CloseToEdge(const std::vector<Double_t> vals, const double margin) const;
 
     RooAbsPdf* CreateAngularSCFPDF();
     RooAbsPdf* CreateAngularBKGPDF();
@@ -187,6 +192,9 @@ class FitterCPV {
     RooAbsPdf* bkg_angular_pdf_;
     RooArgSet scf_parameters_argset_;
     RooArgSet bkg_parameters_argset_;
+
+    RooDataHist* scf_angular_kde_hist_ = NULL;
+    RooHistPdf* scf_angular_kde_ = NULL;
 
     std::vector<RooRealVar**> conditional_vars_;
     std::vector<RooRealVar**> dataset_vars_;

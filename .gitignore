@@ -36,6 +36,9 @@
 */.cproject
 */.settings
 
+# Jupyter files
+.ipynb_checkpoints
+
 # VS Code files
 */.vscode
 compile_commands.json

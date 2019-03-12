@@ -11,6 +11,9 @@
 #ifndef DTCPPDF_H_
 #define DTCPPDF_H_
 
+// Standard includes
+#include <vector>
+
 // ROOT includes
 #include "TF1.h"
 #include "RooRealProxy.h"
@@ -48,7 +51,7 @@ public:
             RooAbsReal& _vtndf,
             RooAbsReal& _vtistagl);
 
-    DtCPPDF(const char *name, const char *title, bool B_bar, bool CKM_favored, bool perfect_tagging, const int efficiency_model, const char* efficiency_file,
+    DtCPPDF(const char *name, const char *title, bool B_bar, bool CKM_favored, bool perfect_tagging, const int efficiency_model, std::vector<const char*> efficiency_files,
             RooAbsReal& _tht,
             RooAbsReal& _thb,
             RooAbsReal& _phit,

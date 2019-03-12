@@ -10,6 +10,9 @@
 #ifndef DSRHOCPFIT_H_
 #define DSRHOCPFIT_H_
 
+// Standard includes
+#include <vector>
+
 struct fitter_options {
     int num_CPUs;
     bool num_CPUs_set;
@@ -25,8 +28,8 @@ struct fitter_options {
     bool num_events_set;
     bool perfect_tagging;
     bool perfect_tagging_set;
-    char* efficiency_file;
-    bool efficiency_file_set;
+    std::vector<const char*> efficiency_files;
+    bool efficiency_files_set;
     int efficiency_model;
     bool efficiency_model_set;
     bool generator_level;

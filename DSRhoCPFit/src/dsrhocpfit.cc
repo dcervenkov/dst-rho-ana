@@ -105,10 +105,8 @@ int main(int argc, char* argv[]) {
     } else {
         fitter.SetEfficiencyModel(1);
     }
-    if (options.efficiency_file_set) {
-        fitter.SetEfficiencyFile(options.efficiency_file);
-    } else {
-        fitter.SetEfficiencyFile("efficiency.root");
+    if (options.efficiency_files_set) {
+        fitter.SetEfficiencyFiles(options.efficiency_files);
     }
     if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
     if (options.scf_kde_file_set) fitter.SetSCFKDE(options.scf_kde_file);
@@ -159,8 +157,10 @@ int main(int argc, char* argv[]) {
         fitter.LogFileCRC("input_file_crc", file_name);
     }
     fitter.LogText("efficiency_model", std::to_string(fitter.GetEfficiencyModel()).c_str());
-    // TODO: This definitely shouldnt't be hardcoded
-    fitter.LogFileCRC("efficiency_crc", fitter.GetEfficiencyFile());
+    for (auto efficiency_file : fitter.GetEfficiencyFiles()) {
+        fitter.LogText("efficiency_file_name", efficiency_file);
+        fitter.LogFileCRC("efficiency_file_crc", efficiency_file);
+    }
     if (fitter.ResultExists()) {
         fitter.LogResults();
         fitter.LogText("pull_table", fitter.CreatePullTableString().c_str());
@@ -238,8 +238,8 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.efficiency_model_set = true;
                 break;
             case 'y':
-                options.efficiency_file = optarg;
-                options.efficiency_file_set = true;
+                options.efficiency_files.push_back(optarg);
+                options.efficiency_files_set = true;
                 break;
             case 'n':
                 options.num_events = atoi(optarg);

@@ -35,6 +35,7 @@ public:
 	virtual ~Efficiency();
 	double GetEfficiency(double thetat, double thetab, double phit, int efficiency_model) const;
 	double EfficiencyInterface(double* x, double* p) const;
+	void ReadInFile(const char* filename);
 
 protected:
 	void RescaleVars(double& thetat, double& thetab, double& phit, const double margin) const;
@@ -127,6 +128,11 @@ protected:
 	TH3F* histo_efficiency = NULL;
 	bool CanUseInterpolation(const double& phit, const double& transtht, const double& transthb) const;
 	int CloseToEdge(const std::vector<Double_t> vals, const double margin) const;
+	double GetHistogramEfficiency(double thetat, double thetab, double phit) const;
+	double GetKDEEfficiency(double thetat, double thetab, double phit) const;
+
+	double histo_normalization = 0;
+	double GetNormalization();
 };
 
 #endif /* EFFICIENCY_H_ */

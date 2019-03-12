@@ -14,7 +14,7 @@
 
 //ClassImp(AngularPDF)
 
-AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _efficiency_model, const char* _efficiency_file,
+AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _efficiency_model, std::vector<const char*> _efficiency_files,
                    RooAbsReal& _tht,
                    RooAbsReal& _thb,
                    RooAbsReal& _phit,
@@ -31,9 +31,12 @@ AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _ef
     a0("a0","a0",this,_a0),
     ata("ata","ata",this,_ata),
     B_bar(_B_bar),
-    efficiency_model(_efficiency_model),
-    eff(_efficiency_file)
+    efficiency_model(_efficiency_model)
 {
+    for (auto file : _efficiency_files) {
+        eff.ReadInFile(file);
+    }
+
     // The rest of this constructor computes angular integration
     // of certain terms of the PDF. This is used to speed up
     // computation of normalization; see AngularPDF::analyticalIntegral

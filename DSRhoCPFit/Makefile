@@ -13,7 +13,7 @@ ROOT_LIBS := $(shell root-config --libs) -lRooFitCore -lRooFit
 INCS := -Isrc -I$(HOME)/bin/belle/packages/Meerkat/inc
 
 BELLE_LIB_DIR ?= /belle
-BELLE_INCS := -I$(BELLE_LIB_DIR)/belle/b20091203_2126/include
+BELLE_INCS := -isystem $(BELLE_LIB_DIR)/belle/b20091203_2126/include
 BELLE_LIBS := -L$(BELLE_LIB_DIR)/belle/b20091203_2126/x86_64-unknown-linux-gnu/opt/lib -ltatami -lbelleutil
 CERN_LIBS := -L$(BELLE_LIB_DIR)/cern/2006/lib64 -lmathlib
 

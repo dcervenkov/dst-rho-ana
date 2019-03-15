@@ -27,6 +27,9 @@
 #include "RooArgList.h"
 #include "RooStats/SPlot.h"
 
+// Local includes
+#include "log.h"
+
 /**
  * Constructor that takes the output directory as argument. Plots as well
  * as ROOT files are saved to that directory.
@@ -193,7 +196,7 @@ void Fitter::Plot() {
 	data_set_->plotOn(frame_de,RooFit::XErrorSize(0.001));
 	active_model_->plotOn(frame_de);
 	const double chi2 = frame_de->chiSquare();
-	printf("chi^2 = %f\n", chi2);
+	Log::print(Log::info, "chi^2 = %f\n", chi2);
 
 	// Create a new frame to draw the pull distribution and add the distribution to the frame
 	RooPlot* frame_pull = de_.frame(RooFit::Title("Pull Distribution"));
@@ -324,7 +327,7 @@ TPaveText* Fitter::CreateStatBox(double chi2) {
 }
 
 void Fitter::SPlotFull(TChain* chain) {
-	printf("********** SPLOT FULL *********\n");
+	Log::print(Log::debug, "********** SPLOT FULL *********\n");
 	RooStats::SPlot* sDataX = new RooStats::SPlot("sData","An SPlot", *data_set_, &model_, RooArgList(n_signal_plus_cross_model_, n_bkg_) );
 
 	RooDataSet* dataw_sig = new RooDataSet(data_set_->GetName(),data_set_->GetTitle(),data_set_,*data_set_->get(),0,"n_signal_plus_cross_model_sw");
@@ -350,14 +353,14 @@ void Fitter::SPlotFull(TChain* chain) {
 	TH2F* h2f = data_set_->createHistogram(de_,thetab_, 100, 100);
 	TCanvas* can2 = new TCanvas("can2", "can2", 500, 500);
 	h2f->Draw();
-	printf("**************Corr full = %f\n",h2f->GetCorrelationFactor());
+	Log::print(Log::debug, "**************Corr full = %f\n",h2f->GetCorrelationFactor());
 	can2->Print("corr.pdf");
 
 	delete sDataX;
 }
 
 void Fitter::SPlotSC(TChain* chain) {
-	printf("********** SPLOT SC *********\n");
+	Log::print(Log::debug, "********** SPLOT SC *********\n");
 
 	this->Setup(Components::signal_plus_crossfeed);
 	data_set_ = new RooDataSet("data_set", "data_set", chain, RooArgSet(de_, evmcflag_, candsel_, thetab_), data_cut_);
@@ -392,7 +395,7 @@ void Fitter::SPlotSC(TChain* chain) {
 }
 
 void Fitter::SPlotSB(TChain* chain) {
-	printf("********** SPLOT SB *********\n");
+	Log::print(Log::debug, "********** SPLOT SB *********\n");
 
 	data_cut_ = "(evmcflag==1||evmcflag==7||evmcflag==8)||!((evmcflag==1||evmcflag==7||evmcflag==8)||(candsel!=0&&(evmcflag!=1&&evmcflag!=7)))";
 	data_set_ = new RooDataSet("data_set", "data_set", chain, RooArgSet(de_, evmcflag_, candsel_, thetab_), data_cut_);
@@ -427,7 +430,7 @@ void Fitter::SPlotSB(TChain* chain) {
 }
 
 void Fitter::SPlotCB(TChain* chain) {
-	printf("********** SPLOT CB *********\n");
+	Log::print(Log::debug, "********** SPLOT CB *********\n");
 
 	data_cut_ = "!(evmcflag==1||evmcflag==7||evmcflag==8)";
 	data_set_ = new RooDataSet("data_set", "data_set", chain, RooArgSet(de_, evmcflag_, candsel_, thetab_), data_cut_);

@@ -21,6 +21,7 @@
 #include "fitter.h"
 #include "tools.h"
 #include "colors.h"
+#include "log.h"
 
 //#define GRAPHICS
 
@@ -43,7 +44,7 @@ int main(int argc, char* argv[]) {
 
 	if (argc != 4){
 		printf("ERROR: Wrong number of arguments.\n");
-		printf("Usage: DSRhoPeek TRAINING-DIR DATA-DIR OUTPUT-DIR\n");
+		printf("Usage: DSRhoPeek TRAINING-DIR DATA-DIR PLOT-DIR\n");
 		return 2;
 	}
 
@@ -51,11 +52,11 @@ int main(int argc, char* argv[]) {
 	const char* dataDir = argv[2];
 	const char* outputDir = argv[3];
 
+	Log::setLogLevel(Log::debug);
+
+	tools::SetPlotDir(outputDir);
 	tools::SetupPlotStyle();
 	colors::setColors();
-
-	gEnv->SetValue("Canvas.PrintDirectory",outputDir);
-	printf("print dir: %s\n",gEnv->GetValue("Canvas.PrintDirectory","not found"));
 
 	// The various parameters are first fixed from training data (6 MC streams)
 	TChain* training_data = tools::ReadDataFromDir(trainingDir);
@@ -100,13 +101,13 @@ int main(int argc, char* argv[]) {
 //	fitter.SPlotCB(data);
 //
 //	fitter.Setup(Components::all);
-//	printf("Correlation - all: %f\n", fitter.GetCorrelation(training_data, fitter.de_, fitter.thetab_, true));
+//	Log::print(Log::info, "Correlation - all: %f\n", fitter.GetCorrelation(training_data, fitter.de_, fitter.thetab_, true));
 //	fitter.Setup(Components::signal);
-//	printf("Correlation - signal: %f\n", fitter.GetCorrelation(training_data, fitter.de_, fitter.thetab_, true));
+//	Log::print(Log::info, "Correlation - signal: %f\n", fitter.GetCorrelation(training_data, fitter.de_, fitter.thetab_, true));
 //	fitter.Setup(Components::crossfeed);
-//	printf("Correlation - crossfeed: %f\n", fitter.GetCorrelation(training_data, fitter.de_, fitter.thetab_, true));
+//	Log::print(Log::info, "Correlation - crossfeed: %f\n", fitter.GetCorrelation(training_data, fitter.de_, fitter.thetab_, true));
 //	fitter.Setup(Components::background);
-//	printf("Correlation - background: %f\n", fitter.GetCorrelation(training_data, fitter.de_, fitter.thetab_, true));
+//	Log::print(Log::info, "Correlation - background: %f\n", fitter.GetCorrelation(training_data, fitter.de_, fitter.thetab_, true));
 
 
 #ifdef GRAPHICS

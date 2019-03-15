@@ -12,6 +12,9 @@
 #include "Math/Functor.h"
 #include "Math/IntegratorMultiDim.h"
 
+// Local includes
+#include "log.h"
+
 //ClassImp(AngularPDF)
 
 AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _efficiency_model, std::vector<const char*> _efficiency_files,
@@ -108,7 +111,7 @@ Double_t AngularPDF::evaluate() const {
                      sqrt(2)*a0ti*sin(2*tht)*sin(tht)*sin(2*thb)*sin(thb)*cos(phit)-\
                      2*apti*sin(2*tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit);
 
-    // printf("eval: %f\n", value * eff.GetEfficiency(tht, thb, phit, efficiency_model));
+    // Log::print(Log::debug, "eval: %f\n", value * eff.GetEfficiency(tht, thb, phit, efficiency_model));
 
     return value * eff.GetEfficiency(tht, thb, phit, efficiency_model);
 }
@@ -159,7 +162,7 @@ Double_t AngularPDF::analyticalIntegral(Int_t code, const char* rangeName) const
     switch(code) {
     case 1: // Int[g,{tht,thb,phit}]
 //        return 32.*TMath::Pi()/9;
-        // printf("int: %f\n", ap*ap * int_tht_thb_phit[0] +
+        // Log::print(Log::debug, "int: %f\n", ap*ap * int_tht_thb_phit[0] +
         //        at*at * int_tht_thb_phit[1] +
         //        a0*a0 * int_tht_thb_phit[2] +
         //        ap0r * int_tht_thb_phit[3] -

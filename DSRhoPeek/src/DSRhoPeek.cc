@@ -5,9 +5,13 @@
  *      Author: D. Cervenkov
  */
 
+#include "DSRhoPeek.h"
+
+// Standard includes
 #include <string>
 #include <cstdio>
 
+// ROOT includes
 #include "TROOT.h"
 #include "TEnv.h"
 #include "TStyle.h"
@@ -21,14 +25,15 @@
 #include "TRandom.h"
 #include "TLegend.h"
 #include "TColor.h"
-
 #include "RooFit.h"
 #include "RooRealVar.h"
 #include "RooPlot.h"
 
-#include "DSRhoPeek.h"
+// Local includes
 #include "constants.h"
 #include "colors.h"
+#include "log.h"
+#include "tools.h"
 
 //#define GRAPHIC
 
@@ -69,27 +74,30 @@ int main(int argc, char* argv[]) {
 	const char* outputFileName =
 			(strOutputFileName.insert(strOutputFileName.rfind(".root"), nameAppendix.c_str())).c_str();
 
-	gEnv->SetValue("Canvas.PrintDirectory","plots");
-	printf("print dir: %s\n",gEnv->GetValue("Canvas.PrintDirectory","not found"));
+	tools::SetPlotDir("plots");
 	colors::setColors();
 
 	// Open file for reading
-	printf("Opening file %s...\n",inputFileName);
+	Log::print(Log::debug, "Opening file %s...\n",inputFileName);
 	TFile* inputFile = new TFile(inputFileName);
 	if(inputFile->IsOpen() == kTRUE){
-		printf("File %s opened.\n",inputFileName);
+		Log::print(Log::info, "File %s opened.\n",inputFileName);
 	} else {
-		printf("ERROR: Couldn't open file %s for reading. Exiting...\n", inputFileName);
+		Log::print(Log::error, "Couldn't open file %s for reading. Exiting...\n", inputFileName);
 		return 2;
 	}
 
 	TTree* Bcand = getBASFTree(inputFile,BASF_HIST_ID_BEST);
 
 	// Open file for writing
-	printf("Opening file %s...\n",outputFileName);
+	Log::print(Log::debug, "Opening file %s...\n",outputFileName);
 	TFile* outputFile = new TFile(outputFileName,"RECREATE");
-	if(outputFile->IsOpen() == kTRUE)
-		printf("File %s opened.\n",outputFileName);
+	if(outputFile->IsOpen() == kTRUE) {
+		Log::print(Log::info, "File %s opened.\n",outputFileName);
+	} else {
+		Log::print(Log::error, "Couldn't open file %s for writing. Exiting...\n", inputFileName);
+		return 2;
+	}
 
 	TCanvas* c_stacked = new TCanvas("c_stacked","B candidates stacked",1280,800);
 
@@ -121,9 +129,9 @@ int main(int argc, char* argv[]) {
 		c_stacked->Write();
 	}
 
-	printf("# MC truth candidates:\n");
+	Log::print(Log::info, "# MC truth candidates:\n");
 	for(int i = 0; i < NUM_MC_FLAGS; ++i) {
-		printf("%3i: %.0f\n", MC_FLAGS_ASSIGNMENT[i],h_stacked[0][i]->GetEntries());
+		Log::print(Log::info, "%3i: %.0f\n", MC_FLAGS_ASSIGNMENT[i],h_stacked[0][i]->GetEntries());
 	}
 
 	double numSignalEvts = 0;
@@ -137,7 +145,7 @@ int main(int argc, char* argv[]) {
 			numBackgroundEvts += h_stacked[0][i]->GetEntries();
 		}
 	}
-	printf("FOM = %f\n", numSignalEvts/sqrt(numSignalEvts + numBackgroundEvts));
+	Log::print(Log::info, "FOM = %f\n", numSignalEvts/sqrt(numSignalEvts + numBackgroundEvts));
 
 	outputFile->Close();
 
@@ -154,7 +162,7 @@ TTree* getBASFTree(TFile* file, const int treeNumber){
 	std::string histName("h");
 	histName += numStr;
 	if(!file->GetListOfKeys()->Contains(histName.c_str())){
-		printf("ERROR: Object '%s' doesn't exist in '%s'! Exiting...\n",histName.c_str(),file->GetName());
+		Log::print(Log::error, "Object '%s' doesn't exist in '%s'! Exiting...\n",histName.c_str(),file->GetName());
 		exit(3);
 	}
 	return (TTree*)file->Get(histName.c_str());

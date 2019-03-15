@@ -913,7 +913,7 @@ void FitterCPV::FitAngularCR() {
         tools::PlotVars2D(*thetab_, *phit_, *cr_hist);
 
         const double chi2 = Calculate3DChi2(hist, *cr_hist);
-        printf("Chi2 = %f\n", chi2);
+        Log::print(Log::info, "Chi2 = %f\n", chi2);
 
         // SaveChi2Scan(sim_pdf, ap_);
         // SaveChi2Scan(sim_pdf, apa_);
@@ -1344,7 +1344,7 @@ const void FitterCPV::LogEnvironmentMetadata() {
 }
 
 void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
-    printf("INFO: Generating dataset with %i events...\n", num_events);
+    Log::print(Log::info, "Generating dataset with %i events...\n", num_events);
 
     // vars with phiweak = phiweak + pi, r = 0.01
     double par_input[] = {
@@ -1462,19 +1462,19 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     const int num_fav = num_events * frac_fav / 2.0;
     const int num_sup = num_events * frac_sup / 2.0;
 
-    printf("INFO: Creating GenSpecs...\n");
+    Log::print(Log::info, "Creating GenSpecs...\n");
     RooAbsPdf::GenSpec* genSpec_a =
         mixing_pdf_a.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_fav));
-    printf("INFO: 1/4 GenSpecs ready\n");
+    Log::print(Log::info, "1/4 GenSpecs ready\n");
     RooAbsPdf::GenSpec* genSpec_ab =
         mixing_pdf_ab.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_fav));
-    printf("INFO: 2/4 GenSpecs ready\n");
+    Log::print(Log::info, "2/4 GenSpecs ready\n");
     RooAbsPdf::GenSpec* genSpec_b =
         mixing_pdf_b.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_sup));
-    printf("INFO: 3/4 GenSpecs ready\n");
+    Log::print(Log::info, "3/4 GenSpecs ready\n");
     RooAbsPdf::GenSpec* genSpec_bb =
         mixing_pdf_bb.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_sup));
-    printf("INFO: 4/4 GenSpecs ready\n");
+    Log::print(Log::info, "4/4 GenSpecs ready\n");
 
     RooAbsData::setDefaultStorageType(RooAbsData::Tree);
     RooDataSet* dataset;
@@ -1495,7 +1495,7 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
         dataset_a->addColumn(btagmcli);
         dataset = (RooDataSet*)dataset_a->Clone();
         delete dataset_a;
-        printf("INFO: 1/4 decay type ready.\n");
+        Log::print(Log::info, "1/4 decay type ready.\n");
 
         //  RooDataSet* dataset_ab = mixing_pdf_ab.generate(varsToGenerate,
         //  RooFit::NumEvents(num_fav));
@@ -1508,7 +1508,7 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
         dataset_ab->addColumn(btagmcli);
         dataset->append(*dataset_ab);
         delete dataset_ab;
-        printf("INFO: 2/4 decay types ready.\n");
+        Log::print(Log::info, "2/4 decay types ready.\n");
 
         //  RooDataSet* dataset_b = mixing_pdf_b.generate(varsToGenerate,
         //  RooFit::NumEvents(num_sup));
@@ -1521,7 +1521,7 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
         dataset_b->addColumn(btagmcli);
         dataset->append(*dataset_b);
         delete dataset_b;
-        printf("INFO: 3/4 decay types ready.\n");
+        Log::print(Log::info, "3/4 decay types ready.\n");
 
         //  RooDataSet* dataset_bb = mixing_pdf_bb.generate(varsToGenerate,
         //  RooFit::NumEvents(num_sup));
@@ -1534,7 +1534,7 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
         dataset_bb->addColumn(btagmcli);
         dataset->append(*dataset_bb);
         delete dataset_bb;
-        printf("INFO: 4/4 decay types ready.\n");
+        Log::print(Log::info, "4/4 decay types ready.\n");
 
         dataset->addColumns(varsToAdd);
 
@@ -1883,11 +1883,7 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
  */
 void FitterCPV::SetPlotDir(const char* plot_dir) {
     make_plots_ = true;
-    if (!boost::filesystem::is_directory(plot_dir)) {
-        boost::filesystem::create_directories(plot_dir);
-    }
-    gEnv->SetValue("Canvas.PrintDirectory", plot_dir);
-    printf("print dir: %s\n", gEnv->GetValue("Canvas.PrintDirectory", "not found"));
+    tools::SetPlotDir(plot_dir);
 }
 
 /**
@@ -1927,7 +1923,7 @@ bool FitterCPV::FixParameters(const char* pars) {
             }
         }
         if (par_not_found) {
-            printf("ERROR: Parameter %s doesn't exist.\n", par.c_str());
+            Log::print(Log::error, "Parameter %s doesn't exist.\n", par.c_str());
             return true;
         }
     }
@@ -2331,7 +2327,7 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var, const 
 
     for (Int_t i = 0; i < steps; i++) {
         var->setVal(i * stepsize + min + stepsize / 2);
-        printf("Computing %i/%i likelihood function.\n", i + 1, steps);
+        Log::print(Log::debug, "Computing %i/%i likelihood function.\n", i + 1, steps);
         const double nll_val = 2 * nll->getVal();
         if (!std::isnan(nll_val)) {
             h1_nll.Fill(var->getVal(), nll_val);
@@ -2404,7 +2400,7 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRe
         for (Int_t j = 0; j < steps2; j++) {
             var1->setVal(i * stepsize1 + min1 + stepsize1 / 2);
             var2->setVal(j * stepsize2 + min2 + stepsize2 / 2);
-            printf("Computing %i/%i likelihood function.\n", i * steps2 + j + 1, steps1 * steps2);
+            Log::print(Log::debug, "Computing %i/%i likelihood function.\n", i * steps2 + j + 1, steps1 * steps2);
             h2_nll.Fill(var1->getVal(), var2->getVal(), 2 * nll->getVal());
         }
     }
@@ -2453,7 +2449,7 @@ const double FitterCPV::Calculate3DChi2(const RooDataHist& data, const RooDataHi
     // h_bin_content.Draw("HIST");
     // h_bin_content.Write();
     // h_bin_content.SaveAs(constants::format);
-    printf("Bins used for chi2: %i/%i (%.1f%%)\n", bins_used, data.numEntries(), (double) bins_used / data.numEntries() * 100);
+    Log::print(Log::info, "Bins used for chi2: %i/%i (%.1f%%)\n", bins_used, data.numEntries(), (double) bins_used / data.numEntries() * 100);
 
     return chi2;
 }
@@ -2488,7 +2484,7 @@ const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const 
 
     for (Int_t i = 0; i < steps; i++) {
         var->setVal(i * stepsize + min + stepsize / 2);
-        printf("Computing chi2 %i/%i.\n", i + 1, steps);
+        Log::print(Log::debug, "Computing chi2 %i/%i.\n", i + 1, steps);
 
         RooDataHist* cr_hist = pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                        dataset_B->sumEntries(), RooFit::ExpectedData(true));
@@ -2697,7 +2693,7 @@ void FitterCPV::SetSCFKDE(const char* file) {
             }
         }
     }
-    Log::print(Log::debug, "Replaced %i/%i (%.1f%%) SCF bins\n", num_replaced, num_checked,
+    Log::print(Log::info, "Replaced %i/%i (%.1f%%) SCF bins\n", num_replaced, num_checked,
                (double)num_replaced / num_checked * 100);
 
     scf_angular_kde_hist_ = new RooDataHist("scf_angular_kde_hist_", "scf_angular_kde_hist_",

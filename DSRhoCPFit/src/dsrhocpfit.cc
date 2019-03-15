@@ -49,9 +49,8 @@ int main(int argc, char* argv[]) {
 
     if (optionless_argc < 3) {
         printf("ERROR: Not enough arguments.\n");
-        printf(
-            "Usage: %s [OPTION]... OUTPUT_FILE INPUT-FILE(s)\n",
-            optionless_argv[0]);
+        printf("Usage: %s [OPTION]... OUTPUT_FILE INPUT-FILE(s)\n",
+               optionless_argv[0]);
         return 2;
     }
 

@@ -103,13 +103,16 @@ void SetupPlotStyle() {
 
 /**
  * Set the directory to which to ouput ROOT plots
+ * 
+ * @param plot_dir Directory to which to save plots
  */
 void SetPlotDir(const char* plot_dir) {
     if (!boost::filesystem::is_directory(plot_dir)) {
         boost::filesystem::create_directories(plot_dir);
     }
     gEnv->SetValue("Canvas.PrintDirectory", plot_dir);
-    Log::print(Log::info, "Print directory: %s\n", gEnv->GetValue("Canvas.PrintDirectory", "not found"));
+    Log::print(Log::info, "Plot directory: %s\n",
+               gEnv->GetValue("Canvas.PrintDirectory", "not found"));
 }
 
 /**
@@ -173,10 +176,12 @@ TPaveText* CreateStatBox(double chi2, RooArgList* results, bool position_top, bo
  * @param format [optional] Format in which to save the images.
  * @param max [optional] Maximum of the range
  */
-void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data, const char* format, const double max) {
-    TCanvas canvas(TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
-                   TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
-                   500, 500);
+void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data,
+                const char* format, const double max) {
+    TCanvas canvas(
+        TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
+        TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
+        500, 500);
 
     TH2D* histo = static_cast<TH2D*>(data.createHistogram("histo", var1, RooFit::YVar(var2)));
 
@@ -203,10 +208,13 @@ void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
  * @param format [optional] Format in which to save the images.
  * @param residual [optional] Plot a residual instead of a pull
  */
-void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data, const RooAbsData& pdf, const char* format, const bool residual) {
+void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data,
+                const RooAbsData& pdf, const char* format, const bool residual) {
     TString type = residual ? "_residual" : "_pull";
-    TCanvas canvas(TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()) + type,
-                   TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()) + type,
+    TCanvas canvas(TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" +
+                       TString(var2.GetName()) + type,
+                   TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" +
+                       TString(var2.GetName()) + type,
                    500, 500);
     gStyle->SetPalette(kLightTemperature);
 
@@ -214,7 +222,6 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
     TH2D* histo2 = static_cast<TH2D*>(pdf.createHistogram("histo2", var1, RooFit::YVar(var2)));
     TH2D* pull_histo =
         static_cast<TH2D*>(pdf.createHistogram("pull_histo", var1, RooFit::YVar(var2)));
-
 
     double p1;
     double p2;
@@ -238,11 +245,12 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
 
     if (questionable_bins) {
         const int total_bins = pull_histo->GetNbinsX() * pull_histo->GetNbinsY();
-        Log::print(Log::warning,
-                   "There were %i/%i (%.0f%%) bins with less than %i events - Poisson approximation "
-                   "questionable! Consider using residuals.\n",
-                   questionable_bins, total_bins, 100 * (double)questionable_bins / total_bins,
-                   questionable_limit);
+        Log::print(
+            Log::warning,
+            "There were %i/%i (%.0f%%) bins with less than %i events - Poisson approximation "
+            "questionable! Consider using residuals.\n",
+            questionable_bins, total_bins, 100 * (double)questionable_bins / total_bins,
+            questionable_limit);
     }
 
     const double pull_max = std::max(abs(pull_histo->GetMinimum()), abs(pull_histo->GetMaximum()));
@@ -274,7 +282,6 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
  */
 void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data1,
                 const RooAbsData& data2, const char* format) {
-    
     double max = 0;
     TH2D* histo1 = static_cast<TH2D*>(data1.createHistogram("histo1", var1, RooFit::YVar(var2)));
     TH2D* histo2 = static_cast<TH2D*>(data2.createHistogram("histo2", var1, RooFit::YVar(var2)));

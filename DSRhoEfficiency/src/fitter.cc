@@ -142,7 +142,7 @@ void Fitter::MirrorDataAtEdges(RooDataSet* data) {
             }
         }
     }
-    printf("DBG: Added %i mirrored datapoints.\n", num_added);
+    Log::print(Log::debug, "Added %i mirrored datapoints.\n", num_added);
 }
 
 double* Fitter::GetMirrorVals(double vals[], const int var_num) {
@@ -441,8 +441,8 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
         }
     }
 
-    printf("Correlation %s : %s is %f\n", var1.GetName(), var2.GetName(),
-           eff_histo->GetCorrelationFactor());
+    Log::print(Log::info, "Correlation %s : %s is %f\n", var1.GetName(), var2.GetName(),
+               eff_histo->GetCorrelationFactor());
 
     // This clone must happen before Draw() of eff_histo, otherwise problems
     // with eff_pull_histo color legend range occur.
@@ -1149,14 +1149,14 @@ TH3F* Fitter::NormalizePDF(const TH3F* pdf, const double low, const double high)
                     do {
                         interpolation = Interpolate(pdf, x, y, z, size++);
                     } while (interpolation < 0 || interpolation > 1);
-                    // printf("bin %i: value = %f, interpolation = %f\n", bin, pdf->GetBinContent(bin), interpolation);
+                    // Log::print(Log::debug, "bin %i: value = %f, interpolation = %f\n", bin, pdf->GetBinContent(bin), interpolation);
                     normalized_pdf->SetBinContent(bin, interpolation);
                 }
             }
         }
     }
 
-    printf("Fixed %i/%i (%.2f%%) bins.\n", fixed_bins, total_bins, (double)fixed_bins/total_bins * 100);
+    Log::print(Log::info, "Fixed %i/%i (%.2f%%) bins.\n", fixed_bins, total_bins, (double)fixed_bins/total_bins * 100);
     return normalized_pdf;
 }
 
@@ -1172,12 +1172,12 @@ double Fitter::Interpolate(const TH3F* histo, int x_org, int y_org, int z_org, i
             for (int z = z_org - size; z <= z_org + size; z++) {
                 if (x == x_org && y == y_org && z == z_org) continue;
                 if (x < 1 || y < 1 || z < 1 || x > num_bins_x || y > num_bins_y || z > num_bins_z) {
-                    printf("skipping\n");
+                    Log::print(Log::debug, "skipping\n");
                     continue;
                 }
                 int bin = histo->GetBin(x, y, z);
                 new_value += histo->GetBinContent(bin);
-                // printf("delta = %f\n", histo->GetBinContent(bin));
+                // Log::print(Log::debug, "delta = %f\n", histo->GetBinContent(bin));
                 points++;
             }
         }

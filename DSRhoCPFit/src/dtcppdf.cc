@@ -20,6 +20,7 @@
 
 // Local includes
 #include "constants.h"
+#include "log.h"
 
 //ClassImp(DtCPPDF)
 
@@ -117,7 +118,7 @@ DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_fav
         double a[] = {tht.min(), thb.min(), phit.min()};
         double b[] = {tht.max(), thb.max(), phit.max()};
 
-        printf("INFO: Beginning precomputation of efficiency integrals... \n");
+        Log::print(Log::info, "Beginning precomputation of efficiency integrals... \n");
         ROOT::Math::IntegratorMultiDim ig(ROOT::Math::IntegrationMultiDim::kADAPTIVE);
         ig.SetFunction(wf1);
         int_tht_thb_phit[0] = ig.Integral(a,b);
@@ -131,7 +132,7 @@ DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_fav
         int_tht_thb_phit[4] = ig.Integral(a,b);
         ig.SetFunction(wf6);
         int_tht_thb_phit[5] = ig.Integral(a,b);
-        printf("INFO: Efficiency integrals' precomputation finished. \n");
+        Log::print(Log::info, "Efficiency integrals' precomputation finished. \n");
 
         efficiency_integrals_ready = true;
     }
@@ -280,7 +281,7 @@ Double_t DtCPPDF::evaluate() const {
 //      double A = ap*ap*(1 - xp*xp - yp*yp) + a0*a0*(1 - x0*x0 - y0*y0) + at*at*(1 - xt*xt - yt*yt);
 //      double S = ap*ap*2*yp + a0*a0*2*y0 + at*at*2*yt;
 //
-//      printf("\nA = %f\nS = %f\n\n", A, S);
+//      Log::print(Log::debug, "\nA = %f\nS = %f\n\n", A, S);
 
     } else {
         pdf = EfRkRdetRnp_fullrec( dt, constants::btype,
@@ -310,7 +311,7 @@ Double_t DtCPPDF::evaluate() const {
 
 Int_t DtCPPDF::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* /*rangeName*/) const {
 
-//  printf(" ******************************* DBG: Looking for analytical integral...\n");
+//  Log::print(Log::debug, "Looking for analytical integral...\n");
 
     if(matchArgs(allVars,analVars,dt,tht,thb,phit)) return 1;
 
@@ -334,7 +335,7 @@ Int_t DtCPPDF::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, co
 
     if(matchArgs(allVars,analVars,dt)) return 12;
 
-//  printf(" ******************************* DBG: Analytical integral not found!\n");
+//  Log::print(Log::debug, "Analytical integral not found!\n");
 
     return 0 ;
 }

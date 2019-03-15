@@ -14,6 +14,7 @@ _dsrhocpfit_complete()
 	'--efficiency-model=[number of the efficiency model to be used]:model:->effmodel' \
 	'--fit=[do a specified fit type]:type:->fittype' \
 	'--config=[read in configuration from the specified file]:filename:_files' \
+	'--version[show version]' \
 	'--help[display help]' \
 	'--time-independent[make a time-independent fit]' \
 	'--scf-kde=[use SCF KDE from file]:filename:_files' \

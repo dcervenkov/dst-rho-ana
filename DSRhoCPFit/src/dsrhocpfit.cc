@@ -25,6 +25,7 @@
 #include "colors.h"
 #include "constants.h"
 #include "fittercpv.h"
+#include "gitversion.h"
 #include "log.h"
 #include "teebuf.h"
 #include "tools.h"
@@ -214,10 +215,11 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"perfect-tag", no_argument, 0, 't'},
         {"plot-dir", required_argument, 0, 'p'},
         {"scf-kde", required_argument, 0, 'k'},
+        {"version", no_argument, 0, 'v'},
         {"help", no_argument, 0, 'h'},
         {NULL, no_argument, NULL, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:y:e:n:f:x:p:k:lmith", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:g:y:e:n:f:x:p:k:lmitvh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -279,6 +281,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'k':
                 options.scf_kde_file = optarg;
                 options.scf_kde_file_set = true;
+                break;
+            case 'v':
+                printf("Version: %s\n", gitversion);
+                exit(0);
                 break;
             case 'h':
                 printf("Usage: %s [OPTION]... RESULTS-FILE INPUT-FILES\n\n", argv[0]);

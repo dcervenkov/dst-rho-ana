@@ -18,6 +18,9 @@
 #include <sstream>
 #include <stdio.h>
 
+// Boost includes
+#include <boost/algorithm/string/predicate.hpp>
+
 // ROOT includes
 #include "TSystem.h"
 
@@ -53,6 +56,10 @@ int main(int argc, char* argv[]) {
         printf("Usage: %s [OPTION]... OUTPUT_FILE INPUT-FILE(s)\n",
                optionless_argv[0]);
         return 2;
+    }
+
+    if (boost::algorithm::ends_with(gitversion, "-dirty")) {
+        Log::print(Log::warning, "Using version from dirty Git worktree\n");
     }
 
     /// This is so I have to change only the next block if I change the

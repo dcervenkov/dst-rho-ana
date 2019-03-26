@@ -42,6 +42,8 @@ struct fitter_options {
     bool save_log_set;
     char* scf_kde_file;
     bool scf_kde_file_set;
+    char* scf_histo_file;
+    bool scf_histo_file_set;
 };
 
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,

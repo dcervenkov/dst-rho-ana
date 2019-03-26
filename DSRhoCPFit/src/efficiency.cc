@@ -122,23 +122,23 @@ double Efficiency::EfficiencyInterface(double* x, double* p) const {
 /**
  * Rescale variables to account for margin-mirrored phase space from DSRhoEfficiency.
  */
-void Efficiency::RescaleVars(double& thetat, double& thetab, double& phit, const double margin) const {
-	const double vars[3] = {thetat, thetab, phit};
-	const double min[3] = {0, 0.6, -TMath::Pi()};
-	const double max[3] = {TMath::Pi(), 2.95, TMath::Pi()};
+// void Efficiency::RescaleVars(double& thetat, double& thetab, double& phit, const double margin) const {
+// 	const double vars[3] = {thetat, thetab, phit};
+// 	const double min[3] = {0, 0.6, -TMath::Pi()};
+// 	const double max[3] = {TMath::Pi(), 2.95, TMath::Pi()};
 
-	double center[3];
-	double new_vars[3];
+// 	double center[3];
+// 	double new_vars[3];
 
-	for (int i = 0; i < 3; i++) {
-		center[i] = (min[i] + max[i]) / 2;
-		new_vars[i] = center[i] + (vars[i] - center[i])/(1 + 2 * margin);
-	}
+// 	for (int i = 0; i < 3; i++) {
+// 		center[i] = (min[i] + max[i]) / 2;
+// 		new_vars[i] = center[i] + (vars[i] - center[i])/(1 + 2 * margin);
+// 	}
 
-	thetat = new_vars[0];
-	thetab = new_vars[1];
-	phit = new_vars[2];
-}
+// 	thetat = new_vars[0];
+// 	thetab = new_vars[1];
+// 	phit = new_vars[2];
+// }
 
 int Efficiency::CloseToEdge(const std::vector<Double_t> vals, const double margin) const {
     RooRealVar* vars[3] = {thetat_, thetab_, phit_};
@@ -170,6 +170,7 @@ double Efficiency::GetHistogramEfficiency(double thetat, double thetab, double p
         int bin = histo_efficiency->GetBin(binx, biny, binz);
         eff = histo_efficiency->GetBinContent(bin);
     }
+    // Add a tiny number to avoid PDF being 0, which causes trouble
     if (eff == 0) eff += 0.000001;
     return eff;
 }

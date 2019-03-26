@@ -51,10 +51,10 @@ class Fitter {
                                const std::array<double, 6> ada_kde_pars, const double mirror_margin = 0);
     void ProcessNormalizedEfficiency(const char* efficiency_file);
     
-    RooRealVar thetat_{"thetat", "#theta_{t} [rad]", 0, kPi};
-    RooRealVar thetab_{"thetab", "#theta_{b} [rad]", 0.5, 2.95};
-    RooRealVar phit_{"phit", "#phi_{t} [rad]", -kPi, kPi};
-    RooRealVar dt_{"dt", "dt", -15, +15};
+    RooRealVar thetat_{"thetat", "#theta_{t} [rad]", constants::cuts::thetat_low, constants::cuts::thetat_high};
+    RooRealVar thetab_{"thetab", "#theta_{b} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high};
+    RooRealVar phit_{"phit", "#phi_{t} [rad]", constants::cuts::phit_low, constants::cuts::phit_high};
+    RooRealVar dt_{"dt", "dt", constants::cuts::dt_low, constants::cuts::dt_high};
     RooCategory dec_type_{"dec_type", "dec_type"};
     RooRealVar evmcflag_{"evmcflag", "evmcflag", -100, 100};
 

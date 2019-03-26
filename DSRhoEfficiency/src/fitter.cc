@@ -309,7 +309,7 @@ void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooD
     }
 
     canvas.Write();
-    canvas.SaveAs(format);
+    canvas.SaveAs(constants::format);
 
     delete plot;
 
@@ -320,8 +320,8 @@ void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooD
 }
 
 void Fitter::PlotVars2D(const RooRealVar& var1, const RooRealVar& var2) const {
-    tools::PlotVars2D(var1, var2, *evtgen_dataset_, format);
-    tools::PlotVars2D(var1, var2, *gsim_dataset_, format);
+    tools::PlotVars2D(var1, var2, *evtgen_dataset_, constants::format);
+    tools::PlotVars2D(var1, var2, *gsim_dataset_, constants::format);
 }
 
 void Fitter::PlotEfficiency(RooRealVar& var, bool plot_model, bool legend_position_top,
@@ -415,7 +415,7 @@ void Fitter::PlotEfficiency(RooRealVar& var, bool plot_model, bool legend_positi
     }
 
     canvas_eff_->Write();
-    canvas_eff_->SaveAs(format);
+    canvas_eff_->SaveAs(constants::format);
 }
 
 void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
@@ -475,7 +475,7 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
     stat_box->Draw();
 
     canvas_eff_->Write();
-    canvas_eff_->SaveAs(format);
+    canvas_eff_->SaveAs(constants::format);
 
     RooProdPdf efficiency_3D("efficiency_3D", "efficiency_3D",
                              RooArgList(*thetat_model_e_, *thetab_model_e_, *phit_model_e_));
@@ -501,7 +501,7 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
                           " PDF eff canvas");
 
     canvas_eff_->Write();
-    canvas_eff_->SaveAs(format);
+    canvas_eff_->SaveAs(constants::format);
 
     // We are not using eff_pull_histo->Add(pdf_eff_histo, -1) because we want
     // to skip bins which are empty in gsim_histo.
@@ -539,7 +539,7 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
 
     canvas_eff_->Update();
     canvas_eff_->Write();
-    canvas_eff_->SaveAs(format);
+    canvas_eff_->SaveAs(constants::format);
     colors::setColors();
 
     delete eff_histo;
@@ -679,18 +679,18 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
     kde.writeToTextFile(efficiency_file);
 
     if (mirror_margin) {
-        thetat_.setMin(0);
-        thetat_.setMax(kPi);
-        thetab_.setMin(0.5);
-        thetab_.setMax(2.95);
-        phit_.setMin(-kPi);
-        phit_.setMax(kPi);
-        vars_[0]->setMin(0);
-        vars_[0]->setMax(kPi);
-        vars_[1]->setMin(0.5);
-        vars_[1]->setMax(2.95);
-        vars_[2]->setMin(-kPi);
-        vars_[2]->setMax(+kPi);
+        thetat_.setMin(constants::cuts::thetat_low);
+        thetat_.setMax(constants::cuts::thetat_high);
+        thetab_.setMin(constants::cuts::thetab_low);
+        thetab_.setMax(constants::cuts::thetab_high);
+        phit_.setMin(constants::cuts::phit_low);
+        phit_.setMax(constants::cuts::phit_high);
+        vars_[0]->setMin(constants::cuts::thetat_low);
+        vars_[0]->setMax(constants::cuts::thetat_high);
+        vars_[1]->setMin(constants::cuts::thetab_low);
+        vars_[1]->setMax(constants::cuts::thetab_high);
+        vars_[2]->setMin(constants::cuts::phit_low);
+        vars_[2]->setMax(constants::cuts::phit_high);
         delete eff_histo;
         eff_histo = GetBinned3DEfficiency();
     }
@@ -723,8 +723,8 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, constants::format, true);
         }
     }
 
@@ -752,8 +752,8 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, constants::format, true);
         }
     }
 }
@@ -794,10 +794,10 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo, format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo, format, true);
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo, format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo, format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo, constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo, constants::format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo, constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo, constants::format, true);
         }
     }
 
@@ -823,8 +823,8 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D, format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D, format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D, constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D, constants::format, true);
         }
     }
 }
@@ -860,8 +860,8 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, constants::format, true);
         }
     }
 
@@ -889,8 +889,8 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, constants::format, true);
         }
     }
 

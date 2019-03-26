@@ -2720,6 +2720,12 @@ void FitterCPV::SetSCFKDE(const char* file) {
     // scf_angular_pdf_ = meerkat_pdf;
 }
 
+void FitterCPV::SetSCFHisto(const char* file) {
+    Log::print(Log::info, "Setting up SCF RooHistPdf model from file '%s'\n", file);
+    TFile f(file, "READ");
+    scf_angular_pdf_ = dynamic_cast<RooHistPdf*>(f.Get("scf_hist_pdf"));
+}
+
 int FitterCPV::CloseToEdge(const std::vector<Double_t> vals, const double margin) const {
     RooRealVar* vars[3] = {thetat_, thetab_, phit_};
     for (int var_num = 0; var_num < 3; var_num++) {

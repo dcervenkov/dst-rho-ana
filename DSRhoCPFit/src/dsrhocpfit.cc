@@ -73,6 +73,11 @@ int main(int argc, char* argv[]) {
         std::cout.rdbuf(out.rdbuf());
     }
 
+    if (options.scf_kde_file_set && options.scf_histo_file_set) {
+        Log::print(Log::error, "Both '--scf-kde' and '--scf-histo' set. Use only one!\n");
+        return 3;
+    }
+
     tools::SetupPlotStyle();
     colors::setColors();
 
@@ -109,7 +114,10 @@ int main(int argc, char* argv[]) {
         fitter.SetEfficiencyFiles(options.efficiency_files);
     }
     if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
+
     if (options.scf_kde_file_set) fitter.SetSCFKDE(options.scf_kde_file);
+    if (options.scf_histo_file_set) fitter.SetSCFHisto(options.scf_histo_file);
+
     if (options.do_mixing_fit_set) fitter.SetDoMixingFit(options.do_mixing_fit);
     if (options.do_time_independent_fit_set) {
         fitter.SetDoTimeIndependentFit(options.do_time_independent_fit);
@@ -215,10 +223,11 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"perfect-tag", no_argument, 0, 't'},
         {"plot-dir", required_argument, 0, 'p'},
         {"scf-kde", required_argument, 0, 'k'},
+        {"scf-histo", required_argument, 0, 's'},
         {"help", no_argument, 0, 'h'},
         {NULL, no_argument, NULL, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:y:e:n:f:x:p:k:lmith", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:g:y:e:n:f:x:p:k:s:lmith", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -281,6 +290,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.scf_kde_file = optarg;
                 options.scf_kde_file_set = true;
                 break;
+            case 's':
+                options.scf_histo_file = optarg;
+                options.scf_histo_file_set = true;
+                break;
             case 'h':
                 printf("Usage: %s [OPTION]... RESULTS-FILE INPUT-FILES\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
@@ -296,6 +309,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-n, --events=NUM-EVENTS          number of events to be imported from the input file\n");
                 printf("-p, --plot-dir=PLOT-DIR          create lifetime/mixing plots\n");
                 printf("-r, --generator-level            do a generator level fit\n");
+                printf("-s, --scf-histo                  use histo SCF from file\n");
                 printf("-t, --perfect-tag                use MC info to get perfect tagging\n");
                 printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit;\n");
                 printf("                                 additional short-hand ARGs are: all, xy, trans and nota0\n");

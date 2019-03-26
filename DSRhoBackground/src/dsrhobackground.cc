@@ -53,7 +53,21 @@ int main(int argc, char* argv[]) {
         fitter.SetNumCPUs(options.num_CPUs);
     }
 
-    if (options.KDE == false) {
+    if (options.KDE && options.histo) {
+        Log::print(Log::error, "Both '--kde' and '--histo' options specified. Use only one!\n");
+        return 3;
+    }
+
+    if (options.KDE) {
+        fitter.thetat_.setBins(50);
+        fitter.thetab_.setBins(50);
+        fitter.phit_.setBins(50);
+        AdaptiveKernelDensity kde = fitter.FitKDE(fitter.dataset_);
+        fitter.PlotKDE(kde);
+    } else if (options.histo) {
+        fitter.CreateHistoPDF(fitter.dataset_);
+    } else {
+    
         // We must plot after each fit otherwise the results printed on the plot
         // would be of the last fit
         fitter.Fit(&fitter.scf_phit_model_, fitter.dataset_);
@@ -95,12 +109,6 @@ int main(int argc, char* argv[]) {
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_bb_, fitter.scf_dt_model_);
         }
-    } else {
-        fitter.thetat_.setBins(50);
-        fitter.thetab_.setBins(50);
-        fitter.phit_.setBins(50);
-        AdaptiveKernelDensity kde = fitter.FitKDE(fitter.dataset_);
-        fitter.PlotKDE(kde);
     }
 
     return 0;
@@ -126,11 +134,12 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     int c;
     struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
                                     {"kde", no_argument, 0, 'k'},
+                                    {"histo", no_argument, 0, 's'},
                                     {"plot-dir", required_argument, 0, 'p'},
                                     {"help", no_argument, 0, 'h'},
                                     {NULL, no_argument, NULL, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:p:h", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:p:ksh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -144,6 +153,9 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'k':
                 options.KDE = true;
                 break;
+            case 's':
+                options.histo = true;
+                break;
             case 'p':
                 options.plot_dir = optarg;
                 options.plot_dir_set = true;
@@ -153,6 +165,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS       number of CPU cores to use for fitting and plotting\n");
                 printf("-k, --kde                 use kernel density estimation\n");
+                printf("-s, --histo               create a histogram PDF\n");
                 printf("-h, --help                display this text and exit\n");
                 printf("-p, --plot-dir=PLOT_DIR   create lifetime/mixing plots\n");
                 exit(0);

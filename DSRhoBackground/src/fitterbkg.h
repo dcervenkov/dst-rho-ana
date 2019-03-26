@@ -52,6 +52,7 @@ class FitterBKG {
     void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);
     void Fit(RooAbsPdf* pdf, RooDataSet* data);
+    void CreateHistoPDF(RooDataSet* data);
     AdaptiveKernelDensity FitKDE(RooDataSet* data);
 
     RooRealVar dt_{"dt", "dt", constants::fit_range_dt_low, constants::fit_range_dt_high};
@@ -107,6 +108,9 @@ class FitterBKG {
     TString GetCommonCutsString() const;
     TH3F* ConvertDensityToHisto(AdaptiveKernelDensity pdf) const;
     TH3F* Create3DHisto(const RooDataSet* dataset) const;
+
+    TH3F* NormalizePDF(const TH3F* pdf, const double low, const double high);
+    double Interpolate(const TH3F* histo, int x_org, int y_org, int z_org, int size);
 
     std::vector<RooRealVar**> conditional_vars_;
     std::vector<RooRealVar**> dataset_vars_;

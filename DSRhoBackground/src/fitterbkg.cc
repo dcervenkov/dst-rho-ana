@@ -466,6 +466,77 @@ void FitterBKG::Fit(RooAbsPdf* pdf, RooDataSet* data) {
     result_ = pdf->fitTo(*data, RooFit::Save(), RooFit::Minimizer("Minuit2"), RooFit::NumCPU(num_CPUs_));
 }
 
+void FitterBKG::CreateHistoPDF(RooDataSet* data) {
+
+    // TH3F* scf_histo = Create3DHisto(data);
+    // TH3F* scf_histo_normalized = NormalizePDF(scf_histo, 0, 1);
+
+    // const char* output_file = "scf_histo";
+    // TFile f(efficiency_file, "RECREATE");
+    // binned_pdf->Write();
+    // f.Close();
+
+    RooDataHist data_hist("data_hist", "data_hist", RooArgSet(thetat_, thetab_, phit_), *data);
+    RooHistPdf* scf_hist_pdf = new RooHistPdf("scf_hist_pdf", "scf_hist_pdf",
+                                              RooArgSet(thetat_, thetab_, phit_), data_hist);
+
+    scf_hist_pdf->Write();
+}
+
+TH3F* FitterBKG::NormalizePDF(const TH3F* pdf, const double low, const double high) {
+    int total_bins = 0;
+    int fixed_bins = 0;
+    TH3F* normalized_pdf = (TH3F*)pdf->Clone();
+    for (int x = 1; x <= pdf->GetNbinsX(); x++) {
+        for (int y = 1; y <= pdf->GetNbinsY(); y++) {
+            for (int z = 1; z <= pdf->GetNbinsZ(); z++) {
+                total_bins++;
+                int bin = pdf->GetBin(x, y, z);
+                if (pdf->GetBinContent(bin) > high || pdf->GetBinContent(bin) < low) {
+                    fixed_bins++;
+                    int size = 1;
+                    double interpolation = -1;
+                    do {
+                        interpolation = Interpolate(pdf, x, y, z, size++);
+                    } while (interpolation < 0 || interpolation > 1);
+                    // printf("bin %i: value = %f, interpolation = %f\n", bin, pdf->GetBinContent(bin), interpolation);
+                    normalized_pdf->SetBinContent(bin, interpolation);
+                }
+            }
+        }
+    }
+
+    Log::print(Log::info, "Fixed %i/%i (%.2f%%) bins.\n", fixed_bins, total_bins, (double)fixed_bins/total_bins * 100);
+    return normalized_pdf;
+}
+
+double FitterBKG::Interpolate(const TH3F* histo, int x_org, int y_org, int z_org, int size) {
+    double new_value = 0;
+    int points = 0;
+    int num_bins_x = histo->GetXaxis()->GetNbins();
+    int num_bins_y = histo->GetYaxis()->GetNbins();
+    int num_bins_z = histo->GetZaxis()->GetNbins();
+
+    for (int x = x_org - size; x <= x_org + size; x++) {
+        for (int y = y_org - size; y <= y_org + size; y++) {
+            for (int z = z_org - size; z <= z_org + size; z++) {
+                if (x == x_org && y == y_org && z == z_org) continue;
+                if (x < 1 || y < 1 || z < 1 || x > num_bins_x || y > num_bins_y || z > num_bins_z) {
+                    printf("skipping\n");
+                    continue;
+                }
+                int bin = histo->GetBin(x, y, z);
+                new_value += histo->GetBinContent(bin);
+                // printf("delta = %f\n", histo->GetBinContent(bin));
+                points++;
+            }
+        }
+    }
+    if (points == 0) return 0;
+    return new_value/points;
+}
+
+
 AdaptiveKernelDensity FitterBKG::FitKDE(RooDataSet* data) {
     OneDimPhaseSpace* phasespace_thetat = new OneDimPhaseSpace("phasespace_thetat", thetat_.getMin(), thetat_.getMax());
     OneDimPhaseSpace* phasespace_thetab = new OneDimPhaseSpace("phasespace_thetab", thetab_.getMin(), thetab_.getMax());
@@ -489,7 +560,7 @@ AdaptiveKernelDensity FitterBKG::FitKDE(RooDataSet* data) {
     // TTree* eff_tree = data->GetClonedTree();
     TTree* eff_tree = data_tree;
 
-    std::array<double, 6> bin_kde_pars = {50, 50, 50, 0.2, 0.2, 0.4};
+    // std::array<double, 6> bin_kde_pars = {50, 50, 50, 0.2, 0.2, 0.4};
     std::array<double, 6> ada_kde_pars = {100, 100, 100, 0.1, 0.05, 0.1};
 
     // BinnedKernelDensity bin_kde("BinKernelPDF", phasespace, eff_tree, "thetat", "thetab", "phit",

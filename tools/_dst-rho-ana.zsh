@@ -17,6 +17,7 @@ _dsrhocpfit_complete()
 	'--help[display help]' \
 	'--time-independent[make a time-independent fit]' \
 	'--scf-kde=[use SCF KDE from file]:filename:_files' \
+	'--scf-histo=[use histo SCF from file]:filename:_files' \
 	'--log[save copy of log to results file]' \
 	'--mixing[make a mixing fit]' \
 	'--events=[number of events to be imported from the input file]' \
@@ -54,7 +55,9 @@ _dsrhobackground_complete()
 {
 	_arguments \
 	'--cpus=[number of CPU cores to use for fitting and plotting]' \
+	'--kde[use kernel density estimation]' \
 	'--help[display help]' \
+	'--histo[create a histogram PDF]' \
 	'--plot-dir=[create lifetime/mixing plots]:directory:_files' \
 	'*:input files:_files'
 

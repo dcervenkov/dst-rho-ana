@@ -1156,7 +1156,7 @@ TH3F* Fitter::NormalizePDF(const TH3F* pdf, const double low, const double high)
         }
     }
 
-    printf("Fixed %i/%i (%.2f%%) bins.\n", fixed_bins, total_bins, (double)fixed_bins/total_bins * 100);
+    Log::print(Log::info, "Fixed %i/%i (%.2f%%) bins.\n", fixed_bins, total_bins, (double)fixed_bins/total_bins * 100);
     return normalized_pdf;
 }
 

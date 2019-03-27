@@ -62,15 +62,15 @@ Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const cha
 
     if (strstr(evtgen_filepath, ".root")) {
         TFile* evtgen_file = new TFile(evtgen_filepath);
-	TTree* evtgen_tree = dynamic_cast<TTree*>(evtgen_file->Get("h2000"));
-	evtgen_dataset_ = new RooDataSet("evtgen_dataset", "evtgen dataset", evtgen_tree,
-			RooArgSet(thetat_, thetab_, phit_, vrvtxz_, vtvtxz_, evmcflag_),
-			"evmcflag==1");
-	delete evtgen_tree;
-	evtgen_file->Close();
+        TTree* evtgen_tree = dynamic_cast<TTree*>(evtgen_file->Get("h2000"));
+        evtgen_dataset_ = new RooDataSet(
+            "evtgen_dataset", "evtgen dataset", evtgen_tree,
+            RooArgSet(thetat_, thetab_, phit_, vrvtxz_, vtvtxz_, evmcflag_), "evmcflag==1");
+        delete evtgen_tree;
+        evtgen_file->Close();
     } else {
         evtgen_dataset_ =
-            RooDataSet::read(evtgen_filepath, RooArgList(thetat_, thetab_, phit_, dt_, dec_type_));
+            RooDataSet::read(evtgen_filepath, RooArgList(thetat_, thetab_, phit_, dt_, dec_type_), "Q");
     }
 
     TFile* gsim_file = new TFile(gsim_filepath);
@@ -197,11 +197,16 @@ void Fitter::PlotVar(const RooRealVar& var) const {
     RooDataHist evtgen_datahist("evtgen_datahist", "evtgen_datahist", RooArgSet(var),
                                 *evtgen_dataset_);
     RooDataHist gsim_datahist("gsim_datahist", "gsim_datahist", RooArgSet(var), *gsim_dataset_);
-    PlotVar(var, evtgen_datahist, gsim_datahist, false);
+    PlotVar(var, evtgen_datahist, gsim_datahist, false, false);
 }
 
 void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist& data2,
-                     const bool draw_pull) const {
+                     const bool draw_pull, const bool draw_residual) const {
+    if (draw_pull && draw_residual) {
+        Log::print(Log::error, "Requested to plot var with both pull and residual. Select only one!\n");
+        return;
+    }
+
     TCanvas canvas(
         TString(var.GetName()) + "_" + TString(data1.GetName()) + "_" + TString(data2.GetName()),
         TString(var.GetTitle()) + " canvas", 500, 500);
@@ -210,7 +215,7 @@ void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooD
 
     TPad* pad_var;
     TPad* pad_pull;
-    if (draw_pull) {
+    if (draw_pull || draw_residual) {
         pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
         pad_var->SetBottomMargin(0.0);
         pad_pull = new TPad("pad_pull", "pad_pull", 0, 0, 1, 0.25);
@@ -243,7 +248,7 @@ void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooD
     leg1->AddEntry(plot->findObject("data2"), data2.GetTitle(), "LP");
     leg1->Draw();
 
-    if (draw_pull) {
+    if (draw_pull || draw_residual) {
         pad_pull->cd();
         pad_pull->SetTopMargin(0.0);
         pad_pull->SetBottomMargin(0.35);
@@ -260,18 +265,31 @@ void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooD
 
         double p1;
         double p2;
+        const int questionable_limit = 10;
+        int questionable_bins = 0;
         for (int i = 1; i <= pull_histo->GetNbinsX(); i++) {
             p1 = data1_histo->GetBinContent(i);
             p2 = data2_histo->GetBinContent(i);
-            // pull_histo->SetBinContent(i, p1 / p2);
-            // pull_histo->SetBinContent(i, p1 - p2);
-            // pull_histo->SetBinContent(i, (p1 - p2) / std::sqrt((p1 + p2) / 2));
-            pull_histo->SetBinContent(i, (p1 - p2) / std::sqrt(p2));
-            Log::print(Log::warning,
-                        "In pull calculation - PDF bin content = %f, Poisson approximation "
-                        "questionable!\n",
-                        p2);
+            if (draw_residual) {
+                pull_histo->SetBinContent(i, p1 - p2);
+            } else if (draw_pull) {
+                pull_histo->SetBinContent(i, (p1 - p2) / std::sqrt(p2));
+                if (p2 < questionable_limit) {
+                    questionable_bins++;
+                }
+            }
         }
+
+        if (questionable_bins) {
+            const int total_bins = pull_histo->GetNbinsX();
+            Log::print(
+                Log::warning,
+                "There were %i/%i (%.0f%%) bins with less than %i events - Poisson approximation "
+                "questionable! Consider using residuals.\n",
+                questionable_bins, total_bins, 100 * (double)questionable_bins / total_bins,
+                questionable_limit);
+        }
+
         RooHist* hpull = new RooHist(*pull_histo, 0, 1, RooAbsData::ErrorType::None);
 
         hpull->SetFillColor(kGray);
@@ -308,6 +326,10 @@ void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooD
         delete pull_histo;
     }
 
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
     canvas.Write();
     canvas.SaveAs(constants::format);
 
@@ -414,6 +436,10 @@ void Fitter::PlotEfficiency(RooRealVar& var, bool plot_model, bool legend_positi
         plot_eff_pull_->Draw();
     }
 
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
     canvas_eff_->Write();
     canvas_eff_->SaveAs(constants::format);
 }
@@ -500,6 +526,10 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
     canvas_eff_->SetTitle(TString(var1.GetTitle()) + "_" + TString(var2.GetName()) +
                           " PDF eff canvas");
 
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
     canvas_eff_->Write();
     canvas_eff_->SaveAs(constants::format);
 
@@ -717,8 +747,8 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
                                RooArgList(thetat_, thetab_, phit_), evtgen_histo);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_simulated_histo, roo_gsim_histo, true);
-        PlotVar(*var, roo_evtgen_histo, roo_gsim_histo, true);
+        PlotVar(*var, roo_simulated_histo, roo_gsim_histo, true, false);
+        PlotVar(*var, roo_evtgen_histo, roo_gsim_histo, true, false);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -747,7 +777,7 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
                                      RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_eff_histo_1D, roo_eff_pdf_histo_1D, true);
+        PlotVar(*var, roo_eff_histo_1D, roo_eff_pdf_histo_1D, true, false);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -788,8 +818,8 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
                                  RooArgList(thetat_, thetab_, phit_), evtgen_histo);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_gsim_kde_histo, roo_gsim_histo, true);
-        PlotVar(*var, roo_evtgen_kde_histo, roo_evtgen_histo, true);
+        PlotVar(*var, roo_gsim_kde_histo, roo_gsim_histo, true, false);
+        PlotVar(*var, roo_evtgen_kde_histo, roo_evtgen_histo, true, false);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -818,7 +848,7 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
                                      RooArgList(thetat_, thetab_, phit_), eff_kde);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_eff_histo_1D, roo_eff_kde_histo_1D, true);
+        PlotVar(*var, roo_eff_histo_1D, roo_eff_kde_histo_1D, true, false);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -841,8 +871,9 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
     TFile f(efficiency_file, "RECREATE");
     binned_pdf->Write();
     f.Close();
+    Log::print(Log::info, "Efficiency written to '%s'\n", efficiency_file);
 
-    TH3F* simulated_histo = Create3DHisto(evtgen_dataset_);
+    TH3F* simulated_histo = Create3DHisto(evtgen_dataset_, "simulated_histo");
     simulated_histo->Multiply(binned_pdf);
     simulated_histo->Scale(gsim_histo->GetSumOfWeights() / simulated_histo->GetSumOfWeights());
 
@@ -854,8 +885,8 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
                                RooArgList(thetat_, thetab_, phit_), evtgen_histo);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_simulated_histo, roo_gsim_histo, true);
-        PlotVar(*var, roo_evtgen_histo, roo_gsim_histo, true);
+        PlotVar(*var, roo_simulated_histo, roo_gsim_histo, true, false);
+        PlotVar(*var, roo_evtgen_histo, roo_gsim_histo, true, false);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -884,7 +915,7 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
                                      RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_eff_histo_1D, roo_eff_pdf_histo_1D, true);
+        PlotVar(*var, roo_eff_histo_1D, roo_eff_pdf_histo_1D, false, true);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -945,11 +976,11 @@ TTree* Fitter::Histogram2TTree(TH3F* histo) {
     return tree;
 }
 
-TH3F* Fitter::Create3DHisto(const RooDataSet* dataset) const {
+TH3F* Fitter::Create3DHisto(const RooDataSet* dataset, const char* name) const {
     const int num_bins = 50;
-    TH3F* histo = new TH3F(dataset->GetName(), dataset->GetTitle(), num_bins, thetat_.getMin(),
-                           thetat_.getMax(), num_bins, thetab_.getMin(), thetab_.getMax(), num_bins,
-                           phit_.getMin(), phit_.getMax());
+    TH3F* histo = new TH3F(name ? name : dataset->GetName(), name ? name : dataset->GetTitle(),
+                           num_bins, thetat_.getMin(), thetat_.getMax(), num_bins, thetab_.getMin(),
+                           thetab_.getMax(), num_bins, phit_.getMin(), phit_.getMax());
     for (int i = 0; i < dataset->numEntries(); i++) {
         const RooArgSet* row = dataset->get(i);
         double thetat = row->getRealValue("thetat");
@@ -1156,7 +1187,8 @@ TH3F* Fitter::NormalizePDF(const TH3F* pdf, const double low, const double high)
         }
     }
 
-    Log::print(Log::info, "Fixed %i/%i (%.2f%%) bins.\n", fixed_bins, total_bins, (double)fixed_bins/total_bins * 100);
+    Log::print(Log::info, "Fixed %i/%i (%.2f%%) bins whose contents were not in [%f, %f].\n",
+               fixed_bins, total_bins, (double)fixed_bins / total_bins * 100, low, high);
     return normalized_pdf;
 }
 
@@ -1167,12 +1199,18 @@ double Fitter::Interpolate(const TH3F* histo, int x_org, int y_org, int z_org, i
     int num_bins_y = histo->GetYaxis()->GetNbins();
     int num_bins_z = histo->GetZaxis()->GetNbins();
 
+    int skipped_bins = 0;
+    int all_bins = 0;
     for (int x = x_org - size; x <= x_org + size; x++) {
         for (int y = y_org - size; y <= y_org + size; y++) {
             for (int z = z_org - size; z <= z_org + size; z++) {
-                if (x == x_org && y == y_org && z == z_org) continue;
+                all_bins++;
+                if (x == x_org && y == y_org && z == z_org) {
+                    skipped_bins++;
+                    continue;
+                }
                 if (x < 1 || y < 1 || z < 1 || x > num_bins_x || y > num_bins_y || z > num_bins_z) {
-                    Log::print(Log::debug, "skipping\n");
+                    skipped_bins++;
                     continue;
                 }
                 int bin = histo->GetBin(x, y, z);
@@ -1182,6 +1220,10 @@ double Fitter::Interpolate(const TH3F* histo, int x_org, int y_org, int z_org, i
             }
         }
     }
+    // if (skipped_bins) {
+    //     Log::print(Log::debug, "Skipped %i/%i (%f %%) bins in Interpolate()\n", skipped_bins,
+    //                all_bins, (double)skipped_bins / all_bins * 100);
+    // }
     if (points == 0) return 0;
     return new_value/points;
 }

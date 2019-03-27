@@ -290,7 +290,7 @@ void FitterBKG::PlotWithPull(const RooRealVar& var, const RooDataSet& data, cons
 }
 
 /**
- * Create and return statbox with fit results to overlay on plots. Returns a NULL pointer
+ * Create and return statbox with fit results to overlay on plots. Returns a nullptr pointer
  * if no fit result exist.
  *
  * @param chi2 Reduced chi2 of the projection plot

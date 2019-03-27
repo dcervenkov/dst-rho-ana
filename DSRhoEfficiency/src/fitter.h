@@ -97,20 +97,20 @@ class Fitter {
 
     TPaveText* CreateStatBox(double chi2, bool position_top = true, bool position_left = true);
 
-    RooDataSet* evtgen_dataset_ = NULL;
-    RooDataSet* gsim_dataset_ = NULL;
+    RooDataSet* evtgen_dataset_ = nullptr;
+    RooDataSet* gsim_dataset_ = nullptr;
 
-    RooDataHist* efficiency_thetat_ = NULL;
-    RooDataHist* efficiency_thetab_ = NULL;
-    RooDataHist* efficiency_phit_ = NULL;
+    RooDataHist* efficiency_thetat_ = nullptr;
+    RooDataHist* efficiency_thetab_ = nullptr;
+    RooDataHist* efficiency_phit_ = nullptr;
 
-    RooDataHist** efficiency_ = NULL;
+    RooDataHist** efficiency_ = nullptr;
 
-    TCanvas* canvas_var_ = NULL;
-    RooPlot* plot_var_ = NULL;
+    TCanvas* canvas_var_ = nullptr;
+    RooPlot* plot_var_ = nullptr;
 
-    TCanvas* canvas_eff_ = NULL;
-    RooPlot* plot_eff_ = NULL;
+    TCanvas* canvas_eff_ = nullptr;
+    RooPlot* plot_eff_ = nullptr;
 
     RooExtendPdf* thetat_model_e_;
     RooExtendPdf* thetab_model_e_;
@@ -227,9 +227,9 @@ class Fitter {
     RooExtendPdf thetat_model4_e_{"thetat_model4_e", "thetat_model4_e", thetat_model4_,
                                   n_thetat_model4_};
 
-    RooAbsPdf* model_ = NULL;
+    RooAbsPdf* model_ = nullptr;
 
-    RooFitResult* result_ = NULL;
+    RooFitResult* result_ = nullptr;
 
     TFile* output_file_;
 };

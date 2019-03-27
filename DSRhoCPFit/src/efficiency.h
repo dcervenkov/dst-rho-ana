@@ -123,9 +123,9 @@ protected:
     OneDimPhaseSpace phasespace_phit{"phasespace_phit", phit_->getMin(), phit_->getMax()};
     CombinedPhaseSpace phasespace{"phasespace", &phasespace_thetat, &phasespace_thetab,
                                   &phasespace_phit};
-	BinnedDensity* binned_efficiency = NULL;
+	BinnedDensity* binned_efficiency = nullptr;
 
-	TH3F* histo_efficiency = NULL;
+	TH3F* histo_efficiency = nullptr;
 	bool CanUseInterpolation(const double& phit, const double& transtht, const double& transthb) const;
 	int CloseToEdge(const std::vector<Double_t> vals, const double margin) const;
 	double GetHistogramEfficiency(double thetat, double thetab, double phit) const;

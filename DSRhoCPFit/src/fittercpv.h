@@ -194,8 +194,8 @@ class FitterCPV {
     RooArgSet scf_parameters_argset_;
     RooArgSet bkg_parameters_argset_;
 
-    RooDataHist* scf_angular_kde_hist_ = NULL;
-    RooHistPdf* scf_angular_kde_ = NULL;
+    RooDataHist* scf_angular_kde_hist_ = nullptr;
+    RooHistPdf* scf_angular_kde_ = nullptr;
 
     std::vector<RooRealVar**> conditional_vars_;
     std::vector<RooRealVar**> dataset_vars_;
@@ -206,10 +206,10 @@ class FitterCPV {
 
     std::array<double, 16> par_input_;
 
-    RooDataSet* dataset_ = NULL;
-    RooFitResult* result_ = NULL;
+    RooDataSet* dataset_ = nullptr;
+    RooFitResult* result_ = nullptr;
 
-    TFile* output_file_ = NULL;
+    TFile* output_file_ = nullptr;
 
     int num_CPUs_;
     std::vector<const char*> efficiency_files_;

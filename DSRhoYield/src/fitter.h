@@ -105,16 +105,16 @@ private:
 	// Whole model
 	RooAddPdf model_ { "model","signal_plus_cross_model_e + bkg_model_e", RooArgList(signal_plus_cross_model_e_, bkg_model_e_)};
 
-	RooAbsPdf* active_model_ = NULL;
+	RooAbsPdf* active_model_ = nullptr;
 	Components active_component_ { Components::all };
 	TString active_model_name_ = { "all" };
 
-	RooDataSet* data_set_ = NULL;
-	RooFitResult* fit_result_ = NULL;
+	RooDataSet* data_set_ = nullptr;
+	RooFitResult* fit_result_ = nullptr;
 
-	const char* data_cut_ = NULL;
+	const char* data_cut_ = nullptr;
 
-	TFile* output_file_ = NULL;
+	TFile* output_file_ = nullptr;
 
 	// Helper variables which are used to calculate final results with their uncertainties
 	RooFormulaVar f_cr_{"f_cr", "f_cr",

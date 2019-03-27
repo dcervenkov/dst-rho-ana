@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 
     Log::setLogLevel(Log::debug);
 
-    char** optionless_argv = NULL;
+    char** optionless_argv = nullptr;
     // The {} causes the struct's members to be initialized to 0. Without it
     // they would have unspecified values
     fitter_options options = {};
@@ -233,7 +233,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"scf-histo", required_argument, 0, 's'},
         {"version", no_argument, 0, 'v'},
         {"help", no_argument, 0, 'h'},
-        {NULL, no_argument, NULL, 0}};
+        {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
     while ((c = getopt_long(argc, argv, "c:g:y:e:n:f:x:p:k:s:lmitvh", long_options, &option_index)) != -1) {
         switch (c) {

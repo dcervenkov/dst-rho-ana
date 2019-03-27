@@ -96,11 +96,11 @@ class FitterBKG {
 
     RooCategory* decaytype_;
 
-    RooDataSet* dataset_ = NULL;
-    RooDataSet* dataset_a_ = NULL;
-    RooDataSet* dataset_ab_ = NULL;
-    RooDataSet* dataset_b_ = NULL;
-    RooDataSet* dataset_bb_ = NULL;
+    RooDataSet* dataset_ = nullptr;
+    RooDataSet* dataset_a_ = nullptr;
+    RooDataSet* dataset_ab_ = nullptr;
+    RooDataSet* dataset_b_ = nullptr;
+    RooDataSet* dataset_bb_ = nullptr;
 
    private:
     TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
@@ -118,11 +118,11 @@ class FitterBKG {
 
     int num_CPUs_;
 
-    RooFitResult* result_ = NULL;
+    RooFitResult* result_ = nullptr;
 
-    TFile* output_file_ = NULL;
-    TChain* input_tree = NULL;
-    TTree* data_tree = NULL;
+    TFile* output_file_ = nullptr;
+    TChain* input_tree = nullptr;
+    TTree* data_tree = nullptr;
 
     // Self-cross-feed dt model
     RooRealVar scf_dt_voigt_mu_{"scf_dt_voigt_mu", "v_{#mu}", -0.303, -1, 1};

@@ -22,7 +22,7 @@
 #include "tools.h"
 
 int main(int argc, char* argv[]) {
-    char** optionless_argv = NULL;
+    char** optionless_argv = nullptr;
     fitter_options options = {};
     const int optionless_argc = ProcessCmdLineOptions(argc, argv, optionless_argv, options);
 
@@ -162,7 +162,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"efficiency-file", required_argument, 0, 'f'},
                                     {"mirror-margin", required_argument, 0, 'm'},
                                     {"help", no_argument, 0, 'h'},
-                                    {NULL, no_argument, NULL, 0}};
+                                    {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
     while ((c = getopt_long(argc, argv, "a:b:e:f:m:h", long_options, &option_index)) != -1) {
         switch (c) {

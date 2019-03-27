@@ -81,8 +81,8 @@ FitterCPV::FitterCPV() {
     perfect_tagging_ = false;
     generator_level_ = false;
 
-    vrzerr_ = NULL;
-    vtzerr_ = NULL;
+    vrzerr_ = nullptr;
+    vtzerr_ = nullptr;
 }
 
 FitterCPV::~FitterCPV() {
@@ -1683,7 +1683,7 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
 }
 
 /**
- * Create and return statbox with fit results to overlay on plots. Returns a NULL pointer
+ * Create and return statbox with fit results to overlay on plots. Returns a nullptr pointer
  * if no fit result exist.
  *
  * @param chi2 Reduced chi2 of the projection plot

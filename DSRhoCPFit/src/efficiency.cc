@@ -66,16 +66,16 @@ double Efficiency::GetEfficiency(double thetat, double thetab, double phit,
         case 4:
             return GetModel4Efficiency();
         case 5: {
-            assert(binned_efficiency != NULL);
+            assert(binned_efficiency != nullptr);
             return GetKDEEfficiency(thetat, thetab, phit);
         }
         case 6: {
-            assert(histo_efficiency != NULL);
+            assert(histo_efficiency != nullptr);
             return GetHistogramEfficiency(thetat, thetab, phit);
         }
         case 7: {
-            assert(binned_efficiency != NULL);
-            assert(histo_efficiency != NULL);
+            assert(binned_efficiency != nullptr);
+            assert(histo_efficiency != nullptr);
             std::vector<Double_t> coords(3);
             coords[0] = thetat;
             coords[1] = thetab;

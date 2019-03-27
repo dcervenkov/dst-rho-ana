@@ -98,10 +98,10 @@ private:
 	const RooArgSet* vars;
 	RooArgSet argset_;
 
-	RooDataSet* dataset_ = NULL;
-	RooFitResult* result_ = NULL;
+	RooDataSet* dataset_ = nullptr;
+	RooFitResult* result_ = nullptr;
 
-	TFile* output_file_ = NULL;
+	TFile* output_file_ = nullptr;
 
 	int num_CPUs_;
 	bool do_lifetime_fit_;

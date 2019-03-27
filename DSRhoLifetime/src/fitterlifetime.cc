@@ -134,10 +134,10 @@ FitterLifetime::FitterLifetime() {
 	make_plots_ = false;
 	perfect_tagging_ = false;
 
-	dt_ = NULL;
-	vrzerr_ = NULL;
-	vtzerr_ = NULL;
-	vars = NULL;
+	dt_ = nullptr;
+	vrzerr_ = nullptr;
+	vtzerr_ = nullptr;
+	vars = nullptr;
 
 }
 
@@ -404,7 +404,7 @@ TPaveText* FitterLifetime::CreateStatBox(const double chi2, const bool position_
 	// If no fit result exists return a null pointer
 	if (!result_) {
 		printf("WARNING: No result exists, can't create stat box!\n");
-		return NULL;
+		return nullptr;
 	}
 
 	const RooArgList results = result_->floatParsFinal();

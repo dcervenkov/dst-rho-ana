@@ -31,6 +31,7 @@ void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
                 const char* format = ".pdf", const double max = 0);
 void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data,
                 const RooAbsData& pdf, const char* format = ".pdf", const bool residual = false);
+TString GetCommonCutsString();
 }  // namespace tools
 
 #endif /* TOOLS_H_ */

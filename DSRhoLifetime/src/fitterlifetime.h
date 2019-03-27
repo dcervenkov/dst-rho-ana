@@ -93,7 +93,6 @@ public:
 
 private:
 	TPaveText* CreateStatBox(const double chi2, const bool position_top, const bool position_left) const;
-	TString GetCommonCutsString() const;
 
 	std::vector<RooRealVar**>vars_;
 	const RooArgSet* vars;

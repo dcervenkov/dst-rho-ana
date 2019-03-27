@@ -344,31 +344,6 @@ TPaveText* FitterBKG::CreateStatBox(const double chi2, const int ndof, const boo
 }
 
 /**
- * Construct and return a cut string common for all for categories
- */
-TString FitterBKG::GetCommonCutsString() const {
-    TString common_cuts("evmcflag!=1&&vrusable==1&&vtusable==1&&");
-    common_cuts += "((vrchi2/vrndf)<";
-    common_cuts += constants::cuts::sig_vtx_h;
-    common_cuts += "||vrntrk==1)&&";
-    common_cuts += "((vtchi2/vtndf)<";
-    common_cuts += constants::cuts::tag_vtx_h;
-    common_cuts += "||vtntrk==1)&&";
-    common_cuts += "((sqrt(vrerr6)<";
-    common_cuts += constants::cuts::sig_vtx_multitrack_sigma_z;
-    common_cuts += "&&vrntrk>1)||(sqrt(vrerr6)<";
-    common_cuts += constants::cuts::sig_vtx_singletrack_sigma_z;
-    common_cuts += "&&vrntrk==1))";
-    common_cuts += "&&";
-    common_cuts += "((sqrt(vterr6)<";
-    common_cuts += constants::cuts::tag_vtx_multitrack_sigma_z;
-    common_cuts += "&&vtntrk>1)||(sqrt(vterr6)<";
-    common_cuts += constants::cuts::tag_vtx_singletrack_sigma_z;
-    common_cuts += "&&vtntrk==1))";
-    return common_cuts;
-}
-
-/**
  * Reads in data from ROOT file(s). Constructs separate datasets for the 4 categories.
  * Binds the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
  *
@@ -387,7 +362,8 @@ void FitterBKG::ReadInFile(std::vector<const char*> file_names, const int& num_e
     //     delete temp_tree;
     // }
 
-    TString common_cuts = GetCommonCutsString();
+    TString common_cuts = tools::GetCommonCutsString();
+    common_cuts += "&&evmcflag!=1";
 
     TString a_cuts;
     TString ab_cuts;

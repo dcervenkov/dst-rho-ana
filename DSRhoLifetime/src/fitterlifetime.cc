@@ -38,6 +38,7 @@
 // Local includes
 #include "constants.h"
 #include "dtpdf.h"
+#include "tools.h"
 
 FitterLifetime::FitterLifetime() {
 	vrusable_ = new RooRealVar( "vrusable", "vrusable", 0, 1 );
@@ -296,7 +297,7 @@ void FitterLifetime::Test() {
 	sim_pdf.addPdf(mixing_pdf_b, "b");
 	sim_pdf.addPdf(mixing_pdf_bb, "bb");
 
-	dt_->setRange("dtFitRange", -15, 15);
+	dt_->setRange("dtFitRange", constants::cuts::dt_low, constants::cuts::dt_high);
 
 //	tau_->setConstant(true);
 //	dm_->setConstant(true);
@@ -446,28 +447,6 @@ TPaveText* FitterLifetime::CreateStatBox(const double chi2, const bool position_
 	return stat_box;
 }
 
-TString FitterLifetime::GetCommonCutsString() const{
-	TString common_cuts("evmcflag==1&&vrusable==1&&vtusable==1&&");
-	common_cuts += "((vrchi2/vrndf)<";
-	common_cuts += constants::cuts::sig_vtx_h;
-	common_cuts += "||vrntrk==1)&&";
-	common_cuts += "((vtchi2/vtndf)<";
-	common_cuts += constants::cuts::tag_vtx_h;
-	common_cuts += "||vtntrk==1)&&";
-	common_cuts += "((sqrt(vrerr6)<";
-	common_cuts += constants::cuts::sig_vtx_multitrack_sigma_z;
-	common_cuts += "&&vrntrk>1)||(sqrt(vrerr6)<";
-	common_cuts += constants::cuts::sig_vtx_singletrack_sigma_z;
-	common_cuts += "&&vrntrk==1))";
-	common_cuts += "&&";
-	common_cuts += "((sqrt(vterr6)<";
-	common_cuts += constants::cuts::tag_vtx_multitrack_sigma_z;
-	common_cuts += "&&vtntrk>1)||(sqrt(vterr6)<";
-	common_cuts += constants::cuts::tag_vtx_singletrack_sigma_z;
-	common_cuts += "&&vtntrk==1))";
-	return common_cuts;
-}
-
 void FitterLifetime::ReadInFile(const char* file_path, const int& num_events) {
 	TFile* input_file = new TFile(file_path);
 	TTree* input_tree = dynamic_cast<TTree*>(input_file->Get("h2000"));
@@ -478,7 +457,8 @@ void FitterLifetime::ReadInFile(const char* file_path, const int& num_events) {
 		delete temp_tree;
 	}
 
-	TString common_cuts = GetCommonCutsString();
+	TString common_cuts = tools::GetCommonCutsString();
+	common_cuts += "&&evmcflag==1";
 
 	TString a_cuts;
 	TString ab_cuts;

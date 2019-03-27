@@ -28,6 +28,7 @@
 #include "TSystemFile.h"
 
 // Local includes
+#include "constants.h"
 #include "log.h"
 
 namespace tools {
@@ -290,6 +291,31 @@ void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
     delete histo2;
     PlotVars2D(var1, var2, data1, format, max);
     PlotVars2D(var1, var2, data2, format, max);
+}
+
+/**
+ * Construct and return a cut string common for all for categories
+ */
+TString GetCommonCutsString() {
+    TString common_cuts("vrusable==1&&vtusable==1&&");
+    common_cuts += "((vrchi2/vrndf)<";
+    common_cuts += constants::cuts::sig_vtx_h;
+    common_cuts += "||vrntrk==1)&&";
+    common_cuts += "((vtchi2/vtndf)<";
+    common_cuts += constants::cuts::tag_vtx_h;
+    common_cuts += "||vtntrk==1)&&";
+    common_cuts += "((sqrt(vrerr6)<";
+    common_cuts += constants::cuts::sig_vtx_multitrack_sigma_z;
+    common_cuts += "&&vrntrk>1)||(sqrt(vrerr6)<";
+    common_cuts += constants::cuts::sig_vtx_singletrack_sigma_z;
+    common_cuts += "&&vrntrk==1))";
+    common_cuts += "&&";
+    common_cuts += "((sqrt(vterr6)<";
+    common_cuts += constants::cuts::tag_vtx_multitrack_sigma_z;
+    common_cuts += "&&vtntrk>1)||(sqrt(vterr6)<";
+    common_cuts += constants::cuts::tag_vtx_singletrack_sigma_z;
+    common_cuts += "&&vtntrk==1))";
+    return common_cuts;
 }
 
 }  // namespace tools

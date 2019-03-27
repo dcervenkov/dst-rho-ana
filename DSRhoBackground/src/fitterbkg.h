@@ -105,7 +105,6 @@ class FitterBKG {
    private:
     TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
                              const bool position_left) const;
-    TString GetCommonCutsString() const;
     TH3F* ConvertDensityToHisto(AdaptiveKernelDensity pdf) const;
     TH3F* Create3DHisto(const RooDataSet* dataset) const;
 

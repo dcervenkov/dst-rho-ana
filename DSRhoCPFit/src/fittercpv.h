@@ -179,7 +179,6 @@ class FitterCPV {
     void ChangeModelParameters(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config);
     TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
                              const bool position_left) const;
-    TString GetCommonCutsString() const;
     TH3D* GetBinnedEfficiency(std::vector<const char*> file, const int model);
     const void SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var, const double margin = 0);
     const void SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRealVar* var2,

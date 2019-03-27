@@ -78,8 +78,20 @@ class Fitter {
     TH3F* NormalizePDF(const TH3F* pdf, const double low, const double high);
     double Interpolate(const TH3F* histo, int x_org, int y_org, int z_org, int size);
 
+    RooRealVar vrusable_{"vrusable", "vrusable", 0};
     RooRealVar vrvtxz_{"vrvtxz", "vrvtxz", 0};
+    RooRealVar vrerr6_{"vrerr6", "vrerr6", 0};
+    RooRealVar vrchi2_{"vrchi2", "vrchi2", 0};
+    RooRealVar vrndf_{"vrndf", "vrndf", 0};
+    RooRealVar vrntrk_{"vrntrk", "vrntrk", 0};
+
+    RooRealVar vtusable_{"vtusable", "vtusable", 0};
     RooRealVar vtvtxz_{"vtvtxz", "vtvtxz", 0};
+    RooRealVar vterr6_{"vterr6", "vterr6", 0};
+    RooRealVar vtchi2_{"vtchi2", "vtchi2", 0};
+    RooRealVar vtndf_{"vtndf", "vtndf", 0};
+    RooRealVar vtntrk_{"vtntrk", "vtntrk", 0};
+
     RooFormulaVar dt_formula_{"dt", "#Deltat [ps]", "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
                               RooArgSet(vrvtxz_, vtvtxz_)};
 

@@ -72,16 +72,40 @@ Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const cha
         evtgen_dataset_ =
             RooDataSet::read(evtgen_filepath, RooArgList(thetat_, thetab_, phit_, dt_, dec_type_), "Q");
     }
+    Log::print(Log::info, "Read %i Evtgen events\n", evtgen_dataset_->numEntries());
+
+    TString cuts = tools::GetCommonCutsString();
+    cuts += "&&evmcflag==1";
+
+    RooArgSet dataset_vars;
+    dataset_vars.add(evmcflag_);
+    dataset_vars.add(thetat_);
+    dataset_vars.add(thetab_);
+    dataset_vars.add(phit_);
+
+    dataset_vars.add(vrusable_);
+    dataset_vars.add(vrvtxz_);
+    dataset_vars.add(vrerr6_);
+    dataset_vars.add(vrchi2_);
+    dataset_vars.add(vrndf_);
+    dataset_vars.add(vrntrk_);
+
+    dataset_vars.add(vtusable_);
+    dataset_vars.add(vtvtxz_);
+    dataset_vars.add(vterr6_);
+    dataset_vars.add(vtchi2_);
+    dataset_vars.add(vtndf_);
+    dataset_vars.add(vtntrk_);
 
     TFile* gsim_file = new TFile(gsim_filepath);
     TTree* gsim_tree = dynamic_cast<TTree*>(gsim_file->Get("h2000"));
-    gsim_dataset_ = new RooDataSet("gsim_dataset", "gsim dataset", gsim_tree,
-                                   RooArgSet(thetat_, thetab_, phit_, vrvtxz_, vtvtxz_, evmcflag_),
-                                   "evmcflag==1");
+    gsim_dataset_ = new RooDataSet("gsim_dataset", "gsim dataset", gsim_tree, dataset_vars, cuts);
+
     // Add calculated dt to the dataset
     // gsim_dataset_->addColumn(dt_formula_);
     delete gsim_tree;
     gsim_file->Close();
+    Log::print(Log::info, "Read %i Gsim events\n", gsim_dataset_->numEntries());
 
     tools::SetPlotDir(output_dir);
 

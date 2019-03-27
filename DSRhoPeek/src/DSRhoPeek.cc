@@ -30,9 +30,9 @@
 #include "RooPlot.h"
 
 // Local includes
-#include "constants.h"
 #include "colors.h"
 #include "log.h"
+#include "peekconstants.h"
 #include "tools.h"
 
 //#define GRAPHIC

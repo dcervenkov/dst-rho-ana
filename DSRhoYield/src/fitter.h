@@ -26,6 +26,9 @@
 #include "RooPolynomial.h"
 #include "RooChebychev.h"
 
+// Local includes
+#include "constants.h"
+
 enum class Components {signal, crossfeed, signal_plus_crossfeed, background, all};
 
 class Fitter {
@@ -47,10 +50,10 @@ public:
 	double GetCorrelation(TChain* chain, const RooRealVar& var1, const RooRealVar& var2, bool save_plot = false);
 	void PrintResults();
 
-	RooRealVar de_ { "de", "#DeltaE [GeV]", -0.14, 0.10 };
+	RooRealVar de_ { "de", "#DeltaE [GeV]", constants::cuts::de_low, constants::cuts::de_high };
 	RooRealVar candsel_ { "candsel", "candsel", 0, 4 };
 	RooRealVar evmcflag_ { "evmcflag", "evmcflag", -1, 8 };
-	RooRealVar thetab_ { "thetab", "#theta_{b} [rad]", 0.5, 2.95 };
+	RooRealVar thetab_ { "thetab", "#theta_{b} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high };
 
 private:
 

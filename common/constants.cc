@@ -52,6 +52,9 @@ const double c = 0.0299792458;  // [cm/ps]
 
 namespace cuts {
 
+const double de_low = -0.14;  // [GeV]
+const double de_high = 0.10;  // [GeV]
+
 const double dt_low = -10;  // [ps]
 const double dt_high = 10;  // [ps]
 

@@ -27,6 +27,8 @@ extern const double c;
 
 namespace cuts {
 
+extern const double de_low;
+extern const double de_high;
 extern const double dt_low;
 extern const double dt_high;
 extern const double thetat_low;

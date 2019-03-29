@@ -522,12 +522,18 @@ AdaptiveKernelDensity FitterBKG::FitKDE(RooDataSet* data) {
     // UniformDensity uniform_density("Uniform Density", &phasespace);
     // FormulaDensity formula_density("Formula Density", &phasespace,
     //                                "(x - 1.57)^2 * (y - 1.57)^2 * (z)^2");
-    FormulaDensity formula_density(
-        "Formula Density", phasespace,
-        "(x > 0 ? 1 : 0) * (x < TMath::Pi() ? 1 : 0) * "
-        "(y > 0.5 ? 1 : 0) * (y < 2.95 ? 1 : 0) * "
-        // "((cos(z))^2 + 0.1) * (z > -TMath::Pi() ? 1 : 0) * (z < TMath::Pi() ? 1 : 0.01)");
-        "(z > -TMath::Pi() ? 1 : 0) * (z < TMath::Pi() ? 1 : 0)");
+
+    // This simple step function provides better edge approximation
+    char formula[1000];
+    std::snprintf(formula, 1000,
+                  "(x > %f ? 1 : 0) * (x < %f ? 1 : 0) * "
+                  "(y > %f ? 1 : 0) * (y < %f ? 1 : 0) * "
+                  "(z > %f ? 1 : 0) * (z < %f ? 1 : 0)",
+                  constants::cuts::thetat_low, constants::cuts::thetat_high,
+                  constants::cuts::thetab_low, constants::cuts::thetab_high,
+                  constants::cuts::phit_low, constants::cuts::phit_high);
+
+    FormulaDensity formula_density("Formula Density", phasespace, formula);
 
     // RooAbsData::setDefaultStorageType(RooAbsData::Tree);
     // RooDataSet* dataNew = new RooDataSet("dataNew","dataNew", data, *data->get());

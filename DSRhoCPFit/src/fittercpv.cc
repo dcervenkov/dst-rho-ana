@@ -2696,9 +2696,12 @@ void FitterCPV::SetSCFHisto(const char* file) {
     Log::print(Log::info, "Setting up SCF RooHistPdf model from file '%s'\n", file);
     TFile f(file, "READ");
     RooHistPdf* temp_pdf = dynamic_cast<RooHistPdf*>(f.Get("scf_hist_pdf"));
-    Log::print(Log::debug, "isWeighted() = %i\n", temp_pdf->dataHist().isWeighted());
+
+    // We create a RooHistPdfFast (our version of RooHistPdf that implements
+    // caching of its "analytical integral") from the original RooHistPdf to
+    // avoid the huge performance hit due to a RooFit bug.
     scf_angular_pdf_ =
-        new RooHistPdfFast("scf_hist_pdf", "scf_hist_pdf", RooArgSet(*thetat_, *thetab_, *phit_),
+        new RooHistPdfFast("scf_hist_pdf_fast", "scf_hist_pdf_fast", RooArgSet(*thetat_, *thetab_, *phit_),
                        temp_pdf->dataHist());
 }
 

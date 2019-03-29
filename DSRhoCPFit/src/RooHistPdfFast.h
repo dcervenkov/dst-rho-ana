@@ -7,34 +7,37 @@
  *
  *  When calling analyticalIntegral() of RooHistPdf, it calls sum() of the
  *  underlying RooDataHist *every* time, instead of having it cached. This
- *  makes it tremedously slow. This class is a workaround to make it as fast as
- *  it should be.
+ *  makes it tremendously slow when evaluating if the RooHistPdf can be cached (analyticalIntegral()
+ *  is called for every event when doing that, even though it is always true). This class is a
+ *  simple workaround to make it as fast as it should be.
  *
  */
 
 #pragma once
 
+// Standard includes
+#include <string>
+
 // ROOT includes
 #include "RooHistPdf.h"
-#include "RooRealProxy.h"
 
 class RooHistPdfFast : public RooHistPdf {
-    // using RooHistPdf::RooHistPdf;
    public:
     RooHistPdfFast(const char* name, const char* title, const RooArgSet& vars,
-                   const RooDataHist& dhist, Int_t intOrder = 0);
-    RooHistPdfFast(const RooHistPdfFast& other, const char* name);
+                   const RooDataHist& dhist, Int_t intOrder = 0)
+        : RooHistPdf(name, title, vars, dhist, intOrder){};
 
-    // Double_t evaluate() const;
-    // Int_t getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars,
-    //                             const char* rangeName = 0) const;
+    RooHistPdfFast(const RooHistPdfFast& other, const char* name)
+        : RooHistPdf(other, name),
+          cached_integral(other.cached_integral),
+          cached_code(other.cached_code),
+          cached_rangeName(other.cached_rangeName){};
+
     Double_t analyticalIntegral(Int_t code, const char* rangeName = 0) const;
-    // Double_t analyticalIntegralWN(Int_t code, const RooArgSet* normSet,
-    //                               const char* rangeName = 0) const;
-    // Double_t getValV(const RooArgSet* nset = 0) const;
-
     TObject* clone(const char* newname) const { return new RooHistPdfFast(*this, newname); }
 
    private:
     mutable Double_t cached_integral = 0;
+    mutable Int_t cached_code = 0;
+    mutable std::string cached_rangeName;
 };

@@ -176,6 +176,14 @@ int main(int argc, char* argv[]) {
         fitter.LogText("efficiency_file_name", efficiency_file);
         fitter.LogFileCRC("efficiency_file_crc", efficiency_file);
     }
+    if (options.scf_histo_file_set) {
+        fitter.LogText("scf_file_name", options.scf_histo_file);
+        fitter.LogFileCRC("scf_file_crc", options.scf_histo_file);
+    }
+    if (options.scf_kde_file_set) {
+        fitter.LogText("scf_file_name", options.scf_kde_file);
+        fitter.LogFileCRC("scf_file_crc", options.scf_kde_file);
+    }
     if (fitter.ResultExists()) {
         fitter.LogResults();
         fitter.LogText("pull_table", fitter.CreatePullTableString().c_str());

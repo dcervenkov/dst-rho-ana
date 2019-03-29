@@ -24,6 +24,9 @@ extern const int btype;
 extern const double dm;
 extern const double tau;
 extern const double c;
+extern const double fraction_cr_of_crscf;
+extern const double fraction_cr_of_crscfbkg;
+extern const double fraction_scf_of_crscfbkg;
 
 namespace cuts {
 

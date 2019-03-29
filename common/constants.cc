@@ -50,6 +50,10 @@ const double dm = 0.507;     // [ps^-1]
 const double tau = 1.53439;  // [ps]
 const double c = 0.0299792458;  // [cm/ps]
 
+const double fraction_cr_of_crscf = 0.860;
+const double fraction_cr_of_crscfbkg = 0.7833;
+const double fraction_scf_of_crscfbkg = 0.1279;
+
 namespace cuts {
 
 const double de_low = -0.14;  // [GeV]

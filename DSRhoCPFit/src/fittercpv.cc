@@ -484,7 +484,7 @@ void FitterCPV::FitCRSCF() {
     // RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b", RooArgList(scf_dt_pdf_b, *scf_angular_pdf));
     // RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb", RooArgList(scf_dt_pdf_bb, *scf_angular_pdf));
 
-    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.860, 0.80, 0.99);
+    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
     cr_scf_f.setConstant();
 
     RooAddPdf pdf_a("pdf_a", "pdf_a", RooArgList(cr_pdf_a, scf_pdf_a), RooArgList(cr_scf_f));
@@ -694,8 +694,8 @@ void FitterCPV::FitAll() {
     RooProdPdf bkg_pdf_bb("bkg_pdf_bb", "bkg_pdf_bb", RooArgList(bkg_dt_dcs_model, *bkg_angular_pdf_));
 
 
-    RooRealVar cr_f("cr_f", "f_{cr}", 0.7833, 0.10, 0.99);
-    RooRealVar scf_f("scf_f", "f_{scf}", 0.1279, 0.10, 0.99);
+    RooRealVar cr_f("cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+    RooRealVar scf_f("scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
 
     cr_f.setConstant();
     scf_f.setConstant();
@@ -938,7 +938,7 @@ void FitterCPV::FitAngularCRSCF() {
     AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
-    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", 0.860, 0.80, 0.99);
+    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
     cr_scf_f.setConstant();
 
     RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_angular_pdf_), RooArgList(cr_scf_f));
@@ -1071,8 +1071,8 @@ void FitterCPV::FitAngularAll() {
     AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
-    RooRealVar cr_f("cr_f", "f_{cr}", 0.7833, 0.10, 0.99);
-    RooRealVar scf_f("scf_f", "f_{scf}", 0.1279, 0.10, 0.99);
+    RooRealVar cr_f("cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+    RooRealVar scf_f("scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
 
     cr_f.setConstant();
     scf_f.setConstant();

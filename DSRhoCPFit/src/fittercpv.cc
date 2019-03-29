@@ -70,6 +70,7 @@
 #include "rapidjson/document.h"
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/stringbuffer.h"
+#include "RooHistPdfFast.h"
 #include "tools.h"
 
 FitterCPV::FitterCPV() {
@@ -2694,7 +2695,11 @@ void FitterCPV::SetSCFKDE(const char* file) {
 void FitterCPV::SetSCFHisto(const char* file) {
     Log::print(Log::info, "Setting up SCF RooHistPdf model from file '%s'\n", file);
     TFile f(file, "READ");
-    scf_angular_pdf_ = dynamic_cast<RooHistPdf*>(f.Get("scf_hist_pdf"));
+    RooHistPdf* temp_pdf = dynamic_cast<RooHistPdf*>(f.Get("scf_hist_pdf"));
+    Log::print(Log::debug, "isWeighted() = %i\n", temp_pdf->dataHist().isWeighted());
+    scf_angular_pdf_ =
+        new RooHistPdfFast("scf_hist_pdf", "scf_hist_pdf", RooArgSet(*thetat_, *thetab_, *phit_),
+                       temp_pdf->dataHist());
 }
 
 int FitterCPV::CloseToEdge(const std::vector<Double_t> vals, const double margin) const {

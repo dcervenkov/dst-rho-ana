@@ -70,6 +70,7 @@
 #include "rapidjson/document.h"
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/stringbuffer.h"
+#include "RooHistPdfFast.h"
 #include "tools.h"
 
 FitterCPV::FitterCPV() {
@@ -2694,7 +2695,14 @@ void FitterCPV::SetSCFKDE(const char* file) {
 void FitterCPV::SetSCFHisto(const char* file) {
     Log::print(Log::info, "Setting up SCF RooHistPdf model from file '%s'\n", file);
     TFile f(file, "READ");
-    scf_angular_pdf_ = dynamic_cast<RooHistPdf*>(f.Get("scf_hist_pdf"));
+    RooHistPdf* temp_pdf = dynamic_cast<RooHistPdf*>(f.Get("scf_hist_pdf"));
+
+    // We create a RooHistPdfFast (our version of RooHistPdf that implements
+    // caching of its "analytical integral") from the original RooHistPdf to
+    // avoid the huge performance hit due to a RooFit bug.
+    scf_angular_pdf_ =
+        new RooHistPdfFast("scf_hist_pdf_fast", "scf_hist_pdf_fast", RooArgSet(*thetat_, *thetab_, *phit_),
+                       temp_pdf->dataHist());
 }
 
 int FitterCPV::CloseToEdge(const std::vector<Double_t> vals, const double margin) const {

@@ -10,13 +10,40 @@ import sys
 
 # Define tests to be run
 test_configs = {
-    "td_cr_fit": ["--efficiency-model=6", "--efficiency-file=efficiency.root",
-                  "--fit=CR", "--mixing", "--events=1000",
+    "td_cr_fit": ["--efficiency-model=6",
+                  "--efficiency-file=efficiency.root",
+                  "--fit=CR",
+                  "--mixing",
+                  "--events=1000",
                   "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
-                  "tests/current_result", "tests/signalMC_data.root"],
-    "ti_cr_fit": ["--efficiency-model=6", "--efficiency-file=efficiency.root",
-                  "--fit=CR", "--time-independent", "--events=1000",
-                  "tests/current_result", "tests/signalMC_data.root"],
+                  "tests/current_result",
+                  "tests/signalMC_data.root"],
+
+    "ti_cr_fit": ["--efficiency-model=6",
+                  "--efficiency-file=efficiency.root",
+                  "--fit=CR",
+                  "--time-independent",
+                  "--events=1000",
+                  "tests/current_result",
+                  "tests/signalMC_data.root"],
+
+    "td_crscf_fit": ["--efficiency-model=6",
+                     "--efficiency-file=efficiency.root",
+                     "--fit=CRSCF",
+                     "--scf-histo=scf_190323.root",
+                     "--mixing", "--events=1000",
+                     "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
+                     "tests/current_result",
+                     "tests/signalMC_data.root"],
+
+    "ti_crscf_fit": ["--efficiency-model=6",
+                     "--efficiency-file=efficiency.root",
+                     "--fit=CRSCF",
+                     "--scf-histo=scf_190323.root",
+                     "--time-independent",
+                     "--events=1000",
+                     "tests/current_result",
+                     "tests/signalMC_data.root"],
 }
 
 

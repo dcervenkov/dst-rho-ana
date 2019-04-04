@@ -14,6 +14,12 @@
 #include <stdio.h>
 #include <vector>
 
+// ROOT includes
+#include "RooDataHist.h"
+#include "RooDataSet.h"
+#include "RooProdPdf.h"
+
+// Meerkat includes
 #include "AdaptiveKernelDensity.hh"
 
 // Local includes
@@ -67,7 +73,7 @@ int main(int argc, char* argv[]) {
     } else if (options.histo) {
         fitter.CreateHistoPDF(fitter.dataset_);
     } else {
-    
+
         // We must plot after each fit otherwise the results printed on the plot
         // would be of the last fit
         fitter.Fit(&fitter.scf_phit_model_, fitter.dataset_);
@@ -108,6 +114,31 @@ int main(int argc, char* argv[]) {
         fitter.Fit(&fitter.scf_dt_model_, fitter.dataset_bb_);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_bb_, fitter.scf_dt_model_);
+        }
+
+        if (options.plot_dir_set) {
+            fitter.thetat_.setBins(50);
+            fitter.thetab_.setBins(50);
+            fitter.phit_.setBins(50);
+
+            RooProdPdf* bkg_pdf =
+                new RooProdPdf("bkg_pdf", "bkg_pdf",
+                               RooArgList(fitter.scf_thetat_model_, fitter.scf_thetab_model_,
+                                          fitter.scf_phit_model_));
+
+            RooDataHist* pdf_hist = bkg_pdf->generateBinned(RooArgSet(fitter.thetat_, fitter.thetab_, fitter.phit_), fitter.dataset_->numEntries(), true);
+
+            RooDataHist data_hist("data_hist", "data_hist",
+                           RooArgSet(fitter.thetat_, fitter.thetab_, fitter.phit_),
+                           *fitter.dataset_);
+
+            tools::PlotVars2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, constants::format);
+            tools::PlotVars2D(fitter.thetat_, fitter.phit_, data_hist, *pdf_hist, constants::format);
+            tools::PlotVars2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, constants::format);
+
+            tools::PlotPull2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, constants::format);
+            tools::PlotPull2D(fitter.thetat_, fitter.phit_, data_hist, *pdf_hist, constants::format);
+            tools::PlotPull2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, constants::format);
         }
     }
 

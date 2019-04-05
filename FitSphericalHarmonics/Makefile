@@ -1,0 +1,32 @@
+TARGET := FitSphericalHarmonics
+
+CXX_FILES := $(wildcard src/*.cc)
+OBJ_FILES := $(addprefix obj/,$(notdir $(CXX_FILES:.cc=.o)))
+DEP_FILES := $(OBJ_FILES:.o=.d)
+
+CXX := g++
+# LD_FLAGS := -Wl,-rpath $(HOME)/bin/belle/packages/Meerkat/lib
+CXX_FLAGS := -std=c++11 -g -Wall -Wno-non-virtual-dtor -O3
+LD_LIBS := -lboost_system -lboost_filesystem
+ROOT_FLAGS := $(shell root-config --cflags)
+ROOT_LIBS := $(shell root-config --libs) -lMathMore -lRooFitCore -lRooFit
+INCS := -Isrc
+
+.PHONY: all clean
+
+all:: $(TARGET)
+
+-include $(DEP_FILES)
+
+$(TARGET): $(OBJ_FILES)
+	g++ -o $@ $^ $(LD_FLAGS) $(ROOT_LIBS) $(LD_LIBS)
+
+obj/%.o: src/%.cc | obj
+	g++ $(CXX_FLAGS) $(INCS) $(ROOT_FLAGS) -c -MMD -o $@ $<
+
+obj:
+	mkdir obj
+
+clean::
+	rm -f $(OBJ_FILES) $(DEP_FILES) $(TARGET)
+

@@ -1,22 +1,23 @@
 /**
- *  @file    fit_spherical_harmonics.cc
+ *  @file    fittershe.cc
  *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
  *  @date    2018-06-05
  *
- *  @brief A program to calculate a spherical harmonics expansion of an
+ *  @brief A class to calculate a spherical harmonics expansion of an
  *  arbitrary 3D function.
  * 
- * This program can calculate a spherical harmonics expansion (SHE) of an
+ * This class can calculate a spherical harmonics expansion (SHE) of an
  * arbitrary 3D function with the appropriate domain. This can be used to model
  * efficiency/acceptance in a particle physics analysis. Most of this code was
  * donated by Pavel Reznicek.
  *
  */
 
-#include "fit_spherical_harmonics.h"
+#include "fittershe.h"
 
 // Standard includes
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <vector>
@@ -40,22 +41,69 @@
 #include "TStyle.h"
 
 // Local includes
+#include "cksum.h"
 #include "colors.h"
 #include "constants.h"
+#include "gitversion.h"
 #include "log.h"
 #include "tools.h"
 
-int main(int argc, char const *argv[]) {
-    colors::setColors();
-    // tools::SetupPlotStyle();
-    gStyle->SetOptStat(0);
-    const char* dataname = argv[1];
-    printf("Processing %s...\n", dataname);
-    AnalyzeDataset(dataname, -1, 20, 50, 2, 1, 5, 5, "fast");
-    return 0;
+// int main(int argc, char const *argv[]) {
+//     colors::setColors();
+//     // tools::SetupPlotStyle();
+//     gStyle->SetOptStat(0);
+//     const char* dataname = argv[1];
+//     printf("Processing %s...\n", dataname);
+//     AnalyzeDataset(dataname, -1, 20, 50, 2, 1, 5, 5, "fast");
+//     return 0;
+// }
+FitterSHE::FitterSHE() {
 }
 
-Double_t Ylm(UInt_t l, Int_t m, Double_t thetat, Double_t phi) {
+FitterSHE::~FitterSHE() {
+    if (output_file_) {
+        if (output_file_->IsOpen()) {
+            output_file_->Close();
+        }
+    }
+}
+
+/**
+ * Reads in data from ROOT file(s). Constructs separate datasets for the 4 categories.
+ * Binds the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
+ *
+ * @param file_names Vector of paths to the ROOT files
+ * @param num_events [optional] Maximum number of events to use (0 to read all)
+ */
+void FitterSHE::ReadInFile(std::vector<const char*> file_names, const int& num_events) {
+    TChain* input_chain = new TChain("h2000");
+    for (auto file_name : file_names) {
+        input_chain->Add(file_name);
+    }
+
+    TTree* input_tree;
+    if (num_events) {
+        input_tree = input_chain->CloneTree(num_events);
+    } else {
+        input_tree = input_chain->CloneTree();
+    }
+
+    TString cuts = tools::GetCommonCutsString();
+    cuts += "&&evmcflag!=1";
+
+    TTree* temp_tree = input_tree->CopyTree(cuts.Data());
+    delete input_tree;
+    input_data_ = temp_tree;
+}
+
+/**
+ * Set file in which output will be saved.
+ */
+void FitterSHE::SetOutputFile(const char* filename) {
+    output_file_ = new TFile(filename, "RECREATE");
+}
+
+Double_t FitterSHE::Ylm(UInt_t l, Int_t m, Double_t thetat, Double_t phi) {
     // https://en.wikipedia.org/wiki/Spherical_harmonics (real form)
     // https://en.wikipedia.org/wiki/Associated_Legendre_polynomials
     if (m > 0)
@@ -68,13 +116,13 @@ Double_t Ylm(UInt_t l, Int_t m, Double_t thetat, Double_t phi) {
         return ROOT::Math::sph_legendre(l, 0, thetat);  // integral is 1
 }
 
-Double_t Pk(UInt_t k, Double_t thetab) {
+Double_t FitterSHE::Pk(UInt_t k, Double_t thetab) {
     // https://en.wikipedia.org/wiki/Legendre_polynomials
     Double_t cosThetab = TMath::Cos(thetab);
     return ROOT::Math::legendre(k, cosThetab) * TMath::Sqrt(k + 0.5);  // integral is 1
 }
 
-Double_t SumAklmYlmPk(double *x, double *par) {
+Double_t FitterSHE::SumAklmYlmPk(double *x, double *par) {
     Double_t phi = x[0];
     Double_t thetat = x[1];
     Double_t thetab = x[2];
@@ -102,7 +150,7 @@ Double_t SumAklmYlmPk(double *x, double *par) {
     return norm * result;
 }
 
-std::map<TString, Double_t> GetChi2NDF(TH3D *h3_phi_cosTheta1_cosTheta2, TF3 *f3, TString title,
+std::map<TString, Double_t> FitterSHE::GetChi2NDF(TH3D *h3_phi_cosTheta1_cosTheta2, TF3 *f3, TString title,
                                        TString options, Int_t smoothScale) {
     static Int_t counter = 0;
 
@@ -451,7 +499,7 @@ std::map<TString, Double_t> GetChi2NDF(TH3D *h3_phi_cosTheta1_cosTheta2, TF3 *f3
     return result;
 }
 
-void AnalyzeDataset(TString dataset, Int_t max_entries, Int_t nBins3D, Int_t nBins1D,
+void FitterSHE::AnalyzeDataset(TString dataset, Int_t max_entries, Int_t nBins3D, Int_t nBins1D,
                     Int_t smooth3D, Int_t smooth1D, Int_t max_k, Int_t max_l, TString options) {
     Bool_t opt_checkNorm = options.Contains("norm", TString::kIgnoreCase);
     Bool_t opt_fastSearch = options.Contains("fast", TString::kIgnoreCase);
@@ -463,69 +511,64 @@ void AnalyzeDataset(TString dataset, Int_t max_entries, Int_t nBins3D, Int_t nBi
     TString angle_names[3];
     TString angle_title[3];
 
-    if (dataset == "DC") {
-        selection = tools::GetCommonCutsString();
-        selection += "&&evmcflag!=1";
-        t_data = new TChain("h2000");
-        t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s11.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s12.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s13.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s14.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s15.root");
-        t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s11.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s12.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s13.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s14.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s15.root");
-        t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s11.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s12.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s13.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s14.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s15.root");
-        t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s11.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s12.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s13.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s14.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s15.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s1.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s2.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s3.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s4.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s5.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s1.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s2.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s3.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s4.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s5.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s1.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s2.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s3.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s4.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s5.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s1.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s2.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s3.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s4.root");
-        // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s5.root");
+    selection = tools::GetCommonCutsString();
+    selection += "&&evmcflag!=1";
+    t_data = new TChain("h2000");
+    t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s11.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s12.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s13.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s14.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s15.root");
+    t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s11.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s12.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s13.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s14.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s15.root");
+    t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s11.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s12.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s13.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s14.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s15.root");
+    t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s11.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s12.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s13.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s14.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s15.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s1.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s2.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s3.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s4.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s5.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s1.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s2.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s3.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s4.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s5.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s1.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s2.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s3.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s4.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s5.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s1.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s2.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s3.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s4.root");
+    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s5.root");
 
-        angle_names[0] = "phit";
-        angle_title[0] = "#phi_{t}";  // phi must be 1st !!!, cos theta1/2 to follow
-        angle_names[1] = "thetat";
-        angle_title[1] = "#theta_{t}";
-        angle_names[2] = "thetab";
-        angle_title[2] = "#theta_{b}";
-    } else {
-        printf("Unknown dataset %s !\n", dataset.Data());
-        return;
-    }
+    angle_names[0] = "phit";
+    angle_title[0] = "#phi_{t}";  // phi must be 1st !!!, cos theta1/2 to follow
+    angle_names[1] = "thetat";
+    angle_title[1] = "#theta_{t}";
+    angle_names[2] = "thetab";
+    angle_title[2] = "#theta_{b}";
 
     if (max_entries > 0) {
         if (selection != "")
@@ -786,4 +829,80 @@ void AnalyzeDataset(TString dataset, Int_t max_entries, Int_t nBins3D, Int_t nBi
     } else {
         printf(" - not needed, same binning defined for 3D and 1D\n");
     }
+}
+
+const void FitterSHE::LogTextFromFile(const char* field_name, const char* filename) {
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+    std::ifstream file;
+    file.open(filename);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    TNamed text(field_name, buffer.str());
+    text.Write();
+}
+
+const void FitterSHE::LogFileCRC(const char* field_name, const char* filename) {
+    char buffer[100];
+    snprintf(buffer, 100, "%lu", cksum(filename, true));
+    TNamed crc(field_name, buffer);
+    crc.Write();
+}
+
+const void FitterSHE::LogText(const char* field_name, const char* text) {
+    TNamed text_field(field_name, text);
+    text_field.Write();
+}
+
+const void FitterSHE::LogCLIArguments(int argc, char* argv[]) {
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+
+    std::string str;
+    for (int i = 0; i < argc; i++) {
+        str += argv[i];
+        str += " ";
+    }
+    // Remove the final space
+    str.pop_back();
+    TNamed cli_arguments("cli_arguments", str.c_str());
+    cli_arguments.Write();
+}
+
+const void FitterSHE::LogEnvironmentMetadata() {
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+
+    TNamed root_version("root_version", ROOT_RELEASE);
+    root_version.Write();
+
+    char buffer[100];
+    gethostname(buffer, 100);
+    TNamed hostname("hostname", buffer);
+    hostname.Write();
+
+    const time_t now = time(0);
+    const char* local_time_string = ctime(&now);
+    TNamed local_date("local_date", local_time_string);
+
+    tm* gmtm = gmtime(&now);
+    const char* utc_time_string = asctime(gmtm);
+    TNamed utc_date("utc_date", utc_time_string);
+
+    TNamed git_version("git_version", gitversion);
+    git_version.Write();
+}
+
+/**
+ * Set the directory to which to ouput plots
+ */
+void FitterSHE::SetPlotDir(const char* plot_dir) {
+    make_plots_ = true;
+    tools::SetPlotDir(plot_dir);
 }

@@ -48,15 +48,6 @@
 #include "log.h"
 #include "tools.h"
 
-// int main(int argc, char const *argv[]) {
-//     colors::setColors();
-//     // tools::SetupPlotStyle();
-//     gStyle->SetOptStat(0);
-//     const char* dataname = argv[1];
-//     printf("Processing %s...\n", dataname);
-//     AnalyzeDataset(dataname, -1, 20, 50, 2, 1, 5, 5, "fast");
-//     return 0;
-// }
 FitterSHE::FitterSHE() {
 }
 
@@ -90,10 +81,60 @@ void FitterSHE::ReadInFile(std::vector<const char*> file_names, const int& num_e
 
     TString cuts = tools::GetCommonCutsString();
     cuts += "&&evmcflag!=1";
+    cuts += "&&thetat>";
+    cuts += constants::cuts::thetat_low;
+    cuts += "&&thetat<";
+    cuts += constants::cuts::thetat_high;
+    cuts += "&&thetab>";
+    cuts += constants::cuts::thetab_low;
+    cuts += "&&thetab<";
+    cuts += constants::cuts::thetab_high;
+    cuts += "&&phit>";
+    cuts += constants::cuts::phit_low;
+    cuts += "&&phit<";
+    cuts += constants::cuts::phit_high;
 
     TTree* temp_tree = input_tree->CopyTree(cuts.Data());
     delete input_tree;
-    input_data_ = temp_tree;
+
+    temp_tree->SetBranchStatus("*", 0);
+    for (auto activeBranchName : {"thetat", "thetab", "phit"}) {
+      temp_tree->SetBranchStatus(activeBranchName, 1);
+    }
+
+    input_data_ = temp_tree->CloneTree();
+    delete temp_tree;
+
+    // AddMirrorData(&input_data_);
+}
+
+void FitterSHE::AddMirrorData(TTree** tree) {
+    TTree* mirror_tree = (*tree)->CloneTree(0);
+    Long64_t nentries = (*tree)->GetEntries();
+
+    Float_t thetat, thetab, phit;
+    (*tree)->SetBranchAddress("thetat", &thetat);
+    (*tree)->SetBranchAddress("thetab", &thetab);
+    (*tree)->SetBranchAddress("phit", &phit);
+
+    const double range_thetab = constants::cuts::thetab_high - constants::cuts::thetab_low;
+    for (Long64_t i = 0; i < nentries; i++) {
+        (*tree)->GetEntry(i);
+        thetab = (thetab - constants::cuts::thetab_low)/range_thetab * TMath::Pi() / 2 + TMath::Pi() / 2;
+        mirror_tree->Fill();
+        thetab = -thetab + TMath::Pi();
+        mirror_tree->Fill();
+    }
+
+    // TList list;
+    // list.Add(tree);
+    // list.Add(mirror_tree);
+    // tree = TTree::MergeTrees(&list);
+    (*tree) = mirror_tree;
+
+    TCanvas c("mirrored_thetab", "mirrored_thetab", 500, 500);
+    (*tree)->Draw("thetab");
+    c.SaveAs(".png");
 }
 
 /**
@@ -150,6 +191,36 @@ Double_t FitterSHE::SumAklmYlmPk(double *x, double *par) {
     return norm * result;
 }
 
+TH3* Histogram3DFunction(TF3* function, const int x_bins, const int y_bins, const int z_bins) {
+    // Create 3D histogram from the TF3 with binning "smoothScale"-times finer than the data
+    // histogram
+    function->SetNpx(x_bins);
+    function->SetNpy(y_bins);
+    function->SetNpz(z_bins);
+    TH3 *function_hist = (TH3 *)(function->GetHistogram());
+    Double_t hf3_nBinsX = function_hist->GetNbinsX();
+    Double_t hf3_nBinsY = function_hist->GetNbinsY();
+    Int_t hf3_nBinsZ = function_hist->GetNbinsZ();
+    for (Int_t ix = 1; ix <= function_hist->GetNbinsX(); ix++) {
+        for (Int_t iy = 1; iy <= function_hist->GetNbinsY(); iy++) {
+            if ((iy % ((100 / hf3_nBinsZ) + 1)) == 0) {
+                printf("Evaluating function: %.5g%%          \r",
+                       100. * ((ix - 1) * hf3_nBinsY + (iy - 1)) / (hf3_nBinsX * hf3_nBinsY));
+                std::flush(std::cout);
+            }
+            for (Int_t iz = 1; iz <= function_hist->GetNbinsZ(); iz++) {
+                double xpos = function_hist->GetXaxis()->GetBinCenter(ix);
+                double ypos = function_hist->GetYaxis()->GetBinCenter(iy);
+                double zpos = function_hist->GetZaxis()->GetBinCenter(iz);
+                function_hist->SetBinContent(ix, iy, iz, function->Eval(xpos, ypos, zpos));
+            }
+        }
+    }
+    printf("                                     \r");
+    std::flush(std::cout);
+    return function_hist;
+}
+
 std::map<TString, Double_t> FitterSHE::GetChi2NDF(TH3D *h3_phi_cosTheta1_cosTheta2, TF3 *f3, TString title,
                                        TString options, Int_t smoothScale) {
     static Int_t counter = 0;
@@ -162,38 +233,8 @@ std::map<TString, Double_t> FitterSHE::GetChi2NDF(TH3D *h3_phi_cosTheta1_cosThet
     Int_t nbins_cosTheta1 = h3_phi_cosTheta1_cosTheta2->GetNbinsY();
     Int_t nbins_cosTheta2 = h3_phi_cosTheta1_cosTheta2->GetNbinsZ();
 
-    // Create 3D histogram from the TF3 with binning "smoothScale"-times finer than the data
-    // histogram
-    f3->SetNpx(h3_phi_cosTheta1_cosTheta2->GetNbinsX() * smoothScale);
-    f3->SetNpy(h3_phi_cosTheta1_cosTheta2->GetNbinsY() * smoothScale);
-    f3->SetNpz(h3_phi_cosTheta1_cosTheta2->GetNbinsZ() * smoothScale);
-    TH3 *hf3_phi_cosTheta1_cosTheta2 = (TH3 *)(f3->GetHistogram());
-    Double_t hf3_nBinsX = hf3_phi_cosTheta1_cosTheta2->GetNbinsX();
-    Double_t hf3_nBinsY = hf3_phi_cosTheta1_cosTheta2->GetNbinsY();
-    Int_t hf3_nBinsZ = hf3_phi_cosTheta1_cosTheta2->GetNbinsZ();
-    for (Int_t ix = 1; ix <= hf3_phi_cosTheta1_cosTheta2->GetNbinsX(); ix++) {
-        for (Int_t iy = 1; iy <= hf3_phi_cosTheta1_cosTheta2->GetNbinsY(); iy++) {
-            if ((iy % ((100 / hf3_nBinsZ) + 1)) == 0) {
-                printf("Evaluating function: %.5g%%          \r",
-                       100. * ((ix - 1) * hf3_nBinsY + (iy - 1)) / (hf3_nBinsX * hf3_nBinsY));
-                std::flush(std::cout);
-            }
-            for (Int_t iz = 1; iz <= hf3_phi_cosTheta1_cosTheta2->GetNbinsZ(); iz++) {
-                double xpos = hf3_phi_cosTheta1_cosTheta2->GetXaxis()->GetBinCenter(ix);
-                double ypos = hf3_phi_cosTheta1_cosTheta2->GetYaxis()->GetBinCenter(iy);
-                double zpos = hf3_phi_cosTheta1_cosTheta2->GetZaxis()->GetBinCenter(iz);
-                if (opt_useIntegral)
-                    hf3_phi_cosTheta1_cosTheta2->SetBinContent(
-                        ix, iy, iz,
-                        f3->Eval(xpos, ypos, zpos));  // TODO: replace eval by integral in the bin
-                else
-                    hf3_phi_cosTheta1_cosTheta2->SetBinContent(ix, iy, iz,
-                                                               f3->Eval(xpos, ypos, zpos));
-            }
-        }
-    }
-    printf("                                     \r");
-    std::flush(std::cout);
+    TH3 *hf3_phi_cosTheta1_cosTheta2 = Histogram3DFunction(
+        f3, nbins_phi * smoothScale, nbins_cosTheta1 * smoothScale, nbins_cosTheta2 * smoothScale);
 
     TFile output_file(title + ".root", "RECREATE");
     hf3_phi_cosTheta1_cosTheta2->Write();
@@ -402,7 +443,7 @@ std::map<TString, Double_t> FitterSHE::GetChi2NDF(TH3D *h3_phi_cosTheta1_cosThet
     hres_phi_cosTheta1_cosTheta2.SetXTitle(text_phi_cosTheta1_cosTheta2);
 
     // Draw the projections and residuals
-    if (opt_controlPlots) {
+    if (make_plots_) {
         Double_t max_phi = h1_phi->GetMaximum() * 1.2;
         Double_t max_cosTheta1 = h1_cosTheta1->GetMaximum() * 1.2;
         Double_t max_cosTheta2 = h1_cosTheta2->GetMaximum() * 1.2;
@@ -459,7 +500,7 @@ std::map<TString, Double_t> FitterSHE::GetChi2NDF(TH3D *h3_phi_cosTheta1_cosThet
         hres_phi_cosTheta1_cosTheta2.DrawCopy("");
         c->Modified();
         c->Update();
-        c->SaveAs(title + ".png");
+        c->SaveAs(".png");
     }
 
     std::map<TString, Double_t> result;
@@ -505,91 +546,34 @@ void FitterSHE::AnalyzeDataset(TString dataset, Int_t max_entries, Int_t nBins3D
     Bool_t opt_fastSearch = options.Contains("fast", TString::kIgnoreCase);
     Bool_t opt_noSearch = options.Contains("fullonly", TString::kIgnoreCase);
 
+    // TCanvas c("mirrored_thetab2", "mirrored_thetab2", 500, 500);
+    // input_data_->Draw("thetab");
+    // c.SaveAs(".png");
+
     // Read input ntuple, define angles titles for different datasets
-    TChain *t_data;
-    TString selection;
     TString angle_names[3];
     TString angle_title[3];
 
-    selection = tools::GetCommonCutsString();
-    selection += "&&evmcflag!=1";
-    t_data = new TChain("h2000");
-    t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s11.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s12.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s13.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s14.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charged_s15.root");
-    t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s11.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s12.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s13.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s14.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-charm_s15.root");
-    t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s11.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s12.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s13.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s14.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s15.root");
-    t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s11.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s12.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s13.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s14.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd1_on_resonance_evtgen-uds_s15.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s1.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s2.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s3.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s4.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s5.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s1.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s2.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s3.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s4.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s5.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s1.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s2.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s3.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s4.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s5.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s1.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s2.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s3.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s4.root");
-    // t_data->Add("../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s5.root");
-
     angle_names[0] = "phit";
     angle_title[0] = "#phi_{t}";  // phi must be 1st !!!, cos theta1/2 to follow
-    angle_names[1] = "thetat";
-    angle_title[1] = "#theta_{t}";
-    angle_names[2] = "thetab";
-    angle_title[2] = "#theta_{b}";
-
-    if (max_entries > 0) {
-        if (selection != "")
-            selection = "(" + selection + TString::Format(") && Entry$ < %d", max_entries);
-        else
-            selection = TString::Format("Entry$ < %d", max_entries);
-    }
+    angle_names[1] = "thetab";
+    angle_title[1] = "#theta_{b}";
+    angle_names[2] = "thetat";
+    angle_title[2] = "#theta_{t}";
 
     // Calculate aklm parameters
-    printf("Reading data for %s\n", dataset.Data());
-    Int_t entries = t_data->Draw("1", selection, "goff");
+    // printf("Reading data for %s\n", dataset.Data());
+    Int_t entries = input_data_->Draw("1", "", "goff");
     if (entries <= 0) {
         printf("No events in dataset !\n");
         return;
     }
     printf("Found %d events\n", entries);
-    t_data->SetEstimate(entries + 1);
-    t_data->Draw(angle_names[2] + ":" + angle_names[1] + ":" + angle_names[0], selection, "goff");
-    Double_t *thetab = t_data->GetV1();
-    Double_t *thetat = t_data->GetV2();
-    Double_t *phit = t_data->GetV3();
+    input_data_->SetEstimate(entries + 1);
+    input_data_->Draw(angle_names[2] + ":" + angle_names[1] + ":" + angle_names[0], "", "goff");
+    Double_t *thetab = input_data_->GetV1();
+    Double_t *thetat = input_data_->GetV2();
+    Double_t *phit = input_data_->GetV3();
 
     printf("Calculating aklm parameters\n");
     std::map<UInt_t, std::map<UInt_t, std::map<Int_t, Double_t> > > aklm;
@@ -616,9 +600,9 @@ void FitterSHE::AnalyzeDataset(TString dataset, Int_t max_entries, Int_t nBins3D
     // Create appropriate 3D function
     printf("Creating the 3D function\n");
     TF3 *f3 = new TF3("f_SumAklmYlmPk", SumAklmYlmPk, constants::cuts::phit_low,
-                      constants::cuts::phit_high, constants::cuts::thetat_low,
-                      constants::cuts::thetat_high, constants::cuts::thetab_low,
-                      constants::cuts::thetab_high, nPar + 3);
+                      constants::cuts::phit_high, constants::cuts::thetab_low,
+                      constants::cuts::thetab_high, constants::cuts::thetat_low,
+                      constants::cuts::thetat_high, nPar + 3);
     f3->SetParameter(0, 1);
     f3->FixParameter(1, max_k);
     f3->FixParameter(2, max_l);
@@ -639,11 +623,11 @@ void FitterSHE::AnalyzeDataset(TString dataset, Int_t max_entries, Int_t nBins3D
         nBins3D = TMath::Min(
             (Int_t)(TMath::Max(5., TMath::Power(entries / 100., 1. / 2. /*3.*/ /*1.*/)) + 0.1), 50);
     TH3D *h3 = new TH3D("h3", "h3", nBins3D, constants::cuts::phit_low, constants::cuts::phit_high,
-                        nBins3D, constants::cuts::thetat_low, constants::cuts::thetat_high, nBins3D,
-                        constants::cuts::thetab_low, constants::cuts::thetab_high);
-    t_data->Draw(angle_names[2] + ":" + angle_names[1] + ":" + angle_names[0] + ">>+ " +
+                        nBins3D, constants::cuts::thetab_low, constants::cuts::thetab_high, nBins3D,
+                        constants::cuts::thetat_low, constants::cuts::thetat_high);
+    input_data_->Draw(angle_names[2] + ":" + angle_names[1] + ":" + angle_names[0] + ">>+ " +
                      TString(h3->GetName()),
-                 selection, "goff");
+                 "", "goff");
     h3->SetXTitle(angle_title[0]);
     h3->SetYTitle(angle_title[1]);
     h3->SetZTitle(angle_title[2]);
@@ -653,8 +637,8 @@ void FitterSHE::AnalyzeDataset(TString dataset, Int_t max_entries, Int_t nBins3D
         printf("Checking normalization...\n");
         printf("Normalization check: %g %g\n",
                f3->Integral(constants::cuts::phit_low, constants::cuts::phit_high,
-                            constants::cuts::thetat_low, constants::cuts::thetat_high,
-                            constants::cuts::thetab_low, constants::cuts::thetab_high),
+                            constants::cuts::thetab_low, constants::cuts::thetab_high,
+                            constants::cuts::thetat_low, constants::cuts::thetat_high),
                h3->Integral("Width"));
     }
 
@@ -805,12 +789,12 @@ void FitterSHE::AnalyzeDataset(TString dataset, Int_t max_entries, Int_t nBins3D
     if (nBins1D == -1) nBins1D = TMath::Min((Int_t)(TMath::Max(5., entries / 100.) + 0.1), 100);
     if (nBins1D != nBins3D) {
         TH3D *h3_fine = new TH3D("h3_fine", "h3_fine", nBins1D, constants::cuts::phit_low,
-                                 constants::cuts::phit_high, nBins1D, constants::cuts::thetat_low,
-                                 constants::cuts::thetat_high, nBins1D, constants::cuts::thetab_low,
-                                 constants::cuts::thetab_high);
-        t_data->Draw(angle_names[2] + ":" + angle_names[1] + ":" + angle_names[0] + ">>+ " +
+                                 constants::cuts::phit_high, nBins1D, constants::cuts::thetab_low,
+                                 constants::cuts::thetab_high, nBins1D, constants::cuts::thetat_low,
+                                 constants::cuts::thetat_high);
+        input_data_->Draw(angle_names[2] + ":" + angle_names[1] + ":" + angle_names[0] + ">>+ " +
                          TString(h3_fine->GetName()),
-                     selection, "goff");
+                     "", "goff");
         h3_fine->SetXTitle(angle_title[0]);
         h3_fine->SetYTitle(angle_title[1]);
         h3_fine->SetZTitle(angle_title[2]);
@@ -820,8 +804,8 @@ void FitterSHE::AnalyzeDataset(TString dataset, Int_t max_entries, Int_t nBins3D
             printf("Checking normalization...\n");
             printf("Normalization check: %g %g\n",
                    f3->Integral(constants::cuts::phit_low, constants::cuts::phit_high,
-                                constants::cuts::thetat_low, constants::cuts::thetat_high,
-                                constants::cuts::thetab_low, constants::cuts::thetab_high),
+                                constants::cuts::thetab_low, constants::cuts::thetab_high,
+                                constants::cuts::thetat_low, constants::cuts::thetat_high),
                    h3->Integral("Width"));
         }
         GetChi2NDF(h3_fine, f3, dataset + "_minimal1Dopt", "plot text",

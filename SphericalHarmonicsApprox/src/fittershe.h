@@ -44,6 +44,7 @@ class FitterSHE {
     const void LogText(const char* field_name, const char* text);
 
    private:
+    void AddMirrorData(TTree** tree);
     static Double_t Ylm(UInt_t l, Int_t m, Double_t cosTheta1, Double_t phi);
     static Double_t Pk(UInt_t k, Double_t cosTheta2);
     static Double_t SumAklmYlmPk(double *x, double *par);

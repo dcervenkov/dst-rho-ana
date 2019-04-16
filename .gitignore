@@ -43,19 +43,21 @@
 */.vscode
 compile_commands.json
 
+# Directories
 data
+logs
+old
+plots
+results
 
+# Temp file used to add git commit hash to the binary
 gitversion.cc
-*/data*/*
-*/plots*/*
-*/configs*/*
-*/logs*/*
-*/results*/*
+
+# Doxygen generated files
 */doc/html/*
-*.db
+
+# Makefiles made from Imakefiles
 DSRho/Makefile
-DSRhoEfficiency/efficiency*
-DSRhoPeek/svd*/*
 DSRhoSkim/Makefile
 panther2TTree/Makefile
 printTree/Makefile

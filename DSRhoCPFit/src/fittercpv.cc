@@ -1252,20 +1252,12 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
     return config;
 }
 
-void FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
+std::string FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     // Store the applied config in the resulting ROOT file for reference
     rapidjson::StringBuffer buffer;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
     config.Accept(writer);
     const char* json_string = buffer.GetString();
-
-    // Set the current directory back to the one for plots (ugly ROOT stuff)
-    if (output_file_) {
-        output_file_->cd();
-    }
-
-    TNamed json_config("json_config", json_string);
-    json_config.Write();
 
     if (config.HasMember("fitRanges")) {
         ChangeFitRanges(config["fitRanges"]);
@@ -1275,6 +1267,9 @@ void FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     if (config.HasMember("modelParameters")) {
         ChangeModelParameters(config["modelParameters"]);
     }
+
+    std::string json_config_string = json_string;
+    return json_config_string;
 }
 
 void FitterCPV::ChangeFitRanges(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config) {

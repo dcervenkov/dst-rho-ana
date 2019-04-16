@@ -93,7 +93,7 @@ class FitterCPV {
     const std::string CreateLatexPullTableString(const bool asymmetric = false);
     RooDataSet* ReduceDataToFitRange(const rapidjson::Document& config);
     static rapidjson::Document ReadJSONConfig(const char* filename);
-    void ApplyJSONConfig(const rapidjson::Document& config);
+    std::string ApplyJSONConfig(const rapidjson::Document& config);
     const void SaveTXTResults(const char* root_filename);
 
     const void LogEnvironmentMetadata();

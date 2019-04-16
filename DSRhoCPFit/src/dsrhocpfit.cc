@@ -95,9 +95,10 @@ int main(int argc, char* argv[]) {
 
     fitter.InitVars(par_input);
 
+    std::string json_config;
     if (options.config_file_set) {
         rapidjson::Document config = FitterCPV::ReadJSONConfig(options.config_file);
-        fitter.ApplyJSONConfig(config);
+        json_config = fitter.ApplyJSONConfig(config);
     }
 
     if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
@@ -141,6 +142,10 @@ int main(int argc, char* argv[]) {
     // fitter.TestEfficiency();
     // fitter.PlotEfficiency();
 
+    std::string output_filename(results_path);
+    output_filename += ".root";
+    fitter.SetOutputFile(output_filename.c_str());
+
     if (std::strcmp(options.fit, "CR") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {
             fitter.FitAngularCR();
@@ -162,12 +167,11 @@ int main(int argc, char* argv[]) {
     }
     // fitter.GenerateToys(10000, 10);
 
-    std::string output_filename(results_path);
-    output_filename += ".root";
-    fitter.SetOutputFile(output_filename.c_str());
-
     fitter.LogCLIArguments(argc, argv);
     fitter.LogEnvironmentMetadata();
+    if (!json_config.empty()) {
+        fitter.LogText("json_config", json_config.c_str());
+    }
     for (auto file_name : file_names) {
         fitter.LogText("input_file_name", file_name);
         fitter.LogFileCRC("input_file_crc", file_name);

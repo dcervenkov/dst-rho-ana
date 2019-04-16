@@ -58,10 +58,6 @@ int main(int argc, char* argv[]) {
         return 2;
     }
 
-    if (boost::algorithm::ends_with(gitversion, "-dirty")) {
-        Log::print(Log::warning, "Using version from dirty Git worktree\n");
-    }
-
     /// This is so I have to change only the next block if I change the
     /// ordering, etc. of arguments
     const char* results_path = optionless_argv[1];
@@ -80,6 +76,11 @@ int main(int argc, char* argv[]) {
         std::cout.rdbuf(out.rdbuf());
     }
 
+
+    if (boost::algorithm::ends_with(gitversion, "-dirty")) {
+        Log::print(Log::warning, "Using version from dirty Git worktree\n");
+    }
+
     if (options.scf_kde_file_set && options.scf_histo_file_set) {
         Log::print(Log::error, "Both '--scf-kde' and '--scf-histo' set. Use only one!\n");
         return 3;
@@ -89,10 +90,6 @@ int main(int argc, char* argv[]) {
     colors::setColors();
 
     FitterCPV fitter;
-
-    std::string output_filename(results_path);
-    output_filename += ".root";
-    fitter.SetOutputFile(output_filename.c_str());
 
     if (options.generator_level_set) fitter.SetGeneratorLevel(options.generator_level);
 
@@ -164,6 +161,10 @@ int main(int argc, char* argv[]) {
         }
     }
     // fitter.GenerateToys(10000, 10);
+
+    std::string output_filename(results_path);
+    output_filename += ".root";
+    fitter.SetOutputFile(output_filename.c_str());
 
     fitter.LogCLIArguments(argc, argv);
     fitter.LogEnvironmentMetadata();

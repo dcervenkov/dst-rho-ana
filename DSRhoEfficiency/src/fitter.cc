@@ -12,6 +12,10 @@
 // Standard includes
 #include <algorithm>
 #include <cmath>
+#include <cstring>
+
+// Boost includes
+#include <boost/algorithm/string/replace.hpp>
 
 // ROOT includes
 #include "RVersion.h"
@@ -474,29 +478,24 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
         TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_eff_canvas",
         TString(var1.GetTitle()) + "_" + TString(var2.GetName()) + " eff canvas", 500, 500);
 
-    TH2D* gsim_histo =
-        static_cast<TH2D*>(gsim_dataset_->createHistogram("gsim_histo", var1, RooFit::YVar(var2)));
-    TH2D* evtgen_histo = static_cast<TH2D*>(
-        evtgen_dataset_->createHistogram("evtgen_histo", var1, RooFit::YVar(var2)));
+    TH3F* eff_histo_3D = GetBinned3DEfficiency();
 
-    TH2* eff_histo = dynamic_cast<TH2*>(gsim_histo->Clone("eff_histo"));
-    eff_histo->Divide(eff_histo, evtgen_histo, 1.0, 1.0, "B");
+    std::string projection_string;
+    projection_string += var2.GetName();
+    projection_string += var1.GetName();
+    boost::replace_all(projection_string, "thetat", "x");
+    boost::replace_all(projection_string, "thetab", "y");
+    boost::replace_all(projection_string, "phit", "z");
 
-    // Empty (whiten) bins with too few entries
-    for (int i = 1; i <= eff_histo->GetNbinsX(); i++) {
-        for (int j = 1; j <= eff_histo->GetNbinsY(); j++) {
-            if (gsim_histo->GetBinContent(i, j) == 0) {
-                eff_histo->SetBinContent(i, j, -1);
-            }
-        }
-    }
+    TH2D* eff_histo = dynamic_cast<TH2D*>(eff_histo_3D->Project3D(projection_string.c_str()));
+    eff_histo->Scale(1. / 50.);
 
     Log::print(Log::info, "Correlation %s : %s is %f\n", var1.GetName(), var2.GetName(),
                eff_histo->GetCorrelationFactor());
 
     // This clone must happen before Draw() of eff_histo, otherwise problems
     // with eff_pull_histo color legend range occur.
-    TH2* eff_pull_histo = dynamic_cast<TH2*>(gsim_histo->Clone("eff_pull_histo"));
+    TH2* eff_pull_histo = dynamic_cast<TH2*>(eff_histo->Clone("eff_pull_histo"));
 
     TString name = "eff_";
     name += var1.GetName();
@@ -507,7 +506,6 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
 
     eff_histo->SetTitle("");
     eff_histo->SetMinimum(0);
-    eff_histo->SetMaximum(0.35);
     eff_histo->Draw("colz");
     eff_histo->GetZaxis()->SetTitle("");
 
@@ -541,7 +539,7 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
 
     pdf_eff_histo->SetTitle("");
     pdf_eff_histo->SetMinimum(0);
-    pdf_eff_histo->SetMaximum(0.35);
+    pdf_eff_histo->SetMaximum(eff_histo->GetMaximum());
     pdf_eff_histo->Draw("colz");
     pdf_eff_histo->GetZaxis()->SetTitle("");
 
@@ -577,11 +575,11 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
 #endif
     eff_pull_histo->SetTitle("");
     eff_pull_histo->GetZaxis()->SetTitle();
-    // const double max = std::max(-eff_pull_histo->GetMinimum(), eff_pull_histo->GetMaximum());
-    // eff_pull_histo->SetMinimum(-max);
-    // eff_pull_histo->SetMaximum(max);
-    eff_pull_histo->SetMinimum(-0.1);
-    eff_pull_histo->SetMaximum(0.1);
+    const double max = std::max(-eff_pull_histo->GetMinimum(), eff_pull_histo->GetMaximum());
+    eff_pull_histo->SetMinimum(-max);
+    eff_pull_histo->SetMaximum(max);
+    // eff_pull_histo->SetMinimum(-0.1);
+    // eff_pull_histo->SetMaximum(0.1);
     eff_pull_histo->SetOption("colz 1");
     eff_pull_histo->Draw();
     eff_pull_histo->Write();
@@ -597,8 +595,7 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
     colors::setColors();
 
     delete eff_histo;
-    delete gsim_histo;
-    delete evtgen_histo;
+    delete eff_histo_3D;
     delete stat_box;
     delete eff_pull_histo;
 }

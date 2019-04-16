@@ -488,7 +488,18 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
     boost::replace_all(projection_string, "phit", "z");
 
     TH2D* eff_histo = dynamic_cast<TH2D*>(eff_histo_3D->Project3D(projection_string.c_str()));
-    eff_histo->Scale(1. / 50.);
+
+    double normalization = 1;
+    if (projection_string.find("x") == std::string::npos) {
+        normalization /= eff_histo_3D->GetNbinsX();
+    } else if (projection_string.find("y") == std::string::npos) {
+        normalization /= eff_histo_3D->GetNbinsY();
+    } else if (projection_string.find("z") == std::string::npos) {
+        normalization /= eff_histo_3D->GetNbinsZ();
+    }
+
+    eff_histo->Scale(normalization);
+
 
     Log::print(Log::info, "Correlation %s : %s is %f\n", var1.GetName(), var2.GetName(),
                eff_histo->GetCorrelationFactor());
@@ -779,8 +790,14 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
         }
     }
 
-    // Scale the histos so that they have efficiency averages on y (or z) axes
-    eff_histo->Scale(1. / 50.);
+    // Scale the histos so that they have efficiency averages on y (or z) axes.
+    // We would have to be more clever if there was a different number of bins
+    // on each axis. For now, we assume they are equal.
+    assert(eff_histo->GetNbinsX() == eff_histo->GetNbinsY());
+    assert(eff_histo->GetNbinsX() == eff_histo->GetNbinsZ());
+    const double normalization = 1. / eff_histo->GetNbinsX();
+
+    eff_histo->Scale(normalization);
     RooDataHist roo_eff_histo_2D("eff", "eff",
                                  RooArgList(thetat_, thetab_, phit_), eff_histo);
 
@@ -790,10 +807,10 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
     RooDataHist roo_eff_pdf_histo_2D("eff_pdf", "eff_pdf",
                                      RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 
-    eff_histo->Scale(1. / 50.);
+    eff_histo->Scale(normalization);
     RooDataHist roo_eff_histo_1D("eff1D", "eff1D",
                                  RooArgList(thetat_, thetab_, phit_), eff_histo);
-    scaled_binned_pdf->Scale(1. / 50.);
+    scaled_binned_pdf->Scale(normalization);
     RooDataHist roo_eff_pdf_histo_1D("eff_pdf1D", "eff_pdf1D",
                                      RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 
@@ -852,19 +869,25 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
         }
     }
 
-    // Scale the histos so that they have efficiency averages on y (or z) axes
-    eff_histo->Scale(1. / 50.);
+    // Scale the histos so that they have efficiency averages on y (or z) axes.
+    // We would have to be more clever if there was a different number of bins
+    // on each axis. For now, we assume they are equal.
+    assert(eff_histo->GetNbinsX() == eff_histo->GetNbinsY());
+    assert(eff_histo->GetNbinsX() == eff_histo->GetNbinsZ());
+    const double normalization = 1. / eff_histo->GetNbinsX();
+
+    eff_histo->Scale(normalization);
     RooDataHist roo_eff_histo_2D("eff", "eff",
                                  RooArgList(thetat_, thetab_, phit_), eff_histo);
 
-    eff_kde->Scale(1. / 50.);
+    eff_kde->Scale(normalization);
     RooDataHist roo_eff_kde_histo_2D("eff_kde", "eff_kde",
                                      RooArgList(thetat_, thetab_, phit_), eff_kde);
 
-    eff_histo->Scale(1. / 50.);
+    eff_histo->Scale(normalization);
     RooDataHist roo_eff_histo_1D("eff1D", "eff1D",
                                  RooArgList(thetat_, thetab_, phit_), eff_histo);
-    eff_kde->Scale(1. / 50.);
+    eff_kde->Scale(normalization);
     RooDataHist roo_eff_kde_histo_1D("eff_pdf1D", "eff_pdf1D",
                                      RooArgList(thetat_, thetab_, phit_), eff_kde);
 
@@ -917,8 +940,14 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
         }
     }
 
-    // Scale the histos so that they have efficiency averages on y (or z) axes
-    eff_histo->Scale(1. / 50.);
+    // Scale the histos so that they have efficiency averages on y (or z) axes.
+    // We would have to be more clever if there was a different number of bins
+    // on each axis. For now, we assume they are equal.
+    assert(eff_histo->GetNbinsX() == eff_histo->GetNbinsY());
+    assert(eff_histo->GetNbinsX() == eff_histo->GetNbinsZ());
+    const double normalization = 1. / eff_histo->GetNbinsX();
+
+    eff_histo->Scale(normalization);
     RooDataHist roo_eff_histo_2D("eff", "eff",
                                  RooArgList(thetat_, thetab_, phit_), eff_histo);
 
@@ -928,10 +957,10 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
     RooDataHist roo_eff_pdf_histo_2D("eff_pdf", "eff_pdf",
                                      RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 
-    eff_histo->Scale(1. / 50.);
+    eff_histo->Scale(normalization);
     RooDataHist roo_eff_histo_1D("eff1D", "eff1D",
                                  RooArgList(thetat_, thetab_, phit_), eff_histo);
-    scaled_binned_pdf->Scale(1. / 50.);
+    scaled_binned_pdf->Scale(normalization);
     RooDataHist roo_eff_pdf_histo_1D("eff_pdf1D", "eff_pdf1D",
                                      RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 

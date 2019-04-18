@@ -55,10 +55,10 @@ class FitterBKG {
     void CreateHistoPDF(RooDataSet* data);
     AdaptiveKernelDensity FitKDE(RooDataSet* data);
 
-    RooRealVar dt_{"dt", "dt", constants::cuts::dt_low, constants::cuts::dt_high};
-    RooRealVar thetat_{"thetat", "thetat", constants::cuts::thetat_low, constants::cuts::thetat_high};
-    RooRealVar thetab_{"thetab", "thetab", constants::cuts::thetab_low, constants::cuts::thetab_high};
-    RooRealVar phit_{"phit", "phit", constants::cuts::phit_low, constants::cuts::phit_high};
+    RooRealVar dt_{"dt", "#Deltat [ps]", constants::cuts::dt_low, constants::cuts::dt_high};
+    RooRealVar thetat_{"thetat", "#theta_{t} [rad]", constants::cuts::thetat_low, constants::cuts::thetat_high};
+    RooRealVar thetab_{"thetab", "#theta_{b} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high};
+    RooRealVar phit_{"phit", "#phi_{t} [rad]", constants::cuts::phit_low, constants::cuts::phit_high};
 
     RooRealVar* expno_;
     RooRealVar* expmc_;

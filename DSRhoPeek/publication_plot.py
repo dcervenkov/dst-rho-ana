@@ -5,6 +5,7 @@ TTrees.
 
 from __future__ import print_function
 import argparse
+import glob
 import json
 import os
 import ROOT
@@ -111,8 +112,7 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
     """Make a single plot, save it as a file and into the ROOT output file"""
     tree = ROOT.TChain(plot_data['treeName'])
     if 'files' in plot_data:
-        for root_file in plot_data['files']:
-            tree.Add(root_file)
+        tree = read_in_files(plot_data['files'], plot_data['treeName'])
 
     canvas_width = 500
     canvas_height = 500
@@ -197,9 +197,12 @@ def draw_element(tree, element, plot_data, same_opt):
     # If this element has it's own 'file' key defined, it
     # superseeds the plot's 'file'
     if 'files' in element:
-        tree = ROOT.TChain(plot_data['treeName'])
-        for root_file in element['files']:
-            tree.Add(root_file)
+        tree = read_in_files(element['files'], plot_data['treeName'])
+
+    if tree is None:
+        print("WARNING: Skipping element '{}' in plot '{}'".format(
+            element['label'], plot_data['fileName']))
+        return
 
     cuts = get_cut_string(plot_data, element)
 
@@ -209,7 +212,8 @@ def draw_element(tree, element, plot_data, same_opt):
 
     num_passing = tree.Draw(formula, cuts, same_opt)
     if num_passing == 0:
-        print("WARNING: No events are passing the following cut: " + cuts)
+        print("WARNING: In plot '" + plot_data['fileName'] +
+              "' No events are passing the following cut: " + cuts)
 
 
 def get_cut_string(plot_data, element):
@@ -227,18 +231,40 @@ def get_cut_string(plot_data, element):
         cuts.append(plot_data['formula'] + '<' + str(plot_data['max']))
     if 'xmin' in plot_data:
         assert ':' in plot_data['formula'], "'xmin' can't be used in 1D plots; use 'min'"
-        cuts.append(plot_data['formula'].split(':')[1] + '>' + str(plot_data['xmin']))
+        cuts.append(plot_data['formula'].split(':')[1] +
+                    '>' + str(plot_data['xmin']))
     if 'xmax' in plot_data:
         assert ':' in plot_data['formula'], "'xmax' can't be used in 1D plots; use 'max'"
-        cuts.append(plot_data['formula'].split(':')[1] + '<' + str(plot_data['xmax']))
+        cuts.append(plot_data['formula'].split(':')[1] +
+                    '<' + str(plot_data['xmax']))
     if 'ymin' in plot_data:
         assert ':' in plot_data['formula'], "'ymin' can't be used in 1D plots"
-        cuts.append(plot_data['formula'].split(':')[0] + '>' + str(plot_data['ymin']))
+        cuts.append(plot_data['formula'].split(':')[0] +
+                    '>' + str(plot_data['ymin']))
     if 'ymax' in plot_data:
         assert ':' in plot_data['formula'], "'ymax' can't be used in 1D plots"
-        cuts.append(plot_data['formula'].split(':')[0] + '<' + str(plot_data['ymax']))
+        cuts.append(plot_data['formula'].split(':')[0] +
+                    '<' + str(plot_data['ymax']))
 
     return "&&".join(cuts)
+
+
+def read_in_files(file_entries, tree_name):
+    """Read trees from files, while unglobbing the filenames."""
+    files = []
+    for entry in file_entries:
+        files += glob.glob(entry)
+
+    if files:
+        tree = ROOT.TChain(tree_name)
+        for root_file in files:
+            tree.Add(root_file)
+        return tree
+
+    print("WARNING: None of the following entries expand to existing files")
+    for entry in file_entries:
+        print(entry)
+    return None
 
 
 def decode_arguments():

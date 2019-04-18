@@ -3,6 +3,7 @@
 TTrees.
 """
 
+from __future__ import print_function
 import argparse
 import json
 import os
@@ -14,21 +15,23 @@ def setup_plot_style():
     ROOT.gROOT.ProcessLine(".L src/colors.cc")
     ROOT.gROOT.ProcessLine("colors::setColors()")
 
-    ROOT.gStyle.SetLabelFont(43, "xyz");
-    ROOT.gStyle.SetLabelSize(18, "xyz");
-    ROOT.gStyle.SetLabelOffset(0.01, "xyz");
-    ROOT.gStyle.SetTitleFont(43, "xyz");
-    ROOT.gStyle.SetTitleSize(18, "xyz");
-    ROOT.gStyle.SetTitleOffset(1.2);
-    ROOT.gStyle.SetMarkerSize(0.5);
-    ROOT.gStyle.SetEndErrorSize(0);  # Disable perpendicular lines at the end of error bars
-    ROOT.gStyle.SetPadTickX(1);
-    ROOT.gStyle.SetPadTickY(1);
-    ROOT.gStyle.SetPadTopMargin(0.05);
-    ROOT.gStyle.SetPadRightMargin(0.05);
-    ROOT.gStyle.SetPadLeftMargin(0.105);
-    ROOT.gStyle.SetPadBottomMargin(0.1);
-    ROOT.gStyle.SetOptStat(0);
+    ROOT.gStyle.SetLabelFont(43, "xyz")
+    ROOT.gStyle.SetLabelSize(18, "xyz")
+    ROOT.gStyle.SetLabelOffset(0.01, "xyz")
+    ROOT.gStyle.SetTitleFont(43, "xyz")
+    ROOT.gStyle.SetTitleSize(18, "xyz")
+    ROOT.gStyle.SetTitleOffset(1.2)
+    ROOT.gStyle.SetMarkerSize(0.5)
+    # Disable perpendicular lines at the end of error bars
+    ROOT.gStyle.SetEndErrorSize(0)
+    ROOT.gStyle.SetPadTickX(1)
+    ROOT.gStyle.SetPadTickY(1)
+    ROOT.gStyle.SetPadTopMargin(0.05)
+    ROOT.gStyle.SetPadRightMargin(0.05)
+    ROOT.gStyle.SetPadLeftMargin(0.105)
+    ROOT.gStyle.SetPadBottomMargin(0.1)
+    ROOT.gStyle.SetOptStat(0)
+
 
 def create_legend(plot_data, canvas):
     """Create a legend based on labels in plot_data"""
@@ -128,10 +131,10 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
             same_opt = "colz"
 
         if 'files' not in element and 'files' not in plot_data:
-            raise Exception("No 'files' array in '{}' plot or element data".format(plot_data['fileName']))
+            raise Exception("No 'files' array in '{}' plot or element data".format(
+                plot_data['fileName']))
 
         draw_element(tree, element, plot_data, same_opt)
-
 
     histograms = get_histograms(canvas)
 

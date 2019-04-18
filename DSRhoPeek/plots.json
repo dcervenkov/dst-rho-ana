@@ -682,6 +682,81 @@
             ]
         },
         {
+            "fileName": "scf_dt_thetat",
+            "formula": "thetat:dt",
+            "xAxisTitle": "#Deltat [ps]",
+            "yAxisTitle": "#theta_{t} [rad]",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+	    "xmin": -10,
+	    "xmax": 10,
+            "files": [
+                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_2.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_3.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_4.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_5.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_6.root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "SCF",
+                    "color": 7,
+                    "cut": "evmcflag!=1"
+                }
+            ]
+        },
+        {
+            "fileName": "scf_dt_thetab",
+            "formula": "thetab:dt",
+            "xAxisTitle": "#Deltat [ps]",
+            "yAxisTitle": "#theta_{b} [rad]",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+	    "xmin": -10,
+	    "xmax": 10,
+            "files": [
+                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_2.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_3.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_4.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_5.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_6.root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "SCF",
+                    "color": 7,
+                    "cut": "evmcflag!=1"
+                }
+            ]
+        },
+        {
+            "fileName": "scf_dt_phit",
+            "formula": "phit:dt",
+            "xAxisTitle": "#Deltat [ps]",
+            "yAxisTitle": "#phi_{t} [rad]",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+	    "xmin": -10,
+	    "xmax": 10,
+            "files": [
+                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_2.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_3.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_4.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_5.root",
+                "../data/DSRho-mdst_basf2_mod_real_unmod_6.root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "SCF",
+                    "color": 7,
+                    "cut": "evmcflag!=1"
+                }
+            ]
+        },
+        {
             "fileName": "scf_thetat_thetab",
             "formula": "thetat:thetab",
             "xAxisTitle": "#theta_{b} [rad]",

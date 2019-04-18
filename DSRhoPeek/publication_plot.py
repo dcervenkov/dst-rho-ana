@@ -11,13 +11,24 @@ import ROOT
 
 def setup_plot_style():
     """Setup a sane ROOT plot style"""
-    ROOT.gROOT.Reset()
     ROOT.gROOT.ProcessLine(".L src/colors.cc")
     ROOT.gROOT.ProcessLine("colors::setColors()")
-    ROOT.gROOT.ProcessLine(".L src/tools.cc")
-    ROOT.gROOT.ProcessLine("tools::SetupPlotStyle()")
-    # ROOT.gStyle.SetOptStat(0)
 
+    ROOT.gStyle.SetLabelFont(43, "xyz");
+    ROOT.gStyle.SetLabelSize(18, "xyz");
+    ROOT.gStyle.SetLabelOffset(0.01, "xyz");
+    ROOT.gStyle.SetTitleFont(43, "xyz");
+    ROOT.gStyle.SetTitleSize(18, "xyz");
+    ROOT.gStyle.SetTitleOffset(1.2);
+    ROOT.gStyle.SetMarkerSize(0.5);
+    ROOT.gStyle.SetEndErrorSize(0);  # Disable perpendicular lines at the end of error bars
+    ROOT.gStyle.SetPadTickX(1);
+    ROOT.gStyle.SetPadTickY(1);
+    ROOT.gStyle.SetPadTopMargin(0.05);
+    ROOT.gStyle.SetPadRightMargin(0.05);
+    ROOT.gStyle.SetPadLeftMargin(0.105);
+    ROOT.gStyle.SetPadBottomMargin(0.1);
+    ROOT.gStyle.SetOptStat(0);
 
 def create_legend(plot_data, canvas):
     """Create a legend based on labels in plot_data"""

@@ -220,9 +220,23 @@ def get_cut_string(plot_data, element):
     if 'cut' in element:
         cuts.append(element['cut'])
     if 'min' in plot_data:
+        assert ':' not in plot_data['formula'], "'min' can't be used in 2D plots; use 'xmin' or 'ymin'"
         cuts.append(plot_data['formula'] + '>' + str(plot_data['min']))
     if 'max' in plot_data:
+        assert ':' not in plot_data['formula'], "'max' can't be used in 2D plots; use 'xmax' or 'ymax'"
         cuts.append(plot_data['formula'] + '<' + str(plot_data['max']))
+    if 'xmin' in plot_data:
+        assert ':' in plot_data['formula'], "'xmin' can't be used in 1D plots; use 'min'"
+        cuts.append(plot_data['formula'].split(':')[1] + '>' + str(plot_data['xmin']))
+    if 'xmax' in plot_data:
+        assert ':' in plot_data['formula'], "'xmax' can't be used in 1D plots; use 'max'"
+        cuts.append(plot_data['formula'].split(':')[1] + '<' + str(plot_data['xmax']))
+    if 'ymin' in plot_data:
+        assert ':' in plot_data['formula'], "'ymin' can't be used in 1D plots"
+        cuts.append(plot_data['formula'].split(':')[0] + '>' + str(plot_data['ymin']))
+    if 'ymax' in plot_data:
+        assert ':' in plot_data['formula'], "'ymax' can't be used in 1D plots"
+        cuts.append(plot_data['formula'].split(':')[0] + '<' + str(plot_data['ymax']))
 
     return "&&".join(cuts)
 

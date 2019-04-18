@@ -1744,9 +1744,17 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
     for (auto file_name : file_names) {
         input_chain->Add(file_name);
     }
-
+    
+    Log::print(Log::info, "Reading %i input files...\n", file_names.size());
+    
     TTree* input_tree;
     if (num_events) {
+	if (file_names.size() > 1) {
+            Log::print(Log::warning,
+                       "You limited the number of events to read, while reading multiple "
+		       "files. Since this limiting works sequentially not randomly, you "
+		       "will probably not get the result you want!\n");
+	}
         input_tree = input_chain->CloneTree(num_events);
     } else {
         input_tree = input_chain->CloneTree();

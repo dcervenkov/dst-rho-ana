@@ -374,7 +374,7 @@ void FitterBKG::ReadInFile(std::vector<const char*> file_names, const int& num_e
     b_cuts = "brecflav==1&&tagqr>0";
     bb_cuts = "brecflav==-1&&tagqr<0";
 
-    Log::print(Log::info, "Reading input files...\n");
+    Log::print(Log::info, "Reading %i input files...\n", file_names.size());
     dataset_ = new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_, common_cuts);
 
     Log::print(Log::info, "Creating a, ab, b, bb labels...\n");

@@ -79,7 +79,7 @@ FitterBKG::FitterBKG() {
     expno_ = new RooRealVar("expno", "expno", 0, 100);
     expmc_ = new RooRealVar("expmc", "expmc", 0, 10);
 
-    evmcflag_ = new RooRealVar("evmcflag", "evmcflag", 0, 10);
+    evmcflag_ = new RooRealVar("evmcflag", "evmcflag", -2, 10);
     brecflav_ = new RooRealVar("brecflav", "brecflav", -1, 1);
     btagmcli_ = new RooRealVar("btagmcli", "btagmcli", -1000, 1000);
     tagqr_ = new RooRealVar("tagqr", "tagqr", -1, 1);

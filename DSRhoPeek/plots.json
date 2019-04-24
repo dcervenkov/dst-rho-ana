@@ -1,6 +1,55 @@
 {
     "plots": [
         {
+            "fileName": "mbc",
+            "formula": "mbc",
+            "xAxisTitle": "M_{bc}",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
+            "files": ["../data/DSRho-mdst_basf2_mod_real_unmod_1.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "mixed",
+                    "color": 5,
+                    "cut": "evmcflag!=1",
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                    ]
+                },
+                {
+                    "label": "charged",
+                    "color": 3,
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                    ]
+                },
+                {
+                    "label": "charm",
+                    "color": 9,
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                    ]
+                },
+                {
+                    "label": "uds",
+                    "color": 8,
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                    ]
+                }
+            ]
+        },
+        {
             "fileName": "resolution_thetat",
             "formula": "thetat-thetatg",
             "xAxisTitle": "#Delta#theta_{t} [rad]",
@@ -107,7 +156,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
                     ]
                 },
                 {
@@ -115,7 +164,7 @@
                     "color": 3,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
                     ]
                 },
                 {
@@ -123,7 +172,7 @@
                     "color": 9,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
                     ]
                 },
                 {
@@ -131,7 +180,7 @@
                     "color": 8,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
                     ]
                 }
             ]
@@ -163,7 +212,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
                     ]
                 },
                 {
@@ -171,7 +220,7 @@
                     "color": 3,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
                     ]
                 },
                 {
@@ -179,7 +228,7 @@
                     "color": 9,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
                     ]
                 },
                 {
@@ -187,7 +236,7 @@
                     "color": 8,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
                     ]
                 }
             ]
@@ -219,7 +268,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
                     ]
                 },
                 {
@@ -227,7 +276,7 @@
                     "color": 3,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
                     ]
                 },
                 {
@@ -235,7 +284,7 @@
                     "color": 9,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
                     ]
                 },
                 {
@@ -243,7 +292,7 @@
                     "color": 8,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
                     ]
                 }
             ]
@@ -275,7 +324,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
                     ]
                 },
                 {
@@ -283,7 +332,7 @@
                     "color": 3,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
                     ]
                 },
                 {
@@ -291,7 +340,7 @@
                     "color": 9,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
                     ]
                 },
                 {
@@ -299,7 +348,7 @@
                     "color": 8,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
                     ]
                 }
             ]
@@ -331,7 +380,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
                     ]
                 },
                 {
@@ -339,7 +388,7 @@
                     "color": 3,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
                     ]
                 },
                 {
@@ -347,7 +396,7 @@
                     "color": 9,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
                     ]
                 },
                 {
@@ -355,7 +404,7 @@
                     "color": 8,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
                     ]
                 }
             ]
@@ -387,7 +436,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
                     ]
                 },
                 {
@@ -395,7 +444,7 @@
                     "color": 3,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
                     ]
                 },
                 {
@@ -403,7 +452,7 @@
                     "color": 9,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
                     ]
                 },
                 {
@@ -411,7 +460,7 @@
                     "color": 8,
                     "cut": "evmcflag!=1&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
                     ]
                 }
             ]
@@ -443,7 +492,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
                     ]
                 },
                 {
@@ -451,7 +500,7 @@
                     "color": 3,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
                     ]
                 },
                 {
@@ -459,7 +508,7 @@
                     "color": 9,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
                     ]
                 },
                 {
@@ -467,7 +516,7 @@
                     "color": 8,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
                     ]
                 }
             ]
@@ -499,7 +548,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
                     ]
                 },
                 {
@@ -507,7 +556,7 @@
                     "color": 3,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
                     ]
                 },
                 {
@@ -515,7 +564,7 @@
                     "color": 9,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
                     ]
                 },
                 {
@@ -523,7 +572,7 @@
                     "color": 8,
                     "cut": "evmcflag!=1&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
                     ]
                 }
             ]
@@ -553,28 +602,28 @@
                     "color": 5,
                     "cut": "evmcflag!=1",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
                     ]
                 },
                 {
                     "label": "charged",
                     "color": 3,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
                     ]
                 },
                 {
                     "label": "charm",
                     "color": 9,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
                     ]
                 },
                 {
                     "label": "uds",
                     "color": 8,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
                     ]
                 }
             ]
@@ -604,28 +653,28 @@
                     "color": 5,
                     "cut": "evmcflag!=1",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
                     ]
                 },
                 {
                     "label": "charged",
                     "color": 3,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
                     ]
                 },
                 {
                     "label": "charm",
                     "color": 9,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
                     ]
                 },
                 {
                     "label": "uds",
                     "color": 8,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
                     ]
                 }
             ]
@@ -655,28 +704,28 @@
                     "color": 5,
                     "cut": "evmcflag!=1",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
                     ]
                 },
                 {
                     "label": "charged",
                     "color": 3,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
                     ]
                 },
                 {
                     "label": "charm",
                     "color": 9,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
                     ]
                 },
                 {
                     "label": "uds",
                     "color": 8,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
                     ]
                 }
             ]
@@ -687,8 +736,8 @@
             "xAxisTitle": "#Deltat [ps]",
             "yAxisTitle": "#theta_{t} [rad]",
             "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
-	    "xmin": -10,
-	    "xmax": 10,
+            "xmin": -10,
+            "xmax": 10,
             "files": [
                 "../data/DSRho-mdst_basf2_mod_real_unmod_[1-6].root"
             ],
@@ -707,8 +756,8 @@
             "xAxisTitle": "#Deltat [ps]",
             "yAxisTitle": "#theta_{b} [rad]",
             "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
-	    "xmin": -10,
-	    "xmax": 10,
+            "xmin": -10,
+            "xmax": 10,
             "files": [
                 "../data/DSRho-mdst_basf2_mod_real_unmod_[1-6].root"
             ],
@@ -727,8 +776,8 @@
             "xAxisTitle": "#Deltat [ps]",
             "yAxisTitle": "#phi_{t} [rad]",
             "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50",
-	    "xmin": -10,
-	    "xmax": 10,
+            "xmin": -10,
+            "xmax": 10,
             "files": [
                 "../data/DSRho-mdst_basf2_mod_real_unmod_[1-6].root"
             ],

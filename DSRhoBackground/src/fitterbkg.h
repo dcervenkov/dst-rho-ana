@@ -23,6 +23,7 @@
 #include "RooGaussian.h"
 #include "RooGenericPdf.h"
 #include "RooPolynomial.h"
+#include "RooProdPdf.h"
 #include "RooVoigtian.h"
 #include "RooRealVar.h"
 #include "TCanvas.h"
@@ -129,11 +130,11 @@ class FitterBKG {
     RooRealVar scf_dt_voigt_mu_{"scf_dt_voigt_mu", "v_{#mu}", -0.303, -1, 1};
     RooRealVar scf_dt_voigt_sigma_{"scf_dt_voigt_sigma_", "v_{#sigma}", 2.323, 0, 10};
     RooRealVar scf_dt_voigt_width_{"scf_dt_voigt_width_", "v_{w}", 0.851, 0, 10};
-    RooVoigtian scf_dt_voigt_{ "scf_dt_voigt",  "scf_dt_voigt", dt_, scf_dt_voigt_mu_, scf_dt_voigt_width_, scf_dt_voigt_sigma_};
+    RooVoigtian scf_dt_voigt_{"scf_dt_voigt", "scf_dt_voigt", dt_, scf_dt_voigt_mu_, scf_dt_voigt_width_, scf_dt_voigt_sigma_};
     
     RooRealVar scf_dt_gaus_mu_{"scf_dt_gaus_mu", "g_{#mu}", -0.161 -1, 1};
     RooRealVar scf_dt_gaus_sigma_{"scf_dt_gaus_sigma_", "g_{#sigma}", 1.096, 0, 10};
-    RooGaussian scf_dt_gaus_{ "scf_dt_gaus",  "scf_dt_gaus", dt_, scf_dt_gaus_mu_, scf_dt_gaus_sigma_};
+    RooGaussian scf_dt_gaus_{"scf_dt_gaus", "scf_dt_gaus", dt_, scf_dt_gaus_mu_, scf_dt_gaus_sigma_};
 
     RooRealVar scf_dt_f_{"scf_dt_f", "f_{v/g}", 0.631, 0, 1};
 
@@ -148,10 +149,21 @@ class FitterBKG {
                                 RooArgList(scf_phit_phit_)};
 
     // Self-cross-feed thetat model
-    RooRealVar scf_thetat_f_{"scf_thetat_f", "#theta_{t}^{w}", -0.051, -0.5, 0.5};
-    RooFormulaVar scf_thetat_thetat_{"scf_thetat_thetat", "scf_thetat_thetat",
-                                     "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
-                                     RooArgList(thetat_, scf_thetat_f_)};
+    // RooRealVar scf_thetat_f_{"scf_thetat_f", "#theta_{t}^{w}", -0.051, -0.5, 0.5};
+    // RooFormulaVar scf_thetat_thetat_{"scf_thetat_thetat", "scf_thetat_thetat",
+    //                                  "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
+    //                                  RooArgList(thetat_, scf_thetat_f_)};
+
+    RooRealVar scf_thetat_p1_{"scf_thetat_p1", "p_{1}", 0};
+    /* RooRealVar scf_thetat_p2_{"scf_thetat_p2", "p_{2}", -100, 100}; */
+    RooRealVar scf_thetat_p2_{"scf_thetat_p2", "p_{2}", -1.147, -10, 10};
+    RooRealVar scf_thetat_p3_{"scf_thetat_p3", "p_{3}", 0};
+    /* RooRealVar scf_thetat_p4_{"scf_thetat_p4", "p_{4}", -100, 100}; */
+    RooRealVar scf_thetat_p4_{"scf_thetat_p4", "p_{4}", 0.174, -1, 1};
+    RooRealVar scf_thetat_p5_{"scf_thetat_p5", "p_{5}", 0};
+    /* RooRealVar scf_thetat_p6_{"scf_thetat_p6", "p_{6}", -100, 100}; */
+    RooRealVar scf_thetat_p6_{"scf_thetat_p6", "p_{6}", -0.029, -1, 1};
+    RooArgList scf_thetat_pars_ {scf_thetat_p1_, scf_thetat_p2_, scf_thetat_p3_, scf_thetat_p4_, scf_thetat_p5_, scf_thetat_p6_};
 
     // Self-cross-feed thetab model
     RooRealVar scf_thetab_gaus_mu_{"scf_thetab_gaus_mu", "#mu", 2.885, 1.5, 3};
@@ -165,6 +177,12 @@ class FitterBKG {
                                    scf_thetab_exp_alpha_};
     RooRealVar scf_thetab_f_{"scf_thetab_f", "f_{exp}", 0.625, 0, 0.8};
 
+
+    // Correlated model
+    RooRealVar pure_corr_f_{"pure_corr_f", "f_{corr}", 0.03, 0.01, 0.10};
+    RooGenericPdf thetab_phit_corr_{"thetab_phit_corr", "thetab_phit_corr", "-cos(2*phit) * TMath::TanH(thetab-1.57) +1", RooArgList(phit_, thetab_)};
+
+
    public:
     // RooAddPdf scf_dt_model_{"scf_dt_model", "scf_dt_model",
     //                           RooArgList(scf_dt_voigt_, scf_dt_gaus_), RooArgList(scf_dt_f_)};
@@ -174,11 +192,17 @@ class FitterBKG {
     RooAddPdf scf_phit_model_{"scf_phit_model", "scf_phit_model",
                               RooArgList(scf_phit_poly_, scf_phit_cos_), RooArgList(scf_phit_f_)};
 
-    RooGenericPdf scf_thetat_model_{"scf_thetat_model", "scf_thetat_model",
-                                    "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat_)};
+    // RooGenericPdf scf_thetat_model_{"scf_thetat_model", "scf_thetat_model",
+    //                                 "sin(scf_thetat_thetat)^3", RooArgList(scf_thetat_thetat_)};
+    // RooGaussian scf_thetat_model_{"scf_thetat_model", "scf_thetat_model", thetat_, scf_thetat_gaus_mu_, scf_thetat_gaus_sigma_};
+    RooChebychev scf_thetat_model_{"scf_thetat_model", "scf_thetat_model", thetat_, scf_thetat_pars_};
 
     RooAddPdf scf_thetab_model_{"scf_thetab_model", "scf_thetab_model",
                               RooArgList(scf_thetab_exp_, scf_thetab_gaus_), RooArgList(scf_thetab_f_)};
+
+    RooProdPdf model_{"model", "model", RooArgList(scf_phit_model_, scf_thetab_model_, scf_thetat_model_)};
+    RooProdPdf pure_corr_model_{"pure_corr_model", "pure_corr_model", RooArgList(thetab_phit_corr_, scf_thetat_model_)};
+    RooAddPdf corr_model_{"corr_model", "corr_model", RooArgList(pure_corr_model_, model_), RooArgList(pure_corr_f_)};
 }
 
 ;

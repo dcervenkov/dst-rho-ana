@@ -13,6 +13,7 @@
 struct fitter_options {
     bool KDE;
     bool histo;
+    bool correlated;
     int num_CPUs;
     bool num_CPUs_set;
     char* plot_dir;

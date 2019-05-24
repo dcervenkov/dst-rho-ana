@@ -72,6 +72,32 @@ int main(int argc, char* argv[]) {
         fitter.PlotKDE(kde);
     } else if (options.histo) {
         fitter.CreateHistoPDF(fitter.dataset_);
+    } else if (options.correlated) {
+        fitter.Fit(&fitter.corr_model_, fitter.dataset_);
+        if (options.plot_dir_set) {
+            fitter.PlotWithPull(fitter.thetat_, *fitter.dataset_, fitter.corr_model_);
+            fitter.PlotWithPull(fitter.thetab_, *fitter.dataset_, fitter.corr_model_);
+            fitter.PlotWithPull(fitter.phit_, *fitter.dataset_, fitter.corr_model_);
+
+
+            fitter.thetat_.setBins(25);
+            fitter.thetab_.setBins(25);
+            fitter.phit_.setBins(25);
+
+            RooDataHist* pdf_hist = fitter.corr_model_.generateBinned(RooArgSet(fitter.thetat_, fitter.thetab_, fitter.phit_), fitter.dataset_->numEntries(), true);
+
+            RooDataHist data_hist("data_hist", "data_hist",
+                           RooArgSet(fitter.thetat_, fitter.thetab_, fitter.phit_),
+                           *fitter.dataset_);
+
+            tools::PlotVars2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, constants::format);
+            tools::PlotVars2D(fitter.thetat_, fitter.phit_, data_hist, *pdf_hist, constants::format);
+            tools::PlotVars2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, constants::format);
+
+            tools::PlotPull2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, constants::format);
+            tools::PlotPull2D(fitter.thetat_, fitter.phit_, data_hist, *pdf_hist, constants::format);
+            tools::PlotPull2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, constants::format);
+        }
     } else {
 
         // We must plot after each fit otherwise the results printed on the plot
@@ -164,13 +190,14 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                           fitter_options& options) {
     int c;
     struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
+                                    {"correlated", no_argument, 0, 'r'},
                                     {"kde", no_argument, 0, 'k'},
                                     {"histo", no_argument, 0, 's'},
                                     {"plot-dir", required_argument, 0, 'p'},
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:p:ksh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:p:krsh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -184,6 +211,9 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'k':
                 options.KDE = true;
                 break;
+            case 'r':
+                options.correlated = true;
+                break;
             case 's':
                 options.histo = true;
                 break;
@@ -196,6 +226,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS       number of CPU cores to use for fitting and plotting\n");
                 printf("-k, --kde                 use kernel density estimation\n");
+                printf("-r, --correlated          use functional PDF with correlation\n");
                 printf("-s, --histo               create a histogram PDF\n");
                 printf("-h, --help                display this text and exit\n");
                 printf("-p, --plot-dir=PLOT_DIR   create lifetime/mixing plots\n");

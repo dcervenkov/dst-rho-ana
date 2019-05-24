@@ -23,14 +23,17 @@
         "scf_thetab_gaus_sigma_r": 0.094,
         "scf_thetab_exp_alpha": -4.63,
         "scf_thetab_f": 0.625,
-        "bkg_phit_poly_p2": 0.040,
-        "bkg_phit_f": 0.660,
-        "bkg_phit_offset": 0.103,
-        "bkg_thetat_f": -0.207,
-        "bkg_thetab_gaus_mu": 2.895,
-        "bkg_thetab_gaus_sigma_l": 0.902,
-        "bkg_thetab_gaus_sigma_r": 0.089,
-        "bkg_thetab_exp_alpha": -2.182,
-        "bkg_thetab_f": 0.661
+        "bkg_phit_poly_p2": 0.024,
+        "bkg_phit_f": 0.821,
+        "bkg_phit_offset": 0.156,
+        "bkg_thetat_p2": -1.147,
+        "bkg_thetat_p4": 0.174,
+        "bkg_thetat_p6": -0.029,
+        "bkg_thetab_gaus_mu": 2.378,
+        "bkg_thetab_gaus_sigma_l": 0.690,
+        "bkg_thetab_gaus_sigma_r": 0.460,
+        "bkg_thetab_exp_alpha": -1.616,
+        "bkg_thetab_f": 0.734,
+        "bkg_pure_corr_f": 0.0687
     }
 }

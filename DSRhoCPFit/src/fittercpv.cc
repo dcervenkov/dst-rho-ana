@@ -1291,6 +1291,7 @@ void FitterCPV::ChangeFitRanges(const rapidjson::GenericValue<rapidjson::UTF8<ch
 void FitterCPV::ChangeModelParameters(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config) {
     for (rapidjson::Value::ConstMemberIterator itr = config.MemberBegin();
          itr != config.MemberEnd(); ++itr) {
+        // The parameter in the JSON file must be valid, i.e., exist in the model
         assert(scf_parameters_argset_.find(itr->name.GetString()) ||
                bkg_parameters_argset_.find(itr->name.GetString()));
         scf_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
@@ -2527,15 +2528,16 @@ RooAbsPdf* FitterCPV::CreateAngularBKGPDF() {
     bkg_parameters_argset_.add(*bkg_phit_offset);
 
     // Background thetat model
-    RooRealVar* bkg_thetat_f = new RooRealVar("bkg_thetat_f", "#theta_(t)^(w)", -0.207);
-    RooFormulaVar* bkg_thetat_thetat = new RooFormulaVar(
-        "bkg_thetat_thetat", "bkg_thetat_thetat", "(thetat - 1.5708)*(1+bkg_thetat_f) + 1.5708",
-        RooArgList(*thetat_, *bkg_thetat_f));
-    RooGenericPdf* bkg_thetat_model =
-        new RooGenericPdf("bkg_thetat_model", "bkg_thetat_model", "sin(bkg_thetat_thetat)^3",
-                          RooArgList(*bkg_thetat_thetat));
-
-    bkg_parameters_argset_.add(*bkg_thetat_f);
+    RooRealVar* bkg_thetat_p1 = new RooRealVar("bkg_thetat_p1", "p_{1}", 0);
+    RooRealVar* bkg_thetat_p2 = new RooRealVar("bkg_thetat_p2", "p_{2}", -1.147);
+    RooRealVar* bkg_thetat_p3 = new RooRealVar("bkg_thetat_p3", "p_{3}", 0);
+    RooRealVar* bkg_thetat_p4 = new RooRealVar("bkg_thetat_p4", "p_{4}", 0.174);
+    RooRealVar* bkg_thetat_p5 = new RooRealVar("bkg_thetat_p5", "p_{5}", 0);
+    RooRealVar* bkg_thetat_p6 = new RooRealVar("bkg_thetat_p6", "p_{6}", -0.029);
+    RooChebychev* bkg_thetat_model = new RooChebychev("bkg_thetat_model", "bkg_thetat_model", *thetat_, RooArgList(*bkg_thetat_p1, *bkg_thetat_p2, *bkg_thetat_p3, *bkg_thetat_p4, *bkg_thetat_p5, *bkg_thetat_p6));
+    bkg_parameters_argset_.add(*bkg_thetat_p2);
+    bkg_parameters_argset_.add(*bkg_thetat_p4);
+    bkg_parameters_argset_.add(*bkg_thetat_p6);
 
     // Background thetab model
     RooRealVar* bkg_thetab_gaus_mu = new RooRealVar("bkg_thetab_gaus_mu", "#mu", 2.895);

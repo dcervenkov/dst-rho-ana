@@ -73,7 +73,6 @@ int main(int argc, char* argv[]) {
     } else if (options.histo) {
         fitter.CreateHistoPDF(fitter.dataset_);
     } else {
-
         // We must plot after each fit otherwise the results printed on the plot
         // would be of the last fit
         fitter.Fit(&fitter.scf_phit_model_, fitter.dataset_);

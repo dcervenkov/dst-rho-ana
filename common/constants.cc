@@ -69,6 +69,8 @@ const double thetab_high = 2.95;        // [rad]
 const double phit_low = -TMath::Pi();   // [rad]
 const double phit_high = TMath::Pi();   // [rad]
 
+const double cs_bdtg = -0.6;
+
 const int sig_vtx_h = 50;
 const int tag_vtx_h = 50;
 

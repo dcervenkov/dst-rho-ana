@@ -142,6 +142,7 @@ class FitterCPV {
 
     RooRealVar* benergy_;
     RooRealVar* mbc_;
+    RooRealVar* csbdtg_;
 
     RooRealVar* shcosthb_;
 

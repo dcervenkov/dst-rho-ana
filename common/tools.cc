@@ -314,7 +314,9 @@ TString GetCommonCutsString() {
     common_cuts += constants::cuts::tag_vtx_multitrack_sigma_z;
     common_cuts += "&&vtntrk>1)||(sqrt(vterr6)<";
     common_cuts += constants::cuts::tag_vtx_singletrack_sigma_z;
-    common_cuts += "&&vtntrk==1))";
+    common_cuts += "&&vtntrk==1))&&";
+    common_cuts += "csbdtg>";
+    common_cuts += constants::cuts::cs_bdtg;
     return common_cuts;
 }
 

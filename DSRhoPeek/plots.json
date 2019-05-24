@@ -1,6 +1,56 @@
 {
     "plots": [
         {
+            "fileName": "csbdtg",
+            "formula": "csbdtg",
+            "xAxisTitle": "BDTG",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "legendPosition": "top left",
+            "files": ["../data/DSRho-mdst_basf2_mod_real_unmod_1.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "mixed",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                    ]
+                },
+                {
+                    "label": "charged",
+                    "color": 3,
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                    ]
+                },
+                {
+                    "label": "charm",
+                    "color": 9,
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                    ]
+                },
+                {
+                    "label": "uds",
+                    "color": 8,
+                    "files": [
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                    ]
+                }
+            ]
+        },
+        {
             "fileName": "mbc",
             "formula": "mbc",
             "xAxisTitle": "M_{bc}",

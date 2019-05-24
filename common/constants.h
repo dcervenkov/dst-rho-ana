@@ -40,6 +40,7 @@ extern const double thetab_low;
 extern const double thetab_high;
 extern const double phit_low;
 extern const double phit_high;
+extern const double cs_bdtg;
 extern const int sig_vtx_h;
 extern const int tag_vtx_h;
 extern const double sig_vtx_multitrack_sigma_z;

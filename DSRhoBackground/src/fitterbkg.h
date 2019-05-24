@@ -71,6 +71,7 @@ class FitterBKG {
 
     RooRealVar* benergy_;
     RooRealVar* mbc_;
+    RooRealVar* csbdtg_;
 
     RooRealVar* shcosthb_;
 

@@ -87,6 +87,7 @@ FitterBKG::FitterBKG() {
 
     benergy_ = new RooRealVar("benergy", "benergy", 0, 100);
     mbc_ = new RooRealVar("mbc", "mbc", 5, 6);
+    csbdtg_ = new RooRealVar("csbdtg", "csbdtg", -1, 1);
 
     shcosthb_ = new RooRealVar("shcosthb", "shcosthb", -1, 1);
 
@@ -109,6 +110,7 @@ FitterBKG::FitterBKG() {
 
     conditional_vars_.push_back(&benergy_);
     conditional_vars_.push_back(&mbc_);
+    conditional_vars_.push_back(&csbdtg_);
 
     conditional_vars_.push_back(&shcosthb_);
 

@@ -82,6 +82,7 @@ Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const cha
     cuts += "&&evmcflag==1";
 
     RooArgSet dataset_vars;
+    dataset_vars.add(csbdtg_);
     dataset_vars.add(evmcflag_);
     dataset_vars.add(thetat_);
     dataset_vars.add(thetab_);

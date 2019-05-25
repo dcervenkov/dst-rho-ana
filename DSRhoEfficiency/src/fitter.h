@@ -57,6 +57,7 @@ class Fitter {
     RooRealVar dt_{"dt", "dt", constants::cuts::dt_low, constants::cuts::dt_high};
     RooCategory dec_type_{"dec_type", "dec_type"};
     RooRealVar evmcflag_{"evmcflag", "evmcflag", -100, 100};
+    RooRealVar csbdtg_{"csbdtg", "csbdtg", -1, 1};
 
    private:
     TH3F* GetBinned3DEfficiency();

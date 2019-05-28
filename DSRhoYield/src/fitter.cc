@@ -29,6 +29,7 @@
 
 // Local includes
 #include "log.h"
+#include "tools.h"
 
 /**
  * Constructor that takes the output directory as argument. Plots as well
@@ -37,6 +38,30 @@
  * @param output_dir Output directory
  */
 Fitter::Fitter(const char* output_dir) {
+    dataset_vars_.add(de_);
+    dataset_vars_.add(csbdtg_);
+    dataset_vars_.add(evmcflag_);
+    dataset_vars_.add(candsel_);
+
+    dataset_vars_.add(thetat_);
+    dataset_vars_.add(thetab_);
+    dataset_vars_.add(phit_);
+    dataset_vars_.add(dt_);
+
+    dataset_vars_.add(vrusable_);
+    dataset_vars_.add(vrvtxz_);
+    dataset_vars_.add(vrerr6_);
+    dataset_vars_.add(vrchi2_);
+    dataset_vars_.add(vrndf_);
+    dataset_vars_.add(vrntrk_);
+
+    dataset_vars_.add(vtusable_);
+    dataset_vars_.add(vtvtxz_);
+    dataset_vars_.add(vterr6_);
+    dataset_vars_.add(vtchi2_);
+    dataset_vars_.add(vtndf_);
+    dataset_vars_.add(vtntrk_);
+
 	Setup(Components::all);
 	char output_filename[1000];
 	snprintf(output_filename, 1000, "%s/fit_results.root", output_dir);
@@ -65,7 +90,7 @@ void Fitter::CloseOutput() {
  */
 void Fitter::FitTo(TChain* chain) {
 	if (data_set_) delete data_set_;
-	data_set_ = new RooDataSet("data_set", "data_set", chain, RooArgSet(de_, evmcflag_, candsel_, thetab_), data_cut_);
+	data_set_ = new RooDataSet("data_set", "data_set", chain, dataset_vars_, data_cut_);
 	data_set_->Print();
 
 //	fit_result_ = active_model_->fitTo(*data_set_, RooFit::Save(), RooFit::Minimizer("Minuit2"), RooFit::Hesse(1), RooFit::Minos(1), RooFit::NumCPU(4));
@@ -79,37 +104,37 @@ void Fitter::FitTo(TChain* chain) {
  */
 void Fitter::Setup(Components component) {
 	active_component_ = component;
+	data_cut_ = tools::GetCommonCutsString();
 	switch (component) {
 	case Components::signal :
-		data_cut_ = "evmcflag==1||evmcflag==7||evmcflag==8";
+		data_cut_ += "&&(evmcflag==1||evmcflag==7||evmcflag==8)";
 		active_model_ = &signal_model_;
 		active_model_name_ = "signal";
 		width_factor_.setConstant();
 		break;
 
 	case Components::crossfeed :
-		data_cut_ = "candsel!=0&&(evmcflag!=1&&evmcflag!=7)";
+		data_cut_ += "&&(candsel!=0&&(evmcflag!=1&&evmcflag!=7))";
 		active_model_ = &cross_model_;
 		active_model_name_ = "crossfeed";
 		width_factor_.setConstant();
 		break;
 
 	case Components::signal_plus_crossfeed :
-		data_cut_ = "(evmcflag==1||evmcflag==7||evmcflag==8)||(candsel!=0&&(evmcflag!=1&&evmcflag!=7))";
+		data_cut_ += "&&((evmcflag==1||evmcflag==7||evmcflag==8)||(candsel!=0&&(evmcflag!=1&&evmcflag!=7)))";
 		active_model_ = &signal_plus_cross_model_;
 		active_model_name_ = "signal_plus_crossfeed";
 		width_factor_.setConstant();
 		break;
 
 	case Components::background :
-		data_cut_ = "!((evmcflag==1||evmcflag==7||evmcflag==8)||(candsel!=0&&(evmcflag!=1&&evmcflag!=7)))";
+		data_cut_ += "&&(!((evmcflag==1||evmcflag==7||evmcflag==8)||(candsel!=0&&(evmcflag!=1&&evmcflag!=7))))";
 		active_model_ = &bkg_model_;
 		active_model_name_ = "background";
 		width_factor_.setConstant();
 		break;
 
 	case Components::all :
-		data_cut_ = "";
 		active_model_ = &model_;
 		active_model_name_ = "all";
 		width_factor_.setConstant(false);

@@ -50,12 +50,32 @@ public:
 	double GetCorrelation(TChain* chain, const RooRealVar& var1, const RooRealVar& var2, bool save_plot = false);
 	void PrintResults();
 
+private:
+	RooArgSet dataset_vars_;
+
+    RooRealVar thetat_{"thetat", "#theta_{t} [rad]", constants::cuts::thetat_low, constants::cuts::thetat_high};
+    RooRealVar thetab_{"thetab", "#theta_{b} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high};
+    RooRealVar phit_{"phit", "#phi_{t} [rad]", constants::cuts::phit_low, constants::cuts::phit_high};
+    RooRealVar dt_{"dt", "dt", constants::cuts::dt_low, constants::cuts::dt_high};
+
 	RooRealVar de_ { "de", "#DeltaE [GeV]", constants::cuts::de_low, constants::cuts::de_high };
 	RooRealVar candsel_ { "candsel", "candsel", 0, 4 };
-	RooRealVar evmcflag_ { "evmcflag", "evmcflag", -1, 8 };
-	RooRealVar thetab_ { "thetab", "#theta_{b} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high };
+    RooRealVar evmcflag_{"evmcflag", "evmcflag", -100, 100};
+    RooRealVar csbdtg_{"csbdtg", "csbdtg", -1, 1};
 
-private:
+    RooRealVar vrusable_{"vrusable", "vrusable", 0};
+    RooRealVar vrvtxz_{"vrvtxz", "vrvtxz", 0};
+    RooRealVar vrerr6_{"vrerr6", "vrerr6", 0};
+    RooRealVar vrchi2_{"vrchi2", "vrchi2", 0};
+    RooRealVar vrndf_{"vrndf", "vrndf", 0};
+    RooRealVar vrntrk_{"vrntrk", "vrntrk", 0};
+
+    RooRealVar vtusable_{"vtusable", "vtusable", 0};
+    RooRealVar vtvtxz_{"vtvtxz", "vtvtxz", 0};
+    RooRealVar vterr6_{"vterr6", "vterr6", 0};
+    RooRealVar vtchi2_{"vtchi2", "vtchi2", 0};
+    RooRealVar vtndf_{"vtndf", "vtndf", 0};
+    RooRealVar vtntrk_{"vtntrk", "vtntrk", 0};
 
 	RooRealVar width_factor_ { "width_factor", "F_{width}", 1, 0.5, 1.5 };
 
@@ -115,7 +135,7 @@ private:
 	RooDataSet* data_set_ = nullptr;
 	RooFitResult* fit_result_ = nullptr;
 
-	const char* data_cut_ = nullptr;
+	TString data_cut_;
 
 	TFile* output_file_ = nullptr;
 

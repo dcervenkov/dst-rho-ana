@@ -10,5 +10,4 @@
 #ifndef DSRHOYIELD_H_
 #define DSRHOYIELD_H_
 
-
 #endif /* DSRHOYIELD_H_ */

@@ -9,7 +9,7 @@ fi
 CHANNEL=${1}
 
 HOST="ipnp29"
-HOSTDIR="bin/belle/DSRhoPeek/data/${CHANNEL}/mc"
+HOSTDIR="bin/belle/dst-rho-ana/data/${CHANNEL}/mc"
 RESULTSDIR="../hbook/${CHANNEL}"
 
 cd ${RESULTSDIR}

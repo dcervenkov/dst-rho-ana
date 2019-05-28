@@ -1,6 +1,7 @@
 #! /bin/tcsh -f
 
 set MDST_DIR = ${1}
+set MDST_DIR_BASE = `basename ${MDST_DIR}`
 set CHANNEL = ${2}
 set SIDEBANDS = "no"
 
@@ -13,12 +14,11 @@ switch (${CHANNEL})
 		echo "D0K3pi"; breaksw
 	default:
 		echo "ERROR: Unknown channel '${CHANNEL}'"; exit 2
-	endsw
-
+endsw
 
 cd ..
 
-if (! -e /home/belle/dcervenk/DSRho/mcproduzh/gsim/${MDST_DIR}) then
+if (! -e ${MDST_DIR}) then
 	echo "ERROR: Dir ${MDST_DIR} doesn't exist."
 	exit 1
 endif
@@ -34,7 +34,7 @@ setenv BASF_NPROCESS 0
 source /sw/belle/local/etc/cshrc_general
 source /home/belle/dcervenk/Env/cshrc.post
 
-basf <<EOD >& log/DSRho-${MDST_DIR}.log
+basf <<EOD >& log/DSRho-${MDST_DIR_BASE}.log
 
 path create main
 path create Analysis
@@ -51,9 +51,9 @@ module put_parameter dsrhomodule svd\\${SVD}
 module put_parameter dsrhomodule sidebands\\${SIDEBANDS}
 
 initialize
-histogram define hbook/DSRho-${MDST_DIR}.hbook
+histogram define hbook/DSRho-${MDST_DIR_BASE}.hbook
 
-process_dir /home/belle/dcervenk/DSRho/mcproduzh/gsim/${MDST_DIR}/
+process_dir ${MDST_DIR}/
 
 terminate
 

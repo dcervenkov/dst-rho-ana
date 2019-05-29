@@ -447,20 +447,13 @@ void FitterBKG::Fit(RooAbsPdf* pdf, RooDataSet* data) {
 }
 
 void FitterBKG::CreateHistoPDF(RooDataSet* data) {
-
-    // TH3F* scf_histo = Create3DHisto(data);
-    // TH3F* scf_histo_normalized = NormalizePDF(scf_histo, 0, 1);
-
-    // const char* output_file = "scf_histo";
-    // TFile f(efficiency_file, "RECREATE");
-    // binned_pdf->Write();
-    // f.Close();
-
     RooDataHist data_hist("data_hist", "data_hist", RooArgSet(thetat_, thetab_, phit_), *data);
     RooHistPdf* scf_hist_pdf = new RooHistPdf("scf_hist_pdf", "scf_hist_pdf",
                                               RooArgSet(thetat_, thetab_, phit_), data_hist);
 
+    TFile f("scf_histo.root", "RECREATE");
     scf_hist_pdf->Write();
+    f.Close();
 }
 
 TH3F* FitterBKG::NormalizePDF(const TH3F* pdf, const double low, const double high) {

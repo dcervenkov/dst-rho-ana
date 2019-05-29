@@ -317,6 +317,15 @@ TString GetCommonCutsString() {
     common_cuts += "&&vtntrk==1))&&";
     common_cuts += "csbdtg>";
     common_cuts += constants::cuts::cs_bdtg;
+    common_cuts += "&&(de>";
+    common_cuts += constants::cuts::de_low;
+    common_cuts += "&&de<";
+    common_cuts += constants::cuts::de_high;
+    common_cuts += ")&&(dt>";
+    common_cuts += constants::cuts::dt_low;
+    common_cuts += "&&dt<";
+    common_cuts += constants::cuts::dt_high;
+    common_cuts += ")";
     return common_cuts;
 }
 

@@ -159,6 +159,7 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
 
     benergy_ = new RooRealVar("benergy", "benergy", 0, 100);
     mbc_ = new RooRealVar("mbc", "mbc", 5, 6);
+    de_ = new RooRealVar("de", "de", -1, 1);
     csbdtg_ = new RooRealVar("csbdtg", "csbdtg", -1, 1);
 
     shcosthb_ = new RooRealVar("shcosthb", "shcosthb", -1, 1);
@@ -204,6 +205,7 @@ void FitterCPV::PrepareVarArgsets() {
 
     conditional_vars_.push_back(&benergy_);
     conditional_vars_.push_back(&mbc_);
+    conditional_vars_.push_back(&de_);
     conditional_vars_.push_back(&csbdtg_);
 
     conditional_vars_.push_back(&shcosthb_);
@@ -1292,6 +1294,7 @@ void FitterCPV::ChangeModelParameters(const rapidjson::GenericValue<rapidjson::U
     for (rapidjson::Value::ConstMemberIterator itr = config.MemberBegin();
          itr != config.MemberEnd(); ++itr) {
         // The parameter in the JSON file must be valid, i.e., exist in the model
+        Log::print(Log::debug, "Changing parameter %s to %f\n", itr->name.GetString(), itr->value.GetDouble());
         assert(scf_parameters_argset_.find(itr->name.GetString()) ||
                bkg_parameters_argset_.find(itr->name.GetString()));
         scf_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());

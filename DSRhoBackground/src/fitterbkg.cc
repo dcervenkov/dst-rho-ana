@@ -155,6 +155,27 @@ FitterBKG::FitterBKG() {
     dataset_vars_argset_.add(phit_);
 
     num_CPUs_ = 1;
+
+    model_parameters_.push_back(&bkg_dt_voigt_mu_);
+    model_parameters_.push_back(&bkg_dt_voigt_sigma_);
+    model_parameters_.push_back(&bkg_dt_voigt_width_);
+    model_parameters_.push_back(&bkg_dt_gaus_mu_);
+    model_parameters_.push_back(&bkg_dt_gaus_sigma_);
+    model_parameters_.push_back(&bkg_dt_f_);
+
+    model_parameters_.push_back(&bkg_phit_poly_p2_);
+    model_parameters_.push_back(&bkg_phit_f_);
+    model_parameters_.push_back(&bkg_phit_offset_);
+
+    model_parameters_.push_back(&bkg_thetat_p2_);
+    model_parameters_.push_back(&bkg_thetat_p4_);
+    model_parameters_.push_back(&bkg_thetat_p6_);
+
+    model_parameters_.push_back(&bkg_thetab_gaus_mu_);
+    model_parameters_.push_back(&bkg_thetab_gaus_sigma_l_);
+    model_parameters_.push_back(&bkg_thetab_gaus_sigma_r_);
+    model_parameters_.push_back(&bkg_thetab_exp_alpha_);
+    model_parameters_.push_back(&bkg_thetab_f_);
 }
 
 FitterBKG::~FitterBKG() {
@@ -637,4 +658,11 @@ void FitterBKG::PlotKDE(AdaptiveKernelDensity kde) const {
         }
     }
 
+}
+
+void FitterBKG::PrintResultsJSON() const {
+    printf("Resulting parameters in JSON format:\n\n");
+    for (auto var : model_parameters_) {
+        printf("\"%s\": \"%f\",\n", var->GetName(), var->getVal());
+    }
 }

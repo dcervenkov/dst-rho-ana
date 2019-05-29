@@ -139,6 +139,8 @@ int main(int argc, char* argv[]) {
             tools::PlotPull2D(fitter.thetat_, fitter.phit_, data_hist, *pdf_hist, constants::format, true);
             tools::PlotPull2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, constants::format, true);
         }
+
+        fitter.PrintResultsJSON();
     }
 
     return 0;

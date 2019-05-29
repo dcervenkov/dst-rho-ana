@@ -55,6 +55,7 @@ class FitterBKG {
     void Fit(RooAbsPdf* pdf, RooDataSet* data);
     void CreateHistoPDF(RooDataSet* data);
     AdaptiveKernelDensity FitKDE(RooDataSet* data);
+    void PrintResultsJSON() const;
 
     RooRealVar dt_{"dt", "#Deltat [ps]", constants::cuts::dt_low, constants::cuts::dt_high};
     RooRealVar thetat_{"thetat", "#theta_{t} [rad]", constants::cuts::thetat_low, constants::cuts::thetat_high};
@@ -118,6 +119,7 @@ class FitterBKG {
     std::vector<RooRealVar**> dataset_vars_;
     RooArgSet conditional_vars_argset_;
     RooArgSet dataset_vars_argset_;
+    std::vector <RooRealVar*> model_parameters_;
 
     int num_CPUs_;
 
@@ -127,7 +129,7 @@ class FitterBKG {
     TChain* input_tree = nullptr;
     TTree* data_tree = nullptr;
 
-    // Self-cross-feed dt model
+    // Background dt model
     RooRealVar bkg_dt_voigt_mu_{"bkg_dt_voigt_mu", "v_{#mu}", -0.303, -1, 1};
     RooRealVar bkg_dt_voigt_sigma_{"bkg_dt_voigt_sigma_", "v_{#sigma}", 2.323, 0, 10};
     RooRealVar bkg_dt_voigt_width_{"bkg_dt_voigt_width_", "v_{w}", 0.851, 0, 10};
@@ -139,7 +141,7 @@ class FitterBKG {
 
     RooRealVar bkg_dt_f_{"bkg_dt_f", "f_{v/g}", 0.631, 0, 1};
 
-    // Self-cross-feed phit model
+    // Background phit model
     RooRealVar bkg_phit_poly_p2_{"bkg_phit_poly_p2", "p_{2}", 0.856, -0.1, 2};
     RooRealVar bkg_phit_f_{"bkg_phit_f", "f_{poly}", 0.147, 0.1, 0.9};
     RooPolynomial bkg_phit_poly_{"bkg_phit_poly", "bkg_phit_poly", phit_, bkg_phit_poly_p2_, 2};
@@ -149,7 +151,7 @@ class FitterBKG {
     RooGenericPdf bkg_phit_cos_{"bkg_phit_cos", "bkg_phit_cos", "cos(bkg_phit_phit)^2",
                                 RooArgList(bkg_phit_phit_)};
 
-    // Self-cross-feed thetat model
+    // Background thetat model
     RooRealVar bkg_thetat_p1_{"bkg_thetat_p1", "p_{1}", 0};
     RooRealVar bkg_thetat_p2_{"bkg_thetat_p2", "p_{2}", -1.147, -10, 10};
     RooRealVar bkg_thetat_p3_{"bkg_thetat_p3", "p_{3}", 0};
@@ -158,7 +160,7 @@ class FitterBKG {
     RooRealVar bkg_thetat_p6_{"bkg_thetat_p6", "p_{6}", -0.029, -1, 1};
     RooArgList bkg_thetat_pars_ {bkg_thetat_p1_, bkg_thetat_p2_, bkg_thetat_p3_, bkg_thetat_p4_, bkg_thetat_p5_, bkg_thetat_p6_};
 
-    // Self-cross-feed thetab model
+    // Background thetab model
     RooRealVar bkg_thetab_gaus_mu_{"bkg_thetab_gaus_mu", "#mu", 2.885, 1.5, 3};
     RooRealVar bkg_thetab_gaus_sigma_l_{"bkg_thetab_gaus_sigma_l", "#sigma_{L}", 0.411, 0, 3};
     RooRealVar bkg_thetab_gaus_sigma_r_{"bkg_thetab_gaus_sigma_r", "#sigma_{R}", 0.094, 0, 3};

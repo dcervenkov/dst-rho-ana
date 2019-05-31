@@ -65,7 +65,7 @@ const double dt_high = 10;  // [ps]
 const double thetat_low = 0;            // [rad]
 const double thetat_high = TMath::Pi(); // [rad]
 const double thetab_low = 0.5;          // [rad]
-const double thetab_high = 2.95;        // [rad]
+const double thetab_high = TMath::Pi(); // [rad]
 const double phit_low = -TMath::Pi();   // [rad]
 const double phit_high = TMath::Pi();   // [rad]
 

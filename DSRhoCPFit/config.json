@@ -10,20 +10,20 @@
         },
         "thetab": {
             "min": 0.5,
-            "max": 2.95
+            "max": 3.1415
         }
     },
     "modelParameters": {
-	"bkg_phit_poly_p2": 0.019731,
-	"bkg_phit_f": 0.770185,
-	"bkg_phit_offset": 0.158274,
-	"bkg_thetat_p2": -1.171730,
-	"bkg_thetat_p4": 0.215565,
-	"bkg_thetat_p6": -0.043751,
-	"bkg_thetab_gaus_mu": 2.484168,
-	"bkg_thetab_gaus_sigma_l": 0.668357,
-	"bkg_thetab_gaus_sigma_r": 0.359792,
-	"bkg_thetab_exp_alpha": -2.157549,
-	"bkg_thetab_f": 0.732300
+	"bkg_phit_poly_p2": 0.018563,
+	"bkg_phit_f": 0.767603,
+	"bkg_phit_offset": 0.162922,
+	"bkg_thetat_p2": -1.174186,
+	"bkg_thetat_p4": 0.217375,
+	"bkg_thetat_p6": -0.041969,
+	"bkg_thetab_gaus_mu": 2.656699,
+	"bkg_thetab_gaus_sigma_l": 0.915154,
+	"bkg_thetab_gaus_sigma_r": 0.190158,
+	"bkg_thetab_exp_alpha": -2.268680,
+	"bkg_thetab_f": 0.692196
     }
 }

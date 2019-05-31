@@ -57,7 +57,7 @@ const double fraction_scf_of_crscfbkg = 0.1302;
 namespace cuts {
 
 const double de_low = -0.14;  // [GeV]
-const double de_high = 0.10;  // [GeV]
+const double de_high = 0.068;  // [GeV]
 
 const double dt_low = -10;  // [ps]
 const double dt_high = 10;  // [ps]

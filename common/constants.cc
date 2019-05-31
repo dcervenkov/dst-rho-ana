@@ -50,9 +50,9 @@ const double dm = 0.507;     // [ps^-1]
 const double tau = 1.53439;  // [ps]
 const double c = 0.0299792458;  // [cm/ps]
 
-const double fraction_cr_of_crscf = 0.8585;
-const double fraction_cr_of_crscfbkg = 0.7901;
-const double fraction_scf_of_crscfbkg = 0.1302;
+const double fraction_cr_of_crscf = 0.8759;
+const double fraction_cr_of_crscfbkg = 0.8142;
+const double fraction_scf_of_crscfbkg = 0.1153;
 
 namespace cuts {
 
@@ -65,7 +65,7 @@ const double dt_high = 10;  // [ps]
 const double thetat_low = 0;            // [rad]
 const double thetat_high = TMath::Pi(); // [rad]
 const double thetab_low = 0.5;          // [rad]
-const double thetab_high = TMath::Pi(); // [rad]
+const double thetab_high = 2.95;        // [rad]
 const double phit_low = -TMath::Pi();   // [rad]
 const double phit_high = TMath::Pi();   // [rad]
 

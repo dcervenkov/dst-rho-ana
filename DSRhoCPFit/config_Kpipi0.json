@@ -1,0 +1,29 @@
+{
+    "fitRanges": {
+        "dt": {
+            "min": -10,
+            "max": 10
+        },
+        "thetat": {
+            "min": 0,
+            "max": 3.1415
+        },
+        "thetab": {
+            "min": 0.5,
+            "max": 2.95
+        }
+    },
+    "modelParameters": {
+	"bkg_phit_poly_p2": 0.030929,
+	"bkg_phit_f": 0.774544,
+	"bkg_phit_offset": 0.114373,
+	"bkg_thetat_p2": -1.169959,
+	"bkg_thetat_p4": 0.212095,
+	"bkg_thetat_p6": -0.036496,
+	"bkg_thetab_gaus_mu": 2.409229,
+	"bkg_thetab_gaus_sigma_l": 0.465934,
+	"bkg_thetab_gaus_sigma_r": 0.447927,
+	"bkg_thetab_exp_alpha": -1.841936,
+	"bkg_thetab_f": 0.758031
+    }
+}

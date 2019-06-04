@@ -185,6 +185,14 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
 
     scf_angular_pdf_ = CreateAngularSCFPDF();
     bkg_angular_pdf_ = CreateAngularBKGPDF();
+
+    cr_scf_f.setConstant();
+    cr_f.setConstant();
+    scf_f.setConstant();
+
+    model_parameters_argset_.add(cr_scf_f);
+    model_parameters_argset_.add(cr_f);
+    model_parameters_argset_.add(scf_f);
 }
 /**
  * Populate various vectors and argsets with all parameters
@@ -488,9 +496,6 @@ void FitterCPV::FitCRSCF() {
     // RooProdPdf scf_pdf_b("scf_pdf_b", "scf_pdf_b", RooArgList(scf_dt_pdf_b, *scf_angular_pdf));
     // RooProdPdf scf_pdf_bb("scf_pdf_bb", "scf_pdf_bb", RooArgList(scf_dt_pdf_bb, *scf_angular_pdf));
 
-    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
-    cr_scf_f.setConstant();
-
     RooAddPdf pdf_a("pdf_a", "pdf_a", RooArgList(cr_pdf_a, scf_pdf_a), RooArgList(cr_scf_f));
     RooAddPdf pdf_ab("pdf_ab", "pdf_ab", RooArgList(cr_pdf_ab, scf_pdf_ab), RooArgList(cr_scf_f));
     RooAddPdf pdf_b("pdf_b", "pdf_b", RooArgList(cr_pdf_b, scf_pdf_b), RooArgList(cr_scf_f));
@@ -697,12 +702,6 @@ void FitterCPV::FitAll() {
     RooProdPdf bkg_pdf_b("bkg_pdf_b", "bkg_pdf_b", RooArgList(bkg_dt_dcs_model, *bkg_angular_pdf_));
     RooProdPdf bkg_pdf_bb("bkg_pdf_bb", "bkg_pdf_bb", RooArgList(bkg_dt_dcs_model, *bkg_angular_pdf_));
 
-
-    RooRealVar cr_f("cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
-    RooRealVar scf_f("scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
-
-    cr_f.setConstant();
-    scf_f.setConstant();
 
     RooAddPdf pdf_a("pdf_a", "pdf_a", RooArgList(cr_pdf_a, scf_pdf_a, bkg_pdf_a), RooArgList(cr_f, scf_f));
     RooAddPdf pdf_ab("pdf_ab", "pdf_ab", RooArgList(cr_pdf_ab, scf_pdf_ab, bkg_pdf_a), RooArgList(cr_f, scf_f));
@@ -942,9 +941,6 @@ void FitterCPV::FitAngularCRSCF() {
     AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
-    RooRealVar cr_scf_f("cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
-    cr_scf_f.setConstant();
-
     RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_angular_pdf_), RooArgList(cr_scf_f));
     RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, *scf_angular_pdf_), RooArgList(cr_scf_f));
 
@@ -1074,12 +1070,6 @@ void FitterCPV::FitAngularAll() {
                      *apa_, *a0_, *ata_);
     AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
-
-    RooRealVar cr_f("cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
-    RooRealVar scf_f("scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
-
-    cr_f.setConstant();
-    scf_f.setConstant();
 
     RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_angular_pdf_, *bkg_angular_pdf_), RooArgList(cr_f, scf_f));
     RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, *scf_angular_pdf_, *bkg_angular_pdf_), RooArgList(cr_f, scf_f));
@@ -1296,9 +1286,11 @@ void FitterCPV::ChangeModelParameters(const rapidjson::GenericValue<rapidjson::U
         // The parameter in the JSON file must be valid, i.e., exist in the model
         Log::print(Log::debug, "Changing parameter %s to %f\n", itr->name.GetString(), itr->value.GetDouble());
         assert(scf_parameters_argset_.find(itr->name.GetString()) ||
-               bkg_parameters_argset_.find(itr->name.GetString()));
+               bkg_parameters_argset_.find(itr->name.GetString()) ||
+               model_parameters_argset_.find(itr->name.GetString()));
         scf_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
         bkg_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
+        model_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
     }
 }
 

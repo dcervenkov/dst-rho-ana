@@ -195,6 +195,11 @@ class FitterCPV {
     RooAbsPdf* bkg_angular_pdf_;
     RooArgSet scf_parameters_argset_;
     RooArgSet bkg_parameters_argset_;
+    RooArgSet model_parameters_argset_;
+
+    RooRealVar cr_scf_f{"cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99};
+    RooRealVar cr_f{"cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99};
+    RooRealVar scf_f{"scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99};
 
     RooDataHist* scf_angular_kde_hist_ = nullptr;
     RooHistPdf* scf_angular_kde_ = nullptr;

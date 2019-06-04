@@ -14,16 +14,16 @@
         }
     },
     "modelParameters": {
-	"bkg_phit_poly_p2": 0.018434,
-	"bkg_phit_f": 0.767169,
-	"bkg_phit_offset": 0.162006,
-	"bkg_thetat_p2": -1.174277,
-	"bkg_thetat_p4": 0.217126,
-	"bkg_thetat_p6": -0.041400,
-	"bkg_thetab_gaus_mu": 2.503266,
-	"bkg_thetab_gaus_sigma_l": 0.676618,
-	"bkg_thetab_gaus_sigma_r": 0.337725,
-	"bkg_thetab_exp_alpha": -2.137619,
-	"bkg_thetab_f": 0.732885
+        "bkg_phit_poly_p2": 0.018434,
+        "bkg_phit_f": 0.767169,
+        "bkg_phit_offset": 0.162006,
+        "bkg_thetat_p2": -1.174277,
+        "bkg_thetat_p4": 0.217126,
+        "bkg_thetat_p6": -0.041400,
+        "bkg_thetab_gaus_mu": 2.503266,
+        "bkg_thetab_gaus_sigma_l": 0.676618,
+        "bkg_thetab_gaus_sigma_r": 0.337725,
+        "bkg_thetab_exp_alpha": -2.137619,
+        "bkg_thetab_f": 0.732885
     }
 }

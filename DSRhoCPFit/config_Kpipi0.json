@@ -24,6 +24,9 @@
         "bkg_thetab_gaus_sigma_l": 0.465934,
         "bkg_thetab_gaus_sigma_r": 0.447927,
         "bkg_thetab_exp_alpha": -1.841936,
-        "bkg_thetab_f": 0.758031
+        "bkg_thetab_f": 0.758031,
+        "cr_scf_f": 0.8263,
+        "cr_f": 0.5386,
+        "scf_f": 0.1132
     }
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 # saner programming env: these switches turn some bugs into errors
-set -o errexit -o pipefail -o noclobber -o nounset
+set -o errexit -o pipefail -o nounset
 
 # -allow a command to fail with !’s side effect on errexit
 # -use return value from ${PIPESTATUS[0]}, because ! hosed $?
@@ -91,19 +91,19 @@ cd ..
 if [ "$TI" = 1 ]; then
 	if [ "$KPI" = 1 ]; then
 		if [ "$CR" = 1 ]; then
-			DIR="cr_ti_Kpi"; mkdir results/$DIR logs/$DIR; for FILE in ../data/DSRho-mdst_basf2_mod_real_unmod_<1-25>.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=CR --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="cr_ti_Kpi"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/DSRho-mdst_basf2_mod_real_unmod_<1-25>.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=CR --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "CR TI Kpi done"
 		fi
 
 		if [ "$CRSCF" = 1 ]; then
-			DIR="crscf_ti_Kpi"; mkdir results/$DIR logs/$DIR; for FILE in ../data/DSRho-mdst_basf2_mod_real_unmod_<1-25>.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=CRSCF --scf-histo=scf_Kpi_190531.root --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="crscf_ti_Kpi"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/DSRho-mdst_basf2_mod_real_unmod_<1-25>.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=CRSCF --scf-histo=scf_Kpi_190531.root --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "CRSCF TI Kpi done"
 		fi
 
 		if [ "$ALL" = 1 ]; then
-			DIR="all_ti_Kpi"; mkdir results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=all --scf-histo=scf_Kpi_190531.root --time-independent --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).root ../data/Kpi/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
+			DIR="all_ti_Kpi"; mkdir -p results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=all --scf-histo=scf_Kpi_190531.root --time-independent --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).root ../data/Kpi/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "All TI Kpi done"
 		fi
@@ -111,19 +111,19 @@ if [ "$TI" = 1 ]; then
 
 	if [ "$KPIPI0" = 1 ]; then
 		if [ "$CR" = 1 ]; then
-			DIR="cr_ti_Kpipi0"; mkdir results/$DIR logs/$DIR; for FILE in ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=CR --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="cr_ti_Kpipi0"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=CR --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "CR TI Kpipi0 done"
 		fi
 
 		if [ "$CRSCF" = 1 ]; then
-			DIR="crscf_ti_Kpipi0"; mkdir results/$DIR logs/$DIR; for FILE in ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=CRSCF --scf-histo=scf_Kpipi0_190603.root --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="crscf_ti_Kpipi0"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=CRSCF --scf-histo=scf_Kpipi0_190603.root --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "CRSCF TI Kpipi0 done"
 		fi
 
 		if [ "$ALL" = 1 ]; then
-			DIR="all_ti_Kpipi0"; mkdir results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=all --scf-histo=scf_Kpipi0_190603.root --time-independent --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_00$((I+1))_svd2.root ../data/Kpipi0/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
+			DIR="all_ti_Kpipi0"; mkdir -p results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=all --scf-histo=scf_Kpipi0_190603.root --time-independent --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_00$((I+1))_svd2.root ../data/Kpipi0/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "All TI Kpipi0 done"
 		fi
@@ -131,19 +131,19 @@ if [ "$TI" = 1 ]; then
 
 	if [ "$K3PI" = 1 ]; then
 		if [ "$CR" = 1 ]; then
-			DIR="cr_ti_K3pi"; mkdir results/$DIR logs/$DIR; for FILE in ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=CR --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="cr_ti_K3pi"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=CR --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "CR TI K3pi done"
 		fi
 
 		if [ "$CRSCF" = 1 ]; then
-			DIR="crscf_ti_K3pi"; mkdir results/$DIR logs/$DIR; for FILE in ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=CRSCF --scf-histo=scf_K3pi_190603.root --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="crscf_ti_K3pi"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=CRSCF --scf-histo=scf_K3pi_190603.root --time-independent --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "CRSCF TI K3pi done"
 		fi
 
 		if [ "$ALL" = 1 ]; then
-			DIR="all_ti_K3pi"; mkdir results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=all --scf-histo=scf_K3pi_190603.root --time-independent --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_00$((I+1))_svd2.root ../data/K3pi/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
+			DIR="all_ti_K3pi"; mkdir -p results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=all --scf-histo=scf_K3pi_190603.root --time-independent --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_00$((I+1))_svd2.root ../data/K3pi/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "All TI K3pi done"
 		fi
@@ -153,19 +153,19 @@ fi
 if [ "$TD" = 1 ]; then
 	if [ "$KPI" = 1 ]; then
 		if [ "$CR" = 1 ]; then
-			DIR="cr_td_Kpi"; mkdir results/$DIR logs/$DIR; for FILE in ../data/DSRho-mdst_basf2_mod_real_unmod_<1-25>.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=CR --mixing --log --cpus=4 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="cr_td_Kpi"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/DSRho-mdst_basf2_mod_real_unmod_<1-25>.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=CR --mixing --log --cpus=4 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "CR TD Kpi done"
 		fi
 
 		if [ "$CRSCF" = 1 ]; then
-			DIR="crscf_td_Kpi"; mkdir results/$DIR logs/$DIR; for FILE in ../data/DSRho-mdst_basf2_mod_real_unmod_<1-25>.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=CRSCF --scf-histo=scf_Kpi_190531.root --mixing --log --cpus=4 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="crscf_td_Kpi"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/DSRho-mdst_basf2_mod_real_unmod_<1-25>.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=CRSCF --scf-histo=scf_Kpi_190531.root --mixing --log --cpus=4 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "CRSCF TD Kpi done"
 		fi
 
 		if [ "$ALL" = 1 ]; then
-			DIR="all_td_Kpi"; mkdir results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=all --scf-histo=scf_Kpi_190531.root --mixing --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/DSRho-mdst_basf2_mod_real_unmod_00$((I+1)).root ../data/Kpi/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
+			DIR="all_td_Kpi"; mkdir -p results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpi_190531.root --config=config_Kpi.json --fit=all --scf-histo=scf_Kpi_190531.root --mixing --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/DSRho-mdst_basf2_mod_real_unmod_00$((I+1)).root ../data/Kpi/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "All TD Kpi done"
 		fi
@@ -174,19 +174,19 @@ if [ "$TD" = 1 ]; then
 
 	if [ "$KPIPI0" = 1 ]; then
 		if [ "$CR" = 1 ]; then
-			DIR="cr_td_Kpipi0"; mkdir results/$DIR logs/$DIR; for FILE in ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=CR --mixing --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="cr_td_Kpipi0"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=CR --mixing --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_tdll_all_processes_end DSRhoCPFit
 			echo "CR TD Kpipi0 done"
 		fi
 
 		if [ "$CRSCF" = 1 ]; then
-			DIR="crscf_td_Kpipi0"; mkdir results/$DIR logs/$DIR; for FILE in ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=CRSCF --scf-histo=scf_Kpipi0_190603.root --mixing --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="crscf_td_Kpipi0"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=CRSCF --scf-histo=scf_Kpipi0_190603.root --mixing --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_tdll_all_processes_end DSRhoCPFit
 			echo "CRSCF TD Kpipi0 done"
 		fi
 
 		if [ "$ALL" = 1 ]; then
-			DIR="all_td_Kpipi0"; mkdir results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=all --scf-histo=scf_Kpipi0_190603.root --mixing --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_00$((I+1))_svd2.root ../data/Kpipi0/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
+			DIR="all_td_Kpipi0"; mkdir -p results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_Kpipi0_190603.root --config=config_Kpipi0.json --fit=all --scf-histo=scf_Kpipi0_190603.root --mixing --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/basf2_190528_Kpipi0/DSRho-mdst_basf2_190528_00$((I+1))_svd2.root ../data/Kpipi0/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
 			wait_tdll_all_processes_end DSRhoCPFit
 			echo "All TD Kpipi0 done"
 		fi
@@ -194,19 +194,19 @@ if [ "$TD" = 1 ]; then
 
 	if [ "$K3PI" = 1 ]; then
 		if [ "$CR" = 1 ]; then
-			DIR="cr_td_K3pi"; mkdir results/$DIR logs/$DIR; for FILE in ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=CR --mixing --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="cr_td_K3pi"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=CR --mixing --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_tdll_all_processes_end DSRhoCPFit
 			echo "CR TD K3pi done"
 		fi
 
 		if [ "$CRSCF" = 1 ]; then
-			DIR="crscf_td_K3pi"; mkdir results/$DIR logs/$DIR; for FILE in ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=CRSCF --scf-histo=scf_K3pi_190603.root --mixing --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
+			DIR="crscf_td_K3pi"; mkdir -p results/$DIR logs/$DIR; for FILE in ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_<001-025>_svd2.root ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=CRSCF --scf-histo=scf_K3pi_190603.root --mixing --log --cpus=1 results/$DIR/$(basename -s.root $FILE).result $FILE &> logs/$DIR/$(basename -s.root $FILE).log &; done
 			wait_tdll_all_processes_end DSRhoCPFit
 			echo "CRSCF TD K3pi done"
 		fi
 
 		if [ "$ALL" = 1 ]; then
-			DIR="all_td_K3pi"; mkdir results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=all --scf-histo=scf_K3pi_190603.root --mixing --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_$((I+1))_svd2.root ../data/K3pi/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
+			DIR="all_td_K3pi"; mkdir -p results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=all --scf-histo=scf_K3pi_190603.root --mixing --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_$((I+1))_svd2.root ../data/K3pi/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
 			wait_tdll_all_processes_end DSRhoCPFit
 			echo "All TD K3pi done"
 		fi

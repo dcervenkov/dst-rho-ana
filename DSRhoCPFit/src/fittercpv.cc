@@ -1238,6 +1238,10 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
 
 /* static */ rapidjson::Document FitterCPV::ReadJSONConfig(const char* filename) {
     std::ifstream filestream(filename);
+    if (!filestream.good()) {
+        Log::print(Log::error, "Specified config file '%s' doesn't exist!\n", filename);
+        exit(5);
+    }
     std::stringstream buffer;
     buffer << filestream.rdbuf();
 
@@ -1747,12 +1751,12 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
     
     TTree* input_tree;
     if (num_events) {
-	if (file_names.size() > 1) {
+    if (file_names.size() > 1) {
             Log::print(Log::warning,
                        "You limited the number of events to read, while reading multiple "
-		       "files. Since this limiting works sequentially not randomly, you "
-		       "will probably not get the result you want!\n");
-	}
+               "files. Since this limiting works sequentially not randomly, you "
+               "will probably not get the result you want!\n");
+    }
         input_tree = input_chain->CloneTree(num_events);
     } else {
         input_tree = input_chain->CloneTree();
@@ -2687,7 +2691,7 @@ void FitterCPV::SetSCFKDE(const char* file) {
     // OneDimPhaseSpace* phasespace_phit = new OneDimPhaseSpace{"phasespace_phit", phit_->getMin(), phit_->getMax()};
     // CombinedPhaseSpace* phasespace = new CombinedPhaseSpace{"phasespace", phasespace_thetat, phasespace_thetab,
     //                               phasespace_phit};
-	// BinnedDensity* binned_scf_kde = new BinnedDensity("binned_scf_kde", phasespace, file);
+    // BinnedDensity* binned_scf_kde = new BinnedDensity("binned_scf_kde", phasespace, file);
     // RooArgList list(*thetat_, *thetab_, *phit_);
     // RooMeerkatPdf* meerkat_pdf =
     //     new RooMeerkatPdf("meerkat_pdf", "meerkat_pdf", list, binned_scf_kde);

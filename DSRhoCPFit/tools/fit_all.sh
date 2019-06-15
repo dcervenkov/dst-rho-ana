@@ -206,7 +206,7 @@ if [ "$TD" = 1 ]; then
 		fi
 
 		if [ "$ALL" = 1 ]; then
-			DIR="all_td_K3pi"; mkdir -p results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=all --scf-histo=scf_K3pi_190603.root --mixing --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_$((I+1))_svd2.root ../data/K3pi/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
+			DIR="all_td_K3pi"; mkdir -p results/$DIR logs/$DIR; for I in $(seq 0 5) ; do nice ./DSRhoCPFit --efficiency-model=6 --efficiency-file=eff_K3pi_190603.root --config=config_K3pi.json --fit=all --scf-histo=scf_K3pi_190603.root --mixing --log --cpus=4 results/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).result ../data/basf2_190529_K3pi/DSRho-mdst_basf2_190529_00$((I+1))_svd2.root ../data/K3pi/mc_wo_signal/DSRhoSkim_svd*$I.root &> logs/$DIR/DSRho-mdst_basf2_mod_real_unmod_$((I+1)).log &; done
 			wait_till_all_processes_end DSRhoCPFit
 			echo "All TD K3pi done"
 		fi

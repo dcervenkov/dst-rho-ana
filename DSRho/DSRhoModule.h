@@ -88,6 +88,8 @@ private:
 
 	printTree* pt;
 	Continuum continuumSupression;
+
+	int numPrintedEvents;
 };
 
 // Register module with BASF

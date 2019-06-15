@@ -98,6 +98,7 @@ void DSRhoModule::init(int*) {
 	printf ("*** DC: Init - channel = %s, svd = %s\n", channel, svd);
 	pt = new printTree(channel);
 	continuumSupression.readInWeights(channel, svd);
+	numPrintedEvents = 0;
 }
 
 void DSRhoModule::begin_run(BelleEvent*, int *status) {
@@ -207,6 +208,8 @@ void DSRhoModule::hist_def(void) {
 void DSRhoModule::event(BelleEvent*, int *status) {
 	// Used for skimming; default to 0, change to 1 if we find a candidate
 	*status = 0;
+
+	if (numPrintedEvents > 10) return;
 
 	// Obtain the ExpnNo, runNo and evtNo
 	expMC = detVer = expNo = runNo = evtNo = 0;
@@ -384,18 +387,14 @@ void DSRhoModule::event(BelleEvent*, int *status) {
 
 		saveToTuple(Bcand, tupleB);
 
-//		int DSFlag = getMCtruthFlag(Bcand.child(0));
-//		int D0Flag = getMCtruthFlag(Bcand.child(0).child(0));
-//		int rhoFlag = getMCtruthFlag(Bcand.child(1));
-//		int candSel = dynamic_cast<const UserInfo&>(Bcand.userInfo()).getCandidateSelection();
-//
-//		if ((int(DSFlag) == 1 || int(DSFlag) == 10) &&
-//			(int(D0Flag == 1) || int(D0Flag == 10)) &&
-//			(int(rhoFlag) == 3) && (candSel == 0) &&
-//			dynamic_cast<const UserInfo&>(Bcand.userInfo()).getDeltaE() < -0.13) {
-//				printEvent(Bcand);
-//		}
+		// int eventMCFlag = getEventMCFlag(dynamic_cast<const UserInfo&>(Bcand.userInfo()).getCandidateSelection(),
+		// 		getMCtruthFlag(Bcand), getMCtruthFlag(Bcand.child(0)), getMCtruthFlag(Bcand.child(1)),
+		// 		getMCtruthFlag(Bcand.child(0).child(0)));
 
+		// if (eventMCFlag == 6) {
+		// 	printEvent(Bcand);
+		// 	numPrintedEvents++;
+		// }
 	}
 }
 

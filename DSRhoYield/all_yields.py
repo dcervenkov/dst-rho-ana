@@ -19,16 +19,18 @@ def recover_yield(filename):
 
 def recover_count(dir):
     chain = TChain("h2000")
-    chain.Add(dir + "/*mixed*.root")
+    chain.Add(dir + "/*.root")
     count = chain.Draw(
-        "de", "(evmcflag==1||evmcflag==7||evmcflag==8)&&de>-0.14", "goff")
+        "de", common_cuts() + "&&(evmcflag==1||evmcflag==7||evmcflag==8)", "goff")
     return count
 
+def common_cuts():
+    return "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5"
 
 # Just to init RooFit to make it print its loading line now
 r = RooRealVar()
 
-channels = ["D0Kpi", "D0Kpipi0", "D0K3pi"]
+channels = ["Kpi", "Kpipi0", "K3pi"]
 streams = range(0, 6)
 
 for channel in channels:
@@ -40,8 +42,11 @@ for channel in channels:
     biases = []
     for stream in streams:
         sig_yield, sig_yield_error = recover_yield(
-            "plots/" + channel + "/stream" + str(stream) + "/fit_results.root")
-        sig_count = recover_count("data/" + channel + "/stream" + str(stream))
+            "plots/" + channel + "_stream" + str(stream) + "/fit_results.root")
+        sig_count = recover_count("../data/" + channel + "/realistic_mc/stream" + str(stream))
+        # sig_yield, sig_yield_error = recover_yield(
+        #     "plots/" + channel + "_stream" + str(stream) + "_genMC/fit_results.root")
+        # sig_count = recover_count("../data/" + channel + "/mc/stream" + str(stream))
         print sig_yield, "+-", sig_yield_error, sig_count, sig_yield - sig_count
         yields.append(sig_yield)
         errors.append(sig_yield_error)

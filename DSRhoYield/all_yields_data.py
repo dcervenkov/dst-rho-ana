@@ -28,12 +28,12 @@ def recover_count(dir):
 # Just to init RooFit to make it print its loading line now
 r = RooRealVar()
 
-channels = ["D0Kpi", "D0Kpipi0", "D0K3pi"]
+channels = ["Kpi", "Kpipi0", "K3pi"]
 streams = range(0, 6)
 
 for channel in channels:
     print channel
     print "Yield", "+-", "Err", "Count", "Bias"
     sig_yield, sig_yield_error = recover_yield(
-        "plots/" + channel + "/data/fit_results.root")
+        "plots/" + channel + "/fit_results.root")
     print sig_yield, "+-", sig_yield_error

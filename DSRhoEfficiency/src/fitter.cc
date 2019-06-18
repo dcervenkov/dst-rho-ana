@@ -690,24 +690,24 @@ TPaveText* Fitter::CreateStatBox(double chi2, bool position_top, bool position_l
 void Fitter::SetEfficiencyModel(const int model_num) {
     switch (model_num) {
         case 1:
-            thetat_model_e_ = &thetat_model1_e_;
-            thetab_model_e_ = &thetab_model1_e_;
-            phit_model_e_ = &phit_model1_e_;
+            thetat_model_e_ = &thetat_model1_;
+            thetab_model_e_ = &thetab_model1_;
+            phit_model_e_ = &phit_model1_;
             break;
         case 2:
-            thetat_model_e_ = &thetat_model2_e_;
-            thetab_model_e_ = &thetab_model2_e_;
-            phit_model_e_ = &phit_model2_e_;
+            thetat_model_e_ = &thetat_model2_;
+            thetab_model_e_ = &thetab_model2_;
+            phit_model_e_ = &phit_model2_;
             break;
         case 3:
-            thetat_model_e_ = &thetat_model3_e_;
-            thetab_model_e_ = &thetab_model3_e_;
-            phit_model_e_ = &phit_model3_e_;
+            thetat_model_e_ = &thetat_model3_;
+            thetab_model_e_ = &thetab_model3_;
+            phit_model_e_ = &phit_model3_;
             break;
         case 4:
-            thetat_model_e_ = &thetat_model4_e_;
-            thetab_model_e_ = &thetab_model3_e_;
-            phit_model_e_ = &phit_model2_e_;
+            thetat_model_e_ = &thetat_model4_;
+            thetab_model_e_ = &thetab_model3_;
+            phit_model_e_ = &phit_model2_;
             break;
     }
 }

@@ -187,7 +187,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.mirror_margin = atof(optarg);
                 break;
             case 'h':
-                printf("Usage: %s [OPTION]... INPUT-FILE OUTPUT_DIR\n\n", argv[0]);
+                printf("Usage: %s [OPTION]... EVTGEN-FILE GSIM-FILE PLOT-DIR\n\n", argv[0]);
                 printf(
                     "Mandatory arguments to long options are mandatory for short options too.\n");
                 printf(

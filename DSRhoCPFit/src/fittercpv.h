@@ -95,6 +95,7 @@ class FitterCPV {
     static rapidjson::Document ReadJSONConfig(const char* filename);
     std::string ApplyJSONConfig(const rapidjson::Document& config);
     const void SaveTXTResults(const char* root_filename);
+    bool CheckConfigIsValid() const;
 
     const void LogEnvironmentMetadata();
     const void LogCLIArguments(int argc, char* argv[]);

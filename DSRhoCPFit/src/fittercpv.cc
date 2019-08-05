@@ -81,6 +81,7 @@ FitterCPV::FitterCPV() {
     make_plots_ = false;
     perfect_tagging_ = false;
     generator_level_ = false;
+    efficiency_model_ = -1;
 
     vrzerr_ = nullptr;
     vtzerr_ = nullptr;
@@ -1266,6 +1267,35 @@ std::string FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
         ChangeModelParameters(config["modelParameters"]);
     }
 
+    if (config.HasMember("efficiencyModel")) {
+        SetEfficiencyModel(config["efficiencyModel"].GetInt());
+    }
+
+    if (config.HasMember("efficiencyFile")) {
+        std::vector<std::string> efficiency_files;
+        std::string file(config["efficiencyFile"].GetString());
+        efficiency_files.push_back(file);
+        Log::print(Log::debug, "Efficiency file: %s\n", efficiency_files[0].c_str());
+        SetEfficiencyFiles(efficiency_files);
+    }
+
+    if (config.HasMember("scfHisto")) {
+        Log::print(Log::debug, "SCF histo file: %s\n", config["scfHisto"].GetString());
+        SetSCFHisto(config["scfHisto"].GetString());
+    }
+
+    if (config.HasMember("timeIndependent")) {
+        Log::print(Log::debug, "Time-independent: %i\n", config["timeIndependent"].GetBool());
+        // SetDoTimeIndependentFit(config["timeIndependent"].GetBool());
+        if (config["timeIndependent"].GetBool()) {
+            Log::print(Log::debug, "Setting time-indep. fit\n");
+            do_time_independent_fit_ = true;
+        } else {
+            Log::print(Log::debug, "Setting time-dep. fit\n");
+            do_mixing_fit_ = true;
+        }
+    }
+
     std::string json_config_string = json_string;
     return json_config_string;
 }
@@ -1746,9 +1776,9 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
     for (auto file_name : file_names) {
         input_chain->Add(file_name);
     }
-    
+
     Log::print(Log::info, "Reading %i input files...\n", file_names.size());
-    
+
     TTree* input_tree;
     if (num_events) {
     if (file_names.size() > 1) {
@@ -2724,4 +2754,21 @@ int FitterCPV::CloseToEdge(const std::vector<Double_t> vals, const double margin
         }
     }
     return 0;
+}
+
+bool FitterCPV::CheckConfigIsValid() const {
+    if (efficiency_model_ < 0 || efficiency_model_ > 6) {
+        Log::print(Log::error, "Invalid efficiency model\n");
+        return false;
+    }
+    if (efficiency_files_.size() == 0) {
+        Log::print(Log::error, "No efficiency file set\n");
+        return false;
+    }
+    if (!(do_time_independent_fit_ ^ do_mixing_fit_)) { // Logical XOR
+        Log::print(Log::error, "Neither (or both) time-dep. and time-indep. fit set\n");
+        return false;
+    }
+
+    return true;
 }

@@ -28,5 +28,8 @@
         "cr_scf_f": 0.8263,
         "cr_f": 0.5386,
         "scf_f": 0.1132
-    }
+    },
+    "efficiencyModel": 6,
+    "efficiencyFile": "eff_Kpipi0_190603.root",
+    "scfHisto": "scf_Kpipi0_190603.root"
 }

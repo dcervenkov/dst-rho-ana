@@ -112,8 +112,6 @@ int main(int argc, char* argv[]) {
     if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
     if (options.efficiency_model_set) {
         fitter.SetEfficiencyModel(options.efficiency_model);
-    } else {
-        fitter.SetEfficiencyModel(1);
     }
     if (options.efficiency_files_set) {
         fitter.SetEfficiencyFiles(options.efficiency_files);
@@ -126,8 +124,6 @@ int main(int argc, char* argv[]) {
     if (options.do_mixing_fit_set) fitter.SetDoMixingFit(options.do_mixing_fit);
     if (options.do_time_independent_fit_set) {
         fitter.SetDoTimeIndependentFit(options.do_time_independent_fit);
-    } else {
-        fitter.SetDoTimeIndependentFit(false);
     }
     if (options.fix_set) {
         if (fitter.FixParameters(options.fix)) {
@@ -145,6 +141,11 @@ int main(int argc, char* argv[]) {
     std::string output_filename(results_path);
     output_filename += ".root";
     fitter.SetOutputFile(output_filename.c_str());
+
+    if (!fitter.CheckConfigIsValid()) {
+        Log::print(Log::error, "Fitter config is not valid!\n");
+        return 3;
+    }
 
     if (std::strcmp(options.fit, "CR") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {

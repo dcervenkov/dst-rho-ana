@@ -1237,6 +1237,11 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
     return reduced_dataset;
 }
 
+/*
+ * Read in a JSON file, parse it, and return a rapidjson document object.
+ *
+ * @param filename Path to the file to be read
+ */
 /* static */ rapidjson::Document FitterCPV::ReadJSONConfig(const char* filename) {
     std::ifstream filestream(filename);
     if (!filestream.good()) {
@@ -1251,6 +1256,14 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
     return config;
 }
 
+/*
+ * Read a rapid JSON document object, loop through all the entries and
+ * configure the fitter according to the JSON.
+ *
+ * @param config Config to be applied to the fitter
+ *
+ * @return Pretty, formatted JSON for logging purposes
+ */
 std::string FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     // Store the applied config in the resulting ROOT file for reference
     rapidjson::StringBuffer buffer;

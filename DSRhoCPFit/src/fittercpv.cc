@@ -1260,6 +1260,10 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
  * Read a rapid JSON document object, loop through all the entries and
  * configure the fitter according to the JSON.
  *
+ * There is a caveat that multiple efficiency files, as used for hybrid
+ * KDE-histo based efficiency models, are not supported via the JSON as they
+ * have been basically deprecated.
+ *
  * @param config Config to be applied to the fitter
  *
  * @return Pretty, formatted JSON for logging purposes
@@ -1270,6 +1274,48 @@ std::string FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
     config.Accept(writer);
     const char* json_string = buffer.GetString();
+    const int max_length = 100;
+
+    for (auto& entry : config.GetObject()) {
+        if (!std::strncmp(entry.name.GetString(), "fitRanges", max_length)) {
+            ChangeFitRanges(config["fitRanges"]);
+            // dataset_ = ReduceDataToFitRange(config);
+
+        } else if (!std::strncmp(entry.name.GetString(), "modelParameters", max_length)) {
+            ChangeModelParameters(entry.value);
+
+        } else if (!std::strncmp(entry.name.GetString(), "efficiencyModel", max_length)) {
+            SetEfficiencyModel(entry.value.GetInt());
+
+        } else if (!std::strncmp(entry.name.GetString(), "efficiencyFile", max_length)) {
+            std::vector<std::string> efficiency_files;
+            std::string file(entry.value.GetString());
+            efficiency_files.push_back(file);
+            Log::print(Log::debug, "Efficiency file: %s\n", efficiency_files[0].c_str());
+            SetEfficiencyFiles(efficiency_files);
+
+        } else if (!std::strncmp(entry.name.GetString(), "scfHisto", max_length)) {
+            Log::print(Log::debug, "SCF histo file: %s\n", entry.value.GetString());
+            SetSCFHisto(entry.value.GetString());
+
+        } else if (!std::strncmp(entry.name.GetString(), "timeIndependent", max_length)) {
+            Log::print(Log::debug, "Time-independent: %i\n", entry.value.GetBool());
+            // SetDoTimeIndependentFit(config["timeIndependent"].GetBool());
+            if (entry.value.GetBool()) {
+                Log::print(Log::debug, "Setting time-indep. fit\n");
+                do_time_independent_fit_ = true;
+                do_mixing_fit_ = false;
+            } else {
+                Log::print(Log::debug, "Setting time-dep. fit\n");
+                do_time_independent_fit_ = false;
+                do_mixing_fit_ = true;
+            }
+
+        } else {
+            Log::print(Log::error, "JSON config key '%s' is unrecognized\n", entry.name.GetString());
+            exit(6);
+        }
+    }
 
     if (config.HasMember("fitRanges")) {
         ChangeFitRanges(config["fitRanges"]);

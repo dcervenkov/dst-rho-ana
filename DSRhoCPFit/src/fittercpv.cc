@@ -2218,10 +2218,10 @@ void FitterCPV::TestEfficiency() {
     c1->SaveAs("eff_test.pdf");
 }
 
-TH3D* FitterCPV::GetBinnedEfficiency(std::vector<const char*> files, const int model) {
+TH3D* FitterCPV::GetBinnedEfficiency(std::vector<std::string> files, const int model) {
     Efficiency eff;
     for (auto file : files) {
-        eff.ReadInFile(file);
+        eff.ReadInFile(file.c_str());
     }
     TH3D* histo =
         new TH3D("histo", "histo", 100, thetat_->getMin(), thetat_->getMax(), 100,

@@ -178,8 +178,8 @@ int main(int argc, char* argv[]) {
     }
     fitter.LogText("efficiency_model", std::to_string(fitter.GetEfficiencyModel()).c_str());
     for (auto efficiency_file : fitter.GetEfficiencyFiles()) {
-        fitter.LogText("efficiency_file_name", efficiency_file);
-        fitter.LogFileCRC("efficiency_file_crc", efficiency_file);
+        fitter.LogText("efficiency_file_name", efficiency_file.c_str());
+        fitter.LogFileCRC("efficiency_file_crc", efficiency_file.c_str());
     }
     if (options.scf_histo_file_set) {
         fitter.LogText("scf_file_name", options.scf_histo_file);

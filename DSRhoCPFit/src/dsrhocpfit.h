@@ -11,6 +11,7 @@
 #define DSRHOCPFIT_H_
 
 // Standard includes
+#include <string>
 #include <vector>
 
 struct fitter_options {
@@ -28,7 +29,7 @@ struct fitter_options {
     bool num_events_set;
     bool perfect_tagging;
     bool perfect_tagging_set;
-    std::vector<const char*> efficiency_files;
+    std::vector<std::string> efficiency_files;
     bool efficiency_files_set;
     int efficiency_model;
     bool efficiency_model_set;

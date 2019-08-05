@@ -17,7 +17,7 @@
 
 //ClassImp(AngularPDF)
 
-AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _efficiency_model, std::vector<const char*> _efficiency_files,
+AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _efficiency_model, std::vector<std::string> _efficiency_files,
                    RooAbsReal& _tht,
                    RooAbsReal& _thb,
                    RooAbsReal& _phit,
@@ -37,7 +37,7 @@ AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _ef
     efficiency_model(_efficiency_model)
 {
     for (auto file : _efficiency_files) {
-        eff.ReadInFile(file);
+        eff.ReadInFile(file.c_str());
     }
 
     // The rest of this constructor computes angular integration

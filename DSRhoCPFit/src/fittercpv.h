@@ -55,8 +55,8 @@ class FitterCPV {
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
     int GetNumCPUs() { return num_CPUs_; };
 
-    void SetEfficiencyFiles(std::vector<const char*> efficiency_files) { efficiency_files_ = efficiency_files; };
-    std::vector<const char*> GetEfficiencyFiles() { return efficiency_files_; };
+    void SetEfficiencyFiles(std::vector<std::string> efficiency_files) { efficiency_files_ = efficiency_files; };
+    std::vector<std::string> GetEfficiencyFiles() { return efficiency_files_; };
 
     void SetEfficiencyModel(const int& efficiency_model) { efficiency_model_ = efficiency_model; };
     int GetEfficiencyModel() { return efficiency_model_; };
@@ -181,7 +181,7 @@ class FitterCPV {
     void ChangeModelParameters(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config);
     TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
                              const bool position_left) const;
-    TH3D* GetBinnedEfficiency(std::vector<const char*> file, const int model);
+    TH3D* GetBinnedEfficiency(std::vector<std::string> file, const int model);
     const void SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var, const double margin = 0);
     const void SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRealVar* var2,
                                   const double margin1 = 0, const double margin2 = 0);
@@ -219,7 +219,7 @@ class FitterCPV {
     TFile* output_file_ = nullptr;
 
     int num_CPUs_;
-    std::vector<const char*> efficiency_files_;
+    std::vector<std::string> efficiency_files_;
     int efficiency_model_;
     bool do_lifetime_fit_;
     bool do_mixing_fit_;

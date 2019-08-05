@@ -19,7 +19,7 @@
 class AngularPDF : public RooAbsPdf {
    public:
     AngularPDF(){};
-    AngularPDF(const char* name, const char* title, bool _B_bar, int _efficiency_model, std::vector<const char*> _efficiency_files,
+    AngularPDF(const char* name, const char* title, bool _B_bar, int _efficiency_model, std::vector<std::string> _efficiency_files,
                RooAbsReal& _tht,
                RooAbsReal& _thb,
                RooAbsReal& _phit,

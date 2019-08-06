@@ -190,6 +190,8 @@ class FitterCPV {
     RooSimultaneous* CreateAngularCRPDF();
     RooSimultaneous* CreateAngularCRSCFPDF();
     RooSimultaneous* CreateAngularAllPDF();
+    void PlotFit(RooSimultaneous* pdf, const bool scf, const bool bkg);
+
     RooAbsPdf* scf_angular_pdf_;
     RooAbsPdf* bkg_angular_pdf_;
     RooArgSet scf_parameters_argset_;

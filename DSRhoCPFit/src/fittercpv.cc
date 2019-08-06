@@ -807,16 +807,16 @@ void FitterCPV::FitAll() {
 }
 
 RooSimultaneous* FitterCPV::CreateAngularCRPDF() {
-    AngularPDF* pdf_B = new AngularPDF("pdf_B", "pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
+    AngularPDF* cr_pdf_B = new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
-    AngularPDF* pdf_B_bar = new AngularPDF("pdf_B_bar", "pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
+    AngularPDF* cr_pdf_B_bar = new AngularPDF("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
     RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf->addPdf(*pdf_B, "a");
-    sim_pdf->addPdf(*pdf_B_bar, "ab");
-    sim_pdf->addPdf(*pdf_B, "b");
-    sim_pdf->addPdf(*pdf_B_bar, "bb");
+    sim_pdf->addPdf(*cr_pdf_B, "a");
+    sim_pdf->addPdf(*cr_pdf_B_bar, "ab");
+    sim_pdf->addPdf(*cr_pdf_B, "b");
+    sim_pdf->addPdf(*cr_pdf_B_bar, "bb");
 
     return sim_pdf;
 }
@@ -836,107 +836,9 @@ void FitterCPV::FitAngularCR() {
     }
 
     if (make_plots_) {
-        // PDF for B_bar differs, so we have to generate them separately. (One
-        // could also use *extended* RooSimultaneous or 'ProtoData' for
-        // RooSimultaneous.)
-        AngularPDF* pdf_B = dynamic_cast<AngularPDF*>(sim_pdf->getPdf("a"));
-        AngularPDF* pdf_B_bar = dynamic_cast<AngularPDF*>(sim_pdf->getPdf("ab"));
-
-        RooDataHist* cr_hist = pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
-                                                     RooFit::ExpectedData(true));
-        RooDataHist* cr_hist_B_bar = pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
-                                                              1000, RooFit::ExpectedData(true));
-        // Add histos from both particle and anti-particle PDFs to create the
-        // final RooHistPdf.
-        cr_hist->add(*cr_hist_B_bar);
-        RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
-                              *cr_hist);
-
-        // Set the current directory back to the one for plots (ugly ROOT stuff)
-        if (output_file_) {
-            output_file_->cd();
-        }
-
-        // const double margin_ap = 0.005;
-        // const double margin_apa = 0.25;
-        // const double margin_a0 = 0.0015;
-        // const double margin_ata = 0.3;
-        // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
-        // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
-        // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
-        // SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
-        // SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
-        // SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
-        // SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
-        // SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
-        // SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
-        // SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
-
-        // Plot data with PDF averaged over B and Bbar (just like in a standard dataset)
-        PlotWithPull(*thetat_, *dataset_, cr_histpdf);
-        PlotWithPull(*thetab_, *dataset_, cr_histpdf);
-        PlotWithPull(*phit_, *dataset_, cr_histpdf);
-
-        // Plot 1D PDF (just for a B not Bbar) projections
-        // PlotVar(*thetat_, pdf_B);
-        // PlotVar(*thetab_, pdf_B);
-        // PlotVar(*phit_, pdf_B);
-
-        // We need this to get the exact number of events to be generated for
-        // the PDF distribution. This is unnecessary for the above, because we
-        // create a RooHistPdf from it and that is normalized to the data when
-        // plotted.
-        RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
-            dataset_->reduce("decaytype==decaytype::a||decaytype==decaytype::b"));
-        RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(
-            dataset_->reduce("decaytype==decaytype::ab||decaytype==decaytype::bb"));
-
-        thetat_->setBins(40);
-        thetab_->setBins(40);
-        phit_->setBins(40);
-        RooDataHist hist("hist", "hist", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_);
-        tools::PlotVars2D(*thetat_, *thetab_, hist);
-        tools::PlotVars2D(*thetat_, *phit_, hist);
-        tools::PlotVars2D(*thetab_, *phit_, hist);
-
-        // We change the binning for 2D plots, so we have to generate new binned
-        // dataset, to avoid dealing with rebinning.
-        delete cr_hist;
-        delete cr_hist_B_bar;
-        cr_hist = pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
-                                       dataset_B->sumEntries(), RooFit::ExpectedData(true));
-        cr_hist_B_bar =
-            pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
-                                     dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
-        cr_hist->add(*cr_hist_B_bar);
-
-        // Set the current directory back to the one for plots (ugly ROOT stuff)
-        if (output_file_) {
-            output_file_->cd();
-        }
-        tools::PlotPull2D(*thetat_, *thetab_, hist, *cr_hist);
-        tools::PlotPull2D(*thetat_, *phit_, hist, *cr_hist);
-        tools::PlotPull2D(*thetab_, *phit_, hist, *cr_hist);
-
-        tools::PlotVars2D(*thetat_, *thetab_, *cr_hist);
-        tools::PlotVars2D(*thetat_, *phit_, *cr_hist);
-        tools::PlotVars2D(*thetab_, *phit_, *cr_hist);
-
-        const double chi2 = Calculate3DChi2(hist, *cr_hist);
-        Log::print(Log::info, "Chi2 = %f\n", chi2);
-
-        // SaveChi2Scan(sim_pdf, ap_);
-        // SaveChi2Scan(sim_pdf, apa_);
-        // SaveChi2Scan(sim_pdf, a0_);
-        // SaveChi2Scan(sim_pdf, ata_);
-        // SaveChi2Scan(sim_pdf, ap_, margin_ap);
-        // SaveChi2Scan(sim_pdf, apa_, margin_apa);
-        // SaveChi2Scan(sim_pdf, a0_, margin_a0);
-        // SaveChi2Scan(sim_pdf, ata_, margin_ata);
-
-        delete dataset_B;
-        delete dataset_B_bar;
+        PlotFit(sim_pdf, false, false);
     }
+
 }
 
 RooSimultaneous* FitterCPV::CreateAngularCRSCFPDF() {
@@ -969,116 +871,7 @@ void FitterCPV::FitAngularCRSCF() {
     }
 
     if (make_plots_) {
-        // PDF for B_bar differs, so we have to generate them separately. (One
-        // could also use *extended* RooSimultaneous or 'ProtoData' for
-        // RooSimultaneous.)
-        RooAddPdf* pdf_B = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("a"));
-        const int cr_pdf_B_index = pdf_B->pdfList().index("cr_pdf_B");
-        RooAbsPdf* cr_pdf_B = dynamic_cast<RooAbsPdf*>(pdf_B->pdfList().at(cr_pdf_B_index));
-
-        RooAddPdf* pdf_B_bar = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("ab"));
-        const int cr_pdf_B_bar_index = pdf_B_bar->pdfList().index("cr_pdf_B_bar");
-        RooAbsPdf* cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(pdf_B->pdfList().at(cr_pdf_B_bar_index));
-
-        RooDataHist* cr_hist = cr_pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
-                                                    RooFit::ExpectedData(true));
-        RooDataHist* cr_hist_B_bar = cr_pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
-                                                              1000, RooFit::ExpectedData(true));
-        // Add histos from both particle and anti-particle PDFs to create the
-        // final RooHistPdf.
-        cr_hist->add(*cr_hist_B_bar);
-        RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
-                              *cr_hist);
-
-        RooDataHist* scf_hist = scf_angular_pdf_->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
-                                                       RooFit::ExpectedData(true));
-        RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
-                               *scf_hist);
-
-        RooRealVar cr_scf_f_gen("cr_scf_f_gen", "cr_scf_f_gen", (1 + cr_scf_f.getVal())/2);
-        RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf),
-                              cr_scf_f);
-
-        // Set the current directory back to the one for plots (ugly ROOT stuff)
-        if (output_file_) {
-            output_file_->cd();
-        }
-
-        // const double margin_ap = 0.005;
-        // const double margin_apa = 0.25;
-        // const double margin_a0 = 0.0015;
-        // const double margin_ata = 0.3;
-        // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
-        // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
-        // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
-        // SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
-        // SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
-        // SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
-        // SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
-        // SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
-        // SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
-        // SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
-
-        // PlotWithPull(*thetat_, *dataset_, cr_histpdf);
-        // PlotWithPull(*thetab_, *dataset_, cr_histpdf);
-        // PlotWithPull(*phit_, *dataset_, cr_histpdf);
-
-        // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
-        // *phit_), *all_hist);
-        std::vector<RooAbsPdf*> components;
-        components.push_back(&cr_histpdf);
-        components.push_back(&scf_histpdf);
-        // thetab_->setBins(100);
-        PlotWithPull(*thetat_, *dataset_, all_histpdf, components);
-        PlotWithPull(*thetab_, *dataset_, all_histpdf, components);
-        PlotWithPull(*phit_, *dataset_, all_histpdf, components);
-
-        // We need this to get the exact number of events to be generated for
-        // the PDF distribution. This is unnecessary for the above, because we
-        // create a RooHistPdf from it and that is normalized to the data when
-        // plotted.
-        RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
-            dataset_->reduce("decaytype==decaytype::a||decaytype==decaytype::b"));
-        RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(
-            dataset_->reduce("decaytype==decaytype::ab||decaytype==decaytype::bb"));
-
-        thetat_->setBins(40);
-        thetab_->setBins(40);
-        phit_->setBins(40);
-        RooDataHist hist("hist", "hist", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_);
-        tools::PlotVars2D(*thetat_, *thetab_, hist);
-        tools::PlotVars2D(*thetat_, *phit_, hist);
-        tools::PlotVars2D(*thetab_, *phit_, hist);
-
-        // We change the binning for 2D plots, so we have to generate new binned
-        // dataset, to avoid dealing with rebinning.
-        delete cr_hist;
-        delete cr_hist_B_bar;
-        cr_hist = pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
-                                       dataset_B->sumEntries(), RooFit::ExpectedData(true));
-        cr_hist_B_bar =
-            pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
-                                     dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
-        cr_hist->add(*cr_hist_B_bar);
-
-        // Set the current directory back to the one for plots (ugly ROOT stuff)
-        if (output_file_) {
-            output_file_->cd();
-        }
-        tools::PlotPull2D(*thetat_, *thetab_, hist, *cr_hist);
-        tools::PlotPull2D(*thetat_, *phit_, hist, *cr_hist);
-        tools::PlotPull2D(*thetab_, *phit_, hist, *cr_hist);
-
-        const double chi2 = Calculate3DChi2(hist, *cr_hist);
-        std::cout << "Chi2 = " << chi2 << std::endl;
-
-        // SaveChi2Scan(sim_pdf, ap_, margin_apa);
-        // SaveChi2Scan(sim_pdf, apa_, margin_apa);
-        // SaveChi2Scan(sim_pdf, a0_, margin_a0);
-        // SaveChi2Scan(sim_pdf, ata_, margin_ata);
-
-        delete dataset_B;
-        delete dataset_B_bar;
+        PlotFit(sim_pdf, true, false);
     }
 }
 
@@ -1111,16 +904,52 @@ void FitterCPV::FitAngularAll() {
     }
 
     if (make_plots_) {
+        PlotFit(sim_pdf, true, true);
+    }
+}
+
+/*
+ * Plot the PDF and data including all components plotted separately
+ * 
+ * This function is rather convoluted to get around a RooFit bug which causes
+ * problems when trying to plot complicated PDFs with conditional observables;
+ * see
+ * https://root-forum.cern.ch/t/rooaddpdf-and-integration-over-conditional-observables/27891
+ * Instead of normally plotting the PDFs, we generate Asimov datasets and plot those.
+ * 
+ * @param sim_pdf The complete PDF to be used for plotting
+ * @param scf Whether a SCF component should be plotted
+ * @param bkg Whether a BKG component should be plotted
+ */
+void FitterCPV::PlotFit(RooSimultaneous* sim_pdf, const bool scf, const bool bkg) {
         // PDF for B_bar differs, so we have to generate them separately. (One
         // could also use *extended* RooSimultaneous or 'ProtoData' for
         // RooSimultaneous.)
-        RooAddPdf* pdf_B = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("a"));
-        const int cr_pdf_B_index = pdf_B->pdfList().index("cr_pdf_B");
-        RooAbsPdf* cr_pdf_B = dynamic_cast<RooAbsPdf*>(pdf_B->pdfList().at(cr_pdf_B_index));
+        RooAbsPdf* cr_pdf_B;
+        RooAbsPdf* cr_pdf_B_bar;
+        RooAbsPdf* pdf_B;
+        RooAbsPdf* pdf_B_bar;
 
-        RooAddPdf* pdf_B_bar = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("ab"));
-        const int cr_pdf_B_bar_index = pdf_B_bar->pdfList().index("cr_pdf_B_bar");
-        RooAbsPdf* cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(pdf_B->pdfList().at(cr_pdf_B_bar_index));
+        // The structure of the PDF for CR-only and CR+anything differs. This if
+        // extracts the CR-only PDFs in all cases as well as the total PDF for B
+        // and B bar (in the case of CR-only the total PDFs are identical to the
+        // CR-only ones)
+        if (scf || bkg) {
+            pdf_B = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("a"));
+            RooAddPdf* add_pdf_B = dynamic_cast<RooAddPdf*>(pdf_B);
+            const int cr_pdf_B_index = add_pdf_B->pdfList().index("cr_pdf_B");
+            cr_pdf_B = dynamic_cast<RooAbsPdf*>(add_pdf_B->pdfList().at(cr_pdf_B_index));
+
+            pdf_B_bar = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("ab"));
+            RooAddPdf* add_pdf_B_bar = dynamic_cast<RooAddPdf*>(pdf_B_bar);
+            const int cr_pdf_B_bar_index = add_pdf_B_bar->pdfList().index("cr_pdf_B_bar");
+            cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(add_pdf_B->pdfList().at(cr_pdf_B_bar_index));
+        } else {
+            cr_pdf_B = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("a"));
+            cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("ab"));
+            pdf_B = cr_pdf_B;
+            pdf_B_bar = cr_pdf_B_bar;
+        }
 
         RooDataHist* cr_hist = cr_pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                     RooFit::ExpectedData(true));
@@ -1129,21 +958,36 @@ void FitterCPV::FitAngularAll() {
         // Add histos from both particle and anti-particle PDFs to create the
         // final RooHistPdf.
         cr_hist->add(*cr_hist_B_bar);
-        RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
+        RooHistPdf* cr_histpdf = new RooHistPdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
                               *cr_hist);
 
-        RooDataHist* scf_hist = scf_angular_pdf_->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
-                                                       RooFit::ExpectedData(true));
-        RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
-                               *scf_hist);
+        RooHistPdf* scf_histpdf;
+        if (scf) {
+            RooDataHist* scf_hist = scf_angular_pdf_->generateBinned(
+                RooArgSet(*thetat_, *thetab_, *phit_), 1000, RooFit::ExpectedData(true));
+            scf_histpdf = new RooHistPdf(
+                "scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *scf_hist);
+        }
 
-        RooDataHist* bkg_hist = bkg_angular_pdf_->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
-                                                       RooFit::ExpectedData(true));
-        RooHistPdf bkg_histpdf("bkg_histpdf", "bkg_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
-                               *bkg_hist);
+        RooHistPdf* bkg_histpdf;
+        if (bkg) {
+            RooDataHist* bkg_hist = bkg_angular_pdf_->generateBinned(
+                RooArgSet(*thetat_, *thetab_, *phit_), 1000, RooFit::ExpectedData(true));
+            bkg_histpdf = new RooHistPdf(
+                "bkg_histpdf", "bkg_histpdf", RooArgSet(*thetat_, *thetab_, *phit_), *bkg_hist);
+        }
 
-        RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf, bkg_histpdf),
-                              RooArgList(cr_f, scf_f));
+        RooAbsPdf* all_histpdf;
+        if ((!scf) && (!bkg)) {
+            all_histpdf = cr_histpdf;
+        } else if (scf && (!bkg)) {
+            all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
+                                        RooArgList(*cr_histpdf, *scf_histpdf), cr_scf_f);
+        } else if (scf && bkg) {
+            all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
+                                        RooArgList(*cr_histpdf, *scf_histpdf, *bkg_histpdf),
+                                        RooArgList(cr_f, scf_f));
+        }
 
         // Set the current directory back to the one for plots (ugly ROOT stuff)
         if (output_file_) {
@@ -1172,13 +1016,17 @@ void FitterCPV::FitAngularAll() {
         // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
         // *phit_), *all_hist);
         std::vector<RooAbsPdf*> components;
-        components.push_back(&cr_histpdf);
-        components.push_back(&scf_histpdf);
-        components.push_back(&bkg_histpdf);
+        components.push_back(cr_histpdf);
+        if (scf) {
+            components.push_back(scf_histpdf);
+        }
+        if (bkg) {
+            components.push_back(bkg_histpdf);
+        }
         // thetab_->setBins(100);
-        PlotWithPull(*thetat_, *dataset_, all_histpdf, components);
-        PlotWithPull(*thetab_, *dataset_, all_histpdf, components);
-        PlotWithPull(*phit_, *dataset_, all_histpdf, components);
+        PlotWithPull(*thetat_, *dataset_, *all_histpdf, components);
+        PlotWithPull(*thetab_, *dataset_, *all_histpdf, components);
+        PlotWithPull(*phit_, *dataset_, *all_histpdf, components);
 
         // We need this to get the exact number of events to be generated for
         // the PDF distribution. This is unnecessary for the above, because we
@@ -1227,7 +1075,7 @@ void FitterCPV::FitAngularAll() {
 
         delete dataset_B;
         delete dataset_B_bar;
-    }
+
 }
 
 RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {

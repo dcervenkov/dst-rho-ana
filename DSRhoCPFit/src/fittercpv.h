@@ -50,7 +50,7 @@ class FitterCPV {
     void TestEfficiency();
     void PlotEfficiency();
 
-    void SetOutputFile(const char* filename);
+    void SetOutputFile(TFile* file);
 
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
     int GetNumCPUs() { return num_CPUs_; };
@@ -97,11 +97,6 @@ class FitterCPV {
     const void SaveTXTResults(const char* root_filename);
     bool CheckConfigIsValid() const;
 
-    const void LogEnvironmentMetadata();
-    const void LogCLIArguments(int argc, char* argv[]);
-    const void LogTextFromFile(const char* field_name, const char* filename);
-    const void LogFileCRC(const char* field_name, const char* filename);
-    const void LogText(const char* field_name, const char* text);
     const void LogResults();
 
     RooRealVar* ap_;

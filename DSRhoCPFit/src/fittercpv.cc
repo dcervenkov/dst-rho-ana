@@ -16,7 +16,6 @@
 #include <ctime>
 #include <fstream>
 #include <regex>
-#include <sstream>
 #include <string>
 
 // Belle includes
@@ -61,11 +60,9 @@
 
 // Local includes
 #include "angularpdf.h"
-#include "cksum.h"
 #include "constants.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
-#include "gitversion.h"
 #include "log.h"
 #include "rapidjson/document.h"
 #include "rapidjson/prettywriter.h"
@@ -1347,49 +1344,6 @@ void FitterCPV::ChangeModelParameters(const rapidjson::GenericValue<rapidjson::U
     }
 }
 
-const void FitterCPV::LogCLIArguments(int argc, char* argv[]) {
-    // Set the current directory back to the one for plots (ugly ROOT stuff)
-    if (output_file_) {
-        output_file_->cd();
-    }
-
-    std::string str;
-    for (int i = 0; i < argc; i++) {
-        str += argv[i];
-        str += " ";
-    }
-    // Remove the final space
-    str.pop_back();
-    TNamed cli_arguments("cli_arguments", str.c_str());
-    cli_arguments.Write();
-}
-
-const void FitterCPV::LogEnvironmentMetadata() {
-    // Set the current directory back to the one for plots (ugly ROOT stuff)
-    if (output_file_) {
-        output_file_->cd();
-    }
-
-    TNamed root_version("root_version", ROOT_RELEASE);
-    root_version.Write();
-
-    char buffer[100];
-    gethostname(buffer, 100);
-    TNamed hostname("hostname", buffer);
-    hostname.Write();
-
-    const time_t now = time(0);
-    const char* local_time_string = ctime(&now);
-    TNamed local_date("local_date", local_time_string);
-
-    tm* gmtm = gmtime(&now);
-    const char* utc_time_string = asctime(gmtm);
-    TNamed utc_date("utc_date", utc_time_string);
-
-    TNamed git_version("git_version", gitversion);
-    git_version.Write();
-}
-
 void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     Log::print(Log::info, "Generating dataset with %i events...\n", num_events);
 
@@ -1963,8 +1917,8 @@ bool FitterCPV::FixParameters(const char* pars) {
 /**
  * Set file in which output will be saved.
  */
-void FitterCPV::SetOutputFile(const char* filename) {
-    output_file_ = new TFile(filename, "RECREATE");
+void FitterCPV::SetOutputFile(TFile* file) {
+    output_file_ = file;
 }
 
 /**
@@ -2304,31 +2258,6 @@ void FitterCPV::PlotEfficiency() {
     tools::PlotVars2D(*thetat_, *thetab_, eff_roohisto);
     tools::PlotVars2D(*thetat_, *phit_, eff_roohisto);
     tools::PlotVars2D(*thetab_, *phit_, eff_roohisto);
-}
-
-const void FitterCPV::LogTextFromFile(const char* field_name, const char* filename) {
-    // Set the current directory back to the one for plots (ugly ROOT stuff)
-    if (output_file_) {
-        output_file_->cd();
-    }
-    std::ifstream file;
-    file.open(filename);
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    TNamed text(field_name, buffer.str());
-    text.Write();
-}
-
-const void FitterCPV::LogFileCRC(const char* field_name, const char* filename) {
-    char buffer[100];
-    snprintf(buffer, 100, "%lu", cksum(filename, true));
-    TNamed crc(field_name, buffer);
-    crc.Write();
-}
-
-const void FitterCPV::LogText(const char* field_name, const char* text) {
-    TNamed text_field(field_name, text);
-    text_field.Write();
 }
 
 /**

@@ -22,6 +22,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 // ROOT includes
+#include "TFile.h"
 #include "TSystem.h"
 
 // Local includes
@@ -140,7 +141,8 @@ int main(int argc, char* argv[]) {
 
     std::string output_filename(results_path);
     output_filename += ".root";
-    fitter.SetOutputFile(output_filename.c_str());
+    TFile* output_file = new TFile(output_filename.c_str(), "RECREATE");
+    fitter.SetOutputFile(output_file);
 
     if (!fitter.CheckConfigIsValid()) {
         Log::print(Log::error, "Fitter config is not valid!\n");
@@ -168,34 +170,34 @@ int main(int argc, char* argv[]) {
     }
     // fitter.GenerateToys(10000, 10);
 
-    fitter.LogCLIArguments(argc, argv);
-    fitter.LogEnvironmentMetadata();
+    tools::LogCLIArguments(output_file, argc, argv);
+    tools::LogEnvironmentMetadata(output_file);
     if (!json_config.empty()) {
-        fitter.LogText("json_config", json_config.c_str());
+        tools::LogText(output_file, "json_config", json_config.c_str());
     }
     for (auto file_name : file_names) {
-        fitter.LogText("input_file_name", file_name);
-        fitter.LogFileCRC("input_file_crc", file_name);
+        tools::LogText(output_file, "input_file_name", file_name);
+        tools::LogFileCRC(output_file, "input_file_crc", file_name);
     }
-    fitter.LogText("efficiency_model", std::to_string(fitter.GetEfficiencyModel()).c_str());
+    tools::LogText(output_file, "efficiency_model", std::to_string(fitter.GetEfficiencyModel()).c_str());
     for (auto efficiency_file : fitter.GetEfficiencyFiles()) {
-        fitter.LogText("efficiency_file_name", efficiency_file.c_str());
-        fitter.LogFileCRC("efficiency_file_crc", efficiency_file.c_str());
+        tools::LogText(output_file, "efficiency_file_name", efficiency_file.c_str());
+        tools::LogFileCRC(output_file, "efficiency_file_crc", efficiency_file.c_str());
     }
     if (options.scf_histo_file_set) {
-        fitter.LogText("scf_file_name", options.scf_histo_file);
-        fitter.LogFileCRC("scf_file_crc", options.scf_histo_file);
+        tools::LogText(output_file, "scf_file_name", options.scf_histo_file);
+        tools::LogFileCRC(output_file, "scf_file_crc", options.scf_histo_file);
     }
     if (options.scf_kde_file_set) {
-        fitter.LogText("scf_file_name", options.scf_kde_file);
-        fitter.LogFileCRC("scf_file_crc", options.scf_kde_file);
+        tools::LogText(output_file, "scf_file_name", options.scf_kde_file);
+        tools::LogFileCRC(output_file, "scf_file_crc", options.scf_kde_file);
     }
     if (fitter.ResultExists()) {
         fitter.LogResults();
-        fitter.LogText("pull_table", fitter.CreatePullTableString().c_str());
-        fitter.LogText("pull_table_asym", fitter.CreatePullTableString(true).c_str());
-        fitter.LogText("latex_pull_table", fitter.CreateLatexPullTableString().c_str());
-        fitter.LogText("latex_pull_table_asym", fitter.CreateLatexPullTableString(true).c_str());
+        tools::LogText(output_file, "pull_table", fitter.CreatePullTableString().c_str());
+        tools::LogText(output_file, "pull_table_asym", fitter.CreatePullTableString(true).c_str());
+        tools::LogText(output_file, "latex_pull_table", fitter.CreateLatexPullTableString().c_str());
+        tools::LogText(output_file, "latex_pull_table_asym", fitter.CreateLatexPullTableString(true).c_str());
 
         fitter.SaveTXTResults(results_path);
     }
@@ -205,7 +207,7 @@ int main(int argc, char* argv[]) {
         // get a segfault as our object goes out of scope sooner than cout
         std::cout.rdbuf(orig_cout_streambuf);
         Log::print(Log::info, "Saving log to ROOT file\n");
-        fitter.LogText("log", sout.str().c_str());
+        tools::LogText(output_file, "log", sout.str().c_str());
     }
 
     return 0;

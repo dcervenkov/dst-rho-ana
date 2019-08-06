@@ -9,6 +9,7 @@
 
 // Standard includes
 #include <algorithm>
+#include <sstream>
 
 // Boost includes
 #include <boost/filesystem.hpp>
@@ -20,6 +21,7 @@
 #include "TCanvas.h"
 #include "TChain.h"
 #include "TEnv.h"
+#include "TFile.h"
 #include "TH2D.h"
 #include "TList.h"
 #include "TPaveStats.h"
@@ -28,7 +30,9 @@
 #include "TSystemFile.h"
 
 // Local includes
+#include "cksum.h"
 #include "constants.h"
+#include "gitversion.h"
 #include "log.h"
 
 namespace tools {
@@ -328,5 +332,65 @@ TString GetCommonCutsString() {
     common_cuts += ")";
     return common_cuts;
 }
+
+void LogTextFromFile(TFile* file, const char* field_name, const char* filename) {
+    file->cd();
+    std::ifstream input_file;
+    input_file.open(filename);
+    std::stringstream buffer;
+    buffer << input_file.rdbuf();
+    TNamed text(field_name, buffer.str());
+    text.Write();
+}
+
+void LogFileCRC(TFile* file, const char* field_name, const char* filename) {
+    file->cd();
+    char buffer[100];
+    snprintf(buffer, 100, "%lu", cksum(filename, true));
+    TNamed crc(field_name, buffer);
+    crc.Write();
+}
+
+void LogText(TFile* file, const char* field_name, const char* text) {
+    file->cd();
+    TNamed text_field(field_name, text);
+    text_field.Write();
+}
+
+void LogCLIArguments(TFile* file, int argc, char* argv[]) {
+    file->cd();
+    std::string str;
+    for (int i = 0; i < argc; i++) {
+        str += argv[i];
+        str += " ";
+    }
+    // Remove the final space
+    str.pop_back();
+    TNamed cli_arguments("cli_arguments", str.c_str());
+    cli_arguments.Write();
+}
+
+void LogEnvironmentMetadata(TFile* file) {
+    file->cd();
+    TNamed root_version("root_version", ROOT_RELEASE);
+    root_version.Write();
+
+    char buffer[100];
+    gethostname(buffer, 100);
+    TNamed hostname("hostname", buffer);
+    hostname.Write();
+
+    const time_t now = time(0);
+    const char* local_time_string = ctime(&now);
+    TNamed local_date("local_date", local_time_string);
+
+    tm* gmtm = gmtime(&now);
+    const char* utc_time_string = asctime(gmtm);
+    TNamed utc_date("utc_date", utc_time_string);
+
+    TNamed git_version("git_version", gitversion);
+    git_version.Write();
+}
+
 
 }  // namespace tools

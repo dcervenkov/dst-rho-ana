@@ -14,6 +14,7 @@
 #include <array>
 #include <boost/filesystem.hpp>
 #include <ctime>
+#include <fstream>
 #include <regex>
 #include <string>
 

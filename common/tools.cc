@@ -9,6 +9,7 @@
 
 // Standard includes
 #include <algorithm>
+#include <fstream>
 #include <sstream>
 
 // Boost includes

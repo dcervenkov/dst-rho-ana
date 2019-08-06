@@ -806,24 +806,29 @@ void FitterCPV::FitAll() {
     }
 }
 
+RooSimultaneous* FitterCPV::CreateAngularCRPDF() {
+    AngularPDF* pdf_B = new AngularPDF("pdf_B", "pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
+                     *apa_, *a0_, *ata_);
+    AngularPDF* pdf_B_bar = new AngularPDF("pdf_B_bar", "pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
+                         *phit_, *ap_, *apa_, *a0_, *ata_);
+
+    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
+    sim_pdf->addPdf(*pdf_B, "a");
+    sim_pdf->addPdf(*pdf_B_bar, "ab");
+    sim_pdf->addPdf(*pdf_B, "b");
+    sim_pdf->addPdf(*pdf_B_bar, "bb");
+
+    return sim_pdf;
+}
+
 void FitterCPV::FitAngularCR() {
     RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
     dataset_ = temp_dataset;
 
     Log::print(Log::debug, "Fitting %i events.\n", dataset_->numEntries());
 
-    AngularPDF pdf_B("pdf_B", "pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
-                     *apa_, *a0_, *ata_);
-    AngularPDF pdf_B_bar("pdf_B_bar", "pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
-                         *phit_, *ap_, *apa_, *a0_, *ata_);
-
-    RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf.addPdf(pdf_B, "a");
-    sim_pdf.addPdf(pdf_B_bar, "ab");
-    sim_pdf.addPdf(pdf_B, "b");
-    sim_pdf.addPdf(pdf_B_bar, "bb");
-
-    result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
+    RooSimultaneous* sim_pdf = CreateAngularCRPDF();
+    result_ = sim_pdf->fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
     if (result_) {
@@ -834,9 +839,12 @@ void FitterCPV::FitAngularCR() {
         // PDF for B_bar differs, so we have to generate them separately. (One
         // could also use *extended* RooSimultaneous or 'ProtoData' for
         // RooSimultaneous.)
-        RooDataHist* cr_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
-                                                    RooFit::ExpectedData(true));
-        RooDataHist* cr_hist_B_bar = pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+        AngularPDF* pdf_B = dynamic_cast<AngularPDF*>(sim_pdf->getPdf("a"));
+        AngularPDF* pdf_B_bar = dynamic_cast<AngularPDF*>(sim_pdf->getPdf("ab"));
+
+        RooDataHist* cr_hist = pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+                                                     RooFit::ExpectedData(true));
+        RooDataHist* cr_hist_B_bar = pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                                               1000, RooFit::ExpectedData(true));
         // Add histos from both particle and anti-particle PDFs to create the
         // final RooHistPdf.
@@ -895,10 +903,10 @@ void FitterCPV::FitAngularCR() {
         // dataset, to avoid dealing with rebinning.
         delete cr_hist;
         delete cr_hist_B_bar;
-        cr_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+        cr_hist = pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                        dataset_B->sumEntries(), RooFit::ExpectedData(true));
         cr_hist_B_bar =
-            pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+            pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                      dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
         cr_hist->add(*cr_hist_B_bar);
 
@@ -931,24 +939,29 @@ void FitterCPV::FitAngularCR() {
     }
 }
 
+RooSimultaneous* FitterCPV::CreateAngularCRSCFPDF() {
+    AngularPDF* cr_pdf_B = new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
+                     *apa_, *a0_, *ata_);
+    AngularPDF* cr_pdf_B_bar = new AngularPDF("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
+                         *phit_, *ap_, *apa_, *a0_, *ata_);
+
+    RooAddPdf* pdf_B = new RooAddPdf("pdf_B", "pdf_B", RooArgList(*cr_pdf_B, *scf_angular_pdf_), RooArgList(cr_scf_f));
+    RooAddPdf* pdf_B_bar = new RooAddPdf("pdf_B_bar", "pdf_B_bar", RooArgList(*cr_pdf_B_bar, *scf_angular_pdf_), RooArgList(cr_scf_f));
+
+    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
+    sim_pdf->addPdf(*pdf_B, "a");
+    sim_pdf->addPdf(*pdf_B_bar, "ab");
+    sim_pdf->addPdf(*pdf_B, "b");
+    sim_pdf->addPdf(*pdf_B_bar, "bb");
+
+    return sim_pdf;
+}
+
 void FitterCPV::FitAngularCRSCF() {
     Log::print(Log::info, "Fitting %i events.\n", dataset_->numEntries());
 
-    AngularPDF cr_pdf_B("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
-                     *apa_, *a0_, *ata_);
-    AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
-                         *phit_, *ap_, *apa_, *a0_, *ata_);
-
-    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_angular_pdf_), RooArgList(cr_scf_f));
-    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, *scf_angular_pdf_), RooArgList(cr_scf_f));
-
-    RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf.addPdf(pdf_B, "a");
-    sim_pdf.addPdf(pdf_B_bar, "ab");
-    sim_pdf.addPdf(pdf_B, "b");
-    sim_pdf.addPdf(pdf_B_bar, "bb");
-
-    result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
+    RooSimultaneous* sim_pdf = CreateAngularCRSCFPDF();
+    result_ = sim_pdf->fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
     if (result_) {
@@ -959,9 +972,17 @@ void FitterCPV::FitAngularCRSCF() {
         // PDF for B_bar differs, so we have to generate them separately. (One
         // could also use *extended* RooSimultaneous or 'ProtoData' for
         // RooSimultaneous.)
-        RooDataHist* cr_hist = cr_pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+        RooAddPdf* pdf_B = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("a"));
+        const int cr_pdf_B_index = pdf_B->pdfList().index("cr_pdf_B");
+        RooAbsPdf* cr_pdf_B = dynamic_cast<RooAbsPdf*>(pdf_B->pdfList().at(cr_pdf_B_index));
+
+        RooAddPdf* pdf_B_bar = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("ab"));
+        const int cr_pdf_B_bar_index = pdf_B_bar->pdfList().index("cr_pdf_B_bar");
+        RooAbsPdf* cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(pdf_B->pdfList().at(cr_pdf_B_bar_index));
+
+        RooDataHist* cr_hist = cr_pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                     RooFit::ExpectedData(true));
-        RooDataHist* cr_hist_B_bar = cr_pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+        RooDataHist* cr_hist_B_bar = cr_pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                                               1000, RooFit::ExpectedData(true));
         // Add histos from both particle and anti-particle PDFs to create the
         // final RooHistPdf.
@@ -1033,10 +1054,10 @@ void FitterCPV::FitAngularCRSCF() {
         // dataset, to avoid dealing with rebinning.
         delete cr_hist;
         delete cr_hist_B_bar;
-        cr_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+        cr_hist = pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                        dataset_B->sumEntries(), RooFit::ExpectedData(true));
         cr_hist_B_bar =
-            pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+            pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                      dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
         cr_hist->add(*cr_hist_B_bar);
 
@@ -1061,24 +1082,28 @@ void FitterCPV::FitAngularCRSCF() {
     }
 }
 
+RooSimultaneous* FitterCPV::CreateAngularAllPDF() {
+    AngularPDF* cr_pdf_B = new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
+                     *apa_, *a0_, *ata_);
+    AngularPDF* cr_pdf_B_bar = new AngularPDF("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
+                         *phit_, *ap_, *apa_, *a0_, *ata_);
+
+    RooAddPdf* pdf_B = new RooAddPdf("pdf_B", "pdf_B", RooArgList(*cr_pdf_B, *scf_angular_pdf_, *bkg_angular_pdf_), RooArgList(cr_f, scf_f));
+    RooAddPdf* pdf_B_bar = new RooAddPdf("pdf_B_bar", "pdf_B_bar", RooArgList(*cr_pdf_B_bar, *scf_angular_pdf_, *bkg_angular_pdf_), RooArgList(cr_f, scf_f));
+
+    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
+    sim_pdf->addPdf(*pdf_B, "a");
+    sim_pdf->addPdf(*pdf_B_bar, "ab");
+    sim_pdf->addPdf(*pdf_B, "b");
+    sim_pdf->addPdf(*pdf_B_bar, "bb");
+
+    return sim_pdf;
+}
 void FitterCPV::FitAngularAll() {
     Log::print(Log::info, "Fitting %i events.\n", dataset_->numEntries());
 
-    AngularPDF cr_pdf_B("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
-                     *apa_, *a0_, *ata_);
-    AngularPDF cr_pdf_B_bar("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
-                         *phit_, *ap_, *apa_, *a0_, *ata_);
-
-    RooAddPdf pdf_B("pdf_B", "pdf_B", RooArgList(cr_pdf_B, *scf_angular_pdf_, *bkg_angular_pdf_), RooArgList(cr_f, scf_f));
-    RooAddPdf pdf_B_bar("pdf_B_bar", "pdf_B_bar", RooArgList(cr_pdf_B_bar, *scf_angular_pdf_, *bkg_angular_pdf_), RooArgList(cr_f, scf_f));
-
-    RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf.addPdf(pdf_B, "a");
-    sim_pdf.addPdf(pdf_B_bar, "ab");
-    sim_pdf.addPdf(pdf_B, "b");
-    sim_pdf.addPdf(pdf_B_bar, "bb");
-
-    result_ = sim_pdf.fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
+    RooSimultaneous* sim_pdf = CreateAngularAllPDF();
+    result_ = sim_pdf->fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
     if (result_) {
@@ -1089,9 +1114,17 @@ void FitterCPV::FitAngularAll() {
         // PDF for B_bar differs, so we have to generate them separately. (One
         // could also use *extended* RooSimultaneous or 'ProtoData' for
         // RooSimultaneous.)
-        RooDataHist* cr_hist = cr_pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
+        RooAddPdf* pdf_B = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("a"));
+        const int cr_pdf_B_index = pdf_B->pdfList().index("cr_pdf_B");
+        RooAbsPdf* cr_pdf_B = dynamic_cast<RooAbsPdf*>(pdf_B->pdfList().at(cr_pdf_B_index));
+
+        RooAddPdf* pdf_B_bar = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("ab"));
+        const int cr_pdf_B_bar_index = pdf_B_bar->pdfList().index("cr_pdf_B_bar");
+        RooAbsPdf* cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(pdf_B->pdfList().at(cr_pdf_B_bar_index));
+
+        RooDataHist* cr_hist = cr_pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
                                                     RooFit::ExpectedData(true));
-        RooDataHist* cr_hist_B_bar = cr_pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+        RooDataHist* cr_hist_B_bar = cr_pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                                               1000, RooFit::ExpectedData(true));
         // Add histos from both particle and anti-particle PDFs to create the
         // final RooHistPdf.
@@ -1169,10 +1202,10 @@ void FitterCPV::FitAngularAll() {
         delete cr_hist;
         delete cr_hist_B_bar;
 
-        RooDataHist* all_hist = pdf_B.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+        RooDataHist* all_hist = pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                        dataset_B->sumEntries(), RooFit::ExpectedData(true));
         RooDataHist* all_hist_B_bar =
-            pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
+            pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
                                      dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
         all_hist->add(*all_hist_B_bar);
 

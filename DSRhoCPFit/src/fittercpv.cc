@@ -1269,36 +1269,30 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
  * @return Pretty, formatted JSON for logging purposes
  */
 std::string FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
-    // Store the applied config in the resulting ROOT file for reference
-    rapidjson::StringBuffer buffer;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-    config.Accept(writer);
-    const char* json_string = buffer.GetString();
-    const int max_length = 100;
 
     for (auto& entry : config.GetObject()) {
-        if (!std::strncmp(entry.name.GetString(), "fitRanges", max_length)) {
+        if (entry.name == "fitRanges") {
             ChangeFitRanges(config["fitRanges"]);
             // dataset_ = ReduceDataToFitRange(config);
 
-        } else if (!std::strncmp(entry.name.GetString(), "modelParameters", max_length)) {
+        } else if (entry.name == "modelParameters") {
             ChangeModelParameters(entry.value);
 
-        } else if (!std::strncmp(entry.name.GetString(), "efficiencyModel", max_length)) {
+        } else if (entry.name == "efficiencyModel") {
             SetEfficiencyModel(entry.value.GetInt());
 
-        } else if (!std::strncmp(entry.name.GetString(), "efficiencyFile", max_length)) {
+        } else if (entry.name == "efficiencyFile") {
             std::vector<std::string> efficiency_files;
             std::string file(entry.value.GetString());
             efficiency_files.push_back(file);
             Log::print(Log::debug, "Efficiency file: %s\n", efficiency_files[0].c_str());
             SetEfficiencyFiles(efficiency_files);
 
-        } else if (!std::strncmp(entry.name.GetString(), "scfHisto", max_length)) {
+        } else if (entry.name == "scfHisto") {
             Log::print(Log::debug, "SCF histo file: %s\n", entry.value.GetString());
             SetSCFHisto(entry.value.GetString());
 
-        } else if (!std::strncmp(entry.name.GetString(), "timeIndependent", max_length)) {
+        } else if (entry.name == "timeIndependent") {
             Log::print(Log::debug, "Time-independent: %i\n", entry.value.GetBool());
             // SetDoTimeIndependentFit(config["timeIndependent"].GetBool());
             if (entry.value.GetBool()) {
@@ -1317,46 +1311,12 @@ std::string FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
         }
     }
 
-    if (config.HasMember("fitRanges")) {
-        ChangeFitRanges(config["fitRanges"]);
-        // dataset_ = ReduceDataToFitRange(config);
-    }
-
-    if (config.HasMember("modelParameters")) {
-        ChangeModelParameters(config["modelParameters"]);
-    }
-
-    if (config.HasMember("efficiencyModel")) {
-        SetEfficiencyModel(config["efficiencyModel"].GetInt());
-    }
-
-    if (config.HasMember("efficiencyFile")) {
-        std::vector<std::string> efficiency_files;
-        std::string file(config["efficiencyFile"].GetString());
-        efficiency_files.push_back(file);
-        Log::print(Log::debug, "Efficiency file: %s\n", efficiency_files[0].c_str());
-        SetEfficiencyFiles(efficiency_files);
-    }
-
-    if (config.HasMember("scfHisto")) {
-        Log::print(Log::debug, "SCF histo file: %s\n", config["scfHisto"].GetString());
-        SetSCFHisto(config["scfHisto"].GetString());
-    }
-
-    if (config.HasMember("timeIndependent")) {
-        Log::print(Log::debug, "Time-independent: %i\n", config["timeIndependent"].GetBool());
-        // SetDoTimeIndependentFit(config["timeIndependent"].GetBool());
-        if (config["timeIndependent"].GetBool()) {
-            Log::print(Log::debug, "Setting time-indep. fit\n");
-            do_time_independent_fit_ = true;
-        } else {
-            Log::print(Log::debug, "Setting time-dep. fit\n");
-            do_mixing_fit_ = true;
-        }
-    }
-
-    std::string json_config_string = json_string;
-    return json_config_string;
+    // Store the applied config in the resulting ROOT file for reference
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    config.Accept(writer);
+    std::string json_config(buffer.GetString());
+    return json_config;
 }
 
 void FitterCPV::ChangeFitRanges(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config) {

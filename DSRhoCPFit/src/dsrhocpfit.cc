@@ -151,19 +151,19 @@ int main(int argc, char* argv[]) {
 
     if (std::strcmp(options.fit, "CR") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {
-            fitter.FitAngularCR();
+            fitter.FitAngular(false, false);
         } else {
             fitter.FitCR();
         }
     } else if (std::strcmp(options.fit, "CRSCF") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {
-            fitter.FitAngularCRSCF();
+            fitter.FitAngular(true, false);
         } else {
             fitter.FitCRSCF();
         }
     } else if (std::strcmp(options.fit, "all") == 0) {
         if (fitter.GetDoTimeIndependentFit()) {
-            fitter.FitAngularAll();
+            fitter.FitAngular(true, true);
         } else {
             fitter.FitAll();
         }

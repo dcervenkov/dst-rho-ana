@@ -43,9 +43,8 @@ class FitterCPV {
     void FitCR();
     void FitCRSCF();
     void FitAll();
-    void FitAngularCR();
-    void FitAngularCRSCF();
-    void FitAngularAll();
+    void FitAngular(const bool scf, const bool bkg);
+
     void GenerateToys(const int num_events, const int num_toys);
     void TestEfficiency();
     void PlotEfficiency();

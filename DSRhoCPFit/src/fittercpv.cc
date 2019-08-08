@@ -821,26 +821,6 @@ RooSimultaneous* FitterCPV::CreateAngularCRPDF() {
     return sim_pdf;
 }
 
-void FitterCPV::FitAngularCR() {
-    RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
-    dataset_ = temp_dataset;
-
-    Log::print(Log::debug, "Fitting %i events.\n", dataset_->numEntries());
-
-    RooSimultaneous* sim_pdf = CreateAngularCRPDF();
-    result_ = sim_pdf->fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
-                            RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-
-    if (result_) {
-        result_->Print();
-    }
-
-    if (make_plots_) {
-        PlotFit(sim_pdf, false, false);
-    }
-
-}
-
 RooSimultaneous* FitterCPV::CreateAngularCRSCFPDF() {
     AngularPDF* cr_pdf_B = new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
@@ -857,22 +837,6 @@ RooSimultaneous* FitterCPV::CreateAngularCRSCFPDF() {
     sim_pdf->addPdf(*pdf_B_bar, "bb");
 
     return sim_pdf;
-}
-
-void FitterCPV::FitAngularCRSCF() {
-    Log::print(Log::info, "Fitting %i events.\n", dataset_->numEntries());
-
-    RooSimultaneous* sim_pdf = CreateAngularCRSCFPDF();
-    result_ = sim_pdf->fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
-                            RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-
-    if (result_) {
-        result_->Print();
-    }
-
-    if (make_plots_) {
-        PlotFit(sim_pdf, true, false);
-    }
 }
 
 RooSimultaneous* FitterCPV::CreateAngularAllPDF() {
@@ -892,10 +856,28 @@ RooSimultaneous* FitterCPV::CreateAngularAllPDF() {
 
     return sim_pdf;
 }
-void FitterCPV::FitAngularAll() {
-    Log::print(Log::info, "Fitting %i events.\n", dataset_->numEntries());
 
-    RooSimultaneous* sim_pdf = CreateAngularAllPDF();
+void FitterCPV::FitAngular(const bool scf, const bool bkg) {
+    Log::print(Log::info, "Fitting %i events.\n", dataset_->numEntries());
+    std::string components;
+
+    RooSimultaneous* sim_pdf;
+    if (!scf && !bkg) {
+        RooDataSet* temp_dataset = dynamic_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
+        dataset_ = temp_dataset;
+        sim_pdf = CreateAngularCRPDF();
+        components += "CR";
+    } else if (scf && !bkg) {
+        sim_pdf = CreateAngularCRSCFPDF();
+        components += "CR+SCF";
+    } else if (scf && bkg) {
+        sim_pdf = CreateAngularAllPDF();
+        components += "CR+SCF+BKG";
+    } else {
+        Log::print(Log::error, "Requested a fit with unsupported component configuration");
+    }
+    Log::print(Log::info, "Running a fit with the following components: %s\n", components.c_str());
+
     result_ = sim_pdf->fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
                             RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
@@ -904,8 +886,9 @@ void FitterCPV::FitAngularAll() {
     }
 
     if (make_plots_) {
-        PlotFit(sim_pdf, true, true);
+        PlotFit(sim_pdf, scf, bkg);
     }
+
 }
 
 /*

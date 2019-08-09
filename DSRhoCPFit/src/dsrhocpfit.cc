@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
     std::ostream out(&sbuf);
     std::streambuf* orig_cout_streambuf = std::cout.rdbuf();
 
-    Log::setLogLevel(Log::info);
+    Log::setLogLevel(Log::debug);
 
     char** optionless_argv = nullptr;
     // The {} causes the struct's members to be initialized to 0. Without it

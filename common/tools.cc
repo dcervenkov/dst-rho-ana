@@ -347,7 +347,7 @@ void LogTextFromFile(TFile* file, const char* field_name, const char* filename) 
 void LogFileCRC(TFile* file, const char* field_name, const char* filename) {
     file->cd();
     char buffer[100];
-    snprintf(buffer, 100, "%lu", cksum(filename, true));
+    snprintf(buffer, 100, "%lu", cksum(filename));
     TNamed crc(field_name, buffer);
     crc.Write();
 }

@@ -1,3 +1,12 @@
+/**
+ *  @file    cksum.cc
+ *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
+ *  @date    2018-07-30
+ *
+ *  @brief Function that calculates CRC checksums of files.
+ *
+ */
+
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -38,7 +47,14 @@ static uint_fast32_t const crctab[256] = {
     0x89b8fd09, 0x8d79e0be, 0x803ac667, 0x84fbdbd0, 0x9abc8bd5, 0x9e7d9662, 0x933eb0bb, 0x97ffad0c,
     0xafb010b1, 0xab710d06, 0xa6322bdf, 0xa2f33668, 0xbcb4666d, 0xb8757bda, 0xb5365d03, 0xb1f740b4};
 
-uint_fast32_t cksum(const char *file, bool print_name) {
+/**
+ * Calculate CRC checksum of supplied file.
+ *
+ * @param file File whose CRC is to be calculated
+ *
+ * @return uint_fast32_t CRC checksum
+ */
+uint_fast32_t cksum(const char *file) {
     unsigned char buf[BUFLEN];
     uint_fast32_t crc = 0;
     uintmax_t length = 0;

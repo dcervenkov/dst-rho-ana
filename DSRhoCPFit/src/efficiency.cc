@@ -26,6 +26,12 @@ Efficiency::Efficiency(const char* filename) {
     ReadInFile(filename);
 }
 
+/**
+ * Read efficiency model from a file. The file can be either a ROOT file with a
+ * histogram model, or a plain text file with a Meerkat KDE model.
+ * 
+ * @param filename File with the efficiency model
+ */
 void Efficiency::ReadInFile(const char* filename) {
     if (boost::algorithm::ends_with(filename, ".root")) {
         TFile efficiency_file(filename, "read");
@@ -119,9 +125,9 @@ double Efficiency::EfficiencyInterface(double* x, double* p) const {
 	return GetEfficiency(x[0], x[1], x[2], 5);
 }
 
-/**
- * Rescale variables to account for margin-mirrored phase space from DSRhoEfficiency.
- */
+// /**
+//  * Rescale variables to account for margin-mirrored phase space from DSRhoEfficiency.
+//  */
 // void Efficiency::RescaleVars(double& thetat, double& thetab, double& phit, const double margin) const {
 // 	const double vars[3] = {thetat, thetab, phit};
 // const double min[3] = {constants::cuts::thetat_low, constants::cuts::phit_low, constants::cuts::phit_low};
@@ -140,6 +146,14 @@ double Efficiency::EfficiencyInterface(double* x, double* p) const {
 // 	phit = new_vars[2];
 // }
 
+/**
+ * Determine whether angular coordinates are close to (any) edge of the phasespace.
+ * 
+ * @param vals Coordinates to be checked
+ * @param margin Distance (fraction of phasespace range in each axis) to be taken as 'close'
+ * 
+ * @return int 0 for not close, 1 for close to lower edge, 2 for close to upper edge
+ */
 int Efficiency::CloseToEdge(const std::vector<Double_t> vals, const double margin) const {
     RooRealVar* vars[3] = {thetat_, thetab_, phit_};
     for (int var_num = 0; var_num < 3; var_num++) {
@@ -155,6 +169,10 @@ int Efficiency::CloseToEdge(const std::vector<Double_t> vals, const double margi
     return 0;
 }
 
+/**
+ * Get efficiency value at given coordinates from the histogram model. Use
+ * interpolation, if possible, to smooth out the histogram steps.
+ */
 double Efficiency::GetHistogramEfficiency(double thetat, double thetab, double phit) const {
     double eff = 0;
     // double transtht = thetat / TMath::Pi() * 2 - 1;
@@ -175,6 +193,9 @@ double Efficiency::GetHistogramEfficiency(double thetat, double thetab, double p
     return eff;
 }
 
+/**
+ * Get efficiency value at given coordinates from the KDE model.
+ */
 double Efficiency::GetKDEEfficiency(double thetat, double thetab, double phit) const {
     std::vector<Double_t> coords(3);
     coords[0] = thetat;
@@ -184,6 +205,10 @@ double Efficiency::GetKDEEfficiency(double thetat, double thetab, double phit) c
     return eff;
 }
 
+/**
+ * Get a normalization factor to make the histogram efficiency have the same
+ * scale as the KDE efficiency. This is useful for hybrid models.
+ */
 double Efficiency::GetNormalization() {
     TH3F* kde_efficiency = dynamic_cast<TH3F*>(histo_efficiency->Clone());
     kde_efficiency->Reset();

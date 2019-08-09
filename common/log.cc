@@ -1,3 +1,14 @@
+/**
+ *  @file    log.cc
+ *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
+ *  @date    2018-09-12
+ *
+ *  A logging class that uses printf-like formatting while using C++ iostreams
+ *  in the background. It also allows adding color tags, time-stamps, etc. to
+ *  the messages.
+ *
+ */
+
 #include "log.h"
 
 // Standard includes
@@ -8,14 +19,29 @@ static Log::LogLevel log_level;
 
 namespace Log {
 
+// ANSI terminal formatting sequences
 const char* reset = "\033[0m";
 const char* red = "\033[31m";
 const char* green = "\033[32m";
 const char* yellow = "\033[33m";
 const char* blue = "\033[34m";
 
+/**
+ * Set the lowest message level that should be printed. Messages with lower
+ * level will be silently ignored.
+ * 
+ * @param level Lowest message level to be outputted
+ */
 void setLogLevel(LogLevel level) { log_level = level; }
 
+/**
+ * Print function that behaves very much like printf, with the added log level
+ * argument.
+ * 
+ * @param level Log level of the message
+ * @param fmt printf-like formatting string
+ * @param ... Optional parameters, much like printf has
+ */
 void print(LogLevel level, const char* fmt, ...) {
     if (level >= log_level) {
         va_list ap;

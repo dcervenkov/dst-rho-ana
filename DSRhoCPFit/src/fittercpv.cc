@@ -3,7 +3,7 @@
  *  @author  Daniel Cervenkov, cervenkov(at)ipnp.mff.cuni.cz
  *  @date    2016-11-03
  *
- *  @brief Class that performs the CP fit itself as well as plotting
+ *  Class that performs the CP fit itself as well as plotting
  *
  */
 
@@ -92,6 +92,9 @@ FitterCPV::~FitterCPV() {
     }
 }
 
+/**
+ * Initialize all the member variables to reasonable values.
+ */
 void FitterCPV::InitVars(std::array<double, 16> par_input) {
     ap_ = new RooRealVar("ap", "|a_{#parallel}|", par_input[0], 0, 0.5);
     apa_ = new RooRealVar("apa", "arg(a_{#parallel})", par_input[1], 0, 1);
@@ -192,8 +195,10 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
     model_parameters_argset_.add(cr_f);
     model_parameters_argset_.add(scf_f);
 }
+
 /**
- * Populate various vectors and argsets with all parameters
+ * Populate various vectors and argsets with all parameters.
+ * 
  * This populates conditional_vars_, dataset_vars_, parameters_ and their pair
  * argsets which are used elsewhere.
  */
@@ -274,7 +279,8 @@ void FitterCPV::PrepareVarArgsets() {
 }
 
 /**
- * Make a simple plot of a variable and save it to a file
+ * Make a simple plot of a variable and save it to a file.
+ * 
  * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
  */
 void FitterCPV::PlotVar(RooRealVar& var, const RooAbsData& data) const {
@@ -298,7 +304,8 @@ void FitterCPV::PlotVar(RooRealVar& var, const RooAbsData& data) const {
 }
 
 /**
- * Make a simple plot of a variable and save it to a file
+ * Make a simple plot of a variable and save it to a file.
+ * 
  * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
  */
 void FitterCPV::PlotVar(RooRealVar& var, const RooAbsPdf& pdf) const {
@@ -806,6 +813,9 @@ void FitterCPV::FitAll() {
     }
 }
 
+/**
+ * Create a time-independent CR-only PDF.
+ */
 RooSimultaneous* FitterCPV::CreateAngularCRPDF() {
     AngularPDF* cr_pdf_B = new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
@@ -821,6 +831,9 @@ RooSimultaneous* FitterCPV::CreateAngularCRPDF() {
     return sim_pdf;
 }
 
+/**
+ * Create a time-independent CR + SCF PDF.
+ */
 RooSimultaneous* FitterCPV::CreateAngularCRSCFPDF() {
     AngularPDF* cr_pdf_B = new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
@@ -839,6 +852,9 @@ RooSimultaneous* FitterCPV::CreateAngularCRSCFPDF() {
     return sim_pdf;
 }
 
+/**
+ * Create a time-independent CR + SCF + BKG PDF.
+ */
 RooSimultaneous* FitterCPV::CreateAngularAllPDF() {
     AngularPDF* cr_pdf_B = new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
@@ -857,6 +873,14 @@ RooSimultaneous* FitterCPV::CreateAngularAllPDF() {
     return sim_pdf;
 }
 
+/**
+ * Fit time-independent PDF with the requested components
+ * 
+ * If the fitter setup requests it, plots will be produced.
+ * 
+ * @param scf Add self-crossfeed component to the fit
+ * @param bkg Add background component to the fit
+ */
 void FitterCPV::FitAngular(const bool scf, const bool bkg) {
     Log::print(Log::info, "Fitting %i events.\n", dataset_->numEntries());
     std::string components;
@@ -891,7 +915,7 @@ void FitterCPV::FitAngular(const bool scf, const bool bkg) {
 
 }
 
-/*
+/**
  * Plot the PDF and data including all components plotted separately
  * 
  * This function is rather convoluted to get around a RooFit bug which causes
@@ -1061,6 +1085,14 @@ void FitterCPV::PlotFit(RooSimultaneous* sim_pdf, const bool scf, const bool bkg
 
 }
 
+/**
+ * Take a JSON config, look at 'fitRanges' key, and create a copy of the dataset
+ * with all events falling outside of the ranges deleted.
+ * 
+ * @param config JSON config with the 'fitRanges' key
+ * 
+ * @return RooDataSet* Dataset with events falling outside of the fit range deleted
+ */
 RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
     RooDataSet* reduced_dataset = 0;
     std::ostringstream reduce_string;
@@ -1098,7 +1130,7 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
     return reduced_dataset;
 }
 
-/*
+/**
  * Read in a JSON file, parse it, and return a rapidjson document object.
  *
  * @param filename Path to the file to be read
@@ -1117,7 +1149,7 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
     return config;
 }
 
-/*
+/**
  * Read a rapid JSON document object, loop through all the entries and
  * configure the fitter according to the JSON.
  *
@@ -1180,6 +1212,12 @@ std::string FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
     return json_config;
 }
 
+/**
+ * Take a JSON config with fit ranges and set the ranges of all variables of
+ * the fitter corresponding to dataset variables according to the config
+ * 
+ * @param config JSON config with the fit ranges
+ */
 void FitterCPV::ChangeFitRanges(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config) {
     for (auto var : dataset_vars_) {
         const char* var_name = (**var).GetName();
@@ -1194,6 +1232,11 @@ void FitterCPV::ChangeFitRanges(const rapidjson::GenericValue<rapidjson::UTF8<ch
     }
 }
 
+/**
+ * Set model parameters (SCF, BKG, etc.) according to a JSON config
+ * 
+ * @param config JSON config with model parameter values
+ */
 void FitterCPV::ChangeModelParameters(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config) {
     for (rapidjson::Value::ConstMemberIterator itr = config.MemberBegin();
          itr != config.MemberEnd(); ++itr) {
@@ -1727,7 +1770,7 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
 }
 
 /**
- * Set the directory to which to ouput plots
+ * Set the directory to which to ouput plots.
  */
 void FitterCPV::SetPlotDir(const char* plot_dir) {
     make_plots_ = true;
@@ -2035,7 +2078,7 @@ const std::string FitterCPV::CreateLatexPullTableString(const bool asymmetric) {
 }
 
 /**
- * Save results, status codes, covariance matrix quality to the ROOT output file
+ * Save results, status codes, covariance matrix quality to the ROOT output file.
  */
 const void FitterCPV::LogResults() {
     // Set the current directory back to the one for plots (ugly ROOT stuff)
@@ -2085,6 +2128,16 @@ void FitterCPV::TestEfficiency() {
     c1->SaveAs("eff_test.pdf");
 }
 
+/**
+ * Read efficiency files, create a model and return a histogram with binned
+ * values sampled from the model. In principle, no files need to be supplied
+ * for functional efficiency models.
+ * 
+ * @param files Files from which a model is to be built
+ * @param model Specification of which model is to be built; see the Efficiency class
+ * 
+ * @return TH3D* Binned efficiency model
+ */
 TH3D* FitterCPV::GetBinnedEfficiency(std::vector<std::string> files, const int model) {
     Efficiency eff;
     for (auto file : files) {
@@ -2110,6 +2163,9 @@ TH3D* FitterCPV::GetBinnedEfficiency(std::vector<std::string> files, const int m
     return histo;
 }
 
+/**
+ * Create 2D plots of the current efficiency model.
+ */
 void FitterCPV::PlotEfficiency() {
     TH3D* eff_histo = GetBinnedEfficiency(efficiency_files_, efficiency_model_);
     RooArgSet vars(*thetat_, *thetab_, *phit_);
@@ -2249,6 +2305,14 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRe
     var2->setVal(orig_val2);
 }
 
+/**
+ * Calculate a chi2 value from a histogram and a PDF, assuming Poisson
+ * distribution of data in the bins.
+ * 
+ * @param data 
+ * @param pdf 
+ * @return const double 
+ */
 const double FitterCPV::Calculate3DChi2(const RooDataHist& data, const RooDataHist& pdf) {
     // TODO: Remove the commented histogram lines
     // TH1I h_bin_content("h_bin_content", "Bin Content", 100, 0, 99);
@@ -2348,6 +2412,9 @@ const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const 
     var->setVal(orig_val);
 }
 
+/**
+ * Create a functional model of the background angular distribution.
+ */
 RooAbsPdf* FitterCPV::CreateAngularBKGPDF() {
     // Background phit model
     RooRealVar* bkg_phit_poly_p2 = new RooRealVar("bkg_phit_poly_p2", "p_(2)", 0.040);
@@ -2410,6 +2477,9 @@ RooAbsPdf* FitterCPV::CreateAngularBKGPDF() {
     return bkg_pdf;
 }
 
+/**
+ * Create a functional model of the self-crossfeed angular distribution.
+ */
 RooAbsPdf* FitterCPV::CreateAngularSCFPDF() {
     // Self-cross-feed phit model
     RooRealVar* scf_phit_poly_p2 = new RooRealVar("scf_phit_poly_p2", "p_(2)", 0.856);
@@ -2471,6 +2541,11 @@ RooAbsPdf* FitterCPV::CreateAngularSCFPDF() {
     return scf_pdf;
 }
 
+/**
+ * WARNING: Experimental approach, should not be used without tweaking the code. Set the self-crossfeed model to histogram constructed from a KDE model from a supplied file.
+ * 
+ * @param file File holding a Meerkat KDE model
+ */
 void FitterCPV::SetSCFKDE(const char* file) {
     Log::print(Log::info, "Setting up KDE SCF model from file '%s'\n", file);
     OneDimPhaseSpace phasespace_thetat{"phasespace_thetat", thetat_->getMin(), thetat_->getMax()};
@@ -2540,6 +2615,11 @@ void FitterCPV::SetSCFKDE(const char* file) {
     // scf_angular_pdf_ = meerkat_pdf;
 }
 
+/**
+ * Set up histogram efficiency from supplied file. The name of the histogram must be 'scf_hist_pdf'.
+ * 
+ * @param file File with the efficiency histogram
+ */
 void FitterCPV::SetSCFHisto(const char* file) {
     Log::print(Log::info, "Setting up SCF RooHistPdf model from file '%s'\n", file);
     TFile f(file, "READ");
@@ -2552,7 +2632,14 @@ void FitterCPV::SetSCFHisto(const char* file) {
         new RooHistPdfFast("scf_hist_pdf_fast", "scf_hist_pdf_fast", RooArgSet(*thetat_, *thetab_, *phit_),
                        temp_pdf->dataHist());
 }
-
+/**
+ * Determine whether angular coordinates are close to (any) edge of the phasespace.
+ * 
+ * @param vals Coordinates to be checked
+ * @param margin Distance (fraction of phasespace range in each axis) to be taken as 'close'
+ * 
+ * @return int 0 for not close, 1 for close to lower edge, 2 for close to upper edge
+ */
 int FitterCPV::CloseToEdge(const std::vector<Double_t> vals, const double margin) const {
     RooRealVar* vars[3] = {thetat_, thetab_, phit_};
     for (int var_num = 0; var_num < 3; var_num++) {
@@ -2568,6 +2655,9 @@ int FitterCPV::CloseToEdge(const std::vector<Double_t> vals, const double margin
     return 0;
 }
 
+/**
+ * Check if the current fitter config makes sense.
+ */
 bool FitterCPV::CheckConfigIsValid() const {
     if (efficiency_model_ < 0 || efficiency_model_ > 6) {
         Log::print(Log::error, "Invalid efficiency model\n");

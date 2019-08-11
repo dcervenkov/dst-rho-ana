@@ -16,6 +16,7 @@
 
 // ROOT includes
 #include "RooHistPdf.h"
+#include "RooProdPdf.h"
 #include "RooRealVar.h"
 #include "RooSimultaneous.h"
 #include "TCanvas.h"
@@ -26,6 +27,8 @@
 
 // Local includes
 #include "constants.h"
+#include "dtcppdf.h"
+#include "dtscfpdf.h"
 #include "rapidjson/document.h"
 
 class FitterCPV {
@@ -189,6 +192,16 @@ class FitterCPV {
     RooSimultaneous* CreateAngularCRPDF();
     RooSimultaneous* CreateAngularCRSCFPDF();
     RooSimultaneous* CreateAngularAllPDF();
+
+    void CreateDtCPPDFs(DtCPPDF*& cr_pdf_a, DtCPPDF*& cr_pdf_ab, DtCPPDF*& cr_pdf_b,
+                        DtCPPDF*& cr_pdf_bb);
+    void CreateDtSCFPDFs(DtSCFPDF*& scf_pdf_a, DtSCFPDF*& scf_pdf_ab, DtSCFPDF*& scf_pdf_b,
+                         DtSCFPDF*& scf_pdf_bb);
+    void CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_a, RooProdPdf*& scf_pdf_ab,
+                                   RooProdPdf*& scf_pdf_b, RooProdPdf*& scf_pdf_bb);
+    void CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_a, RooProdPdf*& bkg_pdf_ab,
+                                   RooProdPdf*& bkg_pdf_b, RooProdPdf*& bkg_pdf_bb);
+
     void PlotFit(RooSimultaneous* pdf, const bool scf, const bool bkg);
 
     RooAbsPdf* scf_angular_pdf_;

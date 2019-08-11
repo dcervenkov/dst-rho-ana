@@ -14,36 +14,60 @@ test_configs = {
                   "--efficiency-file=eff_Kpi_190531.root",
                   "--fit=CR",
                   "--mixing",
-                  "--events=1000",
                   "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
                   "tests/current_result",
-                  "tests/signalMC_data.root"],
+                  "tests/data/signalMC.root"],
 
     "ti_cr_fit": ["--efficiency-model=6",
                   "--efficiency-file=eff_Kpi_190531.root",
                   "--fit=CR",
                   "--time-independent",
-                  "--events=1000",
                   "tests/current_result",
-                  "tests/signalMC_data.root"],
+                  "tests/data/signalMC.root"],
 
     "td_crscf_fit": ["--efficiency-model=6",
                      "--efficiency-file=eff_Kpi_190531.root",
                      "--fit=CRSCF",
                      "--scf-histo=scf_Kpi_190531.root",
-                     "--mixing", "--events=1000",
+                     "--mixing",
                      "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
                      "tests/current_result",
-                     "tests/signalMC_data.root"],
+                     "tests/data/signalMC.root"],
 
     "ti_crscf_fit": ["--efficiency-model=6",
                      "--efficiency-file=eff_Kpi_190531.root",
                      "--fit=CRSCF",
                      "--scf-histo=scf_Kpi_190531.root",
                      "--time-independent",
-                     "--events=1000",
                      "tests/current_result",
-                     "tests/signalMC_data.root"],
+                     "tests/data/signalMC.root"],
+
+    "td_all_fit": ["--efficiency-model=6",
+                   "--efficiency-file=eff_Kpi_190531.root",
+                   "--config=config_Kpi.json",
+                   "--fit=all",
+                   "--scf-histo=scf_Kpi_190531.root",
+                   "--mixing",
+                   "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
+                   "tests/current_result",
+                   "tests/data/signalMC.root",
+                   "tests/data/chargedMC.root",
+                   "tests/data/charmMC.root",
+                   "tests/data/mixedMC.root",
+                   "tests/data/udsMC.root"],
+
+    "ti_all_fit": ["--efficiency-model=6",
+                   "--efficiency-file=eff_Kpi_190531.root",
+                   "--config=config_Kpi.json",
+                   "--fit=all",
+                   "--scf-histo=scf_Kpi_190531.root",
+                   "--time-independent",
+                   "tests/current_result",
+                   "tests/data/signalMC.root",
+                   "tests/data/chargedMC.root",
+                   "tests/data/charmMC.root",
+                   "tests/data/mixedMC.root",
+                   "tests/data/udsMC.root"],
 }
 
 
@@ -56,7 +80,7 @@ def run_test(name, config):
     reference_result = ""
     current_result = ""
 
-    with open(name + ".reference", "r") as f:
+    with open("references/" + name + ".reference", "r") as f:
         reference_result = f.readline()
 
     with open("current_result", "r") as f:

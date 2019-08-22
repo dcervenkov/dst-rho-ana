@@ -12,6 +12,7 @@ import sys
 test_configs = {
     "td_cr_fit": ["--efficiency-model=6",
                   "--efficiency-file=eff_Kpi_190531.root",
+                  "--config=config_Kpi.json",
                   "--fit=CR",
                   "--mixing",
                   "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
@@ -20,6 +21,7 @@ test_configs = {
 
     "ti_cr_fit": ["--efficiency-model=6",
                   "--efficiency-file=eff_Kpi_190531.root",
+                  "--config=config_Kpi.json",
                   "--fit=CR",
                   "--time-independent",
                   "tests/current_result",
@@ -27,6 +29,7 @@ test_configs = {
 
     "td_crscf_fit": ["--efficiency-model=6",
                      "--efficiency-file=eff_Kpi_190531.root",
+                     "--config=config_Kpi.json",
                      "--fit=CRSCF",
                      "--scf-histo=scf_Kpi_190531.root",
                      "--mixing",
@@ -36,6 +39,7 @@ test_configs = {
 
     "ti_crscf_fit": ["--efficiency-model=6",
                      "--efficiency-file=eff_Kpi_190531.root",
+                     "--config=config_Kpi.json",
                      "--fit=CRSCF",
                      "--scf-histo=scf_Kpi_190531.root",
                      "--time-independent",

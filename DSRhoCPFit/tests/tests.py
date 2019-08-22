@@ -121,6 +121,10 @@ def print_results_table(results):
 test_results = []
 
 for test_name, test_config in test_configs.items():
+    # Skip tests that weren't explicitely requested if some were
+    if len(sys.argv) > 1 and test_name not in sys.argv[1:]:
+        continue
+
     test_results.append(run_test(test_name, test_config))
 
 print_results_table(test_results)

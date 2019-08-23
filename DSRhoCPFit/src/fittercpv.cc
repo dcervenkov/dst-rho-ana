@@ -187,6 +187,11 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
     scf_angular_pdf_ = CreateAngularSCFPDF();
     bkg_angular_pdf_ = CreateAngularBKGPDF();
 
+    scf_dt_cf_pdf_ = CreateVoigtGaussDtPdf("scf_dt_cf", scf_parameters_argset_);
+    scf_dt_dcs_pdf_ = CreateVoigtGaussDtPdf("scf_dt_dcs", scf_parameters_argset_);
+    bkg_dt_cf_pdf_ = CreateVoigtGaussDtPdf("bkg_dt_cf", bkg_parameters_argset_);
+    bkg_dt_dcs_pdf_ = CreateVoigtGaussDtPdf("bkg_dt_dcs", bkg_parameters_argset_);
+
     cr_scf_f.setConstant();
     cr_f.setConstant();
     scf_f.setConstant();
@@ -536,83 +541,48 @@ void FitterCPV::CreateDtSCFPDFs(DtSCFPDF*& scf_dt_pdf_a, DtSCFPDF*& scf_dt_pdf_a
                      *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 }
 
+RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf (const char* prefix, RooArgSet& argset) {
+    TString pre(prefix);
+
+    RooRealVar* voigt_mu = new RooRealVar(pre +"_voigt_mu", "v_{#mu}", -0.249);
+    RooRealVar* voigt_sigma = new RooRealVar(pre + "_voigt_sigma_", "v_{#sigma}", 1.910);
+    RooRealVar* voigt_width = new RooRealVar(pre + "_voigt_width_", "v_{w}", 0.684);
+    RooVoigtian* voigt = new RooVoigtian(pre + "_voigt", pre + "_voigt", *dt_, *voigt_mu,
+                                *voigt_width, *voigt_sigma);
+    argset.add(*voigt_mu);
+    argset.add(*voigt_sigma);
+    argset.add(*voigt_width);
+
+    RooRealVar* gaus_mu = new RooRealVar(pre + "_gaus_mu", "g_{#mu}", -0.105);
+    RooRealVar* gaus_sigma = new RooRealVar(pre + "_gaus_sigma_", "g_{#sigma}", 0.881);
+    RooGaussian* gaus = new RooGaussian(pre + "_gaus", pre + "_gaus", *dt_, *gaus_mu,
+                               *gaus_sigma);
+    argset.add(*gaus_mu);
+    argset.add(*gaus_sigma);
+
+    RooRealVar* f = new RooRealVar(pre + "_f", "f_{v/g}", 0.720);
+    RooAddPdf* model = new RooAddPdf(pre + "_model", pre + "_model",
+                              RooArgList(*voigt, *gaus), RooArgList(*f));
+    argset.add(*f);
+
+    return model;
+}
+
 void FitterCPV::CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_a, RooProdPdf*& scf_pdf_ab, RooProdPdf*& scf_pdf_b, RooProdPdf*& scf_pdf_bb) {
-    RooRealVar* scf_dt_cf_voigt_mu = new RooRealVar("scf_dt_cf_voigt_mu", "v_{#mu}", -0.249);
-    RooRealVar* scf_dt_cf_voigt_sigma = new RooRealVar("scf_dt_cf_voigt_sigma_", "v_{#sigma}", 1.910);
-    RooRealVar* scf_dt_cf_voigt_width = new RooRealVar("scf_dt_cf_voigt_width_", "v_{w}", 0.684);
-    RooVoigtian* scf_dt_cf_voigt = new RooVoigtian("scf_dt_cf_voigt", "scf_dt_cf_voigt", *dt_, *scf_dt_cf_voigt_mu,
-                                *scf_dt_cf_voigt_width, *scf_dt_cf_voigt_sigma);
+    Log::print(Log::debug, "Creating SCF dt PDF\n");
 
-    RooRealVar* scf_dt_cf_gaus_mu = new RooRealVar("scf_dt_cf_gaus_mu", "g_{#mu}", -0.105);
-    RooRealVar* scf_dt_cf_gaus_sigma = new RooRealVar("scf_dt_cf_gaus_sigma_", "g_{#sigma}", 0.881);
-    RooGaussian* scf_dt_cf_gaus = new RooGaussian("scf_dt_cf_gaus", "scf_dt_cf_gaus", *dt_, *scf_dt_cf_gaus_mu,
-                               *scf_dt_cf_gaus_sigma);
-
-    RooRealVar* scf_dt_cf_f = new RooRealVar("scf_dt_cf_f", "f_{v/g}", 0.720);
-    RooAddPdf* scf_dt_cf_model = new RooAddPdf("scf_dt_cf_model", "scf_dt_cf_model",
-                              RooArgList(*scf_dt_cf_voigt, *scf_dt_cf_gaus), RooArgList(*scf_dt_cf_f));
-
-    // Self-cross-feed dt DCS model
-    RooRealVar* scf_dt_dcs_voigt_mu = new RooRealVar("scf_dt_dcs_voigt_mu", "v_{#mu}", -0.303);
-    RooRealVar* scf_dt_dcs_voigt_sigma = new RooRealVar("scf_dt_dcs_voigt_sigma_", "v_{#sigma}", 2.739);
-    RooRealVar* scf_dt_dcs_voigt_width = new RooRealVar("scf_dt_dcs_voigt_width_", "v_{w}", 0.712);
-    RooVoigtian* scf_dt_dcs_voigt = new RooVoigtian("scf_dt_dcs_voigt", "scf_dt_dcs_voigt", *dt_, *scf_dt_dcs_voigt_mu,
-                                 *scf_dt_dcs_voigt_width, *scf_dt_dcs_voigt_sigma);
-
-    RooRealVar* scf_dt_dcs_gaus_mu = new RooRealVar("scf_dt_dcs_gaus_mu", "g_{#mu}", -0.177);
-    RooRealVar* scf_dt_dcs_gaus_sigma = new RooRealVar("scf_dt_dcs_gaus_sigma_", "g_{#sigma}", 1.156);
-    RooGaussian* scf_dt_dcs_gaus = new RooGaussian("scf_dt_dcs_gaus", "scf_dt_dcs_gaus", *dt_, *scf_dt_dcs_gaus_mu,
-                                *scf_dt_dcs_gaus_sigma);
-
-    RooRealVar* scf_dt_dcs_f = new RooRealVar("scf_dt_dcs_f", "f_{v/g}", 0.712);
-    RooAddPdf* scf_dt_dcs_model = new RooAddPdf("scf_dt_dcs_model", "scf_dt_dcs_model",
-                               RooArgList(*scf_dt_dcs_voigt, *scf_dt_dcs_gaus),
-                               RooArgList(*scf_dt_dcs_f));
-
-    scf_pdf_a = new RooProdPdf("scf_pdf_a", "scf_pdf_a", RooArgList(*scf_dt_cf_model, *scf_angular_pdf_));
-    scf_pdf_ab = new RooProdPdf("scf_pdf_ab", "scf_pdf_ab", RooArgList(*scf_dt_cf_model, *scf_angular_pdf_));
-    scf_pdf_b = new RooProdPdf("scf_pdf_b", "scf_pdf_b", RooArgList(*scf_dt_dcs_model, *scf_angular_pdf_));
-    scf_pdf_bb = new RooProdPdf("scf_pdf_bb", "scf_pdf_bb", RooArgList(*scf_dt_dcs_model, *scf_angular_pdf_));
+    scf_pdf_a = new RooProdPdf("scf_pdf_a", "scf_pdf_a", RooArgList(*scf_dt_cf_pdf_, *scf_angular_pdf_));
+    scf_pdf_ab = new RooProdPdf("scf_pdf_ab", "scf_pdf_ab", RooArgList(*scf_dt_cf_pdf_, *scf_angular_pdf_));
+    scf_pdf_b = new RooProdPdf("scf_pdf_b", "scf_pdf_b", RooArgList(*scf_dt_dcs_pdf_, *scf_angular_pdf_));
+    scf_pdf_bb = new RooProdPdf("scf_pdf_bb", "scf_pdf_bb", RooArgList(*scf_dt_dcs_pdf_, *scf_angular_pdf_));
 }
 
 void FitterCPV::CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_a, RooProdPdf*& bkg_pdf_ab, RooProdPdf*& bkg_pdf_b, RooProdPdf*& bkg_pdf_bb) {
-    // Background dt CF model
-    RooRealVar* bkg_dt_cf_voigt_mu = new RooRealVar("bkg_dt_cf_voigt_mu", "v_{#mu}", -0.159);
-    RooRealVar* bkg_dt_cf_voigt_sigma = new RooRealVar("bkg_dt_cf_voigt_sigma_", "v_{#sigma}", 1.644);
-    RooRealVar* bkg_dt_cf_voigt_width = new RooRealVar("bkg_dt_cf_voigt_width_", "v_{w}", 0.874);
-    RooVoigtian* bkg_dt_cf_voigt = new RooVoigtian("bkg_dt_cf_voigt", "bkg_dt_cf_voigt", *dt_, *bkg_dt_cf_voigt_mu,
-                                *bkg_dt_cf_voigt_width, *bkg_dt_cf_voigt_sigma);
 
-    RooRealVar* bkg_dt_cf_gaus_mu = new RooRealVar("bkg_dt_cf_gaus_mu", "g_{#mu}", -0.026);
-    RooRealVar* bkg_dt_cf_gaus_sigma = new RooRealVar("bkg_dt_cf_gaus_sigma_", "g_{#sigma}", 0.613);
-    RooGaussian* bkg_dt_cf_gaus = new RooGaussian("bkg_dt_cf_gaus", "bkg_dt_cf_gaus", *dt_, *bkg_dt_cf_gaus_mu,
-                               *bkg_dt_cf_gaus_sigma);
-
-    RooRealVar* bkg_dt_cf_f = new RooRealVar("bkg_dt_cf_f", "f_{v/g}", 0.632);
-    RooAddPdf* bkg_dt_cf_model = new RooAddPdf("bkg_dt_cf_model", "bkg_dt_cf_model",
-                              RooArgList(*bkg_dt_cf_voigt, *bkg_dt_cf_gaus), RooArgList(*bkg_dt_cf_f));
-
-    // Background dt DCS model
-    RooRealVar* bkg_dt_dcs_voigt_mu = new RooRealVar("bkg_dt_dcs_voigt_mu", "v_{#mu}", -0.234);
-    RooRealVar* bkg_dt_dcs_voigt_sigma = new RooRealVar("bkg_dt_dcs_voigt_sigma_", "v_{#sigma}", 2.210);
-    RooRealVar* bkg_dt_dcs_voigt_width = new RooRealVar("bkg_dt_dcs_voigt_width_", "v_{w}", 1.143);
-    RooVoigtian* bkg_dt_dcs_voigt = new RooVoigtian("bkg_dt_dcs_voigt", "bkg_dt_dcs_voigt", *dt_, *bkg_dt_dcs_voigt_mu,
-                                 *bkg_dt_dcs_voigt_width, *bkg_dt_dcs_voigt_sigma);
-
-    RooRealVar* bkg_dt_dcs_gaus_mu = new RooRealVar("bkg_dt_dcs_gaus_mu", "g_{#mu}", -0.020);
-    RooRealVar* bkg_dt_dcs_gaus_sigma = new RooRealVar("bkg_dt_dcs_gaus_sigma_", "g_{#sigma}", 0.639);
-    RooGaussian* bkg_dt_dcs_gaus = new RooGaussian("bkg_dt_dcs_gaus", "bkg_dt_dcs_gaus", *dt_, *bkg_dt_dcs_gaus_mu,
-                                *bkg_dt_dcs_gaus_sigma);
-
-    RooRealVar* bkg_dt_dcs_f = new RooRealVar("bkg_dt_dcs_f", "f_{v/g}", 0.632);
-    RooAddPdf* bkg_dt_dcs_model = new RooAddPdf("bkg_dt_dcs_model", "bkg_dt_dcs_model",
-                               RooArgList(*bkg_dt_dcs_voigt, *bkg_dt_dcs_gaus),
-                               RooArgList(*bkg_dt_dcs_f));
-
-    bkg_pdf_a = new RooProdPdf("bkg_pdf_a", "bkg_pdf_a", RooArgList(*bkg_dt_cf_model, *bkg_angular_pdf_));
-    bkg_pdf_ab = new RooProdPdf("bkg_pdf_ab", "bkg_pdf_ab", RooArgList(*bkg_dt_cf_model, *bkg_angular_pdf_));
-    bkg_pdf_b = new RooProdPdf("bkg_pdf_b", "bkg_pdf_b", RooArgList(*bkg_dt_dcs_model, *bkg_angular_pdf_));
-    bkg_pdf_bb = new RooProdPdf("bkg_pdf_bb", "bkg_pdf_bb", RooArgList(*bkg_dt_dcs_model, *bkg_angular_pdf_));
+    bkg_pdf_a = new RooProdPdf("bkg_pdf_a", "bkg_pdf_a", RooArgList(*bkg_dt_cf_pdf_, *bkg_angular_pdf_));
+    bkg_pdf_ab = new RooProdPdf("bkg_pdf_ab", "bkg_pdf_ab", RooArgList(*bkg_dt_cf_pdf_, *bkg_angular_pdf_));
+    bkg_pdf_b = new RooProdPdf("bkg_pdf_b", "bkg_pdf_b", RooArgList(*bkg_dt_dcs_pdf_, *bkg_angular_pdf_));
+    bkg_pdf_bb = new RooProdPdf("bkg_pdf_bb", "bkg_pdf_bb", RooArgList(*bkg_dt_dcs_pdf_, *bkg_angular_pdf_));
 }
 
 void FitterCPV::FitAll() {
@@ -1178,12 +1148,17 @@ void FitterCPV::ChangeModelParameters(const rapidjson::GenericValue<rapidjson::U
          itr != config.MemberEnd(); ++itr) {
         // The parameter in the JSON file must be valid, i.e., exist in the model
         Log::print(Log::debug, "Changing parameter %s to %f\n", itr->name.GetString(), itr->value.GetDouble());
-        assert(scf_parameters_argset_.find(itr->name.GetString()) ||
-               bkg_parameters_argset_.find(itr->name.GetString()) ||
-               model_parameters_argset_.find(itr->name.GetString()));
-        scf_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
-        bkg_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
-        model_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
+
+        if (!(scf_parameters_argset_.find(itr->name.GetString()) ||
+              bkg_parameters_argset_.find(itr->name.GetString()) ||
+              model_parameters_argset_.find(itr->name.GetString()))) {
+            Log::print(Log::warning, "Parameter '%s' from JSON config not found in the model\n",
+                       itr->name.GetString());
+        } else {
+            scf_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
+            bkg_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
+            model_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
+        }
     }
 }
 

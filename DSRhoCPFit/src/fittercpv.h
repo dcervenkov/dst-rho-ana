@@ -193,6 +193,7 @@ class FitterCPV {
     RooSimultaneous* CreateAngularCRSCFPDF();
     RooSimultaneous* CreateAngularAllPDF();
 
+    RooAddPdf* CreateVoigtGaussDtPdf (const char* prefix, RooArgSet& argset);
     void CreateDtCPPDFs(DtCPPDF*& cr_pdf_a, DtCPPDF*& cr_pdf_ab, DtCPPDF*& cr_pdf_b,
                         DtCPPDF*& cr_pdf_bb);
     void CreateDtSCFPDFs(DtSCFPDF*& scf_pdf_a, DtSCFPDF*& scf_pdf_ab, DtSCFPDF*& scf_pdf_b,
@@ -206,6 +207,10 @@ class FitterCPV {
 
     RooAbsPdf* scf_angular_pdf_;
     RooAbsPdf* bkg_angular_pdf_;
+    RooAbsPdf* scf_dt_cf_pdf_;
+    RooAbsPdf* scf_dt_dcs_pdf_;
+    RooAbsPdf* bkg_dt_cf_pdf_;
+    RooAbsPdf* bkg_dt_dcs_pdf_;
     RooArgSet scf_parameters_argset_;
     RooArgSet bkg_parameters_argset_;
     RooArgSet model_parameters_argset_;

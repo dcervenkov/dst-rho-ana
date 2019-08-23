@@ -187,13 +187,9 @@ class FitterCPV {
 
     RooAbsPdf* CreateAngularSCFPDF();
     RooAbsPdf* CreateAngularBKGPDF();
-    RooSimultaneous* CreateAngularCRPDF();
-    RooSimultaneous* CreateAngularCRSCFPDF();
-    RooSimultaneous* CreateAngularAllPDF();
 
-    RooSimultaneous* CreateCRPDF();
-    RooSimultaneous* CreateCRSCFPDF();
-    RooSimultaneous* CreateAllPDF();
+    RooSimultaneous* CreateAngularPDF(const bool scf, const bool bkg);
+    RooSimultaneous* CreateTimeDependentPDF(const bool scf, const bool bkg);
 
     RooAddPdf* CreateVoigtGaussDtPdf (const char* prefix, RooArgSet& argset);
     void CreateDtCPPDFs(DtCPPDF*& cr_pdf_a, DtCPPDF*& cr_pdf_ab, DtCPPDF*& cr_pdf_b,
@@ -217,9 +213,9 @@ class FitterCPV {
     RooArgSet bkg_parameters_argset_;
     RooArgSet model_parameters_argset_;
 
-    RooRealVar cr_scf_f{"cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99};
-    RooRealVar cr_f{"cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99};
-    RooRealVar scf_f{"scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99};
+    RooRealVar cr_scf_f_{"cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99};
+    RooRealVar cr_f_{"cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99};
+    RooRealVar scf_f_{"scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99};
 
     RooDataHist* scf_angular_kde_hist_ = nullptr;
     RooHistPdf* scf_angular_kde_ = nullptr;

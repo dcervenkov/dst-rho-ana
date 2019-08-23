@@ -192,13 +192,13 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
     bkg_dt_cf_pdf_ = CreateVoigtGaussDtPdf("bkg_dt_cf", bkg_parameters_argset_);
     bkg_dt_dcs_pdf_ = CreateVoigtGaussDtPdf("bkg_dt_dcs", bkg_parameters_argset_);
 
-    cr_scf_f.setConstant();
-    cr_f.setConstant();
-    scf_f.setConstant();
+    cr_scf_f_.setConstant();
+    cr_f_.setConstant();
+    scf_f_.setConstant();
 
-    model_parameters_argset_.add(cr_scf_f);
-    model_parameters_argset_.add(cr_f);
-    model_parameters_argset_.add(scf_f);
+    model_parameters_argset_.add(cr_scf_f_);
+    model_parameters_argset_.add(cr_f_);
+    model_parameters_argset_.add(scf_f_);
 }
 
 /**
@@ -474,34 +474,44 @@ void FitterCPV::CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_a, RooProdPdf*& b
 }
 
 /**
- * Create a time-independent CR-only PDF.
+ * Create a time-independent PDF with the requested components
+ * 
+ * @param scf Whether to add self-crossfeed component
+ * @param bkg Whether to add background component
+ * @return RooSimultaneous* The complete PDF
  */
-RooSimultaneous* FitterCPV::CreateAngularCRPDF() {
+RooSimultaneous* FitterCPV::CreateAngularPDF(const bool scf, const bool bkg) {
+    RooArgList B_pdfs;
+    RooArgList B_bar_pdfs;
+
     AngularPDF* cr_pdf_B = new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
                      *apa_, *a0_, *ata_);
     AngularPDF* cr_pdf_B_bar = new AngularPDF("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
                          *phit_, *ap_, *apa_, *a0_, *ata_);
 
-    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf->addPdf(*cr_pdf_B, "a");
-    sim_pdf->addPdf(*cr_pdf_B_bar, "ab");
-    sim_pdf->addPdf(*cr_pdf_B, "b");
-    sim_pdf->addPdf(*cr_pdf_B_bar, "bb");
+    B_pdfs.add(*cr_pdf_B);
+    B_bar_pdfs.add(*cr_pdf_B_bar);
 
-    return sim_pdf;
-}
+    if (scf) {
+        B_pdfs.add(*scf_angular_pdf_);
+        B_bar_pdfs.add(*scf_angular_pdf_);
+    }
 
-/**
- * Create a time-independent CR + SCF PDF.
- */
-RooSimultaneous* FitterCPV::CreateAngularCRSCFPDF() {
-    AngularPDF* cr_pdf_B = new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
-                     *apa_, *a0_, *ata_);
-    AngularPDF* cr_pdf_B_bar = new AngularPDF("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
-                         *phit_, *ap_, *apa_, *a0_, *ata_);
+    if (bkg) {
+        B_pdfs.add(*bkg_angular_pdf_);
+        B_bar_pdfs.add(*bkg_angular_pdf_);
+    }
 
-    RooAddPdf* pdf_B = new RooAddPdf("pdf_B", "pdf_B", RooArgList(*cr_pdf_B, *scf_angular_pdf_), RooArgList(cr_scf_f));
-    RooAddPdf* pdf_B_bar = new RooAddPdf("pdf_B_bar", "pdf_B_bar", RooArgList(*cr_pdf_B_bar, *scf_angular_pdf_), RooArgList(cr_scf_f));
+    RooArgList fractions;
+    if (scf && !bkg) {
+        fractions.add(cr_scf_f_);
+    } else if (scf && bkg) {
+        fractions.add(cr_f_);
+        fractions.add(scf_f_);
+    }
+
+    RooAddPdf* pdf_B = new RooAddPdf("pdf_B", "pdf_B", B_pdfs, fractions);
+    RooAddPdf* pdf_B_bar = new RooAddPdf("pdf_B_bar", "pdf_B_bar", B_bar_pdfs, fractions);
 
     RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf->addPdf(*pdf_B, "a");
@@ -513,101 +523,64 @@ RooSimultaneous* FitterCPV::CreateAngularCRSCFPDF() {
 }
 
 /**
- * Create a time-independent CR + SCF + BKG PDF.
+ * Create a time-dependent PDF with the requested components
+ * 
+ * @param scf Whether to add self-crossfeed component
+ * @param bkg Whether to add background component
+ * @return RooSimultaneous* The complete PDF
  */
-RooSimultaneous* FitterCPV::CreateAngularAllPDF() {
-    AngularPDF* cr_pdf_B = new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
-                     *apa_, *a0_, *ata_);
-    AngularPDF* cr_pdf_B_bar = new AngularPDF("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
-                         *phit_, *ap_, *apa_, *a0_, *ata_);
+RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const bool scf, const bool bkg) {
+    RooArgList a_pdfs;
+    RooArgList ab_pdfs;
+    RooArgList b_pdfs;
+    RooArgList bb_pdfs;
 
-    RooAddPdf* pdf_B = new RooAddPdf("pdf_B", "pdf_B", RooArgList(*cr_pdf_B, *scf_angular_pdf_, *bkg_angular_pdf_), RooArgList(cr_f, scf_f));
-    RooAddPdf* pdf_B_bar = new RooAddPdf("pdf_B_bar", "pdf_B_bar", RooArgList(*cr_pdf_B_bar, *scf_angular_pdf_, *bkg_angular_pdf_), RooArgList(cr_f, scf_f));
-
-    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf->addPdf(*pdf_B, "a");
-    sim_pdf->addPdf(*pdf_B_bar, "ab");
-    sim_pdf->addPdf(*pdf_B, "b");
-    sim_pdf->addPdf(*pdf_B_bar, "bb");
-
-    return sim_pdf;
-}
-
-/**
- * Create a time-dependent CR-only PDF.
- */
-RooSimultaneous* FitterCPV::CreateCRPDF() {
     DtCPPDF* cr_pdf_a = 0;
     DtCPPDF* cr_pdf_ab = 0;
     DtCPPDF* cr_pdf_b = 0;
     DtCPPDF* cr_pdf_bb = 0;
     CreateDtCPPDFs(cr_pdf_a, cr_pdf_ab, cr_pdf_b, cr_pdf_bb);
-
-    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf->addPdf(*cr_pdf_a, "a");
-    sim_pdf->addPdf(*cr_pdf_ab, "ab");
-    sim_pdf->addPdf(*cr_pdf_b, "b");
-    sim_pdf->addPdf(*cr_pdf_bb, "bb");
-
-    return sim_pdf;
-}
-
-/**
- * Create a time-dependent CR + SCF PDF.
- */
-RooSimultaneous* FitterCPV::CreateCRSCFPDF() {
-    DtCPPDF* cr_pdf_a = 0;
-    DtCPPDF* cr_pdf_ab = 0;
-    DtCPPDF* cr_pdf_b = 0;
-    DtCPPDF* cr_pdf_bb = 0;
-    CreateDtCPPDFs(cr_pdf_a, cr_pdf_ab, cr_pdf_b, cr_pdf_bb);
+    a_pdfs.add(*cr_pdf_a);
+    ab_pdfs.add(*cr_pdf_ab);
+    b_pdfs.add(*cr_pdf_b);
+    bb_pdfs.add(*cr_pdf_bb);
 
     RooProdPdf* scf_pdf_a = 0;
     RooProdPdf* scf_pdf_ab = 0;
     RooProdPdf* scf_pdf_b = 0;
     RooProdPdf* scf_pdf_bb = 0;
-    CreateFunctionalDtSCFPDFs(scf_pdf_a, scf_pdf_ab, scf_pdf_b, scf_pdf_bb);
-
-    RooAddPdf* pdf_a = new RooAddPdf("pdf_a", "pdf_a", RooArgList(*cr_pdf_a, *scf_pdf_a), RooArgList(cr_scf_f));
-    RooAddPdf* pdf_ab = new RooAddPdf("pdf_ab", "pdf_ab", RooArgList(*cr_pdf_ab, *scf_pdf_ab), RooArgList(cr_scf_f));
-    RooAddPdf* pdf_b = new RooAddPdf("pdf_b", "pdf_b", RooArgList(*cr_pdf_b, *scf_pdf_b), RooArgList(cr_scf_f));
-    RooAddPdf* pdf_bb = new RooAddPdf("pdf_bb", "pdf_bb", RooArgList(*cr_pdf_bb, *scf_pdf_bb), RooArgList(cr_scf_f));
-
-    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf->addPdf(*pdf_a, "a");
-    sim_pdf->addPdf(*pdf_ab, "ab");
-    sim_pdf->addPdf(*pdf_b, "b");
-    sim_pdf->addPdf(*pdf_bb, "bb");
-
-    return sim_pdf;
-}
-
-/**
- * Create a time-dependent CR + SCF + BKG PDF.
- */
-RooSimultaneous* FitterCPV::CreateAllPDF() {
-    DtCPPDF* cr_pdf_a = 0;
-    DtCPPDF* cr_pdf_ab = 0;
-    DtCPPDF* cr_pdf_b = 0;
-    DtCPPDF* cr_pdf_bb = 0;
-    CreateDtCPPDFs(cr_pdf_a, cr_pdf_ab, cr_pdf_b, cr_pdf_bb);
-
-    RooProdPdf* scf_pdf_a = 0;
-    RooProdPdf* scf_pdf_ab = 0;
-    RooProdPdf* scf_pdf_b = 0;
-    RooProdPdf* scf_pdf_bb = 0;
-    CreateFunctionalDtSCFPDFs(scf_pdf_a, scf_pdf_ab, scf_pdf_b, scf_pdf_bb);
+    if (scf) {
+        CreateFunctionalDtSCFPDFs(scf_pdf_a, scf_pdf_ab, scf_pdf_b, scf_pdf_bb);
+        a_pdfs.add(*scf_pdf_a);
+        ab_pdfs.add(*scf_pdf_ab);
+        b_pdfs.add(*scf_pdf_b);
+        bb_pdfs.add(*scf_pdf_bb);
+    }
 
     RooProdPdf* bkg_pdf_a = 0;
     RooProdPdf* bkg_pdf_ab = 0;
     RooProdPdf* bkg_pdf_b = 0;
     RooProdPdf* bkg_pdf_bb = 0;
-    CreateFunctionalDtBKGPDFs(bkg_pdf_a, bkg_pdf_ab, bkg_pdf_b, bkg_pdf_bb);
+    if (bkg) {
+        CreateFunctionalDtBKGPDFs(bkg_pdf_a, bkg_pdf_ab, bkg_pdf_b, bkg_pdf_bb);
+        a_pdfs.add(*bkg_pdf_a);
+        ab_pdfs.add(*bkg_pdf_ab);
+        b_pdfs.add(*bkg_pdf_b);
+        bb_pdfs.add(*bkg_pdf_bb);
+    }
 
-    RooAddPdf* pdf_a  = new RooAddPdf("pdf_a", "pdf_a", RooArgList(*cr_pdf_a, *scf_pdf_a, *bkg_pdf_a), RooArgList(cr_f, scf_f));
-    RooAddPdf* pdf_ab = new RooAddPdf("pdf_ab", "pdf_ab", RooArgList(*cr_pdf_ab, *scf_pdf_ab, *bkg_pdf_ab), RooArgList(cr_f, scf_f));
-    RooAddPdf* pdf_b  = new RooAddPdf("pdf_b", "pdf_b", RooArgList(*cr_pdf_b, *scf_pdf_b, *bkg_pdf_b), RooArgList(cr_f, scf_f));
-    RooAddPdf* pdf_bb = new RooAddPdf("pdf_bb", "pdf_bb", RooArgList(*cr_pdf_bb, *scf_pdf_bb, *bkg_pdf_bb), RooArgList(cr_f, scf_f));
+    RooArgList fractions;
+    if (scf && !bkg) {
+        fractions.add(cr_scf_f_);
+    } else if (scf && bkg) {
+        fractions.add(cr_f_);
+        fractions.add(scf_f_);
+    }
+
+    RooAddPdf* pdf_a  = new RooAddPdf("pdf_a", "pdf_a", a_pdfs, fractions);
+    RooAddPdf* pdf_ab = new RooAddPdf("pdf_ab", "pdf_ab", ab_pdfs, fractions);
+    RooAddPdf* pdf_b  = new RooAddPdf("pdf_b", "pdf_b", b_pdfs, fractions);
+    RooAddPdf* pdf_bb = new RooAddPdf("pdf_bb", "pdf_bb", bb_pdfs, fractions);
 
     RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf->addPdf(*pdf_a, "a");
@@ -627,28 +600,23 @@ RooSimultaneous* FitterCPV::CreateAllPDF() {
  */
 void FitterCPV::Fit(const bool timedep, const bool scf, const bool bkg) {
     Log::print(Log::info, "Fitting %i events.\n", dataset_->numEntries());
-    std::string components;
 
-    RooSimultaneous* sim_pdf;
     if (!scf && !bkg) {
         RooDataSet* temp_dataset = dynamic_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
         dataset_ = temp_dataset;
-        sim_pdf = timedep ? CreateCRPDF() : CreateAngularCRPDF();
-        components += "CR";
-    } else if (scf && !bkg) {
-        sim_pdf = timedep ? CreateCRSCFPDF() : CreateAngularCRSCFPDF();
-        components += "CR+SCF";
-    } else if (scf && bkg) {
-        sim_pdf = timedep ? CreateAllPDF() : CreateAngularAllPDF();
-        components += "CR+SCF+BKG";
-    } else {
+    } else if (!scf && bkg) {
         Log::print(Log::error, "Requested a fit with unsupported component configuration");
     }
+
+    std::string components = "CR";
+    components += scf ? "+SCF" : "";
+    components += bkg ? "+BKG" : "";
     Log::print(Log::info, "Running a fit with the following components: %s\n", components.c_str());
 
     tau_->setConstant(true);
     dm_->setConstant(true);
 
+    RooSimultaneous* sim_pdf = timedep ? CreateTimeDependentPDF(scf, bkg) : CreateAngularPDF(scf, bkg);
     result_ = sim_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
                   RooFit::Hesse(false), RooFit::Minos(false), RooFit::Minimizer("Minuit2"),
                   RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
@@ -742,11 +710,11 @@ void FitterCPV::PlotFit(RooSimultaneous* sim_pdf, const bool scf, const bool bkg
             all_histpdf = cr_histpdf;
         } else if (scf && (!bkg)) {
             all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
-                                        RooArgList(*cr_histpdf, *scf_histpdf), cr_scf_f);
+                                        RooArgList(*cr_histpdf, *scf_histpdf), cr_scf_f_);
         } else if (scf && bkg) {
             all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
                                         RooArgList(*cr_histpdf, *scf_histpdf, *bkg_histpdf),
-                                        RooArgList(cr_f, scf_f));
+                                        RooArgList(cr_f_, scf_f_));
         }
 
         // Set the current directory back to the one for plots (ugly ROOT stuff)

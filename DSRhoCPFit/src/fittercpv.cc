@@ -337,154 +337,6 @@ void FitterCPV::PlotVar(RooRealVar& var, const RooAbsPdf& pdf) const {
     canvas.SaveAs(constants::format);
 }
 
-// TODO: Remove/refactor
-void FitterCPV::FitCR() {
-    RooDataSet* temp_dataset = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
-    dataset_ = temp_dataset;
-
-    DtCPPDF* cr_pdf_a = 0;
-    DtCPPDF* cr_pdf_ab = 0;
-    DtCPPDF* cr_pdf_b = 0;
-    DtCPPDF* cr_pdf_bb = 0;
-    CreateDtCPPDFs(cr_pdf_a, cr_pdf_ab, cr_pdf_b, cr_pdf_bb);
-
-    RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf.addPdf(*cr_pdf_a, "a");
-    sim_pdf.addPdf(*cr_pdf_ab, "ab");
-    sim_pdf.addPdf(*cr_pdf_b, "b");
-    sim_pdf.addPdf(*cr_pdf_bb, "bb");
-
-    tau_->setConstant(true);
-    dm_->setConstant(true);
-
-    if (do_mixing_fit_) {
-        result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
-                                RooFit::Minimizer("Minuit2"),
-                                RooFit::Hesse(false), RooFit::Minos(false), RooFit::Save(true),
-                                RooFit::NumCPU(num_CPUs_));
-        if (result_) {
-            result_->Print();
-        }
-
-        if (make_plots_) {
-            RooDataSet* dataset_a =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
-            PlotWithPull(*dt_, *dataset_a, *cr_pdf_a);
-
-            RooDataSet* dataset_b =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
-            PlotWithPull(*dt_, *dataset_b, *cr_pdf_b);
-
-            RooDataSet* dataset_ab =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
-            PlotWithPull(*dt_, *dataset_ab, *cr_pdf_ab);
-
-            RooDataSet* dataset_bb =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
-            PlotWithPull(*dt_, *dataset_bb, *cr_pdf_bb);
-
-            RooDataHist* cr_hist = cr_pdf_a->generateBinned(
-                RooArgSet(*thetat_, *thetab_, *phit_), 1000, RooFit::ExpectedData(true));
-
-            RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
-                                  *cr_hist);
-
-            PlotWithPull(*thetat_, *dataset_, cr_histpdf);
-            PlotWithPull(*thetab_, *dataset_, cr_histpdf);
-            PlotWithPull(*phit_, *dataset_, cr_histpdf);
-        }
-    }
-}
-
-// TODO: Remove/refactor
-void FitterCPV::FitCRSCF() {
-    DtCPPDF* cr_pdf_a = 0;
-    DtCPPDF* cr_pdf_ab = 0;
-    DtCPPDF* cr_pdf_b = 0;
-    DtCPPDF* cr_pdf_bb = 0;
-    CreateDtCPPDFs(cr_pdf_a, cr_pdf_ab, cr_pdf_b, cr_pdf_bb);
-
-    RooProdPdf* scf_pdf_a = 0;
-    RooProdPdf* scf_pdf_ab = 0;
-    RooProdPdf* scf_pdf_b = 0;
-    RooProdPdf* scf_pdf_bb = 0;
-    CreateFunctionalDtSCFPDFs(scf_pdf_a, scf_pdf_ab, scf_pdf_b, scf_pdf_bb);
-
-    RooAddPdf pdf_a("pdf_a", "pdf_a", RooArgList(*cr_pdf_a, *scf_pdf_a), RooArgList(cr_scf_f));
-    RooAddPdf pdf_ab("pdf_ab", "pdf_ab", RooArgList(*cr_pdf_ab, *scf_pdf_ab), RooArgList(cr_scf_f));
-    RooAddPdf pdf_b("pdf_b", "pdf_b", RooArgList(*cr_pdf_b, *scf_pdf_b), RooArgList(cr_scf_f));
-    RooAddPdf pdf_bb("pdf_bb", "pdf_bb", RooArgList(*cr_pdf_bb, *scf_pdf_bb), RooArgList(cr_scf_f));
-
-    RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf.addPdf(pdf_a, "a");
-    sim_pdf.addPdf(pdf_ab, "ab");
-    sim_pdf.addPdf(pdf_b, "b");
-    sim_pdf.addPdf(pdf_bb, "bb");
-
-    tau_->setConstant(true);
-    dm_->setConstant(true);
-
-    if (do_mixing_fit_) {
-        result_ = sim_pdf.fitTo(*dataset_,
-        RooFit::ConditionalObservables(conditional_vars_argset_),
-                                RooFit::Minimizer("Minuit2"),
-                                RooFit::Hesse(false), RooFit::Minos(false),
-                                RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-        if (result_) {
-            result_->Print();
-        }
-
-        if (make_plots_) {
-            // // PDF for B_bar differs, so we have to generate them separately. (One
-            // // could also use *extended* RooSimultaneous or 'ProtoData' for
-            // // RooSimultaneous.)
-            // RooDataHist* cr_hist_a = cr_pdf_a.generateBinned(RooArgSet(*dt_, *thetat_, *thetab_, *phit_), 1000,
-            //                                             RooFit::ExpectedData(true));
-            // RooDataHist* cr_hist_B_bar = cr_pdf_B_bar.generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
-            //                                                     1000, RooFit::ExpectedData(true));
-            // // Add histos from both particle and anti-particle PDFs to create the
-            // // final RooHistPdf.
-            // cr_hist->add(*cr_hist_B_bar);
-            // RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
-            //                     *cr_hist);
-
-            // RooDataHist* scf_hist = scf_pdf->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), 1000,
-            //                                             RooFit::ExpectedData(true));
-            // RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf", RooArgSet(*thetat_, *thetab_, *phit_),
-            //                     *scf_hist);
-
-            // RooRealVar cr_scf_f_gen("cr_scf_f_gen", "cr_scf_f_gen", (1 + cr_scf_f.getVal())/2);
-            // RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf),
-            //                     cr_scf_f);
-
-            // Set the current directory back to the one for plots (ugly ROOT stuff)
-            if (output_file_) {
-                output_file_->cd();
-            }
-
-            RooDataSet* dataset_a =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
-            PlotWithPull(*dt_, *dataset_a, *cr_pdf_a);
-
-            // RooDataSet* dataset_b =
-            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
-            // PlotWithPull(*dt_, *dataset_b, cr_pdf_b);
-
-            RooDataSet* dataset_ab =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
-            PlotWithPull(*dt_, *dataset_ab, *cr_pdf_ab);
-
-            // RooDataSet* dataset_bb =
-            //     static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
-            // PlotWithPull(*dt_, *dataset_bb, cr_pdf_bb);
-
-            PlotWithPull(*thetat_, *dataset_, *cr_pdf_a);
-            PlotWithPull(*thetab_, *dataset_, *cr_pdf_a);
-            PlotWithPull(*phit_, *dataset_, *cr_pdf_a);
-        }
-    }
-}
-
 void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_a, DtCPPDF*& cr_pdf_ab, DtCPPDF*& cr_pdf_b, DtCPPDF*& cr_pdf_bb) {
     cr_pdf_a = new DtCPPDF("cr_pdf_a", "cr_pdf_a", false, true, perfect_tagging_, efficiency_model_,
                            efficiency_files_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
@@ -541,6 +393,17 @@ void FitterCPV::CreateDtSCFPDFs(DtSCFPDF*& scf_dt_pdf_a, DtSCFPDF*& scf_dt_pdf_a
                      *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 }
 
+/**
+ * Create a Voigtian + Gaussian PDF.
+ * 
+ * A common prefix is prepended to all object names. The PDF's parameters are
+ * added to the supplied RooArgSet in order to make these parameters settable
+ * from ApplyJSONConfig().
+ * 
+ * @param prefix Text to be prepended to the ROOT name
+ * @param argset Argset where PDF parameters should be added
+ * @return RooAddPdf* 
+ */
 RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf (const char* prefix, RooArgSet& argset) {
     TString pre(prefix);
 
@@ -568,145 +431,46 @@ RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf (const char* prefix, RooArgSet& args
     return model;
 }
 
-void FitterCPV::CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_a, RooProdPdf*& scf_pdf_ab, RooProdPdf*& scf_pdf_b, RooProdPdf*& scf_pdf_bb) {
+/**
+ * Create SCF PDFs with a function-based dt distribution model.
+ * 
+ * @param scf_pdf_a SCF PDF for B0 -> D*- rho+
+ * @param scf_pdf_ab SCF PDF for anti-B0 -> D*+ rho-
+ * @param scf_pdf_b SCF PDF for B0 -> D*+ rho-
+ * @param scf_pdf_bb SCF PDF for anti-B0 -> D*- rho+
+ */
+void FitterCPV::CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_a, RooProdPdf*& scf_pdf_ab,
+                                          RooProdPdf*& scf_pdf_b, RooProdPdf*& scf_pdf_bb) {
     Log::print(Log::debug, "Creating SCF dt PDF\n");
 
-    scf_pdf_a = new RooProdPdf("scf_pdf_a", "scf_pdf_a", RooArgList(*scf_dt_cf_pdf_, *scf_angular_pdf_));
-    scf_pdf_ab = new RooProdPdf("scf_pdf_ab", "scf_pdf_ab", RooArgList(*scf_dt_cf_pdf_, *scf_angular_pdf_));
-    scf_pdf_b = new RooProdPdf("scf_pdf_b", "scf_pdf_b", RooArgList(*scf_dt_dcs_pdf_, *scf_angular_pdf_));
-    scf_pdf_bb = new RooProdPdf("scf_pdf_bb", "scf_pdf_bb", RooArgList(*scf_dt_dcs_pdf_, *scf_angular_pdf_));
+    scf_pdf_a =
+        new RooProdPdf("scf_pdf_a", "scf_pdf_a", RooArgList(*scf_dt_cf_pdf_, *scf_angular_pdf_));
+    scf_pdf_ab =
+        new RooProdPdf("scf_pdf_ab", "scf_pdf_ab", RooArgList(*scf_dt_cf_pdf_, *scf_angular_pdf_));
+    scf_pdf_b =
+        new RooProdPdf("scf_pdf_b", "scf_pdf_b", RooArgList(*scf_dt_dcs_pdf_, *scf_angular_pdf_));
+    scf_pdf_bb =
+        new RooProdPdf("scf_pdf_bb", "scf_pdf_bb", RooArgList(*scf_dt_dcs_pdf_, *scf_angular_pdf_));
 }
 
-void FitterCPV::CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_a, RooProdPdf*& bkg_pdf_ab, RooProdPdf*& bkg_pdf_b, RooProdPdf*& bkg_pdf_bb) {
-
-    bkg_pdf_a = new RooProdPdf("bkg_pdf_a", "bkg_pdf_a", RooArgList(*bkg_dt_cf_pdf_, *bkg_angular_pdf_));
-    bkg_pdf_ab = new RooProdPdf("bkg_pdf_ab", "bkg_pdf_ab", RooArgList(*bkg_dt_cf_pdf_, *bkg_angular_pdf_));
-    bkg_pdf_b = new RooProdPdf("bkg_pdf_b", "bkg_pdf_b", RooArgList(*bkg_dt_dcs_pdf_, *bkg_angular_pdf_));
-    bkg_pdf_bb = new RooProdPdf("bkg_pdf_bb", "bkg_pdf_bb", RooArgList(*bkg_dt_dcs_pdf_, *bkg_angular_pdf_));
-}
-
-void FitterCPV::FitAll() {
-    DtCPPDF* cr_pdf_a = 0;
-    DtCPPDF* cr_pdf_ab = 0;
-    DtCPPDF* cr_pdf_b = 0;
-    DtCPPDF* cr_pdf_bb = 0;
-    CreateDtCPPDFs(cr_pdf_a, cr_pdf_ab, cr_pdf_b, cr_pdf_bb);
-
-    RooProdPdf* scf_pdf_a = 0;
-    RooProdPdf* scf_pdf_ab = 0;
-    RooProdPdf* scf_pdf_b = 0;
-    RooProdPdf* scf_pdf_bb = 0;
-    CreateFunctionalDtSCFPDFs(scf_pdf_a, scf_pdf_ab, scf_pdf_b, scf_pdf_bb);
-
-    RooProdPdf* bkg_pdf_a = 0;
-    RooProdPdf* bkg_pdf_ab = 0;
-    RooProdPdf* bkg_pdf_b = 0;
-    RooProdPdf* bkg_pdf_bb = 0;
-    CreateFunctionalDtBKGPDFs(bkg_pdf_a, bkg_pdf_ab, bkg_pdf_b, bkg_pdf_bb);
-
-    RooAddPdf pdf_a("pdf_a", "pdf_a", RooArgList(*cr_pdf_a, *scf_pdf_a, *bkg_pdf_a), RooArgList(cr_f, scf_f));
-    RooAddPdf pdf_ab("pdf_ab", "pdf_ab", RooArgList(*cr_pdf_ab, *scf_pdf_ab, *bkg_pdf_ab), RooArgList(cr_f, scf_f));
-    RooAddPdf pdf_b("pdf_b", "pdf_b", RooArgList(*cr_pdf_b, *scf_pdf_b, *bkg_pdf_b), RooArgList(cr_f, scf_f));
-    RooAddPdf pdf_bb("pdf_bb", "pdf_bb", RooArgList(*cr_pdf_bb, *scf_pdf_bb, *bkg_pdf_bb), RooArgList(cr_f, scf_f));
-
-    RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf.addPdf(pdf_a, "a");
-    sim_pdf.addPdf(pdf_ab, "ab");
-    sim_pdf.addPdf(pdf_b, "b");
-    sim_pdf.addPdf(pdf_bb, "bb");
-
-    tau_->setConstant(true);
-    dm_->setConstant(true);
-
-    if (do_mixing_fit_) {
-        result_ =
-            sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
-                          RooFit::Hesse(false), RooFit::Minos(false), RooFit::Minimizer("Minuit2"),
-                          RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-        if (result_) {
-            result_->Print();
-        }
-
-        if (make_plots_) {
-            // TODO: Refactor. Now! Really!
-            // This plotting code actually works! In finite time! Have to start from here.
-            // RooDataSet* cr_dataset_ = static_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
-            // RooDataSet* scf_dataset_ = static_cast<RooDataSet*>(dataset_->reduce("evmcflag!=1"));
-
-            // RooDataSet* cr_dataset_a =
-            //     static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::a"));
-            // PlotWithPull(*dt_, *cr_dataset_a, cr_pdf_a);
-
-            // RooDataSet* cr_dataset_b =
-            //     static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::b"));
-            // PlotWithPull(*dt_, *cr_dataset_b, cr_pdf_b);
-
-            // RooDataSet* cr_dataset_ab =
-            //     static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::ab"));
-            // PlotWithPull(*dt_, *cr_dataset_ab, cr_pdf_ab);
-
-            // RooDataSet* cr_dataset_bb =
-            //     static_cast<RooDataSet*>(cr_dataset_->reduce("decaytype==decaytype::bb"));
-            // PlotWithPull(*dt_, *cr_dataset_bb, cr_pdf_bb);
-
-            // RooDataSet* scf_dataset_a =
-            //     static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::a"));
-            // PlotWithPull(*dt_, *scf_dataset_a, scf_pdf_a);
-
-            // RooDataSet* scf_dataset_b =
-            //     static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::b"));
-            // PlotWithPull(*dt_, *scf_dataset_b, scf_pdf_b);
-
-            // RooDataSet* scf_dataset_ab =
-            //     static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::ab"));
-            // PlotWithPull(*dt_, *scf_dataset_ab, scf_pdf_ab);
-
-            // RooDataSet* scf_dataset_bb =
-            //     static_cast<RooDataSet*>(scf_dataset_->reduce("decaytype==decaytype::bb"));
-            // PlotWithPull(*dt_, *scf_dataset_bb, scf_pdf_bb);
-
-            // thetab_->setBins(300);
-            RooDataHist* cr_hist =
-                cr_pdf_a->generateBinned(RooArgSet(*dt_, *thetat_, *thetab_, *phit_), 1000 * cr_f.getVal(),
-                                        RooFit::ExpectedData(true));
-
-            RooDataHist* scf_hist = scf_pdf_a->generateBinned(
-                RooArgSet(*dt_, *thetat_, *thetab_, *phit_), 1000 * scf_f.getVal(),
-                RooFit::ExpectedData(true));
-
-            RooDataHist* bkg_hist = bkg_pdf_a->generateBinned(
-                RooArgSet(*dt_, *thetat_, *thetab_, *phit_), 1000 * (1 - cr_f.getVal() - scf_f.getVal()),
-                RooFit::ExpectedData(true));
-
-            // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
-            // *phit_), *all_hist);
-            RooHistPdf cr_histpdf("cr_histpdf", "cr_histpdf", RooArgSet(*dt_, *thetat_, *thetab_, *phit_),
-                                  *cr_hist);
-            RooHistPdf scf_histpdf("scf_histpdf", "scf_histpdf",
-                                   RooArgSet(*dt_, *thetat_, *thetab_, *phit_), *scf_hist);
-            RooHistPdf bkg_histpdf("bkg_histpdf", "bkg_histpdf",
-                                   RooArgSet(*dt_, *thetat_, *thetab_, *phit_), *bkg_hist);
-            RooAddPdf all_histpdf("all_histpdf", "all_histpdf", RooArgList(cr_histpdf, scf_histpdf, bkg_histpdf),
-                                  RooArgList(cr_f, scf_f));
-
-            std::vector<RooAbsPdf*> components;
-            components.push_back(&cr_histpdf);
-            components.push_back(&scf_histpdf);
-            components.push_back(&bkg_histpdf);
-
-            // thetab_->setBins(100);
-
-            // Set the current directory back to the one for plots (ugly ROOT stuff)
-            if (output_file_) {
-                output_file_->cd();
-            }
-
-            PlotWithPull(*dt_, *dataset_, all_histpdf, components);
-            PlotWithPull(*thetat_, *dataset_, all_histpdf, components);
-            PlotWithPull(*thetab_, *dataset_, all_histpdf, components);
-            PlotWithPull(*phit_, *dataset_, all_histpdf, components);
-        }
-    }
+/**
+ * Create BKG PDFs with a function-based dt distribution model.
+ * 
+ * @param bkg_pdf_a BKG PDF for B0 -> D*- rho+
+ * @param bkg_pdf_ab BKG PDF for anti-B0 -> D*+ rho-
+ * @param bkg_pdf_b BKG PDF for B0 -> D*+ rho-
+ * @param bkg_pdf_bb BKG PDF for anti-B0 -> D*- rho+
+ */
+void FitterCPV::CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_a, RooProdPdf*& bkg_pdf_ab,
+                                          RooProdPdf*& bkg_pdf_b, RooProdPdf*& bkg_pdf_bb) {
+    bkg_pdf_a =
+        new RooProdPdf("bkg_pdf_a", "bkg_pdf_a", RooArgList(*bkg_dt_cf_pdf_, *bkg_angular_pdf_));
+    bkg_pdf_ab =
+        new RooProdPdf("bkg_pdf_ab", "bkg_pdf_ab", RooArgList(*bkg_dt_cf_pdf_, *bkg_angular_pdf_));
+    bkg_pdf_b =
+        new RooProdPdf("bkg_pdf_b", "bkg_pdf_b", RooArgList(*bkg_dt_dcs_pdf_, *bkg_angular_pdf_));
+    bkg_pdf_bb =
+        new RooProdPdf("bkg_pdf_bb", "bkg_pdf_bb", RooArgList(*bkg_dt_dcs_pdf_, *bkg_angular_pdf_));
 }
 
 /**
@@ -770,14 +534,98 @@ RooSimultaneous* FitterCPV::CreateAngularAllPDF() {
 }
 
 /**
- * Fit time-independent PDF with the requested components
+ * Create a time-dependent CR-only PDF.
+ */
+RooSimultaneous* FitterCPV::CreateCRPDF() {
+    DtCPPDF* cr_pdf_a = 0;
+    DtCPPDF* cr_pdf_ab = 0;
+    DtCPPDF* cr_pdf_b = 0;
+    DtCPPDF* cr_pdf_bb = 0;
+    CreateDtCPPDFs(cr_pdf_a, cr_pdf_ab, cr_pdf_b, cr_pdf_bb);
+
+    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
+    sim_pdf->addPdf(*cr_pdf_a, "a");
+    sim_pdf->addPdf(*cr_pdf_ab, "ab");
+    sim_pdf->addPdf(*cr_pdf_b, "b");
+    sim_pdf->addPdf(*cr_pdf_bb, "bb");
+
+    return sim_pdf;
+}
+
+/**
+ * Create a time-dependent CR + SCF PDF.
+ */
+RooSimultaneous* FitterCPV::CreateCRSCFPDF() {
+    DtCPPDF* cr_pdf_a = 0;
+    DtCPPDF* cr_pdf_ab = 0;
+    DtCPPDF* cr_pdf_b = 0;
+    DtCPPDF* cr_pdf_bb = 0;
+    CreateDtCPPDFs(cr_pdf_a, cr_pdf_ab, cr_pdf_b, cr_pdf_bb);
+
+    RooProdPdf* scf_pdf_a = 0;
+    RooProdPdf* scf_pdf_ab = 0;
+    RooProdPdf* scf_pdf_b = 0;
+    RooProdPdf* scf_pdf_bb = 0;
+    CreateFunctionalDtSCFPDFs(scf_pdf_a, scf_pdf_ab, scf_pdf_b, scf_pdf_bb);
+
+    RooAddPdf* pdf_a = new RooAddPdf("pdf_a", "pdf_a", RooArgList(*cr_pdf_a, *scf_pdf_a), RooArgList(cr_scf_f));
+    RooAddPdf* pdf_ab = new RooAddPdf("pdf_ab", "pdf_ab", RooArgList(*cr_pdf_ab, *scf_pdf_ab), RooArgList(cr_scf_f));
+    RooAddPdf* pdf_b = new RooAddPdf("pdf_b", "pdf_b", RooArgList(*cr_pdf_b, *scf_pdf_b), RooArgList(cr_scf_f));
+    RooAddPdf* pdf_bb = new RooAddPdf("pdf_bb", "pdf_bb", RooArgList(*cr_pdf_bb, *scf_pdf_bb), RooArgList(cr_scf_f));
+
+    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
+    sim_pdf->addPdf(*pdf_a, "a");
+    sim_pdf->addPdf(*pdf_ab, "ab");
+    sim_pdf->addPdf(*pdf_b, "b");
+    sim_pdf->addPdf(*pdf_bb, "bb");
+
+    return sim_pdf;
+}
+
+/**
+ * Create a time-dependent CR + SCF + BKG PDF.
+ */
+RooSimultaneous* FitterCPV::CreateAllPDF() {
+    DtCPPDF* cr_pdf_a = 0;
+    DtCPPDF* cr_pdf_ab = 0;
+    DtCPPDF* cr_pdf_b = 0;
+    DtCPPDF* cr_pdf_bb = 0;
+    CreateDtCPPDFs(cr_pdf_a, cr_pdf_ab, cr_pdf_b, cr_pdf_bb);
+
+    RooProdPdf* scf_pdf_a = 0;
+    RooProdPdf* scf_pdf_ab = 0;
+    RooProdPdf* scf_pdf_b = 0;
+    RooProdPdf* scf_pdf_bb = 0;
+    CreateFunctionalDtSCFPDFs(scf_pdf_a, scf_pdf_ab, scf_pdf_b, scf_pdf_bb);
+
+    RooProdPdf* bkg_pdf_a = 0;
+    RooProdPdf* bkg_pdf_ab = 0;
+    RooProdPdf* bkg_pdf_b = 0;
+    RooProdPdf* bkg_pdf_bb = 0;
+    CreateFunctionalDtBKGPDFs(bkg_pdf_a, bkg_pdf_ab, bkg_pdf_b, bkg_pdf_bb);
+
+    RooAddPdf* pdf_a  = new RooAddPdf("pdf_a", "pdf_a", RooArgList(*cr_pdf_a, *scf_pdf_a, *bkg_pdf_a), RooArgList(cr_f, scf_f));
+    RooAddPdf* pdf_ab = new RooAddPdf("pdf_ab", "pdf_ab", RooArgList(*cr_pdf_ab, *scf_pdf_ab, *bkg_pdf_ab), RooArgList(cr_f, scf_f));
+    RooAddPdf* pdf_b  = new RooAddPdf("pdf_b", "pdf_b", RooArgList(*cr_pdf_b, *scf_pdf_b, *bkg_pdf_b), RooArgList(cr_f, scf_f));
+    RooAddPdf* pdf_bb = new RooAddPdf("pdf_bb", "pdf_bb", RooArgList(*cr_pdf_bb, *scf_pdf_bb, *bkg_pdf_bb), RooArgList(cr_f, scf_f));
+
+    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
+    sim_pdf->addPdf(*pdf_a, "a");
+    sim_pdf->addPdf(*pdf_ab, "ab");
+    sim_pdf->addPdf(*pdf_b, "b");
+    sim_pdf->addPdf(*pdf_bb, "bb");
+
+    return sim_pdf;
+}
+
+/**
+ * Fit specified PDF, show the results, and create plots if config demands it
  * 
- * If the fitter setup requests it, plots will be produced.
- * 
+ * @param timedep Whether a time-dependent fit should be carried out
  * @param scf Add self-crossfeed component to the fit
  * @param bkg Add background component to the fit
  */
-void FitterCPV::FitAngular(const bool scf, const bool bkg) {
+void FitterCPV::Fit(const bool timedep, const bool scf, const bool bkg) {
     Log::print(Log::info, "Fitting %i events.\n", dataset_->numEntries());
     std::string components;
 
@@ -785,21 +633,25 @@ void FitterCPV::FitAngular(const bool scf, const bool bkg) {
     if (!scf && !bkg) {
         RooDataSet* temp_dataset = dynamic_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
         dataset_ = temp_dataset;
-        sim_pdf = CreateAngularCRPDF();
+        sim_pdf = timedep ? CreateCRPDF() : CreateAngularCRPDF();
         components += "CR";
     } else if (scf && !bkg) {
-        sim_pdf = CreateAngularCRSCFPDF();
+        sim_pdf = timedep ? CreateCRSCFPDF() : CreateAngularCRSCFPDF();
         components += "CR+SCF";
     } else if (scf && bkg) {
-        sim_pdf = CreateAngularAllPDF();
+        sim_pdf = timedep ? CreateAllPDF() : CreateAngularAllPDF();
         components += "CR+SCF+BKG";
     } else {
         Log::print(Log::error, "Requested a fit with unsupported component configuration");
     }
     Log::print(Log::info, "Running a fit with the following components: %s\n", components.c_str());
 
-    result_ = sim_pdf->fitTo(*dataset_, RooFit::Minimizer("Minuit2"), RooFit::Hesse(false),
-                            RooFit::Minos(false), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+    tau_->setConstant(true);
+    dm_->setConstant(true);
+
+    result_ = sim_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
+                  RooFit::Hesse(false), RooFit::Minos(false), RooFit::Minimizer("Minuit2"),
+                  RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
     if (result_) {
         result_->Print();
@@ -808,7 +660,6 @@ void FitterCPV::FitAngular(const bool scf, const bool bkg) {
     if (make_plots_) {
         PlotFit(sim_pdf, scf, bkg);
     }
-
 }
 
 /**

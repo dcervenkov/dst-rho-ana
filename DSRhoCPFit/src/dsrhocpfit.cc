@@ -150,23 +150,11 @@ int main(int argc, char* argv[]) {
     }
 
     if (std::strcmp(options.fit, "CR") == 0) {
-        if (fitter.GetDoTimeIndependentFit()) {
-            fitter.FitAngular(false, false);
-        } else {
-            fitter.FitCR();
-        }
+            fitter.Fit(!fitter.GetDoTimeIndependentFit(), false, false);
     } else if (std::strcmp(options.fit, "CRSCF") == 0) {
-        if (fitter.GetDoTimeIndependentFit()) {
-            fitter.FitAngular(true, false);
-        } else {
-            fitter.FitCRSCF();
-        }
+            fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, false);
     } else if (std::strcmp(options.fit, "all") == 0) {
-        if (fitter.GetDoTimeIndependentFit()) {
-            fitter.FitAngular(true, true);
-        } else {
-            fitter.FitAll();
-        }
+            fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, true);
     }
     // fitter.GenerateToys(10000, 10);
 

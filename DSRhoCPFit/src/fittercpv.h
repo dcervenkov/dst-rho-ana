@@ -43,10 +43,8 @@ class FitterCPV {
     void PlotWithPull(const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
                       const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
                       const char* title = "") const;
-    void FitCR();
-    void FitCRSCF();
-    void FitAll();
-    void FitAngular(const bool scf, const bool bkg);
+
+    void Fit(const bool timedep, const bool scf, const bool bkg);
 
     void GenerateToys(const int num_events, const int num_toys);
     void TestEfficiency();
@@ -192,6 +190,10 @@ class FitterCPV {
     RooSimultaneous* CreateAngularCRPDF();
     RooSimultaneous* CreateAngularCRSCFPDF();
     RooSimultaneous* CreateAngularAllPDF();
+
+    RooSimultaneous* CreateCRPDF();
+    RooSimultaneous* CreateCRSCFPDF();
+    RooSimultaneous* CreateAllPDF();
 
     RooAddPdf* CreateVoigtGaussDtPdf (const char* prefix, RooArgSet& argset);
     void CreateDtCPPDFs(DtCPPDF*& cr_pdf_a, DtCPPDF*& cr_pdf_ab, DtCPPDF*& cr_pdf_b,

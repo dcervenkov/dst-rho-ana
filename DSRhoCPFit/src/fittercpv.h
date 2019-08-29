@@ -29,7 +29,7 @@
 #include "constants.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
-#include "rapidjson/document.h"
+#include "nlohmann/json.hpp"
 
 class FitterCPV {
    public:
@@ -91,9 +91,8 @@ class FitterCPV {
     const std::string CreateResultsString();
     const std::string CreatePullTableString(const bool asymmetric = false);
     const std::string CreateLatexPullTableString(const bool asymmetric = false);
-    RooDataSet* ReduceDataToFitRange(const rapidjson::Document& config);
-    static rapidjson::Document ReadJSONConfig(const char* filename);
-    std::string ApplyJSONConfig(const rapidjson::Document& config);
+    static nlohmann::json ReadJSONConfig(const char* filename);
+    std::string ApplyJSONConfig(const nlohmann::json& config);
     const void SaveTXTResults(const char* root_filename);
     bool CheckConfigIsValid() const;
 
@@ -173,8 +172,8 @@ class FitterCPV {
 
    private:
     void PrepareVarArgsets();
-    void ChangeFitRanges(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config);
-    void ChangeModelParameters(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config);
+    void ChangeFitRanges(const nlohmann::json& config);
+    void ChangeModelParameters(const nlohmann::json& config);
     TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
                              const bool position_left) const;
     TH3D* GetBinnedEfficiency(std::vector<std::string> file, const int model);

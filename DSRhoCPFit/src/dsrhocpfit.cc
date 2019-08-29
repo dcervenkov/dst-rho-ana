@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
 
     std::string json_config;
     if (options.config_file_set) {
-        rapidjson::Document config = FitterCPV::ReadJSONConfig(options.config_file);
+        nlohmann::json config = FitterCPV::ReadJSONConfig(options.config_file);
         json_config = fitter.ApplyJSONConfig(config);
     }
 

@@ -59,19 +59,15 @@
 #include "RooMeerkatPdf.hh"
 
 // Local includes
+#include "RooHistPdfFast.h"
 #include "angularpdf.h"
 #include "constants.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
 #include "log.h"
-#include "rapidjson/document.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/stringbuffer.h"
-#include "RooHistPdfFast.h"
 #include "tools.h"
 
 FitterCPV::FitterCPV() {
-
     num_CPUs_ = 1;
     do_lifetime_fit_ = false;
     do_mixing_fit_ = false;
@@ -123,11 +119,13 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
 
     if (generator_level_) {
         thetat_ = new RooRealVar("thetatg", "#theta_{t}^{g} [rad]", 0, TMath::Pi());
-        thetab_ = new RooRealVar("thetabg", "#theta_{b}^{g} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high);
+        thetab_ = new RooRealVar("thetabg", "#theta_{b}^{g} [rad]", constants::cuts::thetab_low,
+                                 constants::cuts::thetab_high);
         phit_ = new RooRealVar("phitg", "#phi_{t}^{g} [rad]", -TMath::Pi(), TMath::Pi());
     } else {
         thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", 0, TMath::Pi());
-        thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high);
+        thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", constants::cuts::thetab_low,
+                                 constants::cuts::thetab_high);
         phit_ = new RooRealVar("phit", "#phi_{t} [rad]", -TMath::Pi(), TMath::Pi());
     }
 
@@ -203,7 +201,7 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
 
 /**
  * Populate various vectors and argsets with all parameters.
- * 
+ *
  * This populates conditional_vars_, dataset_vars_, parameters_ and their pair
  * argsets which are used elsewhere.
  */
@@ -285,7 +283,7 @@ void FitterCPV::PrepareVarArgsets() {
 
 /**
  * Make a simple plot of a variable and save it to a file.
- * 
+ *
  * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
  */
 void FitterCPV::PlotVar(RooRealVar& var, const RooAbsData& data) const {
@@ -310,7 +308,7 @@ void FitterCPV::PlotVar(RooRealVar& var, const RooAbsData& data) const {
 
 /**
  * Make a simple plot of a variable and save it to a file.
- * 
+ *
  * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
  */
 void FitterCPV::PlotVar(RooRealVar& var, const RooAbsPdf& pdf) const {
@@ -337,7 +335,8 @@ void FitterCPV::PlotVar(RooRealVar& var, const RooAbsPdf& pdf) const {
     canvas.SaveAs(constants::format);
 }
 
-void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_a, DtCPPDF*& cr_pdf_ab, DtCPPDF*& cr_pdf_b, DtCPPDF*& cr_pdf_bb) {
+void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_a, DtCPPDF*& cr_pdf_ab, DtCPPDF*& cr_pdf_b,
+                               DtCPPDF*& cr_pdf_bb) {
     cr_pdf_a = new DtCPPDF("cr_pdf_a", "cr_pdf_a", false, true, perfect_tagging_, efficiency_model_,
                            efficiency_files_, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
                            *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
@@ -395,37 +394,36 @@ void FitterCPV::CreateDtSCFPDFs(DtSCFPDF*& scf_dt_pdf_a, DtSCFPDF*& scf_dt_pdf_a
 
 /**
  * Create a Voigtian + Gaussian PDF.
- * 
+ *
  * A common prefix is prepended to all object names. The PDF's parameters are
  * added to the supplied RooArgSet in order to make these parameters settable
  * from ApplyJSONConfig().
- * 
+ *
  * @param prefix Text to be prepended to the ROOT name
  * @param argset Argset where PDF parameters should be added
- * @return RooAddPdf* 
+ * @return RooAddPdf*
  */
-RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf (const char* prefix, RooArgSet& argset) {
+RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf(const char* prefix, RooArgSet& argset) {
     TString pre(prefix);
 
-    RooRealVar* voigt_mu = new RooRealVar(pre +"_voigt_mu", "v_{#mu}", -0.249);
+    RooRealVar* voigt_mu = new RooRealVar(pre + "_voigt_mu", "v_{#mu}", -0.249);
     RooRealVar* voigt_sigma = new RooRealVar(pre + "_voigt_sigma_", "v_{#sigma}", 1.910);
     RooRealVar* voigt_width = new RooRealVar(pre + "_voigt_width_", "v_{w}", 0.684);
     RooVoigtian* voigt = new RooVoigtian(pre + "_voigt", pre + "_voigt", *dt_, *voigt_mu,
-                                *voigt_width, *voigt_sigma);
+                                         *voigt_width, *voigt_sigma);
     argset.add(*voigt_mu);
     argset.add(*voigt_sigma);
     argset.add(*voigt_width);
 
     RooRealVar* gaus_mu = new RooRealVar(pre + "_gaus_mu", "g_{#mu}", -0.105);
     RooRealVar* gaus_sigma = new RooRealVar(pre + "_gaus_sigma_", "g_{#sigma}", 0.881);
-    RooGaussian* gaus = new RooGaussian(pre + "_gaus", pre + "_gaus", *dt_, *gaus_mu,
-                               *gaus_sigma);
+    RooGaussian* gaus = new RooGaussian(pre + "_gaus", pre + "_gaus", *dt_, *gaus_mu, *gaus_sigma);
     argset.add(*gaus_mu);
     argset.add(*gaus_sigma);
 
     RooRealVar* f = new RooRealVar(pre + "_f", "f_{v/g}", 0.720);
-    RooAddPdf* model = new RooAddPdf(pre + "_model", pre + "_model",
-                              RooArgList(*voigt, *gaus), RooArgList(*f));
+    RooAddPdf* model =
+        new RooAddPdf(pre + "_model", pre + "_model", RooArgList(*voigt, *gaus), RooArgList(*f));
     argset.add(*f);
 
     return model;
@@ -433,7 +431,7 @@ RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf (const char* prefix, RooArgSet& args
 
 /**
  * Create SCF PDFs with a function-based dt distribution model.
- * 
+ *
  * @param scf_pdf_a SCF PDF for B0 -> D*- rho+
  * @param scf_pdf_ab SCF PDF for anti-B0 -> D*+ rho-
  * @param scf_pdf_b SCF PDF for B0 -> D*+ rho-
@@ -455,7 +453,7 @@ void FitterCPV::CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_a, RooProdPdf*& s
 
 /**
  * Create BKG PDFs with a function-based dt distribution model.
- * 
+ *
  * @param bkg_pdf_a BKG PDF for B0 -> D*- rho+
  * @param bkg_pdf_ab BKG PDF for anti-B0 -> D*+ rho-
  * @param bkg_pdf_b BKG PDF for B0 -> D*+ rho-
@@ -475,7 +473,7 @@ void FitterCPV::CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_a, RooProdPdf*& b
 
 /**
  * Create a time-independent PDF with the requested components
- * 
+ *
  * @param scf Whether to add self-crossfeed component
  * @param bkg Whether to add background component
  * @return RooSimultaneous* The complete PDF
@@ -484,10 +482,12 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const bool scf, const bool bkg) {
     RooArgList B_pdfs;
     RooArgList B_bar_pdfs;
 
-    AngularPDF* cr_pdf_B = new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, *ap_,
-                     *apa_, *a0_, *ata_);
-    AngularPDF* cr_pdf_B_bar = new AngularPDF("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_, *thetat_, *thetab_,
-                         *phit_, *ap_, *apa_, *a0_, *ata_);
+    AngularPDF* cr_pdf_B =
+        new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_,
+                       *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_);
+    AngularPDF* cr_pdf_B_bar =
+        new AngularPDF("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_,
+                       *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_);
 
     B_pdfs.add(*cr_pdf_B);
     B_bar_pdfs.add(*cr_pdf_B_bar);
@@ -524,7 +524,7 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const bool scf, const bool bkg) {
 
 /**
  * Create a time-dependent PDF with the requested components
- * 
+ *
  * @param scf Whether to add self-crossfeed component
  * @param bkg Whether to add background component
  * @return RooSimultaneous* The complete PDF
@@ -577,9 +577,9 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const bool scf, const bool bk
         fractions.add(scf_f_);
     }
 
-    RooAddPdf* pdf_a  = new RooAddPdf("pdf_a", "pdf_a", a_pdfs, fractions);
+    RooAddPdf* pdf_a = new RooAddPdf("pdf_a", "pdf_a", a_pdfs, fractions);
     RooAddPdf* pdf_ab = new RooAddPdf("pdf_ab", "pdf_ab", ab_pdfs, fractions);
-    RooAddPdf* pdf_b  = new RooAddPdf("pdf_b", "pdf_b", b_pdfs, fractions);
+    RooAddPdf* pdf_b = new RooAddPdf("pdf_b", "pdf_b", b_pdfs, fractions);
     RooAddPdf* pdf_bb = new RooAddPdf("pdf_bb", "pdf_bb", bb_pdfs, fractions);
 
     RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
@@ -593,7 +593,7 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const bool scf, const bool bk
 
 /**
  * Fit specified PDF, show the results, and create plots if config demands it
- * 
+ *
  * @param timedep Whether a time-dependent fit should be carried out
  * @param scf Add self-crossfeed component to the fit
  * @param bkg Add background component to the fit
@@ -616,10 +616,12 @@ void FitterCPV::Fit(const bool timedep, const bool scf, const bool bkg) {
     tau_->setConstant(true);
     dm_->setConstant(true);
 
-    RooSimultaneous* sim_pdf = timedep ? CreateTimeDependentPDF(scf, bkg) : CreateAngularPDF(scf, bkg);
-    result_ = sim_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
-                  RooFit::Hesse(false), RooFit::Minos(false), RooFit::Minimizer("Minuit2"),
-                  RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+    RooSimultaneous* sim_pdf =
+        timedep ? CreateTimeDependentPDF(scf, bkg) : CreateAngularPDF(scf, bkg);
+    result_ =
+        sim_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
+                       RooFit::Hesse(false), RooFit::Minos(false), RooFit::Minimizer("Minuit2"),
+                       RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
     if (result_) {
         result_->Print();
@@ -632,245 +634,194 @@ void FitterCPV::Fit(const bool timedep, const bool scf, const bool bkg) {
 
 /**
  * Plot the PDF and data including all components plotted separately
- * 
+ *
  * This function is rather convoluted to get around a RooFit bug which causes
  * problems when trying to plot complicated PDFs with conditional observables;
  * see
  * https://root-forum.cern.ch/t/rooaddpdf-and-integration-over-conditional-observables/27891
  * Instead of normally plotting the PDFs, we generate Asimov datasets and plot those.
- * 
+ *
  * @param sim_pdf The complete PDF to be used for plotting
  * @param scf Whether a SCF component should be plotted
  * @param bkg Whether a BKG component should be plotted
  */
 void FitterCPV::PlotFit(RooSimultaneous* sim_pdf, const bool scf, const bool bkg) {
-        // PDF for B_bar differs, so we have to generate them separately. (One
-        // could also use *extended* RooSimultaneous or 'ProtoData' for
-        // RooSimultaneous.)
-        RooAbsPdf* cr_pdf_B;
-        RooAbsPdf* cr_pdf_B_bar;
-        RooAbsPdf* pdf_B;
-        RooAbsPdf* pdf_B_bar;
+    // PDF for B_bar differs, so we have to generate them separately. (One
+    // could also use *extended* RooSimultaneous or 'ProtoData' for
+    // RooSimultaneous.)
+    RooAbsPdf* cr_pdf_B;
+    RooAbsPdf* cr_pdf_B_bar;
+    RooAbsPdf* pdf_B;
+    RooAbsPdf* pdf_B_bar;
 
-        // The structure of the PDF for CR-only and CR+anything differs. This if
-        // extracts the CR-only PDFs in all cases as well as the total PDF for B
-        // and B bar (in the case of CR-only the total PDFs are identical to the
-        // CR-only ones)
-        if (scf || bkg) {
-            pdf_B = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("a"));
-            RooAddPdf* add_pdf_B = dynamic_cast<RooAddPdf*>(pdf_B);
-            const int cr_pdf_B_index = add_pdf_B->pdfList().index("cr_pdf_B");
-            cr_pdf_B = dynamic_cast<RooAbsPdf*>(add_pdf_B->pdfList().at(cr_pdf_B_index));
+    // The structure of the PDF for CR-only and CR+anything differs. This if
+    // extracts the CR-only PDFs in all cases as well as the total PDF for B
+    // and B bar (in the case of CR-only the total PDFs are identical to the
+    // CR-only ones)
+    if (scf || bkg) {
+        pdf_B = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("a"));
+        RooAddPdf* add_pdf_B = dynamic_cast<RooAddPdf*>(pdf_B);
+        const int cr_pdf_B_index = add_pdf_B->pdfList().index("cr_pdf_B");
+        cr_pdf_B = dynamic_cast<RooAbsPdf*>(add_pdf_B->pdfList().at(cr_pdf_B_index));
 
-            pdf_B_bar = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("ab"));
-            RooAddPdf* add_pdf_B_bar = dynamic_cast<RooAddPdf*>(pdf_B_bar);
-            const int cr_pdf_B_bar_index = add_pdf_B_bar->pdfList().index("cr_pdf_B_bar");
-            cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(add_pdf_B->pdfList().at(cr_pdf_B_bar_index));
-        } else {
-            cr_pdf_B = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("a"));
-            cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("ab"));
-            pdf_B = cr_pdf_B;
-            pdf_B_bar = cr_pdf_B_bar;
-        }
-
-        RooArgSet used_vars;
-        if (!do_time_independent_fit_) {
-            used_vars.add(*dt_);
-        }
-        used_vars.add(*thetat_);
-        used_vars.add(*thetab_);
-        used_vars.add(*phit_);
-
-        RooDataHist* cr_hist =
-            cr_pdf_B->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
-        RooDataHist* cr_hist_B_bar =
-            cr_pdf_B_bar->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
-
-        // Add histos from both particle and anti-particle PDFs to create the
-        // final RooHistPdf.
-        cr_hist->add(*cr_hist_B_bar);
-        RooHistPdf* cr_histpdf = new RooHistPdf("cr_histpdf", "cr_histpdf", used_vars, *cr_hist);
-
-        RooHistPdf* scf_histpdf;
-        if (scf) {
-            RooDataHist* scf_hist =
-                scf_angular_pdf_->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
-            scf_histpdf = new RooHistPdf("scf_histpdf", "scf_histpdf", used_vars, *scf_hist);
-        }
-
-        RooHistPdf* bkg_histpdf;
-        if (bkg) {
-            RooDataHist* bkg_hist =
-                bkg_angular_pdf_->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
-            bkg_histpdf = new RooHistPdf("bkg_histpdf", "bkg_histpdf", used_vars, *bkg_hist);
-        }
-
-        RooAbsPdf* all_histpdf;
-        if ((!scf) && (!bkg)) {
-            all_histpdf = cr_histpdf;
-        } else if (scf && (!bkg)) {
-            all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
-                                        RooArgList(*cr_histpdf, *scf_histpdf), cr_scf_f_);
-        } else if (scf && bkg) {
-            all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
-                                        RooArgList(*cr_histpdf, *scf_histpdf, *bkg_histpdf),
-                                        RooArgList(cr_f_, scf_f_));
-        }
-
-        // Set the current directory back to the one for plots (ugly ROOT stuff)
-        if (output_file_) {
-            output_file_->cd();
-        }
-
-        // const double margin_ap = 0.005;
-        // const double margin_apa = 0.25;
-        // const double margin_a0 = 0.0015;
-        // const double margin_ata = 0.3;
-        // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
-        // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
-        // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
-        // SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
-        // SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
-        // SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
-        // SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
-        // SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
-        // SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
-        // SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
-
-        // PlotWithPull(*thetat_, *dataset_, cr_histpdf);
-        // PlotWithPull(*thetab_, *dataset_, cr_histpdf);
-        // PlotWithPull(*phit_, *dataset_, cr_histpdf);
-
-        // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
-        // *phit_), *all_hist);
-        std::vector<RooAbsPdf*> components;
-        components.push_back(cr_histpdf);
-        if (scf) {
-            components.push_back(scf_histpdf);
-        }
-        if (bkg) {
-            components.push_back(bkg_histpdf);
-        }
-        // thetab_->setBins(100);
-
-        if (!do_time_independent_fit_) {
-            PlotWithPull(*dt_, *dataset_, *all_histpdf, components);
-        }
-        PlotWithPull(*thetat_, *dataset_, *all_histpdf, components);
-        PlotWithPull(*thetab_, *dataset_, *all_histpdf, components);
-        PlotWithPull(*phit_, *dataset_, *all_histpdf, components);
-
-        // We need this to get the exact number of events to be generated for
-        // the PDF distribution. This is unnecessary for the above, because we
-        // create a RooHistPdf from it and that is normalized to the data when
-        // plotted.
-        RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
-            dataset_->reduce("decaytype==decaytype::a||decaytype==decaytype::b"));
-        RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(
-            dataset_->reduce("decaytype==decaytype::ab||decaytype==decaytype::bb"));
-
-        thetat_->setBins(40);
-        thetab_->setBins(40);
-        phit_->setBins(40);
-        RooDataHist hist("hist", "hist", used_vars, *dataset_);
-        tools::PlotVars2D(*thetat_, *thetab_, hist);
-        tools::PlotVars2D(*thetat_, *phit_, hist);
-        tools::PlotVars2D(*thetab_, *phit_, hist);
-
-        // We change the binning for 2D plots, so we have to generate new binned
-        // dataset, to avoid dealing with rebinning.
-        delete cr_hist;
-        delete cr_hist_B_bar;
-
-        RooDataHist* all_hist = pdf_B->generateBinned(used_vars,
-                                       dataset_B->sumEntries(), RooFit::ExpectedData(true));
-        RooDataHist* all_hist_B_bar =
-            pdf_B_bar->generateBinned(used_vars,
-                                     dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
-        all_hist->add(*all_hist_B_bar);
-
-        // Set the current directory back to the one for plots (ugly ROOT stuff)
-        if (output_file_) {
-            output_file_->cd();
-        }
-        tools::PlotPull2D(*thetat_, *thetab_, hist, *all_hist);
-        tools::PlotPull2D(*thetat_, *phit_, hist, *all_hist);
-        tools::PlotPull2D(*thetab_, *phit_, hist, *all_hist);
-
-        const double chi2 = Calculate3DChi2(hist, *all_hist);
-        std::cout << "Chi2 = " << chi2 << std::endl;
-
-        // SaveChi2Scan(sim_pdf, ap_, margin_apa);
-        // SaveChi2Scan(sim_pdf, apa_, margin_apa);
-        // SaveChi2Scan(sim_pdf, a0_, margin_a0);
-        // SaveChi2Scan(sim_pdf, ata_, margin_ata);
-
-        delete dataset_B;
-        delete dataset_B_bar;
-
-}
-
-/**
- * Take a JSON config, look at 'fitRanges' key, and create a copy of the dataset
- * with all events falling outside of the ranges deleted.
- * 
- * @param config JSON config with the 'fitRanges' key
- * 
- * @return RooDataSet* Dataset with events falling outside of the fit range deleted
- */
-RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
-    RooDataSet* reduced_dataset = 0;
-    std::ostringstream reduce_string;
-    bool first = true;
-
-    for (auto var : dataset_vars_) {
-        const char* var_name = (**var).GetName();
-        if (config["fitRanges"].HasMember(var_name)) {
-            if (first == false) {
-                reduce_string << " && ";
-            } else {
-                first = false;
-            }
-
-            reduce_string << "(";
-            const rapidjson::SizeType num_ranges = config["fitRanges"][var_name].Size();
-            for (rapidjson::SizeType i = 0; i < num_ranges; i++) {
-                double low, high;
-                low = config["fitRanges"][var_name][i][0].GetDouble();
-                high = config["fitRanges"][var_name][i][1].GetDouble();
-
-                reduce_string << "(" << var_name << " > " << low << " && " << var_name << " < "
-                              << high << ")";
-                if (i < num_ranges - 1) {
-                    reduce_string << " || ";
-                }
-            }
-            reduce_string << ")";
-        }
+        pdf_B_bar = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("ab"));
+        RooAddPdf* add_pdf_B_bar = dynamic_cast<RooAddPdf*>(pdf_B_bar);
+        const int cr_pdf_B_bar_index = add_pdf_B_bar->pdfList().index("cr_pdf_B_bar");
+        cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(add_pdf_B->pdfList().at(cr_pdf_B_bar_index));
+    } else {
+        cr_pdf_B = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("a"));
+        cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("ab"));
+        pdf_B = cr_pdf_B;
+        pdf_B_bar = cr_pdf_B_bar;
     }
 
-    reduced_dataset = dynamic_cast<RooDataSet*>(dataset_->reduce(reduce_string.str().c_str()));
-    Log::print(Log::info, "Dataset after reduce: %i\n", reduced_dataset->numEntries());
-    Log::print(Log::debug, "Reduce string: %s\n", reduce_string.str().c_str());
-    return reduced_dataset;
+    RooArgSet used_vars;
+    if (!do_time_independent_fit_) {
+        used_vars.add(*dt_);
+    }
+    used_vars.add(*thetat_);
+    used_vars.add(*thetab_);
+    used_vars.add(*phit_);
+
+    RooDataHist* cr_hist = cr_pdf_B->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
+    RooDataHist* cr_hist_B_bar =
+        cr_pdf_B_bar->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
+
+    // Add histos from both particle and anti-particle PDFs to create the
+    // final RooHistPdf.
+    cr_hist->add(*cr_hist_B_bar);
+    RooHistPdf* cr_histpdf = new RooHistPdf("cr_histpdf", "cr_histpdf", used_vars, *cr_hist);
+
+    RooHistPdf* scf_histpdf;
+    if (scf) {
+        RooDataHist* scf_hist =
+            scf_angular_pdf_->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
+        scf_histpdf = new RooHistPdf("scf_histpdf", "scf_histpdf", used_vars, *scf_hist);
+    }
+
+    RooHistPdf* bkg_histpdf;
+    if (bkg) {
+        RooDataHist* bkg_hist =
+            bkg_angular_pdf_->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
+        bkg_histpdf = new RooHistPdf("bkg_histpdf", "bkg_histpdf", used_vars, *bkg_hist);
+    }
+
+    RooAbsPdf* all_histpdf;
+    if ((!scf) && (!bkg)) {
+        all_histpdf = cr_histpdf;
+    } else if (scf && (!bkg)) {
+        all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
+                                    RooArgList(*cr_histpdf, *scf_histpdf), cr_scf_f_);
+    } else if (scf && bkg) {
+        all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
+                                    RooArgList(*cr_histpdf, *scf_histpdf, *bkg_histpdf),
+                                    RooArgList(cr_f_, scf_f_));
+    }
+
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+
+    // const double margin_ap = 0.005;
+    // const double margin_apa = 0.25;
+    // const double margin_a0 = 0.0015;
+    // const double margin_ata = 0.3;
+    // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
+    // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
+    // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
+    // SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
+    // SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
+    // SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
+    // SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
+    // SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
+    // SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
+    // SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
+
+    // PlotWithPull(*thetat_, *dataset_, cr_histpdf);
+    // PlotWithPull(*thetab_, *dataset_, cr_histpdf);
+    // PlotWithPull(*phit_, *dataset_, cr_histpdf);
+
+    // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
+    // *phit_), *all_hist);
+    std::vector<RooAbsPdf*> components;
+    components.push_back(cr_histpdf);
+    if (scf) {
+        components.push_back(scf_histpdf);
+    }
+    if (bkg) {
+        components.push_back(bkg_histpdf);
+    }
+    // thetab_->setBins(100);
+
+    if (!do_time_independent_fit_) {
+        PlotWithPull(*dt_, *dataset_, *all_histpdf, components);
+    }
+    PlotWithPull(*thetat_, *dataset_, *all_histpdf, components);
+    PlotWithPull(*thetab_, *dataset_, *all_histpdf, components);
+    PlotWithPull(*phit_, *dataset_, *all_histpdf, components);
+
+    // We need this to get the exact number of events to be generated for
+    // the PDF distribution. This is unnecessary for the above, because we
+    // create a RooHistPdf from it and that is normalized to the data when
+    // plotted.
+    RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
+        dataset_->reduce("decaytype==decaytype::a||decaytype==decaytype::b"));
+    RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(
+        dataset_->reduce("decaytype==decaytype::ab||decaytype==decaytype::bb"));
+
+    thetat_->setBins(40);
+    thetab_->setBins(40);
+    phit_->setBins(40);
+    RooDataHist hist("hist", "hist", used_vars, *dataset_);
+    tools::PlotVars2D(*thetat_, *thetab_, hist);
+    tools::PlotVars2D(*thetat_, *phit_, hist);
+    tools::PlotVars2D(*thetab_, *phit_, hist);
+
+    // We change the binning for 2D plots, so we have to generate new binned
+    // dataset, to avoid dealing with rebinning.
+    delete cr_hist;
+    delete cr_hist_B_bar;
+
+    RooDataHist* all_hist =
+        pdf_B->generateBinned(used_vars, dataset_B->sumEntries(), RooFit::ExpectedData(true));
+    RooDataHist* all_hist_B_bar = pdf_B_bar->generateBinned(used_vars, dataset_B_bar->sumEntries(),
+                                                            RooFit::ExpectedData(true));
+    all_hist->add(*all_hist_B_bar);
+
+    // Set the current directory back to the one for plots (ugly ROOT stuff)
+    if (output_file_) {
+        output_file_->cd();
+    }
+    tools::PlotPull2D(*thetat_, *thetab_, hist, *all_hist);
+    tools::PlotPull2D(*thetat_, *phit_, hist, *all_hist);
+    tools::PlotPull2D(*thetab_, *phit_, hist, *all_hist);
+
+    const double chi2 = Calculate3DChi2(hist, *all_hist);
+    std::cout << "Chi2 = " << chi2 << std::endl;
+
+    // SaveChi2Scan(sim_pdf, ap_, margin_apa);
+    // SaveChi2Scan(sim_pdf, apa_, margin_apa);
+    // SaveChi2Scan(sim_pdf, a0_, margin_a0);
+    // SaveChi2Scan(sim_pdf, ata_, margin_ata);
+
+    delete dataset_B;
+    delete dataset_B_bar;
 }
 
 /**
- * Read in a JSON file, parse it, and return a rapidjson document object.
+ * Read in a JSON file, parse it, and return a json object.
  *
  * @param filename Path to the file to be read
  */
-/* static */ rapidjson::Document FitterCPV::ReadJSONConfig(const char* filename) {
+/* static */ nlohmann::json FitterCPV::ReadJSONConfig(const char* filename) {
     std::ifstream filestream(filename);
     if (!filestream.good()) {
         Log::print(Log::error, "Specified config file '%s' doesn't exist!\n", filename);
         exit(5);
     }
-    std::stringstream buffer;
-    buffer << filestream.rdbuf();
-
-    rapidjson::Document config;
-    config.Parse(buffer.str().c_str());
+    nlohmann::json config;
+    filestream >> config;
     return config;
 }
 
@@ -886,34 +837,33 @@ RooDataSet* FitterCPV::ReduceDataToFitRange(const rapidjson::Document& config) {
  *
  * @return Pretty, formatted JSON for logging purposes
  */
-std::string FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
-
-    for (auto& entry : config.GetObject()) {
-        if (entry.name == "fitRanges") {
+std::string FitterCPV::ApplyJSONConfig(const nlohmann::json& config) {
+    for (auto& entry : config.items()) {
+        if (entry.key() == "fitRanges") {
             ChangeFitRanges(config["fitRanges"]);
-            // dataset_ = ReduceDataToFitRange(config);
 
-        } else if (entry.name == "modelParameters") {
-            ChangeModelParameters(entry.value);
+        } else if (entry.key() == "modelParameters") {
+            ChangeModelParameters(entry.value());
 
-        } else if (entry.name == "efficiencyModel") {
-            SetEfficiencyModel(entry.value.GetInt());
+        } else if (entry.key() == "efficiencyModel") {
+            SetEfficiencyModel(entry.value());
 
-        } else if (entry.name == "efficiencyFile") {
+        } else if (entry.key() == "efficiencyFile") {
             std::vector<std::string> efficiency_files;
-            std::string file(entry.value.GetString());
+            std::string file(entry.value());
             efficiency_files.push_back(file);
             Log::print(Log::debug, "Efficiency file: %s\n", efficiency_files[0].c_str());
             SetEfficiencyFiles(efficiency_files);
 
-        } else if (entry.name == "scfHisto") {
-            Log::print(Log::debug, "SCF histo file: %s\n", entry.value.GetString());
-            SetSCFHisto(entry.value.GetString());
+        } else if (entry.key() == "scfHisto") {
+            std::string scf_histo = entry.value();
+            Log::print(Log::debug, "SCF histo file: %s\n", scf_histo.c_str());
+            SetSCFHisto(scf_histo.c_str());
 
-        } else if (entry.name == "timeIndependent") {
-            Log::print(Log::debug, "Time-independent: %i\n", entry.value.GetBool());
+        } else if (entry.key() == "timeIndependent") {
+            Log::print(Log::debug, "Time-independent: %i\n", entry.value());
             // SetDoTimeIndependentFit(config["timeIndependent"].GetBool());
-            if (entry.value.GetBool()) {
+            if (entry.value()) {
                 Log::print(Log::debug, "Setting time-indep. fit\n");
                 do_time_independent_fit_ = true;
                 do_mixing_fit_ = false;
@@ -924,59 +874,70 @@ std::string FitterCPV::ApplyJSONConfig(const rapidjson::Document& config) {
             }
 
         } else {
-            Log::print(Log::error, "JSON config key '%s' is unrecognized\n", entry.name.GetString());
+            Log::print(Log::error, "JSON config key '%s' is unrecognized\n", entry.key().c_str());
             exit(6);
         }
     }
 
-    // Store the applied config in the resulting ROOT file for reference
-    rapidjson::StringBuffer buffer;
-    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-    config.Accept(writer);
-    std::string json_config(buffer.GetString());
-    return json_config;
+    // Return the prettified JSON config so that it can be stored in the
+    // resulting ROOT file for reference
+    return config.dump(4);
 }
 
 /**
  * Take a JSON config with fit ranges and set the ranges of all variables of
  * the fitter corresponding to dataset variables according to the config
- * 
+ *
  * @param config JSON config with the fit ranges
  */
-void FitterCPV::ChangeFitRanges(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config) {
-    for (auto var : dataset_vars_) {
-        const char* var_name = (**var).GetName();
-        if (config.HasMember(var_name)) {
-            if (config[var_name].HasMember("min")) {
-                (**var).setMin(config[var_name]["min"].GetDouble());
+void FitterCPV::ChangeFitRanges(const nlohmann::json& config) {
+    // The following line is C++17 or newer and we work around it to be able to
+    // compile on Travis which uses ancient gcc.
+    // for (auto& [key, value] : config.items()) {
+    for (auto& element : config.items()) {
+        const char* name = element.key().c_str();
+        nlohmann::json value = element.value();
+
+        if (dataset_vars_argset_.find(name)) {
+            if (value.contains("min")) {
+                Log::print(Log::debug, "Changing var %s min to %f\n", name,
+                           value["min"].get<float>());
+                dynamic_cast<RooRealVar&>(dataset_vars_argset_[name]).setMin(value["min"]);
             }
-            if (config[var_name].HasMember("max")) {
-                (**var).setMax(config[var_name]["max"].GetDouble());
+
+            if (value.contains("max")) {
+                Log::print(Log::debug, "Changing var %s max to %f\n", name,
+                           value["max"].get<float>());
+                dynamic_cast<RooRealVar&>(dataset_vars_argset_[name]).setMax(value["max"]);
             }
+        } else {
+            Log::print(Log::warning, "Variable '%s' not found\n", name);
+            exit(9);
         }
     }
 }
 
 /**
  * Set model parameters (SCF, BKG, etc.) according to a JSON config
- * 
+ *
  * @param config JSON config with model parameter values
  */
-void FitterCPV::ChangeModelParameters(const rapidjson::GenericValue<rapidjson::UTF8<char>>& config) {
-    for (rapidjson::Value::ConstMemberIterator itr = config.MemberBegin();
-         itr != config.MemberEnd(); ++itr) {
-        // The parameter in the JSON file must be valid, i.e., exist in the model
-        Log::print(Log::debug, "Changing parameter %s to %f\n", itr->name.GetString(), itr->value.GetDouble());
+void FitterCPV::ChangeModelParameters(const nlohmann::json& config) {
+    for (auto& element : config.items()) {
+        const char* name = element.key().c_str();
+        const double value = element.value().get<double>();
 
-        if (!(scf_parameters_argset_.find(itr->name.GetString()) ||
-              bkg_parameters_argset_.find(itr->name.GetString()) ||
-              model_parameters_argset_.find(itr->name.GetString()))) {
+        // The parameter in the JSON file must be valid, i.e., exist in the model
+        Log::print(Log::debug, "Changing parameter %s to %f\n", name, value);
+
+        if (!(scf_parameters_argset_.find(name) || bkg_parameters_argset_.find(name) ||
+              model_parameters_argset_.find(name))) {
             Log::print(Log::warning, "Parameter '%s' from JSON config not found in the model\n",
-                       itr->name.GetString());
+                       name);
         } else {
-            scf_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
-            bkg_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
-            model_parameters_argset_.setRealValue(itr->name.GetString(), itr->value.GetDouble());
+            scf_parameters_argset_.setRealValue(name, value);
+            bkg_parameters_argset_.setRealValue(name, value);
+            model_parameters_argset_.setRealValue(name, value);
         }
     }
 }
@@ -1052,28 +1013,28 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     RooRealVar ytb("ytb", "ytb", par_input[15], -0.2, 0.2);
 
     DtCPPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_,
-                         efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xp, x0,
-                         xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
-                         *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
-                         *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+                         efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
+                         a0, ata, xp, x0, xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_,
+                         *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
+                         *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_ab("mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_,
-                          efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xpb, x0b,
-                          xtb, ypb, y0b, ytb, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
-                          *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_,
-                          *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+                          efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
+                          a0, ata, xpb, x0b, xtb, ypb, y0b, ytb, *tagwtag_, *dt_, *tau_, *dm_,
+                          *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
+                          *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_b("mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_,
-                         efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xp, x0,
-                         xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_,
-                         *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_,
-                         *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+                         efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
+                         a0, ata, xp, x0, xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_,
+                         *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
+                         *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_bb("mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_,
-                          efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa, a0, ata, xpb, x0b,
-                          xtb, ypb, y0b, ytb, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
-                          *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_,
-                          *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+                          efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
+                          a0, ata, xpb, x0b, xtb, ypb, y0b, ytb, *tagwtag_, *dt_, *tau_, *dm_,
+                          *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
+                          *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     dt_->setRange(-15, 15);
 
@@ -1391,12 +1352,12 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
 
     TTree* input_tree;
     if (num_events) {
-    if (file_names.size() > 1) {
+        if (file_names.size() > 1) {
             Log::print(Log::warning,
                        "You limited the number of events to read, while reading multiple "
-               "files. Since this limiting works sequentially not randomly, you "
-               "will probably not get the result you want!\n");
-    }
+                       "files. Since this limiting works sequentially not randomly, you "
+                       "will probably not get the result you want!\n");
+        }
         input_tree = input_chain->CloneTree(num_events);
     } else {
         input_tree = input_chain->CloneTree();
@@ -1456,10 +1417,11 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
     // thetat_->setBins(10);
     // thetab_->setBins(10);
     // phit_->setBins(10);
-    // RooDataHist datahist_a("datahist_a", "datahist_a", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_a);
-    // RooDataHist datahist_ab("datahist_ab", "datahist_ab", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_ab);
-    // RooDataHist datahist_b("datahist_b", "datahist_b", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_b);
-    // RooDataHist datahist_bb("datahist_bb", "datahist_bb", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_bb);
+    // RooDataHist datahist_a("datahist_a", "datahist_a", RooArgSet(*thetat_, *thetab_, *phit_),
+    // *dataset_a); RooDataHist datahist_ab("datahist_ab", "datahist_ab", RooArgSet(*thetat_,
+    // *thetab_, *phit_), *dataset_ab); RooDataHist datahist_b("datahist_b", "datahist_b",
+    // RooArgSet(*thetat_, *thetab_, *phit_), *dataset_b); RooDataHist datahist_bb("datahist_bb",
+    // "datahist_bb", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_bb);
     // tools::PlotPull2D(*thetat_, *thetab_, datahist_a, datahist_ab);
     // tools::PlotPull2D(*thetat_, *phit_, datahist_a, datahist_ab);
     // tools::PlotPull2D(*thetab_, *phit_, datahist_a, datahist_ab);
@@ -1519,8 +1481,8 @@ bool FitterCPV::FixParameters(const char* pars) {
     // These are helper short-hand options to save some typing
     input = std::regex_replace(input, std::regex("all"),
                                "ap,apa,a0,ata,xp,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb");
-    input = std::regex_replace(input, std::regex("xy"),
-                               "xp,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb");
+    input =
+        std::regex_replace(input, std::regex("xy"), "xp,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb");
     input = std::regex_replace(input, std::regex("trans"), "ap,apa,a0,ata");
     input = std::regex_replace(input, std::regex("nota0"),
                                "ap,apa,ata,xp,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb");
@@ -1554,9 +1516,7 @@ bool FitterCPV::FixParameters(const char* pars) {
 /**
  * Set file in which output will be saved.
  */
-void FitterCPV::SetOutputFile(TFile* file) {
-    output_file_ = file;
-}
+void FitterCPV::SetOutputFile(TFile* file) { output_file_ = file; }
 
 /**
  * Create a string that holds initial values, fit results and errors.
@@ -1862,10 +1822,10 @@ void FitterCPV::TestEfficiency() {
  * Read efficiency files, create a model and return a histogram with binned
  * values sampled from the model. In principle, no files need to be supplied
  * for functional efficiency models.
- * 
+ *
  * @param files Files from which a model is to be built
  * @param model Specification of which model is to be built; see the Efficiency class
- * 
+ *
  * @return TH3D* Binned efficiency model
  */
 TH3D* FitterCPV::GetBinnedEfficiency(std::vector<std::string> files, const int model) {
@@ -2009,7 +1969,8 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRe
         for (Int_t j = 0; j < steps2; j++) {
             var1->setVal(i * stepsize1 + min1 + stepsize1 / 2);
             var2->setVal(j * stepsize2 + min2 + stepsize2 / 2);
-            Log::print(Log::debug, "Computing %i/%i likelihood function.\n", i * steps2 + j + 1, steps1 * steps2);
+            Log::print(Log::debug, "Computing %i/%i likelihood function.\n", i * steps2 + j + 1,
+                       steps1 * steps2);
             h2_nll.Fill(var1->getVal(), var2->getVal(), 2 * nll->getVal());
         }
     }
@@ -2038,24 +1999,24 @@ const void FitterCPV::SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRe
 /**
  * Calculate a chi2 value from a histogram and a PDF, assuming Poisson
  * distribution of data in the bins.
- * 
- * @param data 
- * @param pdf 
- * @return const double 
+ *
+ * @param data
+ * @param pdf
+ * @return const double
  */
 const double FitterCPV::Calculate3DChi2(const RooDataHist& data, const RooDataHist& pdf) {
     // TODO: Remove the commented histogram lines
     // TH1I h_bin_content("h_bin_content", "Bin Content", 100, 0, 99);
     double chi2 = 0;
     int bins_used = 0;
-    for(int i = 0; i < data.numEntries(); i++) {
+    for (int i = 0; i < data.numEntries(); i++) {
         data.get(i);
         pdf.get(i);
         double data_bin = data.weight();
         double pdf_bin = pdf.weight();
         // h_bin_content.Fill(data_bin);
         if (data_bin > 5) {
-            chi2 += (data_bin - pdf_bin)*(data_bin - pdf_bin)/pdf_bin;
+            chi2 += (data_bin - pdf_bin) * (data_bin - pdf_bin) / pdf_bin;
             bins_used++;
         }
     }
@@ -2066,7 +2027,8 @@ const double FitterCPV::Calculate3DChi2(const RooDataHist& data, const RooDataHi
     // h_bin_content.Draw("HIST");
     // h_bin_content.Write();
     // h_bin_content.SaveAs(constants::format);
-    Log::print(Log::info, "Bins used for chi2: %i/%i (%.1f%%)\n", bins_used, data.numEntries(), (double) bins_used / data.numEntries() * 100);
+    Log::print(Log::info, "Bins used for chi2: %i/%i (%.1f%%)\n", bins_used, data.numEntries(),
+               (double)bins_used / data.numEntries() * 100);
 
     return chi2;
 }
@@ -2103,11 +2065,12 @@ const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const 
         var->setVal(i * stepsize + min + stepsize / 2);
         Log::print(Log::debug, "Computing chi2 %i/%i.\n", i + 1, steps);
 
-        RooDataHist* cr_hist = pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
-                                       dataset_B->sumEntries(), RooFit::ExpectedData(true));
+        RooDataHist* cr_hist =
+            pdf_B->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_), dataset_B->sumEntries(),
+                                  RooFit::ExpectedData(true));
         RooDataHist* cr_hist_B_bar =
             pdf_B_bar->generateBinned(RooArgSet(*thetat_, *thetab_, *phit_),
-                                     dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
+                                      dataset_B_bar->sumEntries(), RooFit::ExpectedData(true));
         cr_hist->add(*cr_hist_B_bar);
 
         const double chi2 = Calculate3DChi2(hist, *cr_hist);
@@ -2172,7 +2135,10 @@ RooAbsPdf* FitterCPV::CreateAngularBKGPDF() {
     RooRealVar* bkg_thetat_p4 = new RooRealVar("bkg_thetat_p4", "p_{4}", 0.174);
     RooRealVar* bkg_thetat_p5 = new RooRealVar("bkg_thetat_p5", "p_{5}", 0);
     RooRealVar* bkg_thetat_p6 = new RooRealVar("bkg_thetat_p6", "p_{6}", -0.029);
-    RooChebychev* bkg_thetat_model = new RooChebychev("bkg_thetat_model", "bkg_thetat_model", *thetat_, RooArgList(*bkg_thetat_p1, *bkg_thetat_p2, *bkg_thetat_p3, *bkg_thetat_p4, *bkg_thetat_p5, *bkg_thetat_p6));
+    RooChebychev* bkg_thetat_model =
+        new RooChebychev("bkg_thetat_model", "bkg_thetat_model", *thetat_,
+                         RooArgList(*bkg_thetat_p1, *bkg_thetat_p2, *bkg_thetat_p3, *bkg_thetat_p4,
+                                    *bkg_thetat_p5, *bkg_thetat_p6));
     bkg_parameters_argset_.add(*bkg_thetat_p2);
     bkg_parameters_argset_.add(*bkg_thetat_p4);
     bkg_parameters_argset_.add(*bkg_thetat_p6);
@@ -2272,8 +2238,9 @@ RooAbsPdf* FitterCPV::CreateAngularSCFPDF() {
 }
 
 /**
- * WARNING: Experimental approach, should not be used without tweaking the code. Set the self-crossfeed model to histogram constructed from a KDE model from a supplied file.
- * 
+ * WARNING: Experimental approach, should not be used without tweaking the code. Set the
+ * self-crossfeed model to histogram constructed from a KDE model from a supplied file.
+ *
  * @param file File holding a Meerkat KDE model
  */
 void FitterCPV::SetSCFKDE(const char* file) {
@@ -2333,10 +2300,12 @@ void FitterCPV::SetSCFKDE(const char* file) {
 
     scf_angular_pdf_ = scf_angular_kde_;
 
-    // OneDimPhaseSpace* phasespace_thetat = new OneDimPhaseSpace{"phasespace_thetat", thetat_->getMin(), thetat_->getMax()};
-    // OneDimPhaseSpace* phasespace_thetab = new OneDimPhaseSpace{"phasespace_thetab", thetab_->getMin(), thetab_->getMax()};
-    // OneDimPhaseSpace* phasespace_phit = new OneDimPhaseSpace{"phasespace_phit", phit_->getMin(), phit_->getMax()};
-    // CombinedPhaseSpace* phasespace = new CombinedPhaseSpace{"phasespace", phasespace_thetat, phasespace_thetab,
+    // OneDimPhaseSpace* phasespace_thetat = new OneDimPhaseSpace{"phasespace_thetat",
+    // thetat_->getMin(), thetat_->getMax()}; OneDimPhaseSpace* phasespace_thetab = new
+    // OneDimPhaseSpace{"phasespace_thetab", thetab_->getMin(), thetab_->getMax()};
+    // OneDimPhaseSpace* phasespace_phit = new OneDimPhaseSpace{"phasespace_phit", phit_->getMin(),
+    // phit_->getMax()}; CombinedPhaseSpace* phasespace = new CombinedPhaseSpace{"phasespace",
+    // phasespace_thetat, phasespace_thetab,
     //                               phasespace_phit};
     // BinnedDensity* binned_scf_kde = new BinnedDensity("binned_scf_kde", phasespace, file);
     // RooArgList list(*thetat_, *thetab_, *phit_);
@@ -2347,7 +2316,7 @@ void FitterCPV::SetSCFKDE(const char* file) {
 
 /**
  * Set up histogram efficiency from supplied file. The name of the histogram must be 'scf_hist_pdf'.
- * 
+ *
  * @param file File with the efficiency histogram
  */
 void FitterCPV::SetSCFHisto(const char* file) {
@@ -2359,15 +2328,15 @@ void FitterCPV::SetSCFHisto(const char* file) {
     // caching of its "analytical integral") from the original RooHistPdf to
     // avoid the huge performance hit due to a RooFit bug.
     scf_angular_pdf_ =
-        new RooHistPdfFast("scf_hist_pdf_fast", "scf_hist_pdf_fast", RooArgSet(*thetat_, *thetab_, *phit_),
-                       temp_pdf->dataHist());
+        new RooHistPdfFast("scf_hist_pdf_fast", "scf_hist_pdf_fast",
+                           RooArgSet(*thetat_, *thetab_, *phit_), temp_pdf->dataHist());
 }
 /**
  * Determine whether angular coordinates are close to (any) edge of the phasespace.
- * 
+ *
  * @param vals Coordinates to be checked
  * @param margin Distance (fraction of phasespace range in each axis) to be taken as 'close'
- * 
+ *
  * @return int 0 for not close, 1 for close to lower edge, 2 for close to upper edge
  */
 int FitterCPV::CloseToEdge(const std::vector<Double_t> vals, const double margin) const {
@@ -2397,7 +2366,7 @@ bool FitterCPV::CheckConfigIsValid() const {
         Log::print(Log::error, "No efficiency file set\n");
         return false;
     }
-    if (!(do_time_independent_fit_ ^ do_mixing_fit_)) { // Logical XOR
+    if (!(do_time_independent_fit_ ^ do_mixing_fit_)) {  // Logical XOR
         Log::print(Log::error, "Neither (or both) time-dep. and time-indep. fit set\n");
         return false;
     }

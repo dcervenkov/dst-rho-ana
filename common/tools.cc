@@ -109,7 +109,7 @@ void SetupPlotStyle() {
 
 /**
  * Set the directory to which to ouput ROOT plots
- * 
+ *
  * @param plot_dir Directory to which to save plots
  */
 void SetPlotDir(const char* plot_dir) {
@@ -392,6 +392,5 @@ void LogEnvironmentMetadata(TFile* file) {
     TNamed git_version("git_version", gitversion);
     git_version.Write();
 }
-
 
 }  // namespace tools

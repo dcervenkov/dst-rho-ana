@@ -55,7 +55,9 @@ class FitterCPV {
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
     int GetNumCPUs() { return num_CPUs_; };
 
-    void SetEfficiencyFiles(std::vector<std::string> efficiency_files) { efficiency_files_ = efficiency_files; };
+    void SetEfficiencyFiles(std::vector<std::string> efficiency_files) {
+        efficiency_files_ = efficiency_files;
+    };
     std::vector<std::string> GetEfficiencyFiles() { return efficiency_files_; };
 
     void SetEfficiencyModel(const int& efficiency_model) { efficiency_model_ = efficiency_model; };
@@ -190,7 +192,7 @@ class FitterCPV {
     RooSimultaneous* CreateAngularPDF(const bool scf, const bool bkg);
     RooSimultaneous* CreateTimeDependentPDF(const bool scf, const bool bkg);
 
-    RooAddPdf* CreateVoigtGaussDtPdf (const char* prefix, RooArgSet& argset);
+    RooAddPdf* CreateVoigtGaussDtPdf(const char* prefix, RooArgSet& argset);
     void CreateDtCPPDFs(DtCPPDF*& cr_pdf_a, DtCPPDF*& cr_pdf_ab, DtCPPDF*& cr_pdf_b,
                         DtCPPDF*& cr_pdf_bb);
     void CreateDtSCFPDFs(DtSCFPDF*& scf_pdf_a, DtSCFPDF*& scf_pdf_ab, DtSCFPDF*& scf_pdf_b,

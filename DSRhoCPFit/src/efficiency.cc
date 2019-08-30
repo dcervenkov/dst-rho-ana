@@ -19,17 +19,13 @@
 // Local includes
 #include "log.h"
 
-Efficiency::Efficiency() {
-}
-
-Efficiency::Efficiency(const char* filename) {
-    ReadInFile(filename);
-}
+Efficiency::Efficiency() {}
+Efficiency::Efficiency(const char* filename) { ReadInFile(filename); }
 
 /**
  * Read efficiency model from a file. The file can be either a ROOT file with a
  * histogram model, or a plain text file with a Meerkat KDE model.
- * 
+ *
  * @param filename File with the efficiency model
  */
 void Efficiency::ReadInFile(const char* filename) {
@@ -47,8 +43,7 @@ void Efficiency::ReadInFile(const char* filename) {
     }
 }
 
-Efficiency::~Efficiency() {
-}
+Efficiency::~Efficiency() {}
 
 /**
  * Return the actual efficiency value for the supplied parameters
@@ -92,7 +87,6 @@ double Efficiency::GetEfficiency(double thetat, double thetab, double phit,
                 return GetKDEEfficiency(thetat, thetab, phit);
             }
         }
-
     }
     return 0;
 }
@@ -100,12 +94,12 @@ double Efficiency::GetEfficiency(double thetat, double thetab, double phit,
 /**
  * Check whether any of the vars is too close to the histogram edge to use
  * interpolation.
- * 
+ *
  * From the ROOT documentation: The given values (x,y,z) must be between first
  * bin center and last bin center for each coordinate.
  */
 bool Efficiency::CanUseInterpolation(const double& phit, const double& transtht,
-                               const double& transthb) const {
+                                     const double& transthb) const {
     double vars[3] = {phit, transtht, transthb};
     TAxis* axes[3] = {histo_efficiency->GetXaxis(), histo_efficiency->GetYaxis(),
                       histo_efficiency->GetZaxis()};
@@ -122,16 +116,16 @@ bool Efficiency::CanUseInterpolation(const double& phit, const double& transtht,
 }
 
 double Efficiency::EfficiencyInterface(double* x, double* p) const {
-	return GetEfficiency(x[0], x[1], x[2], 5);
+    return GetEfficiency(x[0], x[1], x[2], 5);
 }
 
 // /**
 //  * Rescale variables to account for margin-mirrored phase space from DSRhoEfficiency.
 //  */
-// void Efficiency::RescaleVars(double& thetat, double& thetab, double& phit, const double margin) const {
-// 	const double vars[3] = {thetat, thetab, phit};
-// const double min[3] = {constants::cuts::thetat_low, constants::cuts::phit_low, constants::cuts::phit_low};
-// const double max[3] = {constants::cuts::thetat_high, constants::cuts::phit_high, constants::cuts::phit_high};
+// void Efficiency::RescaleVars(double& thetat, double& thetab, double& phit, const double margin)
+// const { 	const double vars[3] = {thetat, thetab, phit}; const double min[3] =
+// {constants::cuts::thetat_low, constants::cuts::phit_low, constants::cuts::phit_low}; const double
+// max[3] = {constants::cuts::thetat_high, constants::cuts::phit_high, constants::cuts::phit_high};
 
 // 	double center[3];
 // 	double new_vars[3];
@@ -148,10 +142,10 @@ double Efficiency::EfficiencyInterface(double* x, double* p) const {
 
 /**
  * Determine whether angular coordinates are close to (any) edge of the phasespace.
- * 
+ *
  * @param vals Coordinates to be checked
  * @param margin Distance (fraction of phasespace range in each axis) to be taken as 'close'
- * 
+ *
  * @return int 0 for not close, 1 for close to lower edge, 2 for close to upper edge
  */
 int Efficiency::CloseToEdge(const std::vector<Double_t> vals, const double margin) const {
@@ -222,7 +216,7 @@ double Efficiency::GetNormalization() {
                 thetab = kde_efficiency->GetYaxis()->GetBinCenter(y);
                 phit = kde_efficiency->GetZaxis()->GetBinCenter(z);
                 kde_efficiency->SetBinContent(kde_efficiency->GetBin(x, y, z),
-                                     GetKDEEfficiency(thetat, thetab, phit));
+                                              GetKDEEfficiency(thetat, thetab, phit));
             }
         }
     }

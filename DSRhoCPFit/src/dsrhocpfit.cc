@@ -10,13 +10,13 @@
 #include "dsrhocpfit.h"
 
 // Standard includes
+#include <getopt.h>
+#include <stdio.h>
 #include <array>
 #include <cstdio>
 #include <cstring>
-#include <getopt.h>
 #include <ostream>
 #include <sstream>
-#include <stdio.h>
 
 // Boost includes
 #include <boost/algorithm/string/predicate.hpp>
@@ -33,7 +33,6 @@
 #include "log.h"
 #include "teebuf.h"
 #include "tools.h"
-
 
 int main(int argc, char* argv[]) {
     // This block sets up an alternative ostream that can be used to duplicate
@@ -54,8 +53,7 @@ int main(int argc, char* argv[]) {
 
     if (optionless_argc < 3) {
         printf("ERROR: Not enough arguments.\n");
-        printf("Usage: %s [OPTION]... OUTPUT_FILE INPUT-FILE(s)\n",
-               optionless_argv[0]);
+        printf("Usage: %s [OPTION]... OUTPUT_FILE INPUT-FILE(s)\n", optionless_argv[0]);
         return 2;
     }
 
@@ -76,7 +74,6 @@ int main(int argc, char* argv[]) {
     if (options.save_log_set && options.save_log) {
         std::cout.rdbuf(out.rdbuf());
     }
-
 
     if (boost::algorithm::ends_with(gitversion, "-dirty")) {
         Log::print(Log::warning, "Using version from dirty Git worktree\n");
@@ -150,11 +147,11 @@ int main(int argc, char* argv[]) {
     }
 
     if (std::strcmp(options.fit, "CR") == 0) {
-            fitter.Fit(!fitter.GetDoTimeIndependentFit(), false, false);
+        fitter.Fit(!fitter.GetDoTimeIndependentFit(), false, false);
     } else if (std::strcmp(options.fit, "CRSCF") == 0) {
-            fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, false);
+        fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, false);
     } else if (std::strcmp(options.fit, "all") == 0) {
-            fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, true);
+        fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, true);
     }
     // fitter.GenerateToys(10000, 10);
 
@@ -167,7 +164,8 @@ int main(int argc, char* argv[]) {
         tools::LogText(output_file, "input_file_name", file_name);
         tools::LogFileCRC(output_file, "input_file_crc", file_name);
     }
-    tools::LogText(output_file, "efficiency_model", std::to_string(fitter.GetEfficiencyModel()).c_str());
+    tools::LogText(output_file, "efficiency_model",
+                   std::to_string(fitter.GetEfficiencyModel()).c_str());
     for (auto efficiency_file : fitter.GetEfficiencyFiles()) {
         tools::LogText(output_file, "efficiency_file_name", efficiency_file.c_str());
         tools::LogFileCRC(output_file, "efficiency_file_crc", efficiency_file.c_str());
@@ -184,8 +182,10 @@ int main(int argc, char* argv[]) {
         fitter.LogResults();
         tools::LogText(output_file, "pull_table", fitter.CreatePullTableString().c_str());
         tools::LogText(output_file, "pull_table_asym", fitter.CreatePullTableString(true).c_str());
-        tools::LogText(output_file, "latex_pull_table", fitter.CreateLatexPullTableString().c_str());
-        tools::LogText(output_file, "latex_pull_table_asym", fitter.CreateLatexPullTableString(true).c_str());
+        tools::LogText(output_file, "latex_pull_table",
+                       fitter.CreateLatexPullTableString().c_str());
+        tools::LogText(output_file, "latex_pull_table_asym",
+                       fitter.CreateLatexPullTableString(true).c_str());
 
         fitter.SaveTXTResults(results_path);
     }
@@ -219,27 +219,27 @@ int main(int argc, char* argv[]) {
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,
                           fitter_options& options) {
     int c;
-    struct option long_options[] = {
-        {"cpus", required_argument, 0, 'c'},
-        {"config", required_argument, 0, 'g'},
-        {"efficiency-file", required_argument, 0, 'y'},
-        {"efficiency-model", required_argument, 0, 'e'},
-        {"events", required_argument, 0, 'n'},
-        {"fit", required_argument, 0, 'f'},
-        {"fix", required_argument, 0, 'x'},
-        {"generator-level", no_argument, 0, 'r'},
-        {"log", no_argument, 0, 'l'},
-        {"mixing", no_argument, 0, 'm'},
-        {"time-independent", no_argument, 0, 'i'},
-        {"perfect-tag", no_argument, 0, 't'},
-        {"plot-dir", required_argument, 0, 'p'},
-        {"scf-kde", required_argument, 0, 'k'},
-        {"scf-histo", required_argument, 0, 's'},
-        {"version", no_argument, 0, 'v'},
-        {"help", no_argument, 0, 'h'},
-        {nullptr, no_argument, nullptr, 0}};
+    struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
+                                    {"config", required_argument, 0, 'g'},
+                                    {"efficiency-file", required_argument, 0, 'y'},
+                                    {"efficiency-model", required_argument, 0, 'e'},
+                                    {"events", required_argument, 0, 'n'},
+                                    {"fit", required_argument, 0, 'f'},
+                                    {"fix", required_argument, 0, 'x'},
+                                    {"generator-level", no_argument, 0, 'r'},
+                                    {"log", no_argument, 0, 'l'},
+                                    {"mixing", no_argument, 0, 'm'},
+                                    {"time-independent", no_argument, 0, 'i'},
+                                    {"perfect-tag", no_argument, 0, 't'},
+                                    {"plot-dir", required_argument, 0, 'p'},
+                                    {"scf-kde", required_argument, 0, 'k'},
+                                    {"scf-histo", required_argument, 0, 's'},
+                                    {"version", no_argument, 0, 'v'},
+                                    {"help", no_argument, 0, 'h'},
+                                    {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:y:e:n:f:x:p:k:s:lmitvh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:g:y:e:n:f:x:p:k:s:lmitvh", long_options,
+                            &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);

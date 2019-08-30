@@ -10,7 +10,7 @@
  *  makes it tremendously slow when evaluating if the RooHistPdf can be cached (analyticalIntegral()
  *  is called for every event when doing that, even though it is always true). This class is a
  *  simple workaround to make it as fast as it should be.
- * 
+ *
  */
 
 #include "RooHistPdfFast.h"

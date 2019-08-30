@@ -11,8 +11,8 @@
 #define TOOLS_H_
 
 // ROOT includes
-#include "RooArgList.h"
 #include "RooAbsData.h"
+#include "RooArgList.h"
 #include "RooRealVar.h"
 #include "TChain.h"
 #include "TPaveText.h"

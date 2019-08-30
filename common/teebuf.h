@@ -4,9 +4,9 @@
  *  @date    2012-12-02
  *
  *  @brief Struct that can be used to write to streambuffers simultaneously.
- * 
+ *
  *  The expected usage would be this:
- * 
+ *
  *  // Create a teebuf from a ostringstream (or ofstream, etc.), then create a
  *  // ostream from this
  *  std::ostringstream sout;
@@ -17,9 +17,9 @@
  * // to cout
  *  std::streambuf* old_cout_streambuf = std::cout.rdbuf();
  *  std::cout.rdbuf( out.rdbuf() );
- * 
+ *
  *  ... your code ...
- * 
+ *
  *  // Restore the original cout streambuf (otherwise you will segfault)
  *  std::cout.rdbuf(old_cout_streambuf);
  *

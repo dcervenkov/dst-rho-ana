@@ -29,7 +29,7 @@ const char* blue = "\033[34m";
 /**
  * Set the lowest message level that should be printed. Messages with lower
  * level will be silently ignored.
- * 
+ *
  * @param level Lowest message level to be outputted
  */
 void setLogLevel(LogLevel level) { log_level = level; }
@@ -37,7 +37,7 @@ void setLogLevel(LogLevel level) { log_level = level; }
 /**
  * Print function that behaves very much like printf, with the added log level
  * argument.
- * 
+ *
  * @param level Log level of the message
  * @param fmt printf-like formatting string
  * @param ... Optional parameters, much like printf has
@@ -69,4 +69,32 @@ void print(LogLevel level, const char* fmt, ...) {
     }
 }
 
+LogLine::LogLine(LogLevel level, std::ostream& out) : out_(out), level_(level) {
+    if (level_ >= log_level) {
+        switch (level) {
+            case debug:
+                out << blue << "[DEBUG] " << reset;
+                break;
+            case info:
+                out << green << "[INFO] " << reset;
+                break;
+            case warning:
+                out << yellow << "[WARNING] " << reset;
+                break;
+            case error:
+                out << red << "[ERROR] " << reset;
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+LogLine::~LogLine() {
+    if (level_ >= log_level) {
+        stream_ << "\n";
+        out_ << stream_.rdbuf();
+        out_.flush();
+    }
+}
 }  // namespace Log

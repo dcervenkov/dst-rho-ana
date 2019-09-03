@@ -27,6 +27,7 @@ extern const double c;
 extern const double fraction_cr_of_crscf;
 extern const double fraction_cr_of_crscfbkg;
 extern const double fraction_scf_of_crscfbkg;
+extern const int max_efficiency_model_number;
 
 namespace cuts {
 

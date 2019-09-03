@@ -26,6 +26,7 @@
 #include "TTree.h"
 
 // Local includes
+#include "config.h"
 #include "constants.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
@@ -33,7 +34,7 @@
 
 class FitterCPV {
    public:
-    FitterCPV();
+    FitterCPV(Config config);
     virtual ~FitterCPV();
 
     void InitVars(std::array<double, 16> par_input);
@@ -66,9 +67,6 @@ class FitterCPV {
     void SetDoLifetimeFit(const bool& do_lifetime_fit) { do_lifetime_fit_ = do_lifetime_fit; };
     int GetDoLifetimeFit() const { return do_lifetime_fit_; };
 
-    void SetDoMixingFit(const bool& do_mixing_fit) { do_mixing_fit_ = do_mixing_fit; };
-    int GetDoMixingFit() const { return do_mixing_fit_; };
-
     void SetDoTimeIndependentFit(const bool& do_time_independent_fit) {
         do_time_independent_fit_ = do_time_independent_fit;
     };
@@ -90,13 +88,11 @@ class FitterCPV {
     void SetSCFKDE(const char* file);
     void SetSCFHisto(const char* file);
     bool FixParameters(const char* pars);
-    const std::string CreateResultsString();
+    const std::string CreateResultsString(const bool time_dependent) const;
     const std::string CreatePullTableString(const bool asymmetric = false);
     const std::string CreateLatexPullTableString(const bool asymmetric = false);
     static nlohmann::json ReadJSONConfig(const char* filename);
     std::string ApplyJSONConfig(const nlohmann::json& config);
-    const void SaveTXTResults(const char* root_filename);
-    bool CheckConfigIsValid() const;
 
     const void LogResults();
 
@@ -173,6 +169,14 @@ class FitterCPV {
     RooCategory* decaytype_;
 
    private:
+    RooSimultaneous* CreatePDF(const nlohmann::json config);
+    RooSimultaneous* CreateChannelPDF(const std::string channel_name,
+                                      const nlohmann::json channel_config,
+                                      const nlohmann::json common_config);
+    RooDataSet* GetData(const nlohmann::json config);
+    RooDataSet* GetChannelData(const std::string channel_name, const nlohmann::json channel_config,
+                               const nlohmann::json common_config);
+
     void PrepareVarArgsets();
     void ChangeFitRanges(const nlohmann::json& config);
     void ChangeModelParameters(const nlohmann::json& config);
@@ -189,7 +193,8 @@ class FitterCPV {
     RooAbsPdf* CreateAngularSCFPDF();
     RooAbsPdf* CreateAngularBKGPDF();
 
-    RooSimultaneous* CreateAngularPDF(const bool scf, const bool bkg);
+    RooSimultaneous* CreateAngularPDF(const std::string name_prefix, const bool scf, const bool bkg,
+                                      const nlohmann::json channel_config);
     RooSimultaneous* CreateTimeDependentPDF(const bool scf, const bool bkg);
 
     RooAddPdf* CreateVoigtGaussDtPdf(const char* prefix, RooArgSet& argset);
@@ -239,11 +244,14 @@ class FitterCPV {
     std::vector<std::string> efficiency_files_;
     int efficiency_model_;
     bool do_lifetime_fit_;
-    bool do_mixing_fit_;
     bool do_time_independent_fit_;
     bool make_plots_;
     bool perfect_tagging_;
     bool generator_level_;
+
+    RooSimultaneous* pdf_;
+    RooDataSet* data_;
+    nlohmann::json config_;
 };
 
 #endif /* FITTERCPV_H_ */

@@ -61,16 +61,16 @@
 // Local includes
 #include "RooHistPdfFast.h"
 #include "angularpdf.h"
+#include "config.h"
 #include "constants.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
 #include "log.h"
 #include "tools.h"
 
-FitterCPV::FitterCPV() {
+FitterCPV::FitterCPV(Config config) {
     num_CPUs_ = 1;
     do_lifetime_fit_ = false;
-    do_mixing_fit_ = false;
     make_plots_ = false;
     perfect_tagging_ = false;
     generator_level_ = false;
@@ -78,6 +78,18 @@ FitterCPV::FitterCPV() {
 
     vrzerr_ = nullptr;
     vtzerr_ = nullptr;
+
+    InitVars(constants::par_input);
+    data_ = GetData(config.json);
+    pdf_ = CreatePDF(config.json);
+
+    ChangeModelParameters(config.json["channels"]["Kpi"]["modelParameters"]);
+    ChangeFitRanges(config.json["channels"]["Kpi"]["fitRanges"]);
+    // if (entry.key() == "fitRanges") {
+    //     ChangeFitRanges(config["fitRanges"]);
+
+    // } else if (entry.key() == "modelParameters") {
+    //     ChangeModelParameters(entry.value());
 }
 
 FitterCPV::~FitterCPV() {
@@ -478,16 +490,28 @@ void FitterCPV::CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_a, RooProdPdf*& b
  * @param bkg Whether to add background component
  * @return RooSimultaneous* The complete PDF
  */
-RooSimultaneous* FitterCPV::CreateAngularPDF(const bool scf, const bool bkg) {
+RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, const bool scf,
+                                             const bool bkg, const nlohmann::json channel_config) {
     RooArgList B_pdfs;
     RooArgList B_bar_pdfs;
 
-    AngularPDF* cr_pdf_B =
-        new AngularPDF("cr_pdf_B", "cr_pdf_B", false, efficiency_model_, efficiency_files_,
-                       *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_);
-    AngularPDF* cr_pdf_B_bar =
-        new AngularPDF("cr_pdf_B_bar", "cr_pdf_B_bar", true, efficiency_model_, efficiency_files_,
-                       *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_);
+    TString prefix(name_prefix);
+    prefix += "_";
+
+    auto efficiency_model = channel_config["efficiencyModel"].get<int>();
+
+    // The possibility to supply more than one efficiency file is a remnant of
+    // hybrid histo-KDE models. I'm reluctant to remove it as it might be useful
+    // in the systematics estimation.
+    std::vector<std::string> efficiency_files;
+    efficiency_files.push_back(channel_config["efficiencyFile"]);
+
+    AngularPDF* cr_pdf_B = new AngularPDF(
+        (prefix + "cr_angular_pdf_B").Data(), (prefix + "cr_angular_pdf_B").Data(), false,
+        efficiency_model, efficiency_files, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_);
+    AngularPDF* cr_pdf_B_bar = new AngularPDF(
+        (prefix + "cr_angular_pdf_B_bar").Data(), (prefix + "cr_angular_pdf_B_bar").Data(), true,
+        efficiency_model, efficiency_files, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_);
 
     B_pdfs.add(*cr_pdf_B);
     B_bar_pdfs.add(*cr_pdf_B_bar);
@@ -510,10 +534,13 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const bool scf, const bool bkg) {
         fractions.add(scf_f_);
     }
 
-    RooAddPdf* pdf_B = new RooAddPdf("pdf_B", "pdf_B", B_pdfs, fractions);
-    RooAddPdf* pdf_B_bar = new RooAddPdf("pdf_B_bar", "pdf_B_bar", B_bar_pdfs, fractions);
+    RooAddPdf* pdf_B =
+        new RooAddPdf(prefix + "angular_pdf_B", prefix + "angular_pdf_B", B_pdfs, fractions);
+    RooAddPdf* pdf_B_bar = new RooAddPdf(prefix + "angular_pdf_B_bar", prefix + "angular_pdf_B_bar",
+                                         B_bar_pdfs, fractions);
 
-    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
+    RooSimultaneous* sim_pdf =
+        new RooSimultaneous(prefix + "angular_pdf", prefix + "angular_pdf", *decaytype_);
     sim_pdf->addPdf(*pdf_B, "a");
     sim_pdf->addPdf(*pdf_B_bar, "ab");
     sim_pdf->addPdf(*pdf_B, "b");
@@ -599,11 +626,11 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const bool scf, const bool bk
  * @param bkg Add background component to the fit
  */
 void FitterCPV::Fit(const bool timedep, const bool scf, const bool bkg) {
-    Log::print(Log::info, "Fitting %i events.\n", dataset_->numEntries());
+    Log::print(Log::info, "Fitting %i events.\n", data_->numEntries());
 
     if (!scf && !bkg) {
-        RooDataSet* temp_dataset = dynamic_cast<RooDataSet*>(dataset_->reduce("evmcflag==1"));
-        dataset_ = temp_dataset;
+        RooDataSet* temp_dataset = dynamic_cast<RooDataSet*>(data_->reduce("evmcflag==1"));
+        data_ = temp_dataset;
     } else if (!scf && bkg) {
         Log::print(Log::error, "Requested a fit with unsupported component configuration");
     }
@@ -616,10 +643,17 @@ void FitterCPV::Fit(const bool timedep, const bool scf, const bool bkg) {
     tau_->setConstant(true);
     dm_->setConstant(true);
 
-    RooSimultaneous* sim_pdf =
-        timedep ? CreateTimeDependentPDF(scf, bkg) : CreateAngularPDF(scf, bkg);
+    // RooSimultaneous* sim_pdf =
+    //     timedep ? CreateTimeDependentPDF(scf, bkg) : CreateAngularPDF(scf, bkg);
+
+    // RooAddPdf* mini_pdf = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{Kpi;a}"));
+
+    // mini_pdf->Print();
+    // PlotVar(*thetab_, *data_);
+    // PlotVar(*thetab_, *mini_pdf);
+
     result_ =
-        sim_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_vars_argset_),
+        pdf_->fitTo(*data_, RooFit::ConditionalObservables(conditional_vars_argset_),
                        RooFit::Hesse(false), RooFit::Minos(false), RooFit::Minimizer("Minuit2"),
                        RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
@@ -628,7 +662,7 @@ void FitterCPV::Fit(const bool timedep, const bool scf, const bool bkg) {
     }
 
     if (make_plots_) {
-        PlotFit(sim_pdf, scf, bkg);
+        PlotFit(pdf_, scf, bkg);
     }
 }
 
@@ -866,11 +900,9 @@ std::string FitterCPV::ApplyJSONConfig(const nlohmann::json& config) {
             if (entry.value()) {
                 Log::print(Log::debug, "Setting time-indep. fit\n");
                 do_time_independent_fit_ = true;
-                do_mixing_fit_ = false;
             } else {
                 Log::print(Log::debug, "Setting time-dep. fit\n");
                 do_time_independent_fit_ = false;
-                do_mixing_fit_ = true;
             }
 
         } else {
@@ -1521,7 +1553,7 @@ void FitterCPV::SetOutputFile(TFile* file) { output_file_ = file; }
 /**
  * Create a string that holds initial values, fit results and errors.
  */
-const std::string FitterCPV::CreateResultsString() {
+const std::string FitterCPV::CreateResultsString(const bool time_dependent) const {
     int numParameters = 54;
     double* parameters = new double[numParameters];
 
@@ -1544,7 +1576,7 @@ const std::string FitterCPV::CreateResultsString() {
     parameters[16] = ata_->getVal();
     parameters[17] = ata_->getError();
 
-    if (!do_time_independent_fit_) {
+    if (time_dependent) {
         parameters[18] = par_input_[4];
         parameters[19] = xp_->getVal();
         parameters[20] = xp_->getError();
@@ -1777,7 +1809,7 @@ const void FitterCPV::LogResults() {
     }
     result_->Write();
 
-    std::string results_string = CreateResultsString();
+    std::string results_string = CreateResultsString(!config_.contains("timeIndependent"));
     TNamed txt_result("txt_result", results_string);
     txt_result.Write();
 
@@ -1791,16 +1823,6 @@ const void FitterCPV::LogResults() {
                       std::to_string(result_->statusCodeHistory(i)));
         status.Write();
     }
-}
-
-/**
- * Save results and initial values into a plain file.
- */
-const void FitterCPV::SaveTXTResults(const char* filename) {
-    std::string results_string = CreateResultsString();
-    std::ofstream file(filename);
-    file << results_string;
-    file.close();
 }
 
 void FitterCPV::TestEfficiency() {
@@ -2355,21 +2377,222 @@ int FitterCPV::CloseToEdge(const std::vector<Double_t> vals, const double margin
 }
 
 /**
- * Check if the current fitter config makes sense.
+ * Create the complete PDF based on a supplied config.
  */
-bool FitterCPV::CheckConfigIsValid() const {
-    if (efficiency_model_ < 0 || efficiency_model_ > 6) {
-        Log::print(Log::error, "Invalid efficiency model\n");
-        return false;
-    }
-    if (efficiency_files_.size() == 0) {
-        Log::print(Log::error, "No efficiency file set\n");
-        return false;
-    }
-    if (!(do_time_independent_fit_ ^ do_mixing_fit_)) {  // Logical XOR
-        Log::print(Log::error, "Neither (or both) time-dep. and time-indep. fit set\n");
-        return false;
+RooSimultaneous* FitterCPV::CreatePDF(const nlohmann::json config) {
+    std::map<std::string, RooAbsPdf*> pdf_map;
+    RooCategory* channel = new RooCategory("channel", "channel");
+
+    for (auto& chan : config["channels"].items()) {
+        std::string channel_name = chan.key();
+        auto channel_config = chan.value();
+        Log::LogLine(Log::debug) << "Creating PDF for channel " << channel_name;
+
+        channel->defineType(channel_name.c_str());
+        auto common_config = config;
+        common_config.erase("channels");
+
+        RooSimultaneous* channel_pdf =
+            CreateChannelPDF(channel_name, channel_config, common_config);
+        pdf_map[channel_name] = channel_pdf;
     }
 
-    return true;
+    RooSimultaneous* pdf = new RooSimultaneous("pdf", "pdf", pdf_map, *channel);
+
+    return pdf;
+}
+
+/**
+ * Create the complete PDF for a single channel based on a supplied config.
+ */
+RooSimultaneous* FitterCPV::CreateChannelPDF(const std::string channel_name,
+                                             const nlohmann::json channel_config,
+                                             const nlohmann::json common_config) {
+    bool scf = false;
+    bool bkg = false;
+    if (common_config["components"] == "CRSCF") {
+        scf = true;
+    } else if (common_config["components"] == "all") {
+        scf = true;
+        bkg = true;
+    }
+    RooSimultaneous* channel_pdf = common_config.contains("timeIndependent")
+                                       ? CreateAngularPDF(channel_name, scf, bkg, channel_config)
+                                       : CreateTimeDependentPDF(scf, bkg);
+    return channel_pdf;
+}
+
+/**
+ * Create a dataset with all the categories needed for the complete fit.
+ */
+RooDataSet* FitterCPV::GetData(const nlohmann::json config) {
+    std::vector<RooDataSet*> datasets;
+    RooCategory* channel_cat = new RooCategory("channel_cat", "channel_cat");
+
+    for (auto& chan : config["channels"].items()) {
+        const std::string channel_name = chan.key().c_str();
+        auto channel_config = chan.value();
+        Log::LogLine(Log::debug) << "Constructing dataset for channel " << channel_name;
+
+        channel_cat->defineType(channel_name.c_str());
+        auto common_config = config;
+        common_config.erase("channels");
+
+        RooDataSet* channel_dataset = GetChannelData(channel_name, channel_config, common_config);
+        channel_cat->setLabel(channel_name.c_str());
+        channel_dataset->addColumn(*channel_cat);
+        datasets.push_back(channel_dataset);
+    }
+
+    RooDataSet* dataset = nullptr;
+    for (auto channel_dataset : datasets) {
+        if (dataset == nullptr) {
+            dataset = static_cast<RooDataSet*>(channel_dataset->Clone());
+            continue;
+        }
+        dataset->append(*channel_dataset);
+    }
+
+    vrzerr_ = static_cast<RooRealVar*>(dataset->addColumn(*vrzerr_formula_));
+    vrzerr_->setRange(0, 10000);
+    vtzerr_ = static_cast<RooRealVar*>(dataset->addColumn(*vtzerr_formula_));
+    vtzerr_->setRange(0, 10000);
+
+    conditional_vars_argset_.add(*vrzerr_);
+    conditional_vars_argset_.add(*vtzerr_);
+    conditional_vars_argset_.add(*decaytype_);
+
+    // Bind the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
+    const RooArgSet* vars = dataset->get();
+    for (RooRealVar** var : dataset_vars_) {
+        *var = static_cast<RooRealVar*>(vars->find((*var)->GetName()));
+    }
+
+    dataset->get(1)->Print("v");
+
+    return dataset;
+}
+
+RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
+                                      const nlohmann::json channel_config,
+                                      const nlohmann::json common_config) {
+    TChain* chain = new TChain("h2000");
+    int num_files = 0;
+    if (common_config["MC"].get<bool>() == false) {
+        for (auto& file_name : channel_config["inputFiles"]["data"].items()) {
+            chain->Add(file_name.value().get<std::string>().c_str());
+            num_files++;
+        }
+    } else {
+        for (auto& file_name : channel_config["inputFiles"]["signalMC"].items()) {
+            chain->Add(file_name.value().get<std::string>().c_str());
+            num_files++;
+        }
+
+        if (common_config["components"] == "all") {
+            for (auto& file_name : channel_config["inputFiles"]["genericMC"].items()) {
+                chain->Add(file_name.value().get<std::string>().c_str());
+                num_files++;
+            }
+        }
+    }
+
+    Log::print(Log::info, "Reading %i input files...\n", num_files);
+
+    // TTree* input_tree;
+    // if (num_events) {
+    //     if (file_names.size() > 1) {
+    //         Log::print(Log::warning,
+    //                    "You limited the number of events to read, while reading multiple "
+    //                    "files. Since this limiting works sequentially not randomly, you "
+    //                    "will probably not get the result you want!\n");
+    //     }
+    //     input_tree = input_chain->CloneTree(num_events);
+    // } else {
+    //     input_tree = input_chain->CloneTree();
+    // }
+
+    TString common_cuts = tools::GetCommonCutsString();
+
+    TString a_cuts;
+    TString ab_cuts;
+    TString b_cuts;
+    TString bb_cuts;
+    // TODO: Treat case that key exists but is false
+    if (common_config.contains("perfectTagging")) {
+        a_cuts = "brecflav==1&&btagmcli<0";
+        ab_cuts = "brecflav==-1&&btagmcli>0";
+        b_cuts = "brecflav==1&&btagmcli>0";
+        bb_cuts = "brecflav==-1&&btagmcli<0";
+    } else {
+        // TODO: Treat case that key exists but is false
+        if (common_config.contains("generatorLevel")) {
+            Log::print(Log::warning,
+                       "Attempting to use realistic tagging with generator level fit. This will "
+                       "probably end badly. Consider using the '--perfect-tag' switch.\n");
+        }
+        a_cuts = "brecflav==1&&tagqr<0";
+        ab_cuts = "brecflav==-1&&tagqr>0";
+        b_cuts = "brecflav==1&&tagqr>0";
+        bb_cuts = "brecflav==-1&&tagqr<0";
+    }
+
+    // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
+    // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
+    std::string dataset_name = channel_name;
+    dataset_name += "_dataset";
+    RooDataSet* temp_dataset = new RooDataSet(dataset_name.c_str(), dataset_name.c_str(), chain,
+                                              dataset_vars_argset_, common_cuts);
+    Log::print(Log::debug, "Num events passing common cuts: %i\n", temp_dataset->numEntries());
+
+    //  separate conditional vars from stuff like thetat
+
+    // We add an identifying label to each of the 4 categories and then combine it into a single
+    // dataset for RooSimultaneous fitting
+    RooDataSet* dataset_a = static_cast<RooDataSet*>(temp_dataset->reduce(a_cuts));
+    decaytype_->setLabel("a");
+    dataset_a->addColumn(*decaytype_);
+
+    RooDataSet* dataset_ab = static_cast<RooDataSet*>(temp_dataset->reduce(ab_cuts));
+    decaytype_->setLabel("ab");
+    dataset_ab->addColumn(*decaytype_);
+
+    RooDataSet* dataset_b = static_cast<RooDataSet*>(temp_dataset->reduce(b_cuts));
+    decaytype_->setLabel("b");
+    dataset_b->addColumn(*decaytype_);
+
+    RooDataSet* dataset_bb = static_cast<RooDataSet*>(temp_dataset->reduce(bb_cuts));
+    decaytype_->setLabel("bb");
+    dataset_bb->addColumn(*decaytype_);
+
+    delete temp_dataset;
+
+    // thetat_->setBins(10);
+    // thetab_->setBins(10);
+    // phit_->setBins(10);
+    // RooDataHist datahist_a("datahist_a", "datahist_a", RooArgSet(*thetat_, *thetab_, *phit_),
+    // *dataset_a); RooDataHist datahist_ab("datahist_ab", "datahist_ab", RooArgSet(*thetat_,
+    // *thetab_, *phit_), *dataset_ab); RooDataHist datahist_b("datahist_b", "datahist_b",
+    // RooArgSet(*thetat_, *thetab_, *phit_), *dataset_b); RooDataHist datahist_bb("datahist_bb",
+    // "datahist_bb", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_bb);
+    // tools::PlotPull2D(*thetat_, *thetab_, datahist_a, datahist_ab);
+    // tools::PlotPull2D(*thetat_, *phit_, datahist_a, datahist_ab);
+    // tools::PlotPull2D(*thetab_, *phit_, datahist_a, datahist_ab);
+    // tools::PlotPull2D(*thetat_, *thetab_, datahist_b, datahist_bb);
+    // tools::PlotPull2D(*thetat_, *phit_, datahist_b, datahist_bb);
+    // tools::PlotPull2D(*thetab_, *phit_, datahist_b, datahist_bb);
+
+    // dataset_ = static_cast<RooDataSet*>(dataset_bb->Clone());
+    RooDataSet* dataset = static_cast<RooDataSet*>(dataset_a->Clone());
+    delete dataset_a;
+    dataset->append(*dataset_ab);
+    delete dataset_ab;
+    dataset->append(*dataset_b);
+    delete dataset_b;
+    dataset->append(*dataset_bb);
+    delete dataset_bb;
+
+    Log::print(Log::info, "Num events passing all initial cuts: %i\n", dataset->numEntries());
+
+    return dataset;
 }

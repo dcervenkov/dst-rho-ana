@@ -87,6 +87,10 @@ double Efficiency::GetEfficiency(double thetat, double thetab, double phit,
                 return GetKDEEfficiency(thetat, thetab, phit);
             }
         }
+        default: {
+            Log::print(Log::error, "Unsupported efficiency model number: %i\n", efficiency_model);
+            assert(0);
+        }
     }
     return 0;
 }

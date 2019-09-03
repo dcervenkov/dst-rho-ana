@@ -32,12 +32,14 @@ void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
 void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data,
                 const RooAbsData& pdf, const char* format = ".pdf", const bool residual = false);
 TString GetCommonCutsString();
+void SaveTextToFile(const std::string filename, const std::string text);
 
 void LogEnvironmentMetadata(TFile* file);
 void LogCLIArguments(TFile* file, int argc, char* argv[]);
 void LogTextFromFile(TFile* file, const char* field_name, const char* filename);
 void LogFileCRC(TFile* file, const char* field_name, const char* filename);
 void LogText(TFile* file, const char* field_name, const char* text);
+void LogText(TFile* file, const char* field_name, const std::string text);
 }  // namespace tools
 
 #endif /* TOOLS_H_ */

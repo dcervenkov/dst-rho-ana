@@ -334,6 +334,18 @@ TString GetCommonCutsString() {
     return common_cuts;
 }
 
+/**
+ * Save text to a file
+ * 
+ * @param filename Path to the file to be written
+ * @param text Text to be written to the file
+ */
+void SaveTextToFile(const std::string filename, const std::string text) {
+    std::ofstream file(filename);
+    file << text;
+    file.close();
+}
+
 void LogTextFromFile(TFile* file, const char* field_name, const char* filename) {
     file->cd();
     std::ifstream input_file;
@@ -356,6 +368,10 @@ void LogText(TFile* file, const char* field_name, const char* text) {
     file->cd();
     TNamed text_field(field_name, text);
     text_field.Write();
+}
+
+void LogText(TFile* file, const char* field_name, const std::string text) {
+    LogText(file, field_name, text.c_str());
 }
 
 void LogCLIArguments(TFile* file, int argc, char* argv[]) {

@@ -27,6 +27,7 @@
 
 // Local includes
 #include "colors.h"
+#include "config.h"
 #include "constants.h"
 #include "fittercpv.h"
 #include "gitversion.h"
@@ -46,32 +47,27 @@ int main(int argc, char* argv[]) {
     Log::setLogLevel(Log::debug);
 
     char** optionless_argv = nullptr;
-    // The {} causes the struct's members to be initialized to 0. Without it
-    // they would have unspecified values
-    fitter_options options = {};
-    const int optionless_argc = ProcessCmdLineOptions(argc, argv, optionless_argv, options);
+    nlohmann::json cli_config;
+    const int optionless_argc = ProcessCmdLineOptions(argc, argv, optionless_argv, cli_config);
 
-    if (optionless_argc < 3) {
-        printf("ERROR: Not enough arguments.\n");
-        printf("Usage: %s [OPTION]... OUTPUT_FILE INPUT-FILE(s)\n", optionless_argv[0]);
-        return 2;
+    // if (optionless_argc < 3) {
+    //     printf("ERROR: Not enough arguments.\n");
+    //     printf("Usage: %s [OPTION]... OUTPUT_FILE INPUT-FILE(s)\n", optionless_argv[0]);
+    //     return 2;
+    // }
+
+    Config config;
+    if (cli_config.contains("configFile")) {
+        config.ReadInJSONFile(cli_config["configFile"]);
+    }
+    config.Update(cli_config);
+    if (!config.IsValid()) {
+        Log::print(Log::error, "Config is not valid!\n");
+        exit(1);
     }
 
-    /// This is so I have to change only the next block if I change the
-    /// ordering, etc. of arguments
-    const char* results_path = optionless_argv[1];
-
-    // TODO: Move par_input to option parameter string
-    std::array<double, 16> par_input;
-
-    std::vector<const char*> file_names;
-    for (int i = 2; i < optionless_argc; i++) {
-        file_names.push_back(optionless_argv[i]);
-    }
-
-    par_input = constants::par_input;
-
-    if (options.save_log_set && options.save_log) {
+    if (config.ShouldSaveLog()) {
+        Log::print(Log::debug, "Manipulating cout buffer to save copy of stdout\n");
         std::cout.rdbuf(out.rdbuf());
     }
 
@@ -79,105 +75,56 @@ int main(int argc, char* argv[]) {
         Log::print(Log::warning, "Using version from dirty Git worktree\n");
     }
 
-    if (options.scf_kde_file_set && options.scf_histo_file_set) {
-        Log::print(Log::error, "Both '--scf-kde' and '--scf-histo' set. Use only one!\n");
-        return 3;
-    }
-
     tools::SetupPlotStyle();
     colors::setColors();
 
-    FitterCPV fitter;
+    FitterCPV fitter(config);
 
-    if (options.generator_level_set) fitter.SetGeneratorLevel(options.generator_level);
+    // if (options.generator_level_set) fitter.SetGeneratorLevel(options.generator_level);
 
-    fitter.InitVars(par_input);
+    // if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
 
-    std::string json_config;
-    if (options.config_file_set) {
-        nlohmann::json config = FitterCPV::ReadJSONConfig(options.config_file);
-        json_config = fitter.ApplyJSONConfig(config);
-    }
+    // if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
+    // if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
 
-    if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
+    // if (options.scf_kde_file_set) fitter.SetSCFKDE(options.scf_kde_file);
+    // if (options.scf_histo_file_set) fitter.SetSCFHisto(options.scf_histo_file);
 
-    if (options.num_events_set) {
-        fitter.ReadInFile(file_names, options.num_events);
-    } else {
-        fitter.ReadInFile(file_names);
-    }
+    // if (options.do_time_independent_fit_set) {
+    //     fitter.SetDoTimeIndependentFit(options.do_time_independent_fit);
+    // }
+    // if (options.fix_set) {
+    //     if (fitter.FixParameters(options.fix)) {
+    //         return 1;
+    //     }
+    // }
 
-    if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
-    if (options.efficiency_model_set) {
-        fitter.SetEfficiencyModel(options.efficiency_model);
-    }
-    if (options.efficiency_files_set) {
-        fitter.SetEfficiencyFiles(options.efficiency_files);
-    }
-    if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
+    // if (!options.fit_set) {
+    //     options.fit = (char*)"all";
+    // }
 
-    if (options.scf_kde_file_set) fitter.SetSCFKDE(options.scf_kde_file);
-    if (options.scf_histo_file_set) fitter.SetSCFHisto(options.scf_histo_file);
+    // // fitter.TestEfficiency();
+    // // fitter.PlotEfficiency();
 
-    if (options.do_mixing_fit_set) fitter.SetDoMixingFit(options.do_mixing_fit);
-    if (options.do_time_independent_fit_set) {
-        fitter.SetDoTimeIndependentFit(options.do_time_independent_fit);
-    }
-    if (options.fix_set) {
-        if (fitter.FixParameters(options.fix)) {
-            return 1;
-        }
-    }
-
-    if (!options.fit_set) {
-        options.fit = (char*)"all";
-    }
-
-    // fitter.TestEfficiency();
-    // fitter.PlotEfficiency();
-
-    std::string output_filename(results_path);
+    std::string output_filename = config.GetOutputFilename();
     output_filename += ".root";
     TFile* output_file = new TFile(output_filename.c_str(), "RECREATE");
     fitter.SetOutputFile(output_file);
 
-    if (!fitter.CheckConfigIsValid()) {
-        Log::print(Log::error, "Fitter config is not valid!\n");
-        return 3;
-    }
-
-    if (std::strcmp(options.fit, "CR") == 0) {
-        fitter.Fit(!fitter.GetDoTimeIndependentFit(), false, false);
-    } else if (std::strcmp(options.fit, "CRSCF") == 0) {
-        fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, false);
-    } else if (std::strcmp(options.fit, "all") == 0) {
-        fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, true);
-    }
-    // fitter.GenerateToys(10000, 10);
+    // if (std::strcmp(options.fit, "CR") == 0) {
+        fitter.Fit(false, false, false);
+    //     fitter.Fit(!fitter.GetDoTimeIndependentFit(), false, false);
+    // } else if (std::strcmp(options.fit, "CRSCF") == 0) {
+    //     fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, false);
+    // } else if (std::strcmp(options.fit, "all") == 0) {
+    //     fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, true);
+    // }
+    // // fitter.GenerateToys(10000, 10);
 
     tools::LogCLIArguments(output_file, argc, argv);
     tools::LogEnvironmentMetadata(output_file);
-    if (!json_config.empty()) {
-        tools::LogText(output_file, "json_config", json_config.c_str());
-    }
-    for (auto file_name : file_names) {
-        tools::LogText(output_file, "input_file_name", file_name);
-        tools::LogFileCRC(output_file, "input_file_crc", file_name);
-    }
-    tools::LogText(output_file, "efficiency_model",
-                   std::to_string(fitter.GetEfficiencyModel()).c_str());
-    for (auto efficiency_file : fitter.GetEfficiencyFiles()) {
-        tools::LogText(output_file, "efficiency_file_name", efficiency_file.c_str());
-        tools::LogFileCRC(output_file, "efficiency_file_crc", efficiency_file.c_str());
-    }
-    if (options.scf_histo_file_set) {
-        tools::LogText(output_file, "scf_file_name", options.scf_histo_file);
-        tools::LogFileCRC(output_file, "scf_file_crc", options.scf_histo_file);
-    }
-    if (options.scf_kde_file_set) {
-        tools::LogText(output_file, "scf_file_name", options.scf_kde_file);
-        tools::LogFileCRC(output_file, "scf_file_crc", options.scf_kde_file);
-    }
+    tools::LogText(output_file, "config", config.GetPrettyString());
+
     if (fitter.ResultExists()) {
         fitter.LogResults();
         tools::LogText(output_file, "pull_table", fitter.CreatePullTableString().c_str());
@@ -187,10 +134,11 @@ int main(int argc, char* argv[]) {
         tools::LogText(output_file, "latex_pull_table_asym",
                        fitter.CreateLatexPullTableString(true).c_str());
 
-        fitter.SaveTXTResults(results_path);
+        tools::SaveTextToFile(config.GetOutputFilename(),
+                              fitter.CreateResultsString(!config.json.contains("timeIndependent")));
     }
 
-    if (options.save_log_set && options.save_log) {
+    if (config.ShouldSaveLog()) {
         // We have to restore cout's buffer to the original, otherwise we would
         // get a segfault as our object goes out of scope sooner than cout
         std::cout.rdbuf(orig_cout_streambuf);
@@ -217,28 +165,24 @@ int main(int argc, char* argv[]) {
  * @param options Struct which holds the variables acted upon by switches
  */
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,
-                          fitter_options& options) {
+                          nlohmann::json& config) {
     int c;
     struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
                                     {"config", required_argument, 0, 'g'},
-                                    {"efficiency-file", required_argument, 0, 'y'},
-                                    {"efficiency-model", required_argument, 0, 'e'},
-                                    {"events", required_argument, 0, 'n'},
-                                    {"fit", required_argument, 0, 'f'},
+                                    {"components", required_argument, 0, 'e'},
+                                    {"MC", required_argument, 0, 'm'},
                                     {"fix", required_argument, 0, 'x'},
-                                    {"generator-level", no_argument, 0, 'r'},
+                                    {"plot-dir", required_argument, 0, 'p'},
+                                    {"output", required_argument, 0, 'o'},
                                     {"log", no_argument, 0, 'l'},
-                                    {"mixing", no_argument, 0, 'm'},
                                     {"time-independent", no_argument, 0, 'i'},
                                     {"perfect-tag", no_argument, 0, 't'},
-                                    {"plot-dir", required_argument, 0, 'p'},
-                                    {"scf-kde", required_argument, 0, 'k'},
-                                    {"scf-histo", required_argument, 0, 's'},
+                                    {"generator-level", no_argument, 0, 'r'},
                                     {"version", no_argument, 0, 'v'},
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:y:e:n:f:x:p:k:s:lmitvh", long_options,
+    while ((c = getopt_long(argc, argv, "c:g:e:m:x:p:o:litrvh", long_options,
                             &option_index)) != -1) {
         switch (c) {
             case 0:
@@ -247,89 +191,58 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("\n");
                 break;
             case 'c':
-                options.num_CPUs = atoi(optarg);
-                options.num_CPUs_set = true;
+                config["numCPUs"] = atoi(optarg);
                 break;
             case 'g':
-                options.config_file = optarg;
-                options.config_file_set = true;
+                config["configFile"] = optarg;
                 break;
             case 'e':
-                options.efficiency_model = atoi(optarg);
-                options.efficiency_model_set = true;
-                break;
-            case 'y':
-                options.efficiency_files.push_back(optarg);
-                options.efficiency_files_set = true;
-                break;
-            case 'n':
-                options.num_events = atoi(optarg);
-                options.num_events_set = true;
-                break;
-            case 'f':
-                options.fit = optarg;
-                options.fit_set = true;
-                break;
-            case 'x':
-                options.fix = optarg;
-                options.fix_set = true;
-                break;
-            case 'p':
-                options.plot_dir = optarg;
-                options.plot_dir_set = true;
-                break;
-            case 'l':
-                options.save_log = true;
-                options.save_log_set = true;
+                config["components"] = optarg;
                 break;
             case 'm':
-                options.do_mixing_fit = true;
-                options.do_mixing_fit_set = true;
+                config["MC"] = bool(atoi(optarg));
+                break;
+            case 'x':
+                config["fixParameters"] = optarg;
+                break;
+            case 'p':
+                config["plotDir"] = optarg;
+                break;
+            case 'o':
+                config["output"] = optarg;
+                break;
+            case 'l':
+                config["saveLog"] = true;
                 break;
             case 'i':
-                options.do_time_independent_fit = true;
-                options.do_time_independent_fit_set = true;
+                config["timeIndependent"] = true;
                 break;
             case 't':
-                options.perfect_tagging = true;
-                options.perfect_tagging_set = true;
+                config["perfectTagging"] = true;
                 break;
             case 'r':
-                options.generator_level = true;
-                options.generator_level_set = true;
-                break;
-            case 'k':
-                options.scf_kde_file = optarg;
-                options.scf_kde_file_set = true;
+                config["generatorLevel"] = true;
                 break;
             case 'v':
                 printf("Version: %s\n", gitversion);
                 exit(0);
-            case 's':
-                options.scf_histo_file = optarg;
-                options.scf_histo_file_set = true;
-                break;
             case 'h':
                 printf("Usage: %s [OPTION]... RESULTS-FILE INPUT-FILES\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
-                printf("-e, --efficiency-model=MODEL-NUM number of the efficiency model to be used\n");
-                printf("-f, --fit=CR|CRSCF|all           do a specified fit type\n");
+                printf("-e, --components=CR|CRSCF|all    do a specified fit type\n");
                 printf("-g, --config=CONFIG-FILE         read in configuration from the specified file\n");
                 printf("-h, --help                       display this text and exit\n");
                 printf("-i, --time-independent           make a time-independent fit\n");
-                printf("-k, --scf-kde                    use SCF KDE from file\n");
                 printf("-l, --log                        save copy of log to results file\n");
-                printf("-m, --mixing                     make a mixing fit\n");
-                printf("-n, --events=NUM-EVENTS          number of events to be imported from the input file\n");
+                printf("-m, --MC=0|1                     whether to fit MC or data\n");
+                printf("-o, --output                     basename of the output files\n");
                 printf("-p, --plot-dir=PLOT-DIR          create lifetime/mixing plots\n");
                 printf("-r, --generator-level            do a generator level fit\n");
-                printf("-s, --scf-histo                  use histo SCF from file\n");
                 printf("-t, --perfect-tag                use MC info to get perfect tagging\n");
                 printf("-v, --version                	 display version and exit\n");
                 printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit;\n");
                 printf("                                 additional short-hand ARGs are: all, xy, trans and nota0\n");
-                printf("-y, --efficiency-file=ROOT-FILE  file from which to read in efficiency histogram\n");
                 exit(0);
                 break;
             default:

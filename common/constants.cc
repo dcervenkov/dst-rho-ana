@@ -54,6 +54,8 @@ const double fraction_cr_of_crscf = 0.8759;
 const double fraction_cr_of_crscfbkg = 0.8142;
 const double fraction_scf_of_crscfbkg = 0.1153;
 
+const int max_efficiency_model_number = 6;
+
 namespace cuts {
 
 const double de_low = -0.14;  // [GeV]

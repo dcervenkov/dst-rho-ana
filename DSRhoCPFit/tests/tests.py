@@ -19,13 +19,11 @@ test_configs = {
                   "tests/current_result",
                   "tests/data/signalMC.root"],
 
-    "ti_cr_fit": ["--efficiency-model=6",
-                  "--efficiency-file=eff_Kpi_190531.root",
-                  "--config=config_Kpi.json",
-                  "--fit=CR",
+    "ti_cr_fit": ["--config=tests/config_Kpi.json",
+                  "--components=CR",
                   "--time-independent",
-                  "tests/current_result",
-                  "tests/data/signalMC.root"],
+                  "--output=tests/current_result",
+                  "--MC=1"],
 
     "td_crscf_fit": ["--efficiency-model=6",
                      "--efficiency-file=eff_Kpi_190531.root",

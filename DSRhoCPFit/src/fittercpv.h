@@ -45,7 +45,7 @@ class FitterCPV {
                       const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
                       const char* title = "") const;
 
-    void Fit(const bool timedep, const bool scf, const bool bkg);
+    void Fit(const nlohmann::json config);
 
     void GenerateToys(const int num_events, const int num_toys);
     void TestEfficiency();
@@ -193,28 +193,33 @@ class FitterCPV {
     RooAbsPdf* CreateAngularSCFPDF();
     RooAbsPdf* CreateAngularBKGPDF();
 
+    RooAbsPdf* CreateSCFPDF(const nlohmann::json config) const;
+    RooAbsPdf* GetHistoSCF(const std::string filename) const;
     RooSimultaneous* CreateAngularPDF(const std::string name_prefix, const bool scf, const bool bkg,
                                       const nlohmann::json channel_config);
-    RooSimultaneous* CreateTimeDependentPDF(const bool scf, const bool bkg);
+    RooSimultaneous* CreateTimeDependentPDF(const nlohmann::json common_config,
+                                            const nlohmann::json channel_config);
 
     RooAddPdf* CreateVoigtGaussDtPdf(const char* prefix, RooArgSet& argset);
     void CreateDtCPPDFs(DtCPPDF*& cr_pdf_a, DtCPPDF*& cr_pdf_ab, DtCPPDF*& cr_pdf_b,
-                        DtCPPDF*& cr_pdf_bb);
+                        DtCPPDF*& cr_pdf_bb, const nlohmann::json common_config,
+                        const nlohmann::json channel_config) const;
     void CreateDtSCFPDFs(DtSCFPDF*& scf_pdf_a, DtSCFPDF*& scf_pdf_ab, DtSCFPDF*& scf_pdf_b,
-                         DtSCFPDF*& scf_pdf_bb);
+                         DtSCFPDF*& scf_pdf_bb) const;
     void CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_a, RooProdPdf*& scf_pdf_ab,
-                                   RooProdPdf*& scf_pdf_b, RooProdPdf*& scf_pdf_bb);
+                                   RooProdPdf*& scf_pdf_b, RooProdPdf*& scf_pdf_bb,
+                                   const nlohmann::json channel_config);
     void CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_a, RooProdPdf*& bkg_pdf_ab,
                                    RooProdPdf*& bkg_pdf_b, RooProdPdf*& bkg_pdf_bb);
 
     void PlotFit(RooSimultaneous* pdf, const bool scf, const bool bkg);
 
-    RooAbsPdf* scf_angular_pdf_;
-    RooAbsPdf* bkg_angular_pdf_;
-    RooAbsPdf* scf_dt_cf_pdf_;
-    RooAbsPdf* scf_dt_dcs_pdf_;
-    RooAbsPdf* bkg_dt_cf_pdf_;
-    RooAbsPdf* bkg_dt_dcs_pdf_;
+    // RooAbsPdf* scf_angular_pdf_;
+    // RooAbsPdf* bkg_angular_pdf_;
+    // RooAbsPdf* scf_dt_cf_pdf_;
+    // RooAbsPdf* scf_dt_dcs_pdf_;
+    // RooAbsPdf* bkg_dt_cf_pdf_;
+    // RooAbsPdf* bkg_dt_dcs_pdf_;
     RooArgSet scf_parameters_argset_;
     RooArgSet bkg_parameters_argset_;
     RooArgSet model_parameters_argset_;

@@ -82,26 +82,9 @@ int main(int argc, char* argv[]) {
 
     // if (options.generator_level_set) fitter.SetGeneratorLevel(options.generator_level);
 
-    // if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
-
     // if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
     // if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
 
-    // if (options.scf_kde_file_set) fitter.SetSCFKDE(options.scf_kde_file);
-    // if (options.scf_histo_file_set) fitter.SetSCFHisto(options.scf_histo_file);
-
-    // if (options.do_time_independent_fit_set) {
-    //     fitter.SetDoTimeIndependentFit(options.do_time_independent_fit);
-    // }
-    // if (options.fix_set) {
-    //     if (fitter.FixParameters(options.fix)) {
-    //         return 1;
-    //     }
-    // }
-
-    // if (!options.fit_set) {
-    //     options.fit = (char*)"all";
-    // }
 
     // // fitter.TestEfficiency();
     // // fitter.PlotEfficiency();
@@ -111,15 +94,7 @@ int main(int argc, char* argv[]) {
     TFile* output_file = new TFile(output_filename.c_str(), "RECREATE");
     fitter.SetOutputFile(output_file);
 
-    // if (std::strcmp(options.fit, "CR") == 0) {
-        fitter.Fit(false, false, false);
-    //     fitter.Fit(!fitter.GetDoTimeIndependentFit(), false, false);
-    // } else if (std::strcmp(options.fit, "CRSCF") == 0) {
-    //     fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, false);
-    // } else if (std::strcmp(options.fit, "all") == 0) {
-    //     fitter.Fit(!fitter.GetDoTimeIndependentFit(), true, true);
-    // }
-    // // fitter.GenerateToys(10000, 10);
+    fitter.Fit(config.json);
 
     tools::LogCLIArguments(output_file, argc, argv);
     tools::LogEnvironmentMetadata(output_file);
@@ -203,7 +178,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 config["MC"] = bool(atoi(optarg));
                 break;
             case 'x':
-                config["fixParameters"] = optarg;
+                config["fixedParameters"] = optarg;
                 break;
             case 'p':
                 config["plotDir"] = optarg;

@@ -80,16 +80,14 @@ FitterCPV::FitterCPV(Config config) {
     vtzerr_ = nullptr;
 
     InitVars(constants::par_input);
+    if (config.json.contains("fitRanges")) {
+        ChangeFitRanges(config.json["fitRanges"]);
+    }
+
     data_ = GetData(config.json);
     pdf_ = CreatePDF(config.json);
 
     ChangeModelParameters(config.json["channels"]["Kpi"]["modelParameters"]);
-    ChangeFitRanges(config.json["channels"]["Kpi"]["fitRanges"]);
-    // if (entry.key() == "fitRanges") {
-    //     ChangeFitRanges(config["fitRanges"]);
-
-    // } else if (entry.key() == "modelParameters") {
-    //     ChangeModelParameters(entry.value());
 }
 
 FitterCPV::~FitterCPV() {

@@ -210,13 +210,9 @@ class FitterCPV {
                         const nlohmann::json channel_config) const;
     void CreateDtSCFPDFs(DtSCFPDF*& scf_pdf_FB, DtSCFPDF*& scf_pdf_FA, DtSCFPDF*& scf_pdf_SB,
                          DtSCFPDF*& scf_pdf_SA, const std::string channel_name) const;
-    void CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_FB, RooProdPdf*& scf_pdf_FA,
-                                   RooProdPdf*& scf_pdf_SB, RooProdPdf*& scf_pdf_SA,
-                                   const std::string channel_name,
-                                   const nlohmann::json channel_config);
-    void CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_FB, RooProdPdf*& bkg_pdf_FA,
-                                   RooProdPdf*& bkg_pdf_SB, RooProdPdf*& bkg_pdf_SA,
-                                   const std::string channel_name);
+    void CreateFunctionalDtSCFBKGPDFs(RooProdPdf*& pdf_FB, RooProdPdf*& pdf_FA, RooProdPdf*& pdf_SB,
+                                      RooProdPdf*& pdf_SA, const std::string channel_name,
+                                      const nlohmann::json channel_config, const bool scf);
 
     void PlotFit(RooSimultaneous* pdf, const bool scf, const bool bkg);
 

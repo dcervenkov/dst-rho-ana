@@ -406,7 +406,7 @@ void FitterCPV::CreateDtSCFPDFs(DtSCFPDF*& scf_dt_pdf_FB, DtSCFPDF*& scf_dt_pdf_
  * A common prefix is prepended to all object names.
  *
  * @param prefix Text to be prepended to the ROOT name
- * 
+ *
  */
 RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf(const std::string prefix) {
     TString pre(prefix);
@@ -429,57 +429,42 @@ RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf(const std::string prefix) {
 }
 
 /**
- * Create SCF PDFs with a function-based dt distribution model.
+ * Create SCF or BKG PDFs with a function-based dt distribution model.
  *
- * @param scf_pdf_FB SCF PDF for B0 -> D*- rho+
- * @param scf_pdf_FA SCF PDF for anti-B0 -> D*+ rho-
- * @param scf_pdf_SB SCF PDF for B0 -> D*+ rho-
- * @param scf_pdf_SA SCF PDF for anti-B0 -> D*- rho+
+ * @param pdf_FB PDF for B0 -> D*- rho+
+ * @param pdf_FA PDF for anti-B0 -> D*+ rho-
+ * @param pdf_SB PDF for B0 -> D*+ rho-
+ * @param pdf_SA PDF for anti-B0 -> D*- rho+
+ * @param channel_name Name of the channel the PDF is meant for
+ * @param channel_config JSON object with configuration details (useful for SCF PDF)
+ * @param scf Whether the PDF to be created is for SCF (true) or BKG (false)
+ *
  */
-void FitterCPV::CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_FB, RooProdPdf*& scf_pdf_FA,
-                                          RooProdPdf*& scf_pdf_SB, RooProdPdf*& scf_pdf_SA,
-                                          const std::string channel_name,
-                                          const nlohmann::json channel_config) {
+void FitterCPV::CreateFunctionalDtSCFBKGPDFs(RooProdPdf*& pdf_FB, RooProdPdf*& pdf_FA,
+                                             RooProdPdf*& pdf_SB, RooProdPdf*& pdf_SA,
+                                             const std::string channel_name,
+                                             const nlohmann::json channel_config, const bool scf) {
     Log::print(Log::debug, "Creating SCF dt PDF\n");
 
-    RooAbsPdf* scf_angular_pdf = CreateSCFPDF(channel_name, channel_config);
+    RooAbsPdf* angular_pdf;
+    if (scf) {
+        angular_pdf = CreateSCFPDF(channel_name, channel_config);
+    } else {
+        angular_pdf = CreateAngularSCFBKGPDF(channel_name + "_bkg_");
+    }
 
-    RooAbsPdf* scf_dt_cf_pdf = CreateVoigtGaussDtPdf(channel_name + "_scf_dt_cf");
-    RooAbsPdf* scf_dt_dcs_pdf = CreateVoigtGaussDtPdf(channel_name + "_scf_dt_dcs");
+    const std::string type = scf ? "scf_" : "bkg_";
+    RooAbsPdf* dt_cf_pdf = CreateVoigtGaussDtPdf(channel_name + "_" + type + "dt_cf");
+    RooAbsPdf* dt_dcs_pdf = CreateVoigtGaussDtPdf(channel_name + "_" + type + "dt_dcs");
 
-    scf_pdf_FB =
-        new RooProdPdf("scf_pdf_FB", "scf_pdf_FB", RooArgList(*scf_dt_cf_pdf, *scf_angular_pdf));
-    scf_pdf_FA =
-        new RooProdPdf("scf_pdf_FA", "scf_pdf_FA", RooArgList(*scf_dt_cf_pdf, *scf_angular_pdf));
-    scf_pdf_SB =
-        new RooProdPdf("scf_pdf_SB", "scf_pdf_SB", RooArgList(*scf_dt_dcs_pdf, *scf_angular_pdf));
-    scf_pdf_SA =
-        new RooProdPdf("scf_pdf_SA", "scf_pdf_SA", RooArgList(*scf_dt_dcs_pdf, *scf_angular_pdf));
-}
+    TString pfx = channel_name;
+    pfx += "_";
+    pfx += type;
 
-/**
- * Create BKG PDFs with a function-based dt distribution model.
- *
- * @param bkg_pdf_FB BKG PDF for B0 -> D*- rho+
- * @param bkg_pdf_FA BKG PDF for anti-B0 -> D*+ rho-
- * @param bkg_pdf_SB BKG PDF for B0 -> D*+ rho-
- * @param bkg_pdf_SA BKG PDF for anti-B0 -> D*- rho+
- */
-void FitterCPV::CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_FB, RooProdPdf*& bkg_pdf_FA,
-                                          RooProdPdf*& bkg_pdf_SB, RooProdPdf*& bkg_pdf_SA,
-                                          const std::string channel_name) {
-    RooAbsPdf* bkg_angular_pdf = CreateAngularSCFBKGPDF(channel_name + "_bkg_");
-    RooAbsPdf* bkg_dt_cf_pdf = CreateVoigtGaussDtPdf(channel_name + "_bkg_dt_cf");
-    RooAbsPdf* bkg_dt_dcs_pdf = CreateVoigtGaussDtPdf(channel_name + "_bkg_dt_dcs");
-
-    bkg_pdf_FB =
-        new RooProdPdf("bkg_pdf_FB", "bkg_pdf_FB", RooArgList(*bkg_dt_cf_pdf, *bkg_angular_pdf));
-    bkg_pdf_FA =
-        new RooProdPdf("bkg_pdf_FA", "bkg_pdf_FA", RooArgList(*bkg_dt_cf_pdf, *bkg_angular_pdf));
-    bkg_pdf_SB =
-        new RooProdPdf("bkg_pdf_SB", "bkg_pdf_SB", RooArgList(*bkg_dt_dcs_pdf, *bkg_angular_pdf));
-    bkg_pdf_SA =
-        new RooProdPdf("bkg_pdf_SA", "bkg_pdf_SA", RooArgList(*bkg_dt_dcs_pdf, *bkg_angular_pdf));
+    pdf_FB = new RooProdPdf(pfx + "pdf_FB", pfx + "pdf_FB", RooArgList(*dt_cf_pdf, *angular_pdf));
+    pdf_FA = new RooProdPdf(pfx + "pdf_FA", pfx + "pdf_FA", RooArgList(*dt_cf_pdf, *angular_pdf));
+    pdf_SB = new RooProdPdf(pfx + "pdf_SB", pfx + "pdf_SB", RooArgList(*dt_dcs_pdf, *angular_pdf));
+    pdf_SA = new RooProdPdf(pfx + "pdf_SA", pfx + "pdf_SA", RooArgList(*dt_dcs_pdf, *angular_pdf));
 }
 
 /**
@@ -590,8 +575,8 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const std::string channel_nam
     RooProdPdf* scf_pdf_SB = 0;
     RooProdPdf* scf_pdf_SA = 0;
     if (scf) {
-        CreateFunctionalDtSCFPDFs(scf_pdf_FB, scf_pdf_FA, scf_pdf_SB, scf_pdf_SA, channel_name,
-                                  channel_config);
+        CreateFunctionalDtSCFBKGPDFs(scf_pdf_FB, scf_pdf_FA, scf_pdf_SB, scf_pdf_SA, channel_name,
+                                     channel_config, true);
         FB_pdfs.add(*scf_pdf_FB);
         FA_pdfs.add(*scf_pdf_FA);
         SB_pdfs.add(*scf_pdf_SB);
@@ -603,7 +588,8 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const std::string channel_nam
     RooProdPdf* bkg_pdf_SB = 0;
     RooProdPdf* bkg_pdf_SA = 0;
     if (bkg) {
-        CreateFunctionalDtBKGPDFs(bkg_pdf_FB, bkg_pdf_FA, bkg_pdf_SB, bkg_pdf_SA, channel_name);
+        CreateFunctionalDtSCFBKGPDFs(bkg_pdf_FB, bkg_pdf_FA, bkg_pdf_SB, bkg_pdf_SA, channel_name,
+                                     channel_config, false);
         FB_pdfs.add(*bkg_pdf_FB);
         FA_pdfs.add(*bkg_pdf_FA);
         SB_pdfs.add(*bkg_pdf_SB);
@@ -2072,9 +2058,8 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix) {
                           RooArgList(*phit_, *phit_offset));
     RooGenericPdf* phit_cos = new RooGenericPdf(
         pfx + "phit_cos", "phit_cos", "cos(" + pfx + "phit_phit)^2", RooArgList(*phit_phit));
-    RooAddPdf* phit_model =
-        new RooAddPdf(pfx + "phit_model", "phit_model",
-                      RooArgList(*phit_poly, *phit_cos), RooArgList(*phit_f));
+    RooAddPdf* phit_model = new RooAddPdf(pfx + "phit_model", "phit_model",
+                                          RooArgList(*phit_poly, *phit_cos), RooArgList(*phit_f));
 
     // Background thetat model
     RooRealVar* thetat_p1 = new RooRealVar(pfx + "thetat_p1", "p_{1}", 0);
@@ -2083,10 +2068,9 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix) {
     RooRealVar* thetat_p4 = new RooRealVar(pfx + "thetat_p4", "p_{4}", 0.174);
     RooRealVar* thetat_p5 = new RooRealVar(pfx + "thetat_p5", "p_{5}", 0);
     RooRealVar* thetat_p6 = new RooRealVar(pfx + "thetat_p6", "p_{6}", -0.029);
-    RooChebychev* thetat_model =
-        new RooChebychev(pfx + "thetat_model", "thetat_model", *thetat_,
-                         RooArgList(*thetat_p1, *thetat_p2, *thetat_p3, *thetat_p4,
-                                    *thetat_p5, *thetat_p6));
+    RooChebychev* thetat_model = new RooChebychev(
+        pfx + "thetat_model", "thetat_model", *thetat_,
+        RooArgList(*thetat_p1, *thetat_p2, *thetat_p3, *thetat_p4, *thetat_p5, *thetat_p6));
 
     // Background thetab model
     RooRealVar* thetab_gaus_mu = new RooRealVar(pfx + "thetab_gaus_mu", "#mu", 2.895);
@@ -2103,11 +2087,11 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix) {
     RooRealVar* thetab_f = new RooRealVar(pfx + "thetab_f", "f_(exp)", 0.661);
 
     RooAddPdf* thetab_model =
-        new RooAddPdf(pfx + "thetab_model", "thetab_model",
-                      RooArgList(*thetab_exp, *thetab_gaus), RooArgList(*thetab_f));
+        new RooAddPdf(pfx + "thetab_model", "thetab_model", RooArgList(*thetab_exp, *thetab_gaus),
+                      RooArgList(*thetab_f));
 
-    RooProdPdf* pdf = new RooProdPdf(
-        "pdf", "pdf", RooArgList(*thetat_model, *thetab_model, *phit_model));
+    RooProdPdf* pdf =
+        new RooProdPdf("pdf", "pdf", RooArgList(*thetat_model, *thetab_model, *phit_model));
 
     return pdf;
 }

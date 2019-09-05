@@ -7,8 +7,7 @@
  *
  */
 
-#ifndef CONSTANTS_H_
-#define CONSTANTS_H_
+#pragma once
 
 // Standard includes
 #include <array>
@@ -52,5 +51,3 @@ extern const double tag_vtx_singletrack_sigma_z;
 } // namespace cuts
 
 } // namespace constants
-
-#endif /* CONSTANTS_H_ */

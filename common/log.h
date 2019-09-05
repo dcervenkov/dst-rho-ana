@@ -14,8 +14,7 @@
  *
  */
 
-#ifndef LOG_H_
-#define LOG_H_
+#pragma once
 
 #include <iostream>
 #include <sstream>
@@ -51,5 +50,3 @@ class LogLine {
 };
 
 }  // namespace Log
-
-#endif  // LOG_H_

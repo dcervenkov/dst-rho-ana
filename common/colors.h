@@ -7,13 +7,10 @@
  *
  */
 
-#ifndef COLORS_H_
-#define COLORS_H_
+#pragma once
 
 namespace colors {
 
 void setColors();
 
 } // namespace colors
-
-#endif /* COLORS_H_ */

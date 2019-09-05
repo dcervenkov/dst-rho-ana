@@ -7,8 +7,7 @@
  *
  */
 
-#ifndef DTSCFPDF_H_
-#define DTSCFPDF_H_
+#pragma once
 
 // ROOT includes
 #include "TF1.h"
@@ -130,5 +129,3 @@ protected:
 private:
     //ClassDef(DSRhoPDF,1) // Your description goes here...
 };
-
-#endif // DTSCFPDF_H_

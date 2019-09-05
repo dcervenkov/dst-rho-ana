@@ -25,8 +25,7 @@
  *
  */
 
-#ifndef TEEBUF_H_
-#define TEEBUF_H_
+#pragma once
 
 #include <streambuf>
 
@@ -51,5 +50,3 @@ struct teebuf : std::streambuf {
         return rc ? 0 : -1;
     }
 };
-
-#endif  // TEEBUF_H_

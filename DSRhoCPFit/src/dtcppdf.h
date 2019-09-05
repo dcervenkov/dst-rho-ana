@@ -8,8 +8,7 @@
  *
  */
 
-#ifndef DTCPPDF_H_
-#define DTCPPDF_H_
+#pragma once
 
 // Standard includes
 #include <vector>
@@ -156,5 +155,3 @@ protected:
 private:
     //ClassDef(DSRhoPDF,1) // Your description goes here...
 };
-
-#endif // DTCPPDF_H_

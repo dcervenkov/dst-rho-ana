@@ -7,8 +7,7 @@
  *
  */
 
-#ifndef EFFICIENCY_H_
-#define EFFICIENCY_H_
+#pragma once
 
 // ROOT includes
 #include "RooRealVar.h"
@@ -134,5 +133,3 @@ protected:
 	double histo_normalization = 0;
 	double GetNormalization();
 };
-
-#endif /* EFFICIENCY_H_ */

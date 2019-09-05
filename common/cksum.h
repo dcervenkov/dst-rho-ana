@@ -7,4 +7,6 @@
  *
  */
 
+#pragma once
+
 uint_fast32_t cksum (const char *file);

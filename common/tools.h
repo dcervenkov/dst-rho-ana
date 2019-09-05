@@ -7,8 +7,7 @@
  *
  */
 
-#ifndef TOOLS_H_
-#define TOOLS_H_
+#pragma once
 
 // ROOT includes
 #include "RooAbsData.h"
@@ -41,5 +40,3 @@ void LogFileCRC(TFile* file, const char* field_name, const char* filename);
 void LogText(TFile* file, const char* field_name, const char* text);
 void LogText(TFile* file, const char* field_name, const std::string text);
 }  // namespace tools
-
-#endif /* TOOLS_H_ */

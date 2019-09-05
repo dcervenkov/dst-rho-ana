@@ -7,8 +7,7 @@
  *
  */
 
-#ifndef ANGULARPDF_H_
-#define ANGULARPDF_H_
+#pragma once
 
 // ROOT includes
 #include "RooRealProxy.h"
@@ -64,5 +63,3 @@ class AngularPDF : public RooAbsPdf {
    private:
     // ClassDef(AngularPDF,1) // Your description goes here...
 };
-
-#endif

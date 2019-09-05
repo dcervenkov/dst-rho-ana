@@ -89,17 +89,6 @@ FitterCPV::FitterCPV(Config config) {
 
     data_ = GetData(config.json);
     pdf_ = CreatePDF(config.json);
-
-    ChangeModelParameters(config.json["channels"]["Kpi"]["modelParameters"]);
-
-    // RooArgSet* set = pdf_->getVariables(false);
-    // RooArgSet* components = pdf_->getComponents();
-    // components->Print();
-    // components->find("Kpi_angular_pdf_B")->Print();
-    // RooAbsArg* onepdf = components->find("Kpi_angular_pdf_B");
-    // onepdf->getComponents()->Print();
-    // RooArgSet* components2 = onepdf->getComponents();
-    // components2->find("Kpi_cr_angular_pdf_B")->Print();
 }
 
 FitterCPV::~FitterCPV() {
@@ -204,18 +193,9 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
 
     PrepareVarArgsets();
 
-    // scf_dt_cf_pdf_ = CreateVoigtGaussDtPdf("scf_dt_cf", scf_parameters_argset_);
-    // scf_dt_dcs_pdf_ = CreateVoigtGaussDtPdf("scf_dt_dcs", scf_parameters_argset_);
-    // bkg_dt_cf_pdf_ = CreateVoigtGaussDtPdf("bkg_dt_cf", bkg_parameters_argset_);
-    // bkg_dt_dcs_pdf_ = CreateVoigtGaussDtPdf("bkg_dt_dcs", bkg_parameters_argset_);
-
     cr_scf_f_.setConstant();
     cr_f_.setConstant();
     scf_f_.setConstant();
-
-    model_parameters_argset_.add(cr_scf_f_);
-    model_parameters_argset_.add(cr_f_);
-    model_parameters_argset_.add(scf_f_);
 }
 
 /**
@@ -355,7 +335,8 @@ void FitterCPV::PlotVar(RooRealVar& var, const RooAbsPdf& pdf) const {
 }
 
 void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_FB, DtCPPDF*& cr_pdf_FA, DtCPPDF*& cr_pdf_SB,
-                               DtCPPDF*& cr_pdf_SA, const nlohmann::json common_config,
+                               DtCPPDF*& cr_pdf_SA, const std::string channel_name,
+                               const nlohmann::json common_config,
                                const nlohmann::json channel_config) const {
     const bool perfect_tagging = common_config.contains("perfectTagging");
     const int efficiency_model = channel_config["efficiencyModel"].get<int>();
@@ -366,11 +347,11 @@ void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_FB, DtCPPDF*& cr_pdf_FA, DtCPPDF
     std::vector<std::string> efficiency_files;
     efficiency_files.push_back(channel_config["efficiencyFile"]);
 
-    cr_pdf_FB = new DtCPPDF("cr_pdf_FB", "cr_pdf_FB", false, true, perfect_tagging, efficiency_model,
-                           efficiency_files, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
-                           *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
-                           *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
-                           *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    cr_pdf_FB = new DtCPPDF(
+        "cr_pdf_FB", "cr_pdf_FB", false, true, perfect_tagging, efficiency_model, efficiency_files,
+        *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
+        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     cr_pdf_FA = new DtCPPDF("cr_pdf_FA", "cr_pdf_FA", true, true, perfect_tagging, efficiency_model,
                             efficiency_files, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
@@ -378,11 +359,11 @@ void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_FB, DtCPPDF*& cr_pdf_FA, DtCPPDF
                             *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
                             *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    cr_pdf_SB = new DtCPPDF("cr_pdf_SB", "cr_pdf_SB", false, false, perfect_tagging, efficiency_model,
-                           efficiency_files, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
-                           *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
-                           *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
-                           *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    cr_pdf_SB = new DtCPPDF(
+        "cr_pdf_SB", "cr_pdf_SB", false, false, perfect_tagging, efficiency_model, efficiency_files,
+        *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
+        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     cr_pdf_SA = new DtCPPDF(
         "cr_pdf_SA", "cr_pdf_SA", true, false, perfect_tagging, efficiency_model, efficiency_files,
@@ -392,7 +373,8 @@ void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_FB, DtCPPDF*& cr_pdf_FA, DtCPPDF
 }
 
 void FitterCPV::CreateDtSCFPDFs(DtSCFPDF*& scf_dt_pdf_FB, DtSCFPDF*& scf_dt_pdf_FA,
-                                DtSCFPDF*& scf_dt_pdf_SB, DtSCFPDF*& scf_dt_pdf_SA) const {
+                                DtSCFPDF*& scf_dt_pdf_SB, DtSCFPDF*& scf_dt_pdf_SA,
+                                const std::string channel_name) const {
     scf_dt_pdf_FB =
         new DtSCFPDF("scf_dt_pdf_FB", "scf_dt_pdf_FB", false, true, perfect_tagging_, *ap_, *apa_,
                      *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
@@ -421,15 +403,12 @@ void FitterCPV::CreateDtSCFPDFs(DtSCFPDF*& scf_dt_pdf_FB, DtSCFPDF*& scf_dt_pdf_
 /**
  * Create a Voigtian + Gaussian PDF.
  *
- * A common prefix is prepended to all object names. The PDF's parameters are
- * added to the supplied RooArgSet in order to make these parameters settable
- * from ApplyJSONConfig().
+ * A common prefix is prepended to all object names.
  *
  * @param prefix Text to be prepended to the ROOT name
- * @param argset Argset where PDF parameters should be added
- * @return RooAddPdf*
+ * 
  */
-RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf(const char* prefix, RooArgSet& argset) {
+RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf(const std::string prefix) {
     TString pre(prefix);
 
     RooRealVar* voigt_mu = new RooRealVar(pre + "_voigt_mu", "v_{#mu}", -0.249);
@@ -437,20 +416,14 @@ RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf(const char* prefix, RooArgSet& argse
     RooRealVar* voigt_width = new RooRealVar(pre + "_voigt_width_", "v_{w}", 0.684);
     RooVoigtian* voigt = new RooVoigtian(pre + "_voigt", pre + "_voigt", *dt_, *voigt_mu,
                                          *voigt_width, *voigt_sigma);
-    argset.add(*voigt_mu);
-    argset.add(*voigt_sigma);
-    argset.add(*voigt_width);
 
     RooRealVar* gaus_mu = new RooRealVar(pre + "_gaus_mu", "g_{#mu}", -0.105);
     RooRealVar* gaus_sigma = new RooRealVar(pre + "_gaus_sigma_", "g_{#sigma}", 0.881);
     RooGaussian* gaus = new RooGaussian(pre + "_gaus", pre + "_gaus", *dt_, *gaus_mu, *gaus_sigma);
-    argset.add(*gaus_mu);
-    argset.add(*gaus_sigma);
 
     RooRealVar* f = new RooRealVar(pre + "_f", "f_{v/g}", 0.720);
     RooAddPdf* model =
         new RooAddPdf(pre + "_model", pre + "_model", RooArgList(*voigt, *gaus), RooArgList(*f));
-    argset.add(*f);
 
     return model;
 }
@@ -465,13 +438,14 @@ RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf(const char* prefix, RooArgSet& argse
  */
 void FitterCPV::CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_FB, RooProdPdf*& scf_pdf_FA,
                                           RooProdPdf*& scf_pdf_SB, RooProdPdf*& scf_pdf_SA,
+                                          const std::string channel_name,
                                           const nlohmann::json channel_config) {
     Log::print(Log::debug, "Creating SCF dt PDF\n");
 
-    RooAbsPdf* scf_angular_pdf = CreateSCFPDF(channel_config);
+    RooAbsPdf* scf_angular_pdf = CreateSCFPDF(channel_name, channel_config);
 
-    RooAbsPdf* scf_dt_cf_pdf = CreateVoigtGaussDtPdf("scf_dt_cf", scf_parameters_argset_);
-    RooAbsPdf* scf_dt_dcs_pdf = CreateVoigtGaussDtPdf("scf_dt_dcs", scf_parameters_argset_);
+    RooAbsPdf* scf_dt_cf_pdf = CreateVoigtGaussDtPdf(channel_name + "_scf_dt_cf");
+    RooAbsPdf* scf_dt_dcs_pdf = CreateVoigtGaussDtPdf(channel_name + "_scf_dt_dcs");
 
     scf_pdf_FB =
         new RooProdPdf("scf_pdf_FB", "scf_pdf_FB", RooArgList(*scf_dt_cf_pdf, *scf_angular_pdf));
@@ -492,11 +466,11 @@ void FitterCPV::CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_FB, RooProdPdf*& 
  * @param bkg_pdf_SA BKG PDF for anti-B0 -> D*- rho+
  */
 void FitterCPV::CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_FB, RooProdPdf*& bkg_pdf_FA,
-                                          RooProdPdf*& bkg_pdf_SB, RooProdPdf*& bkg_pdf_SA)  {
-
-    RooAbsPdf* bkg_angular_pdf = CreateAngularBKGPDF();
-    RooAbsPdf* bkg_dt_cf_pdf = CreateVoigtGaussDtPdf("bkg_dt_cf", bkg_parameters_argset_);
-    RooAbsPdf* bkg_dt_dcs_pdf = CreateVoigtGaussDtPdf("bkg_dt_dcs", bkg_parameters_argset_);
+                                          RooProdPdf*& bkg_pdf_SB, RooProdPdf*& bkg_pdf_SA,
+                                          const std::string channel_name) {
+    RooAbsPdf* bkg_angular_pdf = CreateAngularSCFBKGPDF(channel_name + "_bkg_");
+    RooAbsPdf* bkg_dt_cf_pdf = CreateVoigtGaussDtPdf(channel_name + "_bkg_dt_cf");
+    RooAbsPdf* bkg_dt_dcs_pdf = CreateVoigtGaussDtPdf(channel_name + "_bkg_dt_dcs");
 
     bkg_pdf_FB =
         new RooProdPdf("bkg_pdf_FB", "bkg_pdf_FB", RooArgList(*bkg_dt_cf_pdf, *bkg_angular_pdf));
@@ -542,13 +516,13 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
     B_bar_pdfs.add(*cr_pdf_B_bar);
 
     if (scf) {
-        RooAbsPdf* scf_angular_pdf = CreateSCFPDF(channel_config);
+        RooAbsPdf* scf_angular_pdf = CreateSCFPDF(name_prefix, channel_config);
         B_pdfs.add(*scf_angular_pdf);
         B_bar_pdfs.add(*scf_angular_pdf);
     }
 
     if (bkg) {
-        RooAbsPdf* bkg_angular_pdf = CreateAngularBKGPDF();
+        RooAbsPdf* bkg_angular_pdf = CreateAngularSCFBKGPDF(name_prefix + "_bkg_");
         B_pdfs.add(*bkg_angular_pdf);
         B_bar_pdfs.add(*bkg_angular_pdf);
     }
@@ -583,15 +557,14 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
  * @param bkg Whether to add background component
  * @return RooSimultaneous* The complete PDF
  */
-RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const nlohmann::json common_config,
+RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const std::string channel_name,
+                                                   const nlohmann::json common_config,
                                                    const nlohmann::json channel_config) {
     RooArgList FB_pdfs;
     RooArgList FA_pdfs;
     RooArgList SB_pdfs;
     RooArgList SA_pdfs;
 
-    // TString prefix(name_prefix);
-    // prefix += "_";
     bool scf = false;
     bool bkg = false;
     if (common_config["components"] == "CRSCF") {
@@ -605,7 +578,8 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const nlohmann::json common_c
     DtCPPDF* cr_pdf_FA = 0;
     DtCPPDF* cr_pdf_SB = 0;
     DtCPPDF* cr_pdf_SA = 0;
-    CreateDtCPPDFs(cr_pdf_FB, cr_pdf_FA, cr_pdf_SB, cr_pdf_SA, common_config, channel_config);
+    CreateDtCPPDFs(cr_pdf_FB, cr_pdf_FA, cr_pdf_SB, cr_pdf_SA, channel_name, common_config,
+                   channel_config);
     FB_pdfs.add(*cr_pdf_FB);
     FA_pdfs.add(*cr_pdf_FA);
     SB_pdfs.add(*cr_pdf_SB);
@@ -616,7 +590,8 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const nlohmann::json common_c
     RooProdPdf* scf_pdf_SB = 0;
     RooProdPdf* scf_pdf_SA = 0;
     if (scf) {
-        CreateFunctionalDtSCFPDFs(scf_pdf_FB, scf_pdf_FA, scf_pdf_SB, scf_pdf_SA, channel_config);
+        CreateFunctionalDtSCFPDFs(scf_pdf_FB, scf_pdf_FA, scf_pdf_SB, scf_pdf_SA, channel_name,
+                                  channel_config);
         FB_pdfs.add(*scf_pdf_FB);
         FA_pdfs.add(*scf_pdf_FA);
         SB_pdfs.add(*scf_pdf_SB);
@@ -628,7 +603,7 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const nlohmann::json common_c
     RooProdPdf* bkg_pdf_SB = 0;
     RooProdPdf* bkg_pdf_SA = 0;
     if (bkg) {
-        CreateFunctionalDtBKGPDFs(bkg_pdf_FB, bkg_pdf_FA, bkg_pdf_SB, bkg_pdf_SA);
+        CreateFunctionalDtBKGPDFs(bkg_pdf_FB, bkg_pdf_FA, bkg_pdf_SB, bkg_pdf_SA, channel_name);
         FB_pdfs.add(*bkg_pdf_FB);
         FA_pdfs.add(*bkg_pdf_FA);
         SB_pdfs.add(*bkg_pdf_SB);
@@ -666,11 +641,6 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const nlohmann::json common_c
  */
 void FitterCPV::Fit(const nlohmann::json config) {
     Log::print(Log::info, "Fitting %i events.\n", data_->numEntries());
-
-    if (config["components"] == "CR") {
-        RooDataSet* temp_dataset = dynamic_cast<RooDataSet*>(data_->reduce("evmcflag==1"));
-        data_ = temp_dataset;
-    }
 
     Log::LogLine(Log::info) << "Running a fit with the following components: "
                             << config["components"];
@@ -885,63 +855,6 @@ void FitterCPV::PlotFit(RooSimultaneous* sim_pdf, const bool scf, const bool bkg
 }
 
 /**
- * Read a rapid JSON document object, loop through all the entries and
- * configure the fitter according to the JSON.
- *
- * There is a caveat that multiple efficiency files, as used for hybrid
- * KDE-histo based efficiency models, are not supported via the JSON as they
- * have been basically deprecated.
- *
- * @param config Config to be applied to the fitter
- *
- * @return Pretty, formatted JSON for logging purposes
- */
-// std::string FitterCPV::ApplyJSONConfig(const nlohmann::json& config) {
-//     for (auto& entry : config.items()) {
-//         if (entry.key() == "fitRanges") {
-//             ChangeFitRanges(config["fitRanges"]);
-
-//         } else if (entry.key() == "modelParameters") {
-//             ChangeModelParameters(entry.value());
-
-//         } else if (entry.key() == "efficiencyModel") {
-//             SetEfficiencyModel(entry.value());
-
-//         } else if (entry.key() == "efficiencyFile") {
-//             std::vector<std::string> efficiency_files;
-//             std::string file(entry.value());
-//             efficiency_files.push_back(file);
-//             Log::print(Log::debug, "Efficiency file: %s\n", efficiency_files[0].c_str());
-//             SetEfficiencyFiles(efficiency_files);
-
-//         } else if (entry.key() == "scfHisto") {
-//             std::string scf_histo = entry.value();
-//             Log::print(Log::debug, "SCF histo file: %s\n", scf_histo.c_str());
-//             SetSCFHisto(scf_histo.c_str());
-
-//         } else if (entry.key() == "timeIndependent") {
-//             Log::print(Log::debug, "Time-independent: %i\n", entry.value());
-//             // SetDoTimeIndependentFit(config["timeIndependent"].GetBool());
-//             if (entry.value()) {
-//                 Log::print(Log::debug, "Setting time-indep. fit\n");
-//                 do_time_independent_fit_ = true;
-//             } else {
-//                 Log::print(Log::debug, "Setting time-dep. fit\n");
-//                 do_time_independent_fit_ = false;
-//             }
-
-//         } else {
-//             Log::print(Log::error, "JSON config key '%s' is unrecognized\n",
-//             entry.key().c_str()); exit(6);
-//         }
-//     }
-
-//     // Return the prettified JSON config so that it can be stored in the
-//     // resulting ROOT file for reference
-//     return config.dump(4);
-// }
-
-/**
  * Take a JSON config with fit ranges and set the ranges of all variables of
  * the fitter corresponding to dataset variables according to the config
  *
@@ -977,24 +890,30 @@ void FitterCPV::ChangeFitRanges(const nlohmann::json& config) {
 /**
  * Set model parameters (SCF, BKG, etc.) according to a JSON config
  *
- * @param config JSON config with model parameter values
+ * @param pdf The model whose parameters are to be changed
+ * @param model_parameters JSON config with model parameter values
  */
-void FitterCPV::ChangeModelParameters(const nlohmann::json& config) {
-    for (auto& element : config.items()) {
-        const char* name = element.key().c_str();
-        const double value = element.value().get<double>();
+void FitterCPV::ChangeModelParameters(RooAbsPdf* pdf, const std::string channel_name,
+                                      const nlohmann::json& model_parameters) {
+    Log::LogLine(Log::info) << "Updating parameter values for channel " << channel_name;
+    pdf->getVariables()->Print();
+    for (auto& parameter : model_parameters.items()) {
+        const char* name = parameter.key().c_str();
+        const double value = parameter.value().get<double>();
 
-        // The parameter in the JSON file must be valid, i.e., exist in the model
-        Log::print(Log::debug, "Changing parameter %s to %f\n", name, value);
+        RooArgSet* pdf_parameters = pdf->getVariables();
 
-        if (!(scf_parameters_argset_.find(name) || bkg_parameters_argset_.find(name) ||
-              model_parameters_argset_.find(name))) {
-            Log::print(Log::warning, "Parameter '%s' from JSON config not found in the model\n",
-                       name);
+        std::string full_name = channel_name;
+        full_name += "_";
+        full_name += name;
+        RooRealVar* rooparameter =
+            dynamic_cast<RooRealVar*>(pdf_parameters->find(full_name.c_str()));
+
+        if (rooparameter) {
+            Log::print(Log::debug, "Changing parameter %s to %f\n", name, value);
+            rooparameter->setVal(value);
         } else {
-            scf_parameters_argset_.setRealValue(name, value);
-            bkg_parameters_argset_.setRealValue(name, value);
-            model_parameters_argset_.setRealValue(name, value);
+            Log::print(Log::warning, "Parameter %s not found in model, skipping...\n", name);
         }
     }
 }
@@ -1070,10 +989,10 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     RooRealVar ytb("ytb", "ytb", par_input[15], -0.2, 0.2);
 
     DtCPPDF mixing_pdf_FB("mixing_pdf_FB", "mixing_pdf_FB", false, true, perfect_tagging_,
-                         efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
-                         a0, ata, xp, x0, xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_,
-                         *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
-                         *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+                          efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
+                          a0, ata, xp, x0, xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_,
+                          *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
+                          *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_FA("mixing_pdf_FA", "mixing_pdf_FA", true, true, perfect_tagging_,
                           efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
@@ -1082,10 +1001,10 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
                           *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_SB("mixing_pdf_SB", "mixing_pdf_SB", false, false, perfect_tagging_,
-                         efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
-                         a0, ata, xp, x0, xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_,
-                         *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
-                         *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+                          efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
+                          a0, ata, xp, x0, xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_,
+                          *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
+                          *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtCPPDF mixing_pdf_SA("mixing_pdf_SA", "mixing_pdf_SA", true, false, perfect_tagging_,
                           efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
@@ -2139,133 +2058,58 @@ const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const 
 /**
  * Create a functional model of the background angular distribution.
  */
-RooAbsPdf* FitterCPV::CreateAngularBKGPDF() {
-    // Background phit model
-    RooRealVar* bkg_phit_poly_p2 = new RooRealVar("bkg_phit_poly_p2", "p_(2)", 0.040);
-    RooRealVar* bkg_phit_f = new RooRealVar("bkg_phit_f", "f_(poly)", 0.660);
-    RooPolynomial* bkg_phit_poly =
-        new RooPolynomial("bkg_phit_poly", "bkg_phit_poly", *phit_, *bkg_phit_poly_p2, 2);
-    RooRealVar* bkg_phit_offset = new RooRealVar("bkg_phit_offset", "#phi_(t)^(offset)", 0.103);
-    RooFormulaVar* bkg_phit_phit =
-        new RooFormulaVar("bkg_phit_phit", "bkg_phit_phit", "phit - bkg_phit_offset",
-                          RooArgList(*phit_, *bkg_phit_offset));
-    RooGenericPdf* bkg_phit_cos = new RooGenericPdf(
-        "bkg_phit_cos", "bkg_phit_cos", "cos(bkg_phit_phit)^2", RooArgList(*bkg_phit_phit));
-    RooAddPdf* bkg_phit_model =
-        new RooAddPdf("bkg_phit_model", "bkg_phit_model", RooArgList(*bkg_phit_poly, *bkg_phit_cos),
-                      RooArgList(*bkg_phit_f));
+RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix) {
+    TString pfx = prefix;
 
-    bkg_parameters_argset_.add(*bkg_phit_poly_p2);
-    bkg_parameters_argset_.add(*bkg_phit_f);
-    bkg_parameters_argset_.add(*bkg_phit_offset);
+    // Background phit model
+    RooRealVar* phit_poly_p2 = new RooRealVar(pfx + "phit_poly_p2", "p_(2)", 0.040);
+    RooRealVar* phit_f = new RooRealVar(pfx + "phit_f", "f_(poly)", 0.660);
+    RooPolynomial* phit_poly =
+        new RooPolynomial(pfx + "phit_poly", "phit_poly", *phit_, *phit_poly_p2, 2);
+    RooRealVar* phit_offset = new RooRealVar(pfx + "phit_offset", "#phi_(t)^(offset)", 0.103);
+    RooFormulaVar* phit_phit =
+        new RooFormulaVar(pfx + "phit_phit", "phit_phit", "phit - " + pfx + "phit_offset",
+                          RooArgList(*phit_, *phit_offset));
+    RooGenericPdf* phit_cos = new RooGenericPdf(
+        pfx + "phit_cos", "phit_cos", "cos(" + pfx + "phit_phit)^2", RooArgList(*phit_phit));
+    RooAddPdf* phit_model =
+        new RooAddPdf(pfx + "phit_model", "phit_model",
+                      RooArgList(*phit_poly, *phit_cos), RooArgList(*phit_f));
 
     // Background thetat model
-    RooRealVar* bkg_thetat_p1 = new RooRealVar("bkg_thetat_p1", "p_{1}", 0);
-    RooRealVar* bkg_thetat_p2 = new RooRealVar("bkg_thetat_p2", "p_{2}", -1.147);
-    RooRealVar* bkg_thetat_p3 = new RooRealVar("bkg_thetat_p3", "p_{3}", 0);
-    RooRealVar* bkg_thetat_p4 = new RooRealVar("bkg_thetat_p4", "p_{4}", 0.174);
-    RooRealVar* bkg_thetat_p5 = new RooRealVar("bkg_thetat_p5", "p_{5}", 0);
-    RooRealVar* bkg_thetat_p6 = new RooRealVar("bkg_thetat_p6", "p_{6}", -0.029);
-    RooChebychev* bkg_thetat_model =
-        new RooChebychev("bkg_thetat_model", "bkg_thetat_model", *thetat_,
-                         RooArgList(*bkg_thetat_p1, *bkg_thetat_p2, *bkg_thetat_p3, *bkg_thetat_p4,
-                                    *bkg_thetat_p5, *bkg_thetat_p6));
-    bkg_parameters_argset_.add(*bkg_thetat_p2);
-    bkg_parameters_argset_.add(*bkg_thetat_p4);
-    bkg_parameters_argset_.add(*bkg_thetat_p6);
+    RooRealVar* thetat_p1 = new RooRealVar(pfx + "thetat_p1", "p_{1}", 0);
+    RooRealVar* thetat_p2 = new RooRealVar(pfx + "thetat_p2", "p_{2}", -1.147);
+    RooRealVar* thetat_p3 = new RooRealVar(pfx + "thetat_p3", "p_{3}", 0);
+    RooRealVar* thetat_p4 = new RooRealVar(pfx + "thetat_p4", "p_{4}", 0.174);
+    RooRealVar* thetat_p5 = new RooRealVar(pfx + "thetat_p5", "p_{5}", 0);
+    RooRealVar* thetat_p6 = new RooRealVar(pfx + "thetat_p6", "p_{6}", -0.029);
+    RooChebychev* thetat_model =
+        new RooChebychev(pfx + "thetat_model", "thetat_model", *thetat_,
+                         RooArgList(*thetat_p1, *thetat_p2, *thetat_p3, *thetat_p4,
+                                    *thetat_p5, *thetat_p6));
 
     // Background thetab model
-    RooRealVar* bkg_thetab_gaus_mu = new RooRealVar("bkg_thetab_gaus_mu", "#mu", 2.895);
-    RooRealVar* bkg_thetab_gaus_sigma_l =
-        new RooRealVar("bkg_thetab_gaus_sigma_l", "#sigma_(L)", 0.902);
-    RooRealVar* bkg_thetab_gaus_sigma_r =
-        new RooRealVar("bkg_thetab_gaus_sigma_r", "#sigma_(R)", 0.089);
-    RooBifurGauss* bkg_thetab_gaus =
-        new RooBifurGauss("bkg_thetab_gaus", "bkg_thetab_gaus", *thetab_, *bkg_thetab_gaus_mu,
-                          *bkg_thetab_gaus_sigma_l, *bkg_thetab_gaus_sigma_r);
-    RooRealVar* bkg_thetab_exp_alpha = new RooRealVar("bkg_thetab_exp_alpha", "#alpha", -2.182);
-    RooExponential* bkg_thetab_exp =
-        new RooExponential("bkg_thetab_exp", "bkg_thetab_exp", *thetab_, *bkg_thetab_exp_alpha);
-    RooRealVar* bkg_thetab_f = new RooRealVar("bkg_thetab_f", "f_(exp)", 0.661);
+    RooRealVar* thetab_gaus_mu = new RooRealVar(pfx + "thetab_gaus_mu", "#mu", 2.895);
+    RooRealVar* thetab_gaus_sigma_l =
+        new RooRealVar(pfx + "thetab_gaus_sigma_l", "#sigma_(L)", 0.902);
+    RooRealVar* thetab_gaus_sigma_r =
+        new RooRealVar(pfx + "thetab_gaus_sigma_r", "#sigma_(R)", 0.089);
+    RooBifurGauss* thetab_gaus =
+        new RooBifurGauss(pfx + "thetab_gaus", "thetab_gaus", *thetab_, *thetab_gaus_mu,
+                          *thetab_gaus_sigma_l, *thetab_gaus_sigma_r);
+    RooRealVar* thetab_exp_alpha = new RooRealVar(pfx + "thetab_exp_alpha", "#alpha", -2.182);
+    RooExponential* thetab_exp =
+        new RooExponential(pfx + "thetab_exp", "thetab_exp", *thetab_, *thetab_exp_alpha);
+    RooRealVar* thetab_f = new RooRealVar(pfx + "thetab_f", "f_(exp)", 0.661);
 
-    RooAddPdf* bkg_thetab_model =
-        new RooAddPdf("bkg_thetab_model", "bkg_thetab_model",
-                      RooArgList(*bkg_thetab_exp, *bkg_thetab_gaus), RooArgList(*bkg_thetab_f));
+    RooAddPdf* thetab_model =
+        new RooAddPdf(pfx + "thetab_model", "thetab_model",
+                      RooArgList(*thetab_exp, *thetab_gaus), RooArgList(*thetab_f));
 
-    bkg_parameters_argset_.add(*bkg_thetab_gaus_mu);
-    bkg_parameters_argset_.add(*bkg_thetab_gaus_sigma_l);
-    bkg_parameters_argset_.add(*bkg_thetab_gaus_sigma_r);
-    bkg_parameters_argset_.add(*bkg_thetab_exp_alpha);
-    bkg_parameters_argset_.add(*bkg_thetab_f);
+    RooProdPdf* pdf = new RooProdPdf(
+        "pdf", "pdf", RooArgList(*thetat_model, *thetab_model, *phit_model));
 
-    RooProdPdf* bkg_pdf = new RooProdPdf(
-        "bkg_pdf", "bkg_pdf", RooArgList(*bkg_thetat_model, *bkg_thetab_model, *bkg_phit_model));
-
-    return bkg_pdf;
-}
-
-/**
- * Create a functional model of the self-crossfeed angular distribution.
- */
-RooAbsPdf* FitterCPV::CreateAngularSCFPDF() {
-    // Self-cross-feed phit model
-    RooRealVar* scf_phit_poly_p2 = new RooRealVar("scf_phit_poly_p2", "p_(2)", 0.856);
-    RooRealVar* scf_phit_f = new RooRealVar("scf_phit_f", "f_(poly)", 0.147);
-    RooPolynomial* scf_phit_poly =
-        new RooPolynomial("scf_phit_poly", "scf_phit_poly", *phit_, *scf_phit_poly_p2, 2);
-    RooRealVar* scf_phit_offset = new RooRealVar("scf_phit_offset", "#phi_(t)^(offset)", 0.056);
-    RooFormulaVar* scf_phit_phit =
-        new RooFormulaVar("scf_phit_phit", "scf_phit_phit", "phit - scf_phit_offset",
-                          RooArgList(*phit_, *scf_phit_offset));
-    RooGenericPdf* scf_phit_cos = new RooGenericPdf(
-        "scf_phit_cos", "scf_phit_cos", "cos(scf_phit_phit)^2", RooArgList(*scf_phit_phit));
-    RooAddPdf* scf_phit_model =
-        new RooAddPdf("scf_phit_model", "scf_phit_model", RooArgList(*scf_phit_poly, *scf_phit_cos),
-                      RooArgList(*scf_phit_f));
-
-    scf_parameters_argset_.add(*scf_phit_poly_p2);
-    scf_parameters_argset_.add(*scf_phit_f);
-    scf_parameters_argset_.add(*scf_phit_offset);
-
-    // Self-cross-feed thetat model
-    RooRealVar* scf_thetat_f = new RooRealVar("scf_thetat_f", "#theta_(t)^(w)", -0.051);
-    RooFormulaVar* scf_thetat_thetat = new RooFormulaVar(
-        "scf_thetat_thetat", "scf_thetat_thetat", "(thetat - 1.5708)*(1+scf_thetat_f) + 1.5708",
-        RooArgList(*thetat_, *scf_thetat_f));
-    RooGenericPdf* scf_thetat_model =
-        new RooGenericPdf("scf_thetat_model", "scf_thetat_model", "sin(scf_thetat_thetat)^3",
-                          RooArgList(*scf_thetat_thetat));
-
-    scf_parameters_argset_.add(*scf_thetat_f);
-
-    // Self-cross-feed thetab model
-    RooRealVar* scf_thetab_gaus_mu = new RooRealVar("scf_thetab_gaus_mu", "#mu", 2.885);
-    RooRealVar* scf_thetab_gaus_sigma_l =
-        new RooRealVar("scf_thetab_gaus_sigma_l", "#sigma_(L)", 0.411);
-    RooRealVar* scf_thetab_gaus_sigma_r =
-        new RooRealVar("scf_thetab_gaus_sigma_r", "#sigma_(R)", 0.094);
-    RooBifurGauss* scf_thetab_gaus =
-        new RooBifurGauss("scf_thetab_gaus", "scf_thetab_gaus", *thetab_, *scf_thetab_gaus_mu,
-                          *scf_thetab_gaus_sigma_l, *scf_thetab_gaus_sigma_r);
-    RooRealVar* scf_thetab_exp_alpha = new RooRealVar("scf_thetab_exp_alpha", "#alpha", -4.63);
-    RooExponential* scf_thetab_exp =
-        new RooExponential("scf_thetab_exp", "scf_thetab_exp", *thetab_, *scf_thetab_exp_alpha);
-    RooRealVar* scf_thetab_f = new RooRealVar("scf_thetab_f", "f_(exp)", 0.625);
-
-    RooAddPdf* scf_thetab_model =
-        new RooAddPdf("scf_thetab_model", "scf_thetab_model",
-                      RooArgList(*scf_thetab_exp, *scf_thetab_gaus), RooArgList(*scf_thetab_f));
-
-    scf_parameters_argset_.add(*scf_thetab_gaus_mu);
-    scf_parameters_argset_.add(*scf_thetab_gaus_sigma_l);
-    scf_parameters_argset_.add(*scf_thetab_gaus_sigma_r);
-    scf_parameters_argset_.add(*scf_thetab_exp_alpha);
-    scf_parameters_argset_.add(*scf_thetab_f);
-
-    RooProdPdf* scf_pdf = new RooProdPdf(
-        "scf_pdf", "scf_pdf", RooArgList(*scf_thetat_model, *scf_thetab_model, *scf_phit_model));
-
-    return scf_pdf;
+    return pdf;
 }
 
 /**
@@ -2406,7 +2250,6 @@ RooSimultaneous* FitterCPV::CreatePDF(const nlohmann::json config) {
     }
 
     RooSimultaneous* pdf = new RooSimultaneous("pdf", "pdf", pdf_map, *channel);
-
     return pdf;
 }
 
@@ -2424,9 +2267,15 @@ RooSimultaneous* FitterCPV::CreateChannelPDF(const std::string channel_name,
         scf = true;
         bkg = true;
     }
-    RooSimultaneous* channel_pdf = common_config.contains("timeIndependent")
-                                       ? CreateAngularPDF(channel_name, scf, bkg, channel_config)
-                                       : CreateTimeDependentPDF(common_config, channel_config);
+    RooSimultaneous* channel_pdf =
+        common_config.contains("timeIndependent")
+            ? CreateAngularPDF(channel_name, scf, bkg, channel_config)
+            : CreateTimeDependentPDF(channel_name, common_config, channel_config);
+
+    if (channel_config.contains("modelParameters")) {
+        ChangeModelParameters(channel_pdf, channel_name, channel_config["modelParameters"]);
+    }
+
     return channel_pdf;
 }
 
@@ -2476,7 +2325,10 @@ RooDataSet* FitterCPV::GetData(const nlohmann::json config) {
         *var = static_cast<RooRealVar*>(vars->find((*var)->GetName()));
     }
 
-    dataset->get(1)->Print("v");
+    if (config["components"] == "CR") {
+        RooDataSet* temp_dataset = dynamic_cast<RooDataSet*>(dataset->reduce("evmcflag==1"));
+        dataset = temp_dataset;
+    }
 
     return dataset;
 }
@@ -2587,9 +2439,15 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
     return dataset;
 }
 
-RooAbsPdf* FitterCPV::CreateSCFPDF(const nlohmann::json config) const {
-    if (config.contains("scfHisto")) {
-        return GetHistoSCF(config["scfHisto"]);
+RooAbsPdf* FitterCPV::CreateSCFPDF(const std::string channel_name,
+                                   const nlohmann::json channel_config) const {
+    if (channel_config.contains("scfHisto")) {
+        RooAbsPdf* histo_pdf = GetHistoSCF(channel_config["scfHisto"]);
+        std::string name = channel_name;
+        name += "_";
+        name += histo_pdf->GetName();
+        histo_pdf->SetName(name.c_str());
+        return histo_pdf;
     } else {
         Log::LogLine(Log::error) << "No known scf specified";
     }

@@ -194,10 +194,10 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
     dm_ = new RooRealVar("dm", "#Deltam", constants::dm - 1, constants::dm + 1);
 
     decaytype_ = new RooCategory("decaytype", "decaytype");
-    decaytype_->defineType("a", 1);
-    decaytype_->defineType("ab", 2);
-    decaytype_->defineType("b", 3);
-    decaytype_->defineType("bb", 4);
+    decaytype_->defineType("FB", 1);
+    decaytype_->defineType("FA", 2);
+    decaytype_->defineType("SB", 3);
+    decaytype_->defineType("SA", 4);
 
     // Make a copy of the input parameters for saving results, etc.
     par_input_ = par_input;
@@ -354,8 +354,8 @@ void FitterCPV::PlotVar(RooRealVar& var, const RooAbsPdf& pdf) const {
     canvas.SaveAs(constants::format);
 }
 
-void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_a, DtCPPDF*& cr_pdf_ab, DtCPPDF*& cr_pdf_b,
-                               DtCPPDF*& cr_pdf_bb, const nlohmann::json common_config,
+void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_FB, DtCPPDF*& cr_pdf_FA, DtCPPDF*& cr_pdf_SB,
+                               DtCPPDF*& cr_pdf_SA, const nlohmann::json common_config,
                                const nlohmann::json channel_config) const {
     const bool perfect_tagging = common_config.contains("perfectTagging");
     const int efficiency_model = channel_config["efficiencyModel"].get<int>();
@@ -366,53 +366,53 @@ void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_a, DtCPPDF*& cr_pdf_ab, DtCPPDF*
     std::vector<std::string> efficiency_files;
     efficiency_files.push_back(channel_config["efficiencyFile"]);
 
-    cr_pdf_a = new DtCPPDF("cr_pdf_a", "cr_pdf_a", false, true, perfect_tagging, efficiency_model,
+    cr_pdf_FB = new DtCPPDF("cr_pdf_FB", "cr_pdf_FB", false, true, perfect_tagging, efficiency_model,
                            efficiency_files, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
                            *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
                            *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
                            *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    cr_pdf_ab = new DtCPPDF("cr_pdf_ab", "cr_pdf_ab", true, true, perfect_tagging, efficiency_model,
+    cr_pdf_FA = new DtCPPDF("cr_pdf_FA", "cr_pdf_FA", true, true, perfect_tagging, efficiency_model,
                             efficiency_files, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
                             *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_,
                             *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
                             *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    cr_pdf_b = new DtCPPDF("cr_pdf_b", "cr_pdf_b", false, false, perfect_tagging, efficiency_model,
+    cr_pdf_SB = new DtCPPDF("cr_pdf_SB", "cr_pdf_SB", false, false, perfect_tagging, efficiency_model,
                            efficiency_files, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
                            *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
                            *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
                            *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    cr_pdf_bb = new DtCPPDF(
-        "cr_pdf_bb", "cr_pdf_bb", true, false, perfect_tagging, efficiency_model, efficiency_files,
+    cr_pdf_SA = new DtCPPDF(
+        "cr_pdf_SA", "cr_pdf_SA", true, false, perfect_tagging, efficiency_model, efficiency_files,
         *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_,
         *ytb_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_,
         *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 }
 
-void FitterCPV::CreateDtSCFPDFs(DtSCFPDF*& scf_dt_pdf_a, DtSCFPDF*& scf_dt_pdf_ab,
-                                DtSCFPDF*& scf_dt_pdf_b, DtSCFPDF*& scf_dt_pdf_bb) const {
-    scf_dt_pdf_a =
-        new DtSCFPDF("scf_dt_pdf_a", "scf_dt_pdf_a", false, true, perfect_tagging_, *ap_, *apa_,
+void FitterCPV::CreateDtSCFPDFs(DtSCFPDF*& scf_dt_pdf_FB, DtSCFPDF*& scf_dt_pdf_FA,
+                                DtSCFPDF*& scf_dt_pdf_SB, DtSCFPDF*& scf_dt_pdf_SA) const {
+    scf_dt_pdf_FB =
+        new DtSCFPDF("scf_dt_pdf_FB", "scf_dt_pdf_FB", false, true, perfect_tagging_, *ap_, *apa_,
                      *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
                      *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
                      *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    scf_dt_pdf_ab =
-        new DtSCFPDF("scf_dt_pdf_ab", "scf_dt_pdf_ab", true, true, perfect_tagging_, *ap_, *apa_,
+    scf_dt_pdf_FA =
+        new DtSCFPDF("scf_dt_pdf_FA", "scf_dt_pdf_FA", true, true, perfect_tagging_, *ap_, *apa_,
                      *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
                      *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
                      *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    scf_dt_pdf_b =
-        new DtSCFPDF("scf_dt_pdf_b", "scf_dt_pdf_b", false, false, perfect_tagging_, *ap_, *apa_,
+    scf_dt_pdf_SB =
+        new DtSCFPDF("scf_dt_pdf_SB", "scf_dt_pdf_SB", false, false, perfect_tagging_, *ap_, *apa_,
                      *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
                      *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
                      *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    scf_dt_pdf_bb =
-        new DtSCFPDF("scf_dt_pdf_bb", "scf_dt_pdf_bb", true, false, perfect_tagging_, *ap_, *apa_,
+    scf_dt_pdf_SA =
+        new DtSCFPDF("scf_dt_pdf_SA", "scf_dt_pdf_SA", true, false, perfect_tagging_, *ap_, *apa_,
                      *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
                      *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
                      *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
@@ -458,13 +458,13 @@ RooAddPdf* FitterCPV::CreateVoigtGaussDtPdf(const char* prefix, RooArgSet& argse
 /**
  * Create SCF PDFs with a function-based dt distribution model.
  *
- * @param scf_pdf_a SCF PDF for B0 -> D*- rho+
- * @param scf_pdf_ab SCF PDF for anti-B0 -> D*+ rho-
- * @param scf_pdf_b SCF PDF for B0 -> D*+ rho-
- * @param scf_pdf_bb SCF PDF for anti-B0 -> D*- rho+
+ * @param scf_pdf_FB SCF PDF for B0 -> D*- rho+
+ * @param scf_pdf_FA SCF PDF for anti-B0 -> D*+ rho-
+ * @param scf_pdf_SB SCF PDF for B0 -> D*+ rho-
+ * @param scf_pdf_SA SCF PDF for anti-B0 -> D*- rho+
  */
-void FitterCPV::CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_a, RooProdPdf*& scf_pdf_ab,
-                                          RooProdPdf*& scf_pdf_b, RooProdPdf*& scf_pdf_bb,
+void FitterCPV::CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_FB, RooProdPdf*& scf_pdf_FA,
+                                          RooProdPdf*& scf_pdf_SB, RooProdPdf*& scf_pdf_SA,
                                           const nlohmann::json channel_config) {
     Log::print(Log::debug, "Creating SCF dt PDF\n");
 
@@ -473,39 +473,39 @@ void FitterCPV::CreateFunctionalDtSCFPDFs(RooProdPdf*& scf_pdf_a, RooProdPdf*& s
     RooAbsPdf* scf_dt_cf_pdf = CreateVoigtGaussDtPdf("scf_dt_cf", scf_parameters_argset_);
     RooAbsPdf* scf_dt_dcs_pdf = CreateVoigtGaussDtPdf("scf_dt_dcs", scf_parameters_argset_);
 
-    scf_pdf_a =
-        new RooProdPdf("scf_pdf_a", "scf_pdf_a", RooArgList(*scf_dt_cf_pdf, *scf_angular_pdf));
-    scf_pdf_ab =
-        new RooProdPdf("scf_pdf_ab", "scf_pdf_ab", RooArgList(*scf_dt_cf_pdf, *scf_angular_pdf));
-    scf_pdf_b =
-        new RooProdPdf("scf_pdf_b", "scf_pdf_b", RooArgList(*scf_dt_dcs_pdf, *scf_angular_pdf));
-    scf_pdf_bb =
-        new RooProdPdf("scf_pdf_bb", "scf_pdf_bb", RooArgList(*scf_dt_dcs_pdf, *scf_angular_pdf));
+    scf_pdf_FB =
+        new RooProdPdf("scf_pdf_FB", "scf_pdf_FB", RooArgList(*scf_dt_cf_pdf, *scf_angular_pdf));
+    scf_pdf_FA =
+        new RooProdPdf("scf_pdf_FA", "scf_pdf_FA", RooArgList(*scf_dt_cf_pdf, *scf_angular_pdf));
+    scf_pdf_SB =
+        new RooProdPdf("scf_pdf_SB", "scf_pdf_SB", RooArgList(*scf_dt_dcs_pdf, *scf_angular_pdf));
+    scf_pdf_SA =
+        new RooProdPdf("scf_pdf_SA", "scf_pdf_SA", RooArgList(*scf_dt_dcs_pdf, *scf_angular_pdf));
 }
 
 /**
  * Create BKG PDFs with a function-based dt distribution model.
  *
- * @param bkg_pdf_a BKG PDF for B0 -> D*- rho+
- * @param bkg_pdf_ab BKG PDF for anti-B0 -> D*+ rho-
- * @param bkg_pdf_b BKG PDF for B0 -> D*+ rho-
- * @param bkg_pdf_bb BKG PDF for anti-B0 -> D*- rho+
+ * @param bkg_pdf_FB BKG PDF for B0 -> D*- rho+
+ * @param bkg_pdf_FA BKG PDF for anti-B0 -> D*+ rho-
+ * @param bkg_pdf_SB BKG PDF for B0 -> D*+ rho-
+ * @param bkg_pdf_SA BKG PDF for anti-B0 -> D*- rho+
  */
-void FitterCPV::CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_a, RooProdPdf*& bkg_pdf_ab,
-                                          RooProdPdf*& bkg_pdf_b, RooProdPdf*& bkg_pdf_bb)  {
+void FitterCPV::CreateFunctionalDtBKGPDFs(RooProdPdf*& bkg_pdf_FB, RooProdPdf*& bkg_pdf_FA,
+                                          RooProdPdf*& bkg_pdf_SB, RooProdPdf*& bkg_pdf_SA)  {
 
     RooAbsPdf* bkg_angular_pdf = CreateAngularBKGPDF();
     RooAbsPdf* bkg_dt_cf_pdf = CreateVoigtGaussDtPdf("bkg_dt_cf", bkg_parameters_argset_);
     RooAbsPdf* bkg_dt_dcs_pdf = CreateVoigtGaussDtPdf("bkg_dt_dcs", bkg_parameters_argset_);
 
-    bkg_pdf_a =
-        new RooProdPdf("bkg_pdf_a", "bkg_pdf_a", RooArgList(*bkg_dt_cf_pdf, *bkg_angular_pdf));
-    bkg_pdf_ab =
-        new RooProdPdf("bkg_pdf_ab", "bkg_pdf_ab", RooArgList(*bkg_dt_cf_pdf, *bkg_angular_pdf));
-    bkg_pdf_b =
-        new RooProdPdf("bkg_pdf_b", "bkg_pdf_b", RooArgList(*bkg_dt_dcs_pdf, *bkg_angular_pdf));
-    bkg_pdf_bb =
-        new RooProdPdf("bkg_pdf_bb", "bkg_pdf_bb", RooArgList(*bkg_dt_dcs_pdf, *bkg_angular_pdf));
+    bkg_pdf_FB =
+        new RooProdPdf("bkg_pdf_FB", "bkg_pdf_FB", RooArgList(*bkg_dt_cf_pdf, *bkg_angular_pdf));
+    bkg_pdf_FA =
+        new RooProdPdf("bkg_pdf_FA", "bkg_pdf_FA", RooArgList(*bkg_dt_cf_pdf, *bkg_angular_pdf));
+    bkg_pdf_SB =
+        new RooProdPdf("bkg_pdf_SB", "bkg_pdf_SB", RooArgList(*bkg_dt_dcs_pdf, *bkg_angular_pdf));
+    bkg_pdf_SA =
+        new RooProdPdf("bkg_pdf_SA", "bkg_pdf_SA", RooArgList(*bkg_dt_dcs_pdf, *bkg_angular_pdf));
 }
 
 /**
@@ -568,10 +568,10 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
 
     RooSimultaneous* sim_pdf =
         new RooSimultaneous(prefix + "angular_pdf", prefix + "angular_pdf", *decaytype_);
-    sim_pdf->addPdf(*pdf_B, "a");
-    sim_pdf->addPdf(*pdf_B_bar, "ab");
-    sim_pdf->addPdf(*pdf_B, "b");
-    sim_pdf->addPdf(*pdf_B_bar, "bb");
+    sim_pdf->addPdf(*pdf_B, "FB");
+    sim_pdf->addPdf(*pdf_B_bar, "FA");
+    sim_pdf->addPdf(*pdf_B, "SB");
+    sim_pdf->addPdf(*pdf_B_bar, "SA");
 
     return sim_pdf;
 }
@@ -585,10 +585,10 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
  */
 RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const nlohmann::json common_config,
                                                    const nlohmann::json channel_config) {
-    RooArgList a_pdfs;
-    RooArgList ab_pdfs;
-    RooArgList b_pdfs;
-    RooArgList bb_pdfs;
+    RooArgList FB_pdfs;
+    RooArgList FA_pdfs;
+    RooArgList SB_pdfs;
+    RooArgList SA_pdfs;
 
     // TString prefix(name_prefix);
     // prefix += "_";
@@ -601,38 +601,38 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const nlohmann::json common_c
         bkg = true;
     }
 
-    DtCPPDF* cr_pdf_a = 0;
-    DtCPPDF* cr_pdf_ab = 0;
-    DtCPPDF* cr_pdf_b = 0;
-    DtCPPDF* cr_pdf_bb = 0;
-    CreateDtCPPDFs(cr_pdf_a, cr_pdf_ab, cr_pdf_b, cr_pdf_bb, common_config, channel_config);
-    a_pdfs.add(*cr_pdf_a);
-    ab_pdfs.add(*cr_pdf_ab);
-    b_pdfs.add(*cr_pdf_b);
-    bb_pdfs.add(*cr_pdf_bb);
+    DtCPPDF* cr_pdf_FB = 0;
+    DtCPPDF* cr_pdf_FA = 0;
+    DtCPPDF* cr_pdf_SB = 0;
+    DtCPPDF* cr_pdf_SA = 0;
+    CreateDtCPPDFs(cr_pdf_FB, cr_pdf_FA, cr_pdf_SB, cr_pdf_SA, common_config, channel_config);
+    FB_pdfs.add(*cr_pdf_FB);
+    FA_pdfs.add(*cr_pdf_FA);
+    SB_pdfs.add(*cr_pdf_SB);
+    SA_pdfs.add(*cr_pdf_SA);
 
-    RooProdPdf* scf_pdf_a = 0;
-    RooProdPdf* scf_pdf_ab = 0;
-    RooProdPdf* scf_pdf_b = 0;
-    RooProdPdf* scf_pdf_bb = 0;
+    RooProdPdf* scf_pdf_FB = 0;
+    RooProdPdf* scf_pdf_FA = 0;
+    RooProdPdf* scf_pdf_SB = 0;
+    RooProdPdf* scf_pdf_SA = 0;
     if (scf) {
-        CreateFunctionalDtSCFPDFs(scf_pdf_a, scf_pdf_ab, scf_pdf_b, scf_pdf_bb, channel_config);
-        a_pdfs.add(*scf_pdf_a);
-        ab_pdfs.add(*scf_pdf_ab);
-        b_pdfs.add(*scf_pdf_b);
-        bb_pdfs.add(*scf_pdf_bb);
+        CreateFunctionalDtSCFPDFs(scf_pdf_FB, scf_pdf_FA, scf_pdf_SB, scf_pdf_SA, channel_config);
+        FB_pdfs.add(*scf_pdf_FB);
+        FA_pdfs.add(*scf_pdf_FA);
+        SB_pdfs.add(*scf_pdf_SB);
+        SA_pdfs.add(*scf_pdf_SA);
     }
 
-    RooProdPdf* bkg_pdf_a = 0;
-    RooProdPdf* bkg_pdf_ab = 0;
-    RooProdPdf* bkg_pdf_b = 0;
-    RooProdPdf* bkg_pdf_bb = 0;
+    RooProdPdf* bkg_pdf_FB = 0;
+    RooProdPdf* bkg_pdf_FA = 0;
+    RooProdPdf* bkg_pdf_SB = 0;
+    RooProdPdf* bkg_pdf_SA = 0;
     if (bkg) {
-        CreateFunctionalDtBKGPDFs(bkg_pdf_a, bkg_pdf_ab, bkg_pdf_b, bkg_pdf_bb);
-        a_pdfs.add(*bkg_pdf_a);
-        ab_pdfs.add(*bkg_pdf_ab);
-        b_pdfs.add(*bkg_pdf_b);
-        bb_pdfs.add(*bkg_pdf_bb);
+        CreateFunctionalDtBKGPDFs(bkg_pdf_FB, bkg_pdf_FA, bkg_pdf_SB, bkg_pdf_SA);
+        FB_pdfs.add(*bkg_pdf_FB);
+        FA_pdfs.add(*bkg_pdf_FA);
+        SB_pdfs.add(*bkg_pdf_SB);
+        SA_pdfs.add(*bkg_pdf_SA);
     }
 
     RooArgList fractions;
@@ -643,16 +643,16 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const nlohmann::json common_c
         fractions.add(scf_f_);
     }
 
-    RooAddPdf* pdf_a = new RooAddPdf("pdf_a", "pdf_a", a_pdfs, fractions);
-    RooAddPdf* pdf_ab = new RooAddPdf("pdf_ab", "pdf_ab", ab_pdfs, fractions);
-    RooAddPdf* pdf_b = new RooAddPdf("pdf_b", "pdf_b", b_pdfs, fractions);
-    RooAddPdf* pdf_bb = new RooAddPdf("pdf_bb", "pdf_bb", bb_pdfs, fractions);
+    RooAddPdf* pdf_FB = new RooAddPdf("pdf_FB", "pdf_FB", FB_pdfs, fractions);
+    RooAddPdf* pdf_FA = new RooAddPdf("pdf_FA", "pdf_FA", FA_pdfs, fractions);
+    RooAddPdf* pdf_SB = new RooAddPdf("pdf_SB", "pdf_SB", SB_pdfs, fractions);
+    RooAddPdf* pdf_SA = new RooAddPdf("pdf_SA", "pdf_SA", SA_pdfs, fractions);
 
     RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf->addPdf(*pdf_a, "a");
-    sim_pdf->addPdf(*pdf_ab, "ab");
-    sim_pdf->addPdf(*pdf_b, "b");
-    sim_pdf->addPdf(*pdf_bb, "bb");
+    sim_pdf->addPdf(*pdf_FB, "FB");
+    sim_pdf->addPdf(*pdf_FA, "FA");
+    sim_pdf->addPdf(*pdf_SB, "SB");
+    sim_pdf->addPdf(*pdf_SA, "SA");
 
     return sim_pdf;
 }
@@ -718,18 +718,18 @@ void FitterCPV::PlotFit(RooSimultaneous* sim_pdf, const bool scf, const bool bkg
     // and B bar (in the case of CR-only the total PDFs are identical to the
     // CR-only ones)
     if (scf || bkg) {
-        pdf_B = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("a"));
+        pdf_B = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("FB"));
         RooAddPdf* add_pdf_B = dynamic_cast<RooAddPdf*>(pdf_B);
         const int cr_pdf_B_index = add_pdf_B->pdfList().index("cr_pdf_B");
         cr_pdf_B = dynamic_cast<RooAbsPdf*>(add_pdf_B->pdfList().at(cr_pdf_B_index));
 
-        pdf_B_bar = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("ab"));
+        pdf_B_bar = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("FA"));
         RooAddPdf* add_pdf_B_bar = dynamic_cast<RooAddPdf*>(pdf_B_bar);
         const int cr_pdf_B_bar_index = add_pdf_B_bar->pdfList().index("cr_pdf_B_bar");
         cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(add_pdf_B->pdfList().at(cr_pdf_B_bar_index));
     } else {
-        cr_pdf_B = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("a"));
-        cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("ab"));
+        cr_pdf_B = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("FB"));
+        cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("FA"));
         pdf_B = cr_pdf_B;
         pdf_B_bar = cr_pdf_B_bar;
     }
@@ -825,9 +825,9 @@ void FitterCPV::PlotFit(RooSimultaneous* sim_pdf, const bool scf, const bool bkg
     // create a RooHistPdf from it and that is normalized to the data when
     // plotted.
     RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
-        dataset_->reduce("decaytype==decaytype::a||decaytype==decaytype::b"));
+        dataset_->reduce("decaytype==decaytype::FB||decaytype==decaytype::SB"));
     RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(
-        dataset_->reduce("decaytype==decaytype::ab||decaytype==decaytype::bb"));
+        dataset_->reduce("decaytype==decaytype::FA||decaytype==decaytype::SA"));
 
     thetat_->setBins(40);
     thetab_->setBins(40);
@@ -1069,25 +1069,25 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     RooRealVar y0b("y0b", "y0b", par_input[14], -0.2, 0.2);
     RooRealVar ytb("ytb", "ytb", par_input[15], -0.2, 0.2);
 
-    DtCPPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", false, true, perfect_tagging_,
+    DtCPPDF mixing_pdf_FB("mixing_pdf_FB", "mixing_pdf_FB", false, true, perfect_tagging_,
                          efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
                          a0, ata, xp, x0, xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_,
                          *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
                          *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF mixing_pdf_ab("mixing_pdf_ab", "mixing_pdf_ab", true, true, perfect_tagging_,
+    DtCPPDF mixing_pdf_FA("mixing_pdf_FA", "mixing_pdf_FA", true, true, perfect_tagging_,
                           efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
                           a0, ata, xpb, x0b, xtb, ypb, y0b, ytb, *tagwtag_, *dt_, *tau_, *dm_,
                           *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
                           *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF mixing_pdf_b("mixing_pdf_b", "mixing_pdf_b", false, false, perfect_tagging_,
+    DtCPPDF mixing_pdf_SB("mixing_pdf_SB", "mixing_pdf_SB", false, false, perfect_tagging_,
                          efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
                          a0, ata, xp, x0, xt, yp, y0, yt, *tagwtag_, *dt_, *tau_, *dm_, *expmc_,
                          *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_,
                          *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtCPPDF mixing_pdf_bb("mixing_pdf_bb", "mixing_pdf_bb", true, false, perfect_tagging_,
+    DtCPPDF mixing_pdf_SA("mixing_pdf_SA", "mixing_pdf_SA", true, false, perfect_tagging_,
                           efficiency_model_, efficiency_files_, *thetat_, *thetab_, *phit_, ap, apa,
                           a0, ata, xpb, x0b, xtb, ypb, y0b, ytb, *tagwtag_, *dt_, *tau_, *dm_,
                           *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
@@ -1119,17 +1119,17 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     const int num_sup = num_events * frac_sup / 2.0;
 
     Log::print(Log::info, "Creating GenSpecs...\n");
-    RooAbsPdf::GenSpec* genSpec_a =
-        mixing_pdf_a.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_fav));
+    RooAbsPdf::GenSpec* genSpec_FB =
+        mixing_pdf_FB.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_fav));
     Log::print(Log::info, "1/4 GenSpecs ready\n");
-    RooAbsPdf::GenSpec* genSpec_ab =
-        mixing_pdf_ab.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_fav));
+    RooAbsPdf::GenSpec* genSpec_FA =
+        mixing_pdf_FA.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_fav));
     Log::print(Log::info, "2/4 GenSpecs ready\n");
-    RooAbsPdf::GenSpec* genSpec_b =
-        mixing_pdf_b.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_sup));
+    RooAbsPdf::GenSpec* genSpec_SB =
+        mixing_pdf_SB.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_sup));
     Log::print(Log::info, "3/4 GenSpecs ready\n");
-    RooAbsPdf::GenSpec* genSpec_bb =
-        mixing_pdf_bb.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_sup));
+    RooAbsPdf::GenSpec* genSpec_SA =
+        mixing_pdf_SA.prepareMultiGen(varsToGenerate, RooFit::NumEvents(num_sup));
     Log::print(Log::info, "4/4 GenSpecs ready\n");
 
     RooAbsData::setDefaultStorageType(RooAbsData::Tree);
@@ -1140,56 +1140,56 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     RooRealVar brecflav("brecflav", "brecflav", -1, 1);
 
     for (int i = 1; i <= num_toys; i++) {
-        //  RooDataSet* dataset_a = mixing_pdf_a.generate(varsToGenerate,
+        //  RooDataSet* dataset_FB = mixing_pdf_FB.generate(varsToGenerate,
         //  RooFit::NumEvents(num_fav));
-        RooDataSet* dataset_a = mixing_pdf_a.generate(*genSpec_a);
-        decaytype_->setLabel("a");
-        dataset_a->addColumn(*decaytype_);
+        RooDataSet* dataset_FB = mixing_pdf_FB.generate(*genSpec_FB);
+        decaytype_->setLabel("FB");
+        dataset_FB->addColumn(*decaytype_);
         brecflav.setVal(1);
         btagmcli.setVal(-511);
-        dataset_a->addColumn(brecflav);
-        dataset_a->addColumn(btagmcli);
-        dataset = (RooDataSet*)dataset_a->Clone();
-        delete dataset_a;
+        dataset_FB->addColumn(brecflav);
+        dataset_FB->addColumn(btagmcli);
+        dataset = (RooDataSet*)dataset_FB->Clone();
+        delete dataset_FB;
         Log::print(Log::info, "1/4 decay type ready.\n");
 
-        //  RooDataSet* dataset_ab = mixing_pdf_ab.generate(varsToGenerate,
+        //  RooDataSet* dataset_FA = mixing_pdf_FA.generate(varsToGenerate,
         //  RooFit::NumEvents(num_fav));
-        RooDataSet* dataset_ab = mixing_pdf_ab.generate(*genSpec_ab);
-        decaytype_->setLabel("ab");
-        dataset_ab->addColumn(*decaytype_);
+        RooDataSet* dataset_FA = mixing_pdf_FA.generate(*genSpec_FA);
+        decaytype_->setLabel("FA");
+        dataset_FA->addColumn(*decaytype_);
         brecflav.setVal(-1);
         btagmcli.setVal(511);
-        dataset_ab->addColumn(brecflav);
-        dataset_ab->addColumn(btagmcli);
-        dataset->append(*dataset_ab);
-        delete dataset_ab;
+        dataset_FA->addColumn(brecflav);
+        dataset_FA->addColumn(btagmcli);
+        dataset->append(*dataset_FA);
+        delete dataset_FA;
         Log::print(Log::info, "2/4 decay types ready.\n");
 
-        //  RooDataSet* dataset_b = mixing_pdf_b.generate(varsToGenerate,
+        //  RooDataSet* dataset_SB = mixing_pdf_SB.generate(varsToGenerate,
         //  RooFit::NumEvents(num_sup));
-        RooDataSet* dataset_b = mixing_pdf_b.generate(*genSpec_b);
-        decaytype_->setLabel("b");
-        dataset_b->addColumn(*decaytype_);
+        RooDataSet* dataset_SB = mixing_pdf_SB.generate(*genSpec_SB);
+        decaytype_->setLabel("SB");
+        dataset_SB->addColumn(*decaytype_);
         brecflav.setVal(1);
         btagmcli.setVal(511);
-        dataset_b->addColumn(brecflav);
-        dataset_b->addColumn(btagmcli);
-        dataset->append(*dataset_b);
-        delete dataset_b;
+        dataset_SB->addColumn(brecflav);
+        dataset_SB->addColumn(btagmcli);
+        dataset->append(*dataset_SB);
+        delete dataset_SB;
         Log::print(Log::info, "3/4 decay types ready.\n");
 
-        //  RooDataSet* dataset_bb = mixing_pdf_bb.generate(varsToGenerate,
+        //  RooDataSet* dataset_SA = mixing_pdf_SA.generate(varsToGenerate,
         //  RooFit::NumEvents(num_sup));
-        RooDataSet* dataset_bb = mixing_pdf_bb.generate(*genSpec_bb);
-        decaytype_->setLabel("bb");
-        dataset_bb->addColumn(*decaytype_);
+        RooDataSet* dataset_SA = mixing_pdf_SA.generate(*genSpec_SA);
+        decaytype_->setLabel("SA");
+        dataset_SA->addColumn(*decaytype_);
         brecflav.setVal(-1);
         btagmcli.setVal(-511);
-        dataset_bb->addColumn(brecflav);
-        dataset_bb->addColumn(btagmcli);
-        dataset->append(*dataset_bb);
-        delete dataset_bb;
+        dataset_SA->addColumn(brecflav);
+        dataset_SA->addColumn(btagmcli);
+        dataset->append(*dataset_SA);
+        delete dataset_SA;
         Log::print(Log::info, "4/4 decay types ready.\n");
 
         dataset->addColumns(varsToAdd);
@@ -1222,7 +1222,7 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
 
     //  return dataset;
 
-    //  result_ = mixing_pdf_a.fitTo(*new_dataset,
+    //  result_ = mixing_pdf_FB.fitTo(*new_dataset,
     // RooFit::ConditionalObservables(conditional_vars_argset_),
     //          RooFit::Minimizer("Minuit2"), RooFit::Hesse(false), RooFit::Minos(false),
     //          RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
@@ -1422,25 +1422,25 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
 
     TString common_cuts = tools::GetCommonCutsString();
 
-    TString a_cuts;
-    TString ab_cuts;
-    TString b_cuts;
-    TString bb_cuts;
+    TString FB_cuts;
+    TString FA_cuts;
+    TString SB_cuts;
+    TString SA_cuts;
     if (perfect_tagging_) {
-        a_cuts = "brecflav==1&&btagmcli<0";
-        ab_cuts = "brecflav==-1&&btagmcli>0";
-        b_cuts = "brecflav==1&&btagmcli>0";
-        bb_cuts = "brecflav==-1&&btagmcli<0";
+        FB_cuts = "brecflav==1&&btagmcli<0";
+        FA_cuts = "brecflav==-1&&btagmcli>0";
+        SB_cuts = "brecflav==1&&btagmcli>0";
+        SA_cuts = "brecflav==-1&&btagmcli<0";
     } else {
         if (generator_level_) {
             Log::print(Log::warning,
                        "Attempting to use realistic tagging with generator level fit. This will "
                        "probably end badly. Consider using the '--perfect-tag' switch.\n");
         }
-        a_cuts = "brecflav==1&&tagqr<0";
-        ab_cuts = "brecflav==-1&&tagqr>0";
-        b_cuts = "brecflav==1&&tagqr>0";
-        bb_cuts = "brecflav==-1&&tagqr<0";
+        FB_cuts = "brecflav==1&&tagqr<0";
+        FA_cuts = "brecflav==-1&&tagqr>0";
+        SB_cuts = "brecflav==1&&tagqr>0";
+        SA_cuts = "brecflav==-1&&tagqr<0";
     }
 
     // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
@@ -1453,48 +1453,32 @@ void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_e
 
     // We add an identifying label to each of the 4 categories and then combine it into a single
     // dataset for RooSimultaneous fitting
-    RooDataSet* dataset_a = static_cast<RooDataSet*>(temp_dataset->reduce(a_cuts));
-    decaytype_->setLabel("a");
-    dataset_a->addColumn(*decaytype_);
+    RooDataSet* dataset_FB = static_cast<RooDataSet*>(temp_dataset->reduce(FB_cuts));
+    decaytype_->setLabel("FB");
+    dataset_FB->addColumn(*decaytype_);
 
-    RooDataSet* dataset_ab = static_cast<RooDataSet*>(temp_dataset->reduce(ab_cuts));
-    decaytype_->setLabel("ab");
-    dataset_ab->addColumn(*decaytype_);
+    RooDataSet* dataset_FA = static_cast<RooDataSet*>(temp_dataset->reduce(FA_cuts));
+    decaytype_->setLabel("FA");
+    dataset_FA->addColumn(*decaytype_);
 
-    RooDataSet* dataset_b = static_cast<RooDataSet*>(temp_dataset->reduce(b_cuts));
-    decaytype_->setLabel("b");
-    dataset_b->addColumn(*decaytype_);
+    RooDataSet* dataset_SB = static_cast<RooDataSet*>(temp_dataset->reduce(SB_cuts));
+    decaytype_->setLabel("SB");
+    dataset_SB->addColumn(*decaytype_);
 
-    RooDataSet* dataset_bb = static_cast<RooDataSet*>(temp_dataset->reduce(bb_cuts));
-    decaytype_->setLabel("bb");
-    dataset_bb->addColumn(*decaytype_);
+    RooDataSet* dataset_SA = static_cast<RooDataSet*>(temp_dataset->reduce(SA_cuts));
+    decaytype_->setLabel("SA");
+    dataset_SA->addColumn(*decaytype_);
 
     delete temp_dataset;
 
-    // thetat_->setBins(10);
-    // thetab_->setBins(10);
-    // phit_->setBins(10);
-    // RooDataHist datahist_a("datahist_a", "datahist_a", RooArgSet(*thetat_, *thetab_, *phit_),
-    // *dataset_a); RooDataHist datahist_ab("datahist_ab", "datahist_ab", RooArgSet(*thetat_,
-    // *thetab_, *phit_), *dataset_ab); RooDataHist datahist_b("datahist_b", "datahist_b",
-    // RooArgSet(*thetat_, *thetab_, *phit_), *dataset_b); RooDataHist datahist_bb("datahist_bb",
-    // "datahist_bb", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_bb);
-    // tools::PlotPull2D(*thetat_, *thetab_, datahist_a, datahist_ab);
-    // tools::PlotPull2D(*thetat_, *phit_, datahist_a, datahist_ab);
-    // tools::PlotPull2D(*thetab_, *phit_, datahist_a, datahist_ab);
-    // tools::PlotPull2D(*thetat_, *thetab_, datahist_b, datahist_bb);
-    // tools::PlotPull2D(*thetat_, *phit_, datahist_b, datahist_bb);
-    // tools::PlotPull2D(*thetab_, *phit_, datahist_b, datahist_bb);
-
-    // dataset_ = static_cast<RooDataSet*>(dataset_bb->Clone());
-    dataset_ = static_cast<RooDataSet*>(dataset_a->Clone());
-    delete dataset_a;
-    dataset_->append(*dataset_ab);
-    delete dataset_ab;
-    dataset_->append(*dataset_b);
-    delete dataset_b;
-    dataset_->append(*dataset_bb);
-    delete dataset_bb;
+    dataset_ = static_cast<RooDataSet*>(dataset_FB->Clone());
+    delete dataset_FB;
+    dataset_->append(*dataset_FA);
+    delete dataset_FA;
+    dataset_->append(*dataset_SB);
+    delete dataset_SB;
+    dataset_->append(*dataset_SA);
+    delete dataset_SA;
 
     Log::print(Log::info, "Num events passing all initial cuts: %i\n", dataset_->numEntries());
 
@@ -2097,14 +2081,14 @@ const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const 
     const double stepsize = (max - min) / steps;
 
     RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
-        dataset_->reduce("decaytype==decaytype::a||decaytype==decaytype::b"));
+        dataset_->reduce("decaytype==decaytype::FB||decaytype==decaytype::SB"));
     RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(
-        dataset_->reduce("decaytype==decaytype::ab||decaytype==decaytype::bb"));
+        dataset_->reduce("decaytype==decaytype::FA||decaytype==decaytype::SA"));
 
     RooDataHist hist("hist", "hist", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_);
 
-    RooAbsPdf* pdf_B = pdf.getPdf("a");
-    RooAbsPdf* pdf_B_bar = pdf.getPdf("ab");
+    RooAbsPdf* pdf_B = pdf.getPdf("FB");
+    RooAbsPdf* pdf_B_bar = pdf.getPdf("FA");
 
     TH1D h1_chi2("h1_" + name, "h1_" + name, steps, min, max);
 
@@ -2538,16 +2522,16 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
 
     TString common_cuts = tools::GetCommonCutsString();
 
-    TString a_cuts;
-    TString ab_cuts;
-    TString b_cuts;
-    TString bb_cuts;
+    TString FB_cuts;
+    TString FA_cuts;
+    TString SB_cuts;
+    TString SA_cuts;
     // TODO: Treat case that key exists but is false
     if (common_config.contains("perfectTagging")) {
-        a_cuts = "brecflav==1&&btagmcli<0";
-        ab_cuts = "brecflav==-1&&btagmcli>0";
-        b_cuts = "brecflav==1&&btagmcli>0";
-        bb_cuts = "brecflav==-1&&btagmcli<0";
+        FB_cuts = "brecflav==1&&btagmcli<0";
+        FA_cuts = "brecflav==-1&&btagmcli>0";
+        SB_cuts = "brecflav==1&&btagmcli>0";
+        SA_cuts = "brecflav==-1&&btagmcli<0";
     } else {
         // TODO: Treat case that key exists but is false
         if (common_config.contains("generatorLevel")) {
@@ -2555,10 +2539,10 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
                        "Attempting to use realistic tagging with generator level fit. This will "
                        "probably end badly. Consider using the '--perfect-tag' switch.\n");
         }
-        a_cuts = "brecflav==1&&tagqr<0";
-        ab_cuts = "brecflav==-1&&tagqr>0";
-        b_cuts = "brecflav==1&&tagqr>0";
-        bb_cuts = "brecflav==-1&&tagqr<0";
+        FB_cuts = "brecflav==1&&tagqr<0";
+        FA_cuts = "brecflav==-1&&tagqr>0";
+        SB_cuts = "brecflav==1&&tagqr>0";
+        SA_cuts = "brecflav==-1&&tagqr<0";
     }
 
     // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
@@ -2569,52 +2553,34 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
                                               dataset_vars_argset_, common_cuts);
     Log::print(Log::debug, "Num events passing common cuts: %i\n", temp_dataset->numEntries());
 
-    //  separate conditional vars from stuff like thetat
-
     // We add an identifying label to each of the 4 categories and then combine it into a single
     // dataset for RooSimultaneous fitting
-    RooDataSet* dataset_a = static_cast<RooDataSet*>(temp_dataset->reduce(a_cuts));
-    decaytype_->setLabel("a");
-    dataset_a->addColumn(*decaytype_);
+    RooDataSet* dataset_FB = static_cast<RooDataSet*>(temp_dataset->reduce(FB_cuts));
+    decaytype_->setLabel("FB");
+    dataset_FB->addColumn(*decaytype_);
 
-    RooDataSet* dataset_ab = static_cast<RooDataSet*>(temp_dataset->reduce(ab_cuts));
-    decaytype_->setLabel("ab");
-    dataset_ab->addColumn(*decaytype_);
+    RooDataSet* dataset_FA = static_cast<RooDataSet*>(temp_dataset->reduce(FA_cuts));
+    decaytype_->setLabel("FA");
+    dataset_FA->addColumn(*decaytype_);
 
-    RooDataSet* dataset_b = static_cast<RooDataSet*>(temp_dataset->reduce(b_cuts));
-    decaytype_->setLabel("b");
-    dataset_b->addColumn(*decaytype_);
+    RooDataSet* dataset_SB = static_cast<RooDataSet*>(temp_dataset->reduce(SB_cuts));
+    decaytype_->setLabel("SB");
+    dataset_SB->addColumn(*decaytype_);
 
-    RooDataSet* dataset_bb = static_cast<RooDataSet*>(temp_dataset->reduce(bb_cuts));
-    decaytype_->setLabel("bb");
-    dataset_bb->addColumn(*decaytype_);
+    RooDataSet* dataset_SA = static_cast<RooDataSet*>(temp_dataset->reduce(SA_cuts));
+    decaytype_->setLabel("SA");
+    dataset_SA->addColumn(*decaytype_);
 
     delete temp_dataset;
 
-    // thetat_->setBins(10);
-    // thetab_->setBins(10);
-    // phit_->setBins(10);
-    // RooDataHist datahist_a("datahist_a", "datahist_a", RooArgSet(*thetat_, *thetab_, *phit_),
-    // *dataset_a); RooDataHist datahist_ab("datahist_ab", "datahist_ab", RooArgSet(*thetat_,
-    // *thetab_, *phit_), *dataset_ab); RooDataHist datahist_b("datahist_b", "datahist_b",
-    // RooArgSet(*thetat_, *thetab_, *phit_), *dataset_b); RooDataHist datahist_bb("datahist_bb",
-    // "datahist_bb", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_bb);
-    // tools::PlotPull2D(*thetat_, *thetab_, datahist_a, datahist_ab);
-    // tools::PlotPull2D(*thetat_, *phit_, datahist_a, datahist_ab);
-    // tools::PlotPull2D(*thetab_, *phit_, datahist_a, datahist_ab);
-    // tools::PlotPull2D(*thetat_, *thetab_, datahist_b, datahist_bb);
-    // tools::PlotPull2D(*thetat_, *phit_, datahist_b, datahist_bb);
-    // tools::PlotPull2D(*thetab_, *phit_, datahist_b, datahist_bb);
-
-    // dataset_ = static_cast<RooDataSet*>(dataset_bb->Clone());
-    RooDataSet* dataset = static_cast<RooDataSet*>(dataset_a->Clone());
-    delete dataset_a;
-    dataset->append(*dataset_ab);
-    delete dataset_ab;
-    dataset->append(*dataset_b);
-    delete dataset_b;
-    dataset->append(*dataset_bb);
-    delete dataset_bb;
+    RooDataSet* dataset = static_cast<RooDataSet*>(dataset_FB->Clone());
+    delete dataset_FB;
+    dataset->append(*dataset_FA);
+    delete dataset_FA;
+    dataset->append(*dataset_SB);
+    delete dataset_SB;
+    dataset->append(*dataset_SA);
+    delete dataset_SA;
 
     Log::print(Log::info, "Num events passing all initial cuts: %i\n", dataset->numEntries());
 

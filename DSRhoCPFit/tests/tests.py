@@ -67,6 +67,11 @@ def run_test(name, config):
         print("The result matches the reference result.")
         os.remove("current_result")
         os.remove("current_result.root")
+        # Delete results from previous failed runs if it now works
+        if (os.path.exists(name + ".result")):
+            os.remove(name + ".result")
+        if (os.path.exists(name + ".result.root")):
+            os.remove(name + ".result.root")
         return 0, name
     else:
         print("The result does NOT match the reference result!")

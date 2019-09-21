@@ -39,4 +39,5 @@ void LogTextFromFile(TFile* file, const char* field_name, const char* filename);
 void LogFileCRC(TFile* file, const char* field_name, const char* filename);
 void LogText(TFile* file, const char* field_name, const char* text);
 void LogText(TFile* file, const char* field_name, const std::string text);
+std::vector<std::string> SplitString(const std::string& input_string, char delimiter);
 }  // namespace tools

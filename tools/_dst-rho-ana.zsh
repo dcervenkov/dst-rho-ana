@@ -12,6 +12,7 @@ _dsrhocpfit_complete()
 	'--cpus=[number of CPU cores to use for fitting and plotting]' \
 	'--components=[fit the specified components]:type:->components' \
 	'--config=[read in configuration from the specified file]:filename:_files' \
+	'--exclude-channels=[exclude channels from fit]:type:->channels' \
 	'--MC=[whether the fit is MC or data]:type:->binary' \
 	'--version[show version]' \
 	'--help[display help]' \
@@ -29,6 +30,9 @@ _dsrhocpfit_complete()
 			;;
 		binary)
 			_values -s ' ' 'type' 0 1
+			;;
+		channels)
+			_values -s ' ' 'type' Kpi Kpipi0 K3pi
 			;;
 		jsonfiles)
 			local -a json_files

@@ -15,14 +15,11 @@
 // Local includes
 #include "constants.h"
 #include "log.h"
+#include "tools.h"
 
-Config::Config(/* args */)
-{
-}
+Config::Config(/* args */) {}
 
-Config::~Config()
-{
-}
+Config::~Config() {}
 
 /**
  * Read a JSON config from a specified filename.
@@ -40,9 +37,7 @@ void Config::ReadInJSONFile(const char* filename) {
 /**
  * Read a JSON config from a specified filename.
  */
-void Config::ReadInJSONFile(const std::string filename) {
-    ReadInJSONFile(filename.c_str());
-}
+void Config::ReadInJSONFile(const std::string filename) { ReadInJSONFile(filename.c_str()); }
 
 /**
  * Update the current config by appending/overwriting values from a JSON
@@ -55,12 +50,10 @@ void Config::Update(const nlohmann::json new_config) {
 
 /**
  * Get a pretty-formatted string of the config.
- * 
+ *
  * @return std::string Pretty-formatted string
  */
-std::string Config::GetPrettyString() const {
-    return json.dump(4);
-}
+std::string Config::GetPrettyString() const { return json.dump(4); }
 
 /**
  * Check whether the current config is valid.
@@ -68,8 +61,8 @@ std::string Config::GetPrettyString() const {
 bool Config::IsValid() const {
     // output check
     if (!json.contains("output")) {
-            Log::LogLine(Log::error) << "No output file specified";
-            return false;
+        Log::LogLine(Log::error) << "No output file specified";
+        return false;
     }
 
     // components check
@@ -78,7 +71,8 @@ bool Config::IsValid() const {
         Log::LogLine(Log::error) << "Fit components not specified";
         return false;
     } else {
-        if (components.value() != "CR" && components.value() != "CRSCF" && components.value() != "all") {
+        if (components.value() != "CR" && components.value() != "CRSCF" &&
+            components.value() != "all") {
             Log::LogLine(Log::error) << "Invalid fit components " << components.value();
             return false;
         }
@@ -90,6 +84,18 @@ bool Config::IsValid() const {
         return false;
     }
 
+    if (json.contains("excludeChannels")) {
+        std::vector<std::string> excluded_channels =
+            tools::SplitString(json["excludeChannels"], ',');
+        for (auto excluded_channel : excluded_channels) {
+            if (!json["channels"].contains(excluded_channel)) {
+                Log::LogLine(Log::error) << "Channel '" << excluded_channel
+                                         << "' which is to be excluded is not present in config";
+                return false;
+            }
+        }
+    }
+
     for (auto& chan : json["channels"].items()) {
         const char* channel_name = chan.key().c_str();
         nlohmann::json channel = chan.value();
@@ -97,11 +103,14 @@ bool Config::IsValid() const {
         // efficiencyModel check
         auto efficiency_model = channel.find("efficiencyModel");
         if (efficiency_model == channel.end()) {
-            Log::LogLine(Log::error) << "No efficiency model specified for channel " << channel_name;
+            Log::LogLine(Log::error)
+                << "No efficiency model specified for channel " << channel_name;
             return false;
         } else {
-            if (efficiency_model.value() < 0 || efficiency_model.value() > constants::max_efficiency_model_number) {
-                Log::LogLine(Log::error) << "Efficiency model " << efficiency_model.value() << " does not exist";
+            if (efficiency_model.value() < 0 ||
+                efficiency_model.value() > constants::max_efficiency_model_number) {
+                Log::LogLine(Log::error)
+                    << "Efficiency model " << efficiency_model.value() << " does not exist";
                 return false;
             }
         }
@@ -140,7 +149,6 @@ bool Config::IsValid() const {
                 }
             }
         }
-
     }
 
     return true;

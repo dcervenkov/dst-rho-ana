@@ -86,6 +86,14 @@ FitterCPV::FitterCPV(Config config) {
     if (config.json.contains("fixedParameters")) {
         FixParameters(config.json["fixedParameters"].get<std::string>().c_str());
     }
+    if (config.json.contains("excludeChannels")) {
+        std::vector<std::string> excluded_channels =
+            tools::SplitString(config.json["excludeChannels"], ',');
+        for (auto excluded_channel : excluded_channels) {
+            Log::LogLine(Log::info) << "Excluding channel " << excluded_channel;
+            config.json["channels"].erase(excluded_channel);
+        }
+    }
 
     data_ = GetData(config.json);
     pdf_ = CreatePDF(config.json);

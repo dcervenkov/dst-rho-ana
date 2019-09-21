@@ -145,8 +145,9 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
                                     {"config", required_argument, 0, 'g'},
                                     {"components", required_argument, 0, 'e'},
+                                    {"exclude-channels", required_argument, 0, 'x'},
                                     {"MC", required_argument, 0, 'm'},
-                                    {"fix", required_argument, 0, 'x'},
+                                    {"fix", required_argument, 0, 'f'},
                                     {"plot-dir", required_argument, 0, 'p'},
                                     {"output", required_argument, 0, 'o'},
                                     {"log", no_argument, 0, 'l'},
@@ -157,7 +158,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:e:m:x:p:o:litrvh", long_options,
+    while ((c = getopt_long(argc, argv, "c:g:e:x:m:f:p:o:litrvh", long_options,
                             &option_index)) != -1) {
         switch (c) {
             case 0:
@@ -174,10 +175,13 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'e':
                 config["components"] = optarg;
                 break;
+            case 'x':
+                config["excludeChannels"] = optarg;
+                break;
             case 'm':
                 config["MC"] = bool(atoi(optarg));
                 break;
-            case 'x':
+            case 'f':
                 config["fixedParameters"] = optarg;
                 break;
             case 'p':
@@ -206,6 +210,8 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
                 printf("-e, --components=CR|CRSCF|all    do a specified fit type\n");
+                printf("-f, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit;\n");
+                printf("                                 additional short-hand ARGs are: all, xy, trans and nota0\n");
                 printf("-g, --config=CONFIG-FILE         read in configuration from the specified file\n");
                 printf("-h, --help                       display this text and exit\n");
                 printf("-i, --time-independent           make a time-independent fit\n");
@@ -216,8 +222,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-r, --generator-level            do a generator level fit\n");
                 printf("-t, --perfect-tag                use MC info to get perfect tagging\n");
                 printf("-v, --version                	 display version and exit\n");
-                printf("-x, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit;\n");
-                printf("                                 additional short-hand ARGs are: all, xy, trans and nota0\n");
+                printf("-x, --exclude-channels         	 exclude channels from fit\n");
                 exit(0);
                 break;
             default:

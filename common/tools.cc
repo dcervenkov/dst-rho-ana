@@ -409,4 +409,17 @@ void LogEnvironmentMetadata(TFile* file) {
     git_version.Write();
 }
 
+/**
+ * Split string into multiple strings based on a delimiter
+ */
+std::vector<std::string> SplitString(const std::string& input_string, char delimiter) {
+    std::vector<std::string> substrings;
+    std::stringstream ss(input_string);
+    std::string substring;
+    while (std::getline(ss, substring, delimiter)) {
+        substrings.push_back(substring);
+    }
+    return substrings;
+}
+
 }  // namespace tools

@@ -60,7 +60,10 @@ int main(int argc, char* argv[]) {
     if (cli_config.contains("configFile")) {
         config.ReadInJSONFile(cli_config["configFile"]);
     }
+
     config.Update(cli_config);
+    config.FillMissingDefaults();
+
     if (!config.IsValid()) {
         Log::print(Log::error, "Config is not valid!\n");
         exit(1);

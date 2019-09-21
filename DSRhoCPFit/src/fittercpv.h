@@ -53,9 +53,6 @@ class FitterCPV {
 
     void SetOutputFile(TFile* file);
 
-    void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
-    int GetNumCPUs() { return num_CPUs_; };
-
     void SetEfficiencyFiles(std::vector<std::string> efficiency_files) {
         efficiency_files_ = efficiency_files;
     };
@@ -237,7 +234,6 @@ class FitterCPV {
 
     TFile* output_file_ = nullptr;
 
-    int num_CPUs_;
     std::vector<std::string> efficiency_files_;
     int efficiency_model_;
     bool do_lifetime_fit_;

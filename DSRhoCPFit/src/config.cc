@@ -56,6 +56,15 @@ void Config::Update(const nlohmann::json new_config) {
 std::string Config::GetPrettyString() const { return json.dump(4); }
 
 /**
+ *  Fill mandatory missing values with sensible defaults
+ */
+void Config::FillMissingDefaults() {
+    if (!json.contains("numCPUs")) {
+        json["numCPUs"] = 1;
+    }
+}
+
+/**
  * Check whether the current config is valid.
  */
 bool Config::IsValid() const {

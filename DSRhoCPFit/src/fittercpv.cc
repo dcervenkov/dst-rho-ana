@@ -2289,6 +2289,8 @@ RooDataSet* FitterCPV::GetData(const nlohmann::json config) {
     for (auto channel_dataset : datasets) {
         if (dataset == nullptr) {
             dataset = static_cast<RooDataSet*>(channel_dataset->Clone());
+            dataset->SetName("combined_dataset");
+            dataset->SetTitle("Combined Dataset");
             continue;
         }
         dataset->append(*channel_dataset);
@@ -2309,10 +2311,7 @@ RooDataSet* FitterCPV::GetData(const nlohmann::json config) {
         *var = static_cast<RooRealVar*>(vars->find((*var)->GetName()));
     }
 
-    if (config["components"] == "CR") {
-        RooDataSet* temp_dataset = dynamic_cast<RooDataSet*>(dataset->reduce("evmcflag==1"));
-        dataset = temp_dataset;
-    }
+    Log::LogLine(Log::info) << "Total dataset events: " << dataset->numEntries();
 
     return dataset;
 }
@@ -2357,6 +2356,10 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
     // }
 
     TString common_cuts = tools::GetCommonCutsString();
+
+    if (common_config["components"] == "CR") {
+        common_cuts += "&&evmcflag==1";
+    }
 
     TString FB_cuts;
     TString FA_cuts;

@@ -47,6 +47,9 @@ test_configs = {
                    "--MC=1"],
 }
 
+green_code = "\033[32m"
+red_code = "\033[31m"
+reset_code = "\033[0m"
 
 def run_test(name, config):
     """Run a single test defined by its name and config."""
@@ -64,7 +67,7 @@ def run_test(name, config):
         current_result = f.readline()
 
     if return_code == 0 and reference_result == current_result:
-        print("The result matches the reference result.")
+        print(green_code + "The result matches the reference result." + reset_code)
         os.remove("current_result")
         os.remove("current_result.root")
         # Delete results from previous failed runs if it now works
@@ -74,7 +77,7 @@ def run_test(name, config):
             os.remove(name + ".result.root")
         return 0, name
     else:
-        print("The result does NOT match the reference result!")
+        print(red_code + "The result does NOT match the reference result!" + reset_code)
         os.rename("current_result", name + ".result")
         os.rename("current_result.root", name + ".result.root")
         return 1, name
@@ -88,9 +91,9 @@ def print_results_table(results):
     for result in test_results:
         result_str = ""
         if result[0]:
-            result_str = "FAIL"
+            result_str = red_code + "FAIL" + reset_code
         else:
-            result_str = "pass"
+            result_str = green_code + "pass" + reset_code
 
         print("{:<20} | {}".format(result[1], result_str))
 

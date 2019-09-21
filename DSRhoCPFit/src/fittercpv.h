@@ -26,7 +26,6 @@
 #include "TTree.h"
 
 // Local includes
-#include "config.h"
 #include "constants.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
@@ -34,7 +33,7 @@
 
 class FitterCPV {
    public:
-    FitterCPV(Config config);
+    FitterCPV(nlohmann::json config);
     virtual ~FitterCPV();
 
     void InitVars(std::array<double, 16> par_input);

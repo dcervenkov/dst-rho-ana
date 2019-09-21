@@ -81,11 +81,10 @@ int main(int argc, char* argv[]) {
     tools::SetupPlotStyle();
     colors::setColors();
 
-    FitterCPV fitter(config);
+    FitterCPV fitter(config.json);
 
     // if (options.generator_level_set) fitter.SetGeneratorLevel(options.generator_level);
 
-    // if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
     // if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
 
 

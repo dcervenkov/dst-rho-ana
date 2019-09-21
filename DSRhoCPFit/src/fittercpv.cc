@@ -68,7 +68,7 @@
 #include "log.h"
 #include "tools.h"
 
-FitterCPV::FitterCPV(Config config) {
+FitterCPV::FitterCPV(nlohmann::json config) {
     do_lifetime_fit_ = false;
     make_plots_ = false;
     perfect_tagging_ = false;
@@ -79,23 +79,23 @@ FitterCPV::FitterCPV(Config config) {
     vtzerr_ = nullptr;
 
     InitVars(constants::par_input);
-    if (config.json.contains("fitRanges")) {
-        ChangeFitRanges(config.json["fitRanges"]);
+    if (config.contains("fitRanges")) {
+        ChangeFitRanges(config["fitRanges"]);
     }
-    if (config.json.contains("fixedParameters")) {
-        FixParameters(config.json["fixedParameters"].get<std::string>().c_str());
+    if (config.contains("fixedParameters")) {
+        FixParameters(config["fixedParameters"].get<std::string>().c_str());
     }
-    if (config.json.contains("excludeChannels")) {
+    if (config.contains("excludeChannels")) {
         std::vector<std::string> excluded_channels =
-            tools::SplitString(config.json["excludeChannels"], ',');
+            tools::SplitString(config["excludeChannels"], ',');
         for (auto excluded_channel : excluded_channels) {
             Log::LogLine(Log::info) << "Excluding channel " << excluded_channel;
-            config.json["channels"].erase(excluded_channel);
+            config["channels"].erase(excluded_channel);
         }
     }
 
-    data_ = GetData(config.json);
-    pdf_ = CreatePDF(config.json);
+    data_ = GetData(config);
+    pdf_ = CreatePDF(config);
 }
 
 FitterCPV::~FitterCPV() {
@@ -2444,5 +2444,6 @@ RooAbsPdf* FitterCPV::CreateSCFPDF(const std::string channel_name,
         return histo_pdf;
     } else {
         Log::LogLine(Log::error) << "No known scf specified";
+        exit(8);
     }
 }

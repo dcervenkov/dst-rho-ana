@@ -110,9 +110,7 @@ int main(int argc, char* argv[]) {
                        fitter.CreateLatexPullTableString().c_str());
         tools::LogText(output_file, "latex_pull_table_asym",
                        fitter.CreateLatexPullTableString(true).c_str());
-
-        tools::SaveTextToFile(config.GetOutputFilename(),
-                              fitter.CreateResultsString(!config.json.contains("timeIndependent")));
+        tools::SaveTextToFile(config.GetOutputFilename(), fitter.CreateResultsString());
     }
 
     if (config.ShouldSaveLog()) {

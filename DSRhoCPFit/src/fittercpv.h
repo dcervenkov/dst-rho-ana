@@ -63,11 +63,6 @@ class FitterCPV {
     void SetDoLifetimeFit(const bool& do_lifetime_fit) { do_lifetime_fit_ = do_lifetime_fit; };
     int GetDoLifetimeFit() const { return do_lifetime_fit_; };
 
-    void SetDoTimeIndependentFit(const bool& do_time_independent_fit) {
-        do_time_independent_fit_ = do_time_independent_fit;
-    };
-    int GetDoTimeIndependentFit() const { return do_time_independent_fit_; };
-
     void SetMakePlots(const bool& make_plots) { make_plots_ = make_plots; };
     int GetMakePlots() const { return make_plots_; };
 
@@ -84,7 +79,7 @@ class FitterCPV {
     void SetSCFKDE(const char* file);
     void SetSCFHisto(const char* file);
     bool FixParameters(const char* pars);
-    const std::string CreateResultsString(const bool time_dependent) const;
+    const std::string CreateResultsString() const;
     const std::string CreatePullTableString(const bool asymmetric = false);
     const std::string CreateLatexPullTableString(const bool asymmetric = false);
     static nlohmann::json ReadJSONConfig(const char* filename);
@@ -211,6 +206,7 @@ class FitterCPV {
                                       const nlohmann::json channel_config, const bool scf);
 
     void PlotFit(RooSimultaneous* pdf, const bool scf, const bool bkg);
+    bool IsTimeDependent() const;
 
     RooRealVar cr_scf_f_{"cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99};
     RooRealVar cr_f_{"cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99};
@@ -236,14 +232,12 @@ class FitterCPV {
     std::vector<std::string> efficiency_files_;
     int efficiency_model_;
     bool do_lifetime_fit_;
-    bool do_time_independent_fit_;
     bool make_plots_;
     bool perfect_tagging_;
     bool generator_level_;
 
     RooSimultaneous* pdf_;
     RooDataSet* data_;
-    nlohmann::json config_;
 };
 
 #endif /* FITTERCPV_H_ */

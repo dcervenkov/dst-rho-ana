@@ -611,12 +611,15 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const std::string channel_nam
         fractions.add(scf_f_);
     }
 
-    RooAddPdf* pdf_FB = new RooAddPdf("pdf_FB", "pdf_FB", FB_pdfs, fractions);
-    RooAddPdf* pdf_FA = new RooAddPdf("pdf_FA", "pdf_FA", FA_pdfs, fractions);
-    RooAddPdf* pdf_SB = new RooAddPdf("pdf_SB", "pdf_SB", SB_pdfs, fractions);
-    RooAddPdf* pdf_SA = new RooAddPdf("pdf_SA", "pdf_SA", SA_pdfs, fractions);
+    TString prefix = channel_name.c_str();
+    prefix += "_";
 
-    RooSimultaneous* sim_pdf = new RooSimultaneous("sim_pdf", "sim_pdf", *decaytype_);
+    RooAddPdf* pdf_FB = new RooAddPdf(prefix + "pdf_FB", prefix + "pdf_FB", FB_pdfs, fractions);
+    RooAddPdf* pdf_FA = new RooAddPdf(prefix + "pdf_FA", prefix + "pdf_FA", FA_pdfs, fractions);
+    RooAddPdf* pdf_SB = new RooAddPdf(prefix + "pdf_SB", prefix + "pdf_SB", SB_pdfs, fractions);
+    RooAddPdf* pdf_SA = new RooAddPdf(prefix + "pdf_SA", prefix + "pdf_SA", SA_pdfs, fractions);
+
+    RooSimultaneous* sim_pdf = new RooSimultaneous(prefix + "sim_pdf", prefix + "sim_pdf", *decaytype_);
     sim_pdf->addPdf(*pdf_FB, "FB");
     sim_pdf->addPdf(*pdf_FA, "FA");
     sim_pdf->addPdf(*pdf_SB, "SB");
@@ -1474,7 +1477,7 @@ void FitterCPV::SetOutputFile(TFile* file) { output_file_ = file; }
 /**
  * Create a string that holds initial values, fit results and errors.
  */
-const std::string FitterCPV::CreateResultsString(const bool time_dependent) const {
+const std::string FitterCPV::CreateResultsString() const {
     int numParameters = 54;
     double* parameters = new double[numParameters];
 
@@ -1497,7 +1500,7 @@ const std::string FitterCPV::CreateResultsString(const bool time_dependent) cons
     parameters[16] = ata_->getVal();
     parameters[17] = ata_->getError();
 
-    if (time_dependent) {
+    if (IsTimeDependent()) {
         parameters[18] = par_input_[4];
         parameters[19] = xp_->getVal();
         parameters[20] = xp_->getError();
@@ -1586,7 +1589,7 @@ const std::string FitterCPV::CreatePullTableString(const bool asymmetric) {
         std::string name = (*parameters_[i])->GetName();
 
         // Skip 'x' and 'y' pars if we are doing a time-independent fit
-        if (do_time_independent_fit_) {
+        if (!IsTimeDependent()) {
             if (name.front() == 'x' || name.front() == 'y') continue;
         }
 
@@ -1664,7 +1667,7 @@ const std::string FitterCPV::CreateLatexPullTableString(const bool asymmetric) {
         std::replace(name.begin(), name.end(), '#', '\\');
 
         // Skip 'x' and 'y' pars if we are doing a time-independent fit
-        if (do_time_independent_fit_) {
+        if (!IsTimeDependent()) {
             if (name.find('x') != std::string::npos || name.find('y') != std::string::npos)
                 continue;
         }
@@ -1730,7 +1733,7 @@ const void FitterCPV::LogResults() {
     }
     result_->Write();
 
-    std::string results_string = CreateResultsString(!config_.contains("timeIndependent"));
+    std::string results_string = CreateResultsString();
     TNamed txt_result("txt_result", results_string);
     txt_result.Write();
 
@@ -2446,4 +2449,14 @@ RooAbsPdf* FitterCPV::CreateSCFPDF(const std::string channel_name,
         Log::LogLine(Log::error) << "No known scf specified";
         exit(8);
     }
+}
+
+/**
+ * Check whether the current fitter is time-dependent or not
+ * 
+ * @return true Time-dependent
+ * @return false Not time-dependent
+ */
+bool FitterCPV::IsTimeDependent() const {
+    return pdf_->getObservables(data_)->contains(*dt_);
 }

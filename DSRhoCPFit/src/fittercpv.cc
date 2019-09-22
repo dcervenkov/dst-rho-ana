@@ -2101,7 +2101,7 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix) {
                       RooArgList(*thetab_f));
 
     RooProdPdf* pdf =
-        new RooProdPdf("pdf", "pdf", RooArgList(*thetat_model, *thetab_model, *phit_model));
+        new RooProdPdf(pfx + "pdf", pfx + "pdf", RooArgList(*thetat_model, *thetab_model, *phit_model));
 
     return pdf;
 }
@@ -2278,14 +2278,17 @@ RooSimultaneous* FitterCPV::CreateChannelPDF(const std::string channel_name,
  */
 RooDataSet* FitterCPV::GetData(const nlohmann::json config) {
     std::vector<RooDataSet*> datasets;
+
     RooCategory* channel_cat = new RooCategory("channel_cat", "channel_cat");
+    for (auto& chan : config["channels"].items()) {
+        channel_cat->defineType(chan.key().c_str());
+    }
 
     for (auto& chan : config["channels"].items()) {
         const std::string channel_name = chan.key().c_str();
         auto channel_config = chan.value();
         Log::LogLine(Log::debug) << "Constructing dataset for channel " << channel_name;
 
-        channel_cat->defineType(channel_name.c_str());
         auto common_config = config;
         common_config.erase("channels");
 

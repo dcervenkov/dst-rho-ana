@@ -48,13 +48,7 @@ int main(int argc, char* argv[]) {
 
     char** optionless_argv = nullptr;
     nlohmann::json cli_config;
-    const int optionless_argc = ProcessCmdLineOptions(argc, argv, optionless_argv, cli_config);
-
-    // if (optionless_argc < 3) {
-    //     printf("ERROR: Not enough arguments.\n");
-    //     printf("Usage: %s [OPTION]... OUTPUT_FILE INPUT-FILE(s)\n", optionless_argv[0]);
-    //     return 2;
-    // }
+    ProcessCmdLineOptions(argc, argv, optionless_argv, cli_config);
 
     Config config;
     if (cli_config.contains("configFile")) {
@@ -84,12 +78,10 @@ int main(int argc, char* argv[]) {
     FitterCPV fitter(config.json);
 
     // if (options.generator_level_set) fitter.SetGeneratorLevel(options.generator_level);
-
     // if (options.plot_dir_set) fitter.SetPlotDir(options.plot_dir);
 
-
-    // // fitter.TestEfficiency();
-    // // fitter.PlotEfficiency();
+    // fitter.TestEfficiency();
+    // fitter.PlotEfficiency();
 
     std::string output_filename = config.GetOutputFilename();
     output_filename += ".root";

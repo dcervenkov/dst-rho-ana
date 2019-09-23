@@ -208,10 +208,6 @@ class FitterCPV {
     void PlotFit(RooSimultaneous* pdf, const bool scf, const bool bkg);
     bool IsTimeDependent() const;
 
-    RooRealVar cr_scf_f_{"cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99};
-    RooRealVar cr_f_{"cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99};
-    RooRealVar scf_f_{"scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99};
-
     RooDataHist* scf_angular_kde_hist_ = nullptr;
     RooHistPdf* scf_angular_kde_ = nullptr;
 

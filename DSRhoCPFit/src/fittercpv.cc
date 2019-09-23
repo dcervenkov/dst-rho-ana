@@ -199,10 +199,6 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
     par_input_ = par_input;
 
     PrepareVarArgsets();
-
-    cr_scf_f_.setConstant();
-    cr_f_.setConstant();
-    scf_f_.setConstant();
 }
 
 /**
@@ -521,10 +517,16 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
 
     RooArgList fractions;
     if (scf && !bkg) {
-        fractions.add(cr_scf_f_);
+        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
+        cr_scf_f_->setConstant();
+        fractions.add(*cr_scf_f_);
     } else if (scf && bkg) {
-        fractions.add(cr_f_);
-        fractions.add(scf_f_);
+        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+        cr_f_->setConstant();
+        scf_f_->setConstant();
+        fractions.add(*cr_f_);
+        fractions.add(*scf_f_);
     }
 
     RooAddPdf* pdf_B =
@@ -603,16 +605,22 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const std::string channel_nam
         SA_pdfs.add(*bkg_pdf_SA);
     }
 
-    RooArgList fractions;
-    if (scf && !bkg) {
-        fractions.add(cr_scf_f_);
-    } else if (scf && bkg) {
-        fractions.add(cr_f_);
-        fractions.add(scf_f_);
-    }
-
     TString prefix = channel_name.c_str();
     prefix += "_";
+
+    RooArgList fractions;
+    if (scf && !bkg) {
+        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
+        cr_scf_f_->setConstant();
+        fractions.add(*cr_scf_f_);
+    } else if (scf && bkg) {
+        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+        cr_f_->setConstant();
+        scf_f_->setConstant();
+        fractions.add(*cr_f_);
+        fractions.add(*scf_f_);
+    }
 
     RooAddPdf* pdf_FB = new RooAddPdf(prefix + "pdf_FB", prefix + "pdf_FB", FB_pdfs, fractions);
     RooAddPdf* pdf_FA = new RooAddPdf(prefix + "pdf_FA", prefix + "pdf_FA", FA_pdfs, fractions);

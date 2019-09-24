@@ -45,6 +45,18 @@ test_configs = {
                    "--time-independent",
                    "--output=tests/current_result",
                    "--MC=1"],
+
+    "Kpipi0_ti_cr_fit": ["--config=tests/config_Kpipi0.json",
+                         "--components=CR",
+                         "--time-independent",
+                         "--output=tests/current_result",
+                         "--MC=1"],
+
+    "Kpipi0_ti_crscf_fit": ["--config=tests/config_Kpipi0.json",
+                            "--components=CRSCF",
+                            "--time-independent",
+                            "--output=tests/current_result",
+                            "--MC=1"],
 }
 
 green_code = "\033[32m"

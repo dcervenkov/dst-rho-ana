@@ -10,52 +10,60 @@ import sys
 
 # Define tests to be run
 test_configs = {
-    "td_cr_fit": ["--config=tests/config_Kpi.json",
+    "td_cr_fit": ["--config=tests/config_test.json",
                   "--components=CR",
                   "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
                   "--output=tests/current_result",
+                  "--exclude-channels=Kpipi0",
                   "--MC=1"],
 
-    "ti_cr_fit": ["--config=tests/config_Kpi.json",
+    "ti_cr_fit": ["--config=tests/config_test.json",
                   "--components=CR",
                   "--time-independent",
                   "--output=tests/current_result",
+                  "--exclude-channels=Kpipi0",
                   "--MC=1"],
 
-    "td_crscf_fit": ["--config=tests/config_Kpi.json",
+    "td_crscf_fit": ["--config=tests/config_test.json",
                      "--components=CRSCF",
                      "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
                      "--output=tests/current_result",
+                     "--exclude-channels=Kpipi0",
                      "--MC=1"],
 
-    "ti_crscf_fit": ["--config=tests/config_Kpi.json",
+    "ti_crscf_fit": ["--config=tests/config_test.json",
                      "--components=CRSCF",
                      "--time-independent",
                      "--output=tests/current_result",
+                     "--exclude-channels=Kpipi0",
                      "--MC=1"],
 
-    "td_all_fit": ["--config=tests/config_Kpi.json",
+    "td_all_fit": ["--config=tests/config_test.json",
                    "--components=all",
                    "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
                    "--output=tests/current_result",
+                   "--exclude-channels=Kpipi0",
                    "--MC=1"],
 
-    "ti_all_fit": ["--config=tests/config_Kpi.json",
+    "ti_all_fit": ["--config=tests/config_test.json",
                    "--components=all",
                    "--time-independent",
                    "--output=tests/current_result",
+                   "--exclude-channels=Kpipi0",
                    "--MC=1"],
 
-    "Kpipi0_ti_cr_fit": ["--config=tests/config_Kpipi0.json",
+    "Kpipi0_ti_cr_fit": ["--config=tests/config_test.json",
                          "--components=CR",
                          "--time-independent",
                          "--output=tests/current_result",
+                         "--exclude-channels=Kpi",
                          "--MC=1"],
 
-    "Kpipi0_ti_crscf_fit": ["--config=tests/config_Kpipi0.json",
+    "Kpipi0_ti_crscf_fit": ["--config=tests/config_test.json",
                             "--components=CRSCF",
                             "--time-independent",
                             "--output=tests/current_result",
+                            "--exclude-channels=Kpi",
                             "--MC=1"],
 }
 

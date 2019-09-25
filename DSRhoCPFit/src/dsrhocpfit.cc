@@ -57,11 +57,11 @@ int main(int argc, char* argv[]) {
 
     config.Update(cli_config);
     config.FillMissingDefaults();
-
     if (!config.IsValid()) {
         Log::print(Log::error, "Config is not valid!\n");
         exit(1);
     }
+    config.RemoveExcludedChannels();
 
     if (config.ShouldSaveLog()) {
         Log::print(Log::debug, "Manipulating cout buffer to save copy of stdout\n");

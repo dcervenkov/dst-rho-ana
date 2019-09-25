@@ -56,11 +56,25 @@ void Config::Update(const nlohmann::json new_config) {
 std::string Config::GetPrettyString() const { return json.dump(4); }
 
 /**
- *  Fill mandatory missing values with sensible defaults
+ * Fill mandatory missing values with sensible defaults
  */
 void Config::FillMissingDefaults() {
     if (!json.contains("numCPUs")) {
         json["numCPUs"] = 1;
+    }
+}
+
+/**
+ * Remove channels that were excluded by 'excludedChannels' key from the JSON
+ */
+void Config::RemoveExcludedChannels() {
+        if (json.contains("excludeChannels")) {
+        std::vector<std::string> excluded_channels =
+            tools::SplitString(json["excludeChannels"], ',');
+        for (auto excluded_channel : excluded_channels) {
+            Log::LogLine(Log::info) << "Excluding channel " << excluded_channel;
+            json["channels"].erase(excluded_channel);
+        }
     }
 }
 

@@ -26,6 +26,7 @@ public:
     void Update(const nlohmann::json new_config);
     std::string GetPrettyString() const;
     void FillMissingDefaults();
+    void RemoveExcludedChannels();
     bool IsValid() const;
     bool ShouldSaveLog() const { return json.contains("saveLog"); };
     std::string GetOutputFilename() const { return json["output"].get<std::string>(); };

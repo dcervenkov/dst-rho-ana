@@ -85,14 +85,6 @@ FitterCPV::FitterCPV(nlohmann::json config) {
     if (config.contains("fixedParameters")) {
         FixParameters(config["fixedParameters"].get<std::string>().c_str());
     }
-    if (config.contains("excludeChannels")) {
-        std::vector<std::string> excluded_channels =
-            tools::SplitString(config["excludeChannels"], ',');
-        for (auto excluded_channel : excluded_channels) {
-            Log::LogLine(Log::info) << "Excluding channel " << excluded_channel;
-            config["channels"].erase(excluded_channel);
-        }
-    }
 
     data_ = GetData(config);
     pdf_ = CreatePDF(config);

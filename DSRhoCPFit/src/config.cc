@@ -147,7 +147,7 @@ bool Config::IsValid() const {
                     Log::LogLine(Log::error) << "Signal MC input files not specified";
                     return false;
                 }
-                if (!input_files.value().contains("genericMC") && components.value() != "CR") {
+                if (!input_files.value().contains("genericMC") && components.value() == "all") {
                     Log::LogLine(Log::error) << "Generic MC input files not specified";
                     return false;
                 }

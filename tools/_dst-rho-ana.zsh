@@ -12,6 +12,7 @@ _dsrhocpfit_complete()
 	'--cpus=[number of CPU cores to use for fitting and plotting]' \
 	'--components=[fit the specified components]:type:->components' \
 	'--config=[read in configuration from the specified file]:filename:_files' \
+	'--events=[total number of events to be read from input files]' \
 	'--exclude-channels=[exclude channels from fit]:type:->channels' \
 	'--MC=[whether the fit is MC or data]:type:->binary' \
 	'--version[show version]' \

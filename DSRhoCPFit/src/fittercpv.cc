@@ -2368,6 +2368,18 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
     //     input_tree = input_chain->CloneTree();
     // }
 
+    TTree* tree = nullptr;
+    if (common_config.contains("events")) {
+        double fraction_events = common_config["events"].get<double>() / chain->GetEntries();
+        std::string fraction_string = "LocalEntry$<LocalEntries$*";
+        fraction_string += std::to_string(fraction_events);
+        Log::print(
+            Log::info,
+            "Taking a total of %i events (%.1f%%) properly distributed across all input files\n",
+            common_config["events"].get<int>(), fraction_events * 100);
+        tree = chain->CopyTree(fraction_string.c_str());
+    }
+
     TString common_cuts = tools::GetCommonCutsString();
 
     if (common_config["components"] == "CR") {
@@ -2401,8 +2413,9 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
     // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
     std::string dataset_name = channel_name;
     dataset_name += "_dataset";
-    RooDataSet* temp_dataset = new RooDataSet(dataset_name.c_str(), dataset_name.c_str(), chain,
-                                              dataset_vars_argset_, common_cuts);
+    RooDataSet* temp_dataset =
+        new RooDataSet(dataset_name.c_str(), dataset_name.c_str(), tree == nullptr ? chain : tree,
+                       dataset_vars_argset_, common_cuts);
     Log::print(Log::debug, "Num events passing common cuts: %i\n", temp_dataset->numEntries());
 
     // We add an identifying label to each of the 4 categories and then combine it into a single

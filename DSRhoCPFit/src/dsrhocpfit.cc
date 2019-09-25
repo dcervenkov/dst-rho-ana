@@ -137,6 +137,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
                                     {"config", required_argument, 0, 'g'},
                                     {"components", required_argument, 0, 'e'},
+                                    {"events", required_argument, 0, 'n'},
                                     {"exclude-channels", required_argument, 0, 'x'},
                                     {"MC", required_argument, 0, 'm'},
                                     {"fix", required_argument, 0, 'f'},
@@ -150,7 +151,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:e:x:m:f:p:o:litrvh", long_options,
+    while ((c = getopt_long(argc, argv, "c:g:e:n:x:m:f:p:o:litrvh", long_options,
                             &option_index)) != -1) {
         switch (c) {
             case 0:
@@ -166,6 +167,9 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 break;
             case 'e':
                 config["components"] = optarg;
+                break;
+            case 'n':
+                config["events"] = atoi(optarg);
                 break;
             case 'x':
                 config["excludeChannels"] = optarg;

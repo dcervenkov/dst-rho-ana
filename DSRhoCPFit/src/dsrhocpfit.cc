@@ -105,6 +105,11 @@ int main(int argc, char* argv[]) {
         tools::SaveTextToFile(config.GetOutputFilename(), fitter.CreateResultsString());
     }
 
+    if (config.json.contains("plotDir")) {
+        tools::SetPlotDir(config.json["plotDir"].get<std::string>().c_str());
+        fitter.CreatePlots(config.json);
+    }
+
     if (config.ShouldSaveLog()) {
         // We have to restore cout's buffer to the original, otherwise we would
         // get a segfault as our object goes out of scope sooner than cout

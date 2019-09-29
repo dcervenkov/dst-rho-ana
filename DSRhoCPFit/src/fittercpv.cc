@@ -651,9 +651,17 @@ void FitterCPV::Fit(const nlohmann::json config) {
     if (result_) {
         result_->Print();
     }
+}
 
-    if (make_plots_) {
-        // PlotFit(pdf_, scf, bkg);
+void FitterCPV::CreatePlots(const nlohmann::json config) const {
+    for (auto& chan : config["channels"].items()) {
+        const std::string channel_name = chan.key().c_str();
+        auto channel_config = chan.value();
+
+        auto common_config = config;
+        common_config.erase("channels");
+
+        PlotChannel(common_config, channel_config, channel_name);
     }
 }
 
@@ -666,173 +674,186 @@ void FitterCPV::Fit(const nlohmann::json config) {
  * https://root-forum.cern.ch/t/rooaddpdf-and-integration-over-conditional-observables/27891
  * Instead of normally plotting the PDFs, we generate Asimov datasets and plot those.
  *
- * @param sim_pdf The complete PDF to be used for plotting
- * @param scf Whether a SCF component should be plotted
- * @param bkg Whether a BKG component should be plotted
+ * @param common_config Part of the config common to all channels
+ * @param channel_config Part of the config specific for this channel
+ * @param channel_name Name of this channel
  */
-// void FitterCPV::PlotFit(RooSimultaneous* sim_pdf, const bool scf, const bool bkg) {
-//     // PDF for B_bar differs, so we have to generate them separately. (One
-//     // could also use *extended* RooSimultaneous or 'ProtoData' for
-//     // RooSimultaneous.)
-//     RooAbsPdf* cr_pdf_B;
-//     RooAbsPdf* cr_pdf_B_bar;
-//     RooAbsPdf* pdf_B;
-//     RooAbsPdf* pdf_B_bar;
+void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::json channel_config,
+                            const std::string channel_name) const {
+    Log::LogLine(Log::info) << "Creating plots for channel " << channel_name;
 
-//     // The structure of the PDF for CR-only and CR+anything differs. This if
-//     // extracts the CR-only PDFs in all cases as well as the total PDF for B
-//     // and B bar (in the case of CR-only the total PDFs are identical to the
-//     // CR-only ones)
-//     if (scf || bkg) {
-//         pdf_B = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("FB"));
-//         RooAddPdf* add_pdf_B = dynamic_cast<RooAddPdf*>(pdf_B);
-//         const int cr_pdf_B_index = add_pdf_B->pdfList().index("cr_pdf_B");
-//         cr_pdf_B = dynamic_cast<RooAbsPdf*>(add_pdf_B->pdfList().at(cr_pdf_B_index));
+    pdf_->getComponents()->Print();
+    pdf_->getVariables()->Print();
 
-//         pdf_B_bar = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("FA"));
-//         RooAddPdf* add_pdf_B_bar = dynamic_cast<RooAddPdf*>(pdf_B_bar);
-//         const int cr_pdf_B_bar_index = add_pdf_B_bar->pdfList().index("cr_pdf_B_bar");
-//         cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(add_pdf_B->pdfList().at(cr_pdf_B_bar_index));
-//     } else {
-//         cr_pdf_B = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("FB"));
-//         cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(sim_pdf->getPdf("FA"));
-//         pdf_B = cr_pdf_B;
-//         pdf_B_bar = cr_pdf_B_bar;
-//     }
+    std::vector<RooAbsPdf*> components;
+    RooAbsPdf* all_histpdf = CreateHistPdf(common_config, channel_name, components);
 
-//     RooArgSet used_vars;
-//     if (!do_time_independent_fit_) {
-//         used_vars.add(*dt_);
-//     }
-//     used_vars.add(*thetat_);
-//     used_vars.add(*thetab_);
-//     used_vars.add(*phit_);
+    RooArgSet* observables = pdf_->getObservables(data_);
+    for (auto observable : tools::ToVector(*observables)) {
+        PlotWithPull(*observable, *data_, *all_histpdf, components);
+    }
 
-//     RooDataHist* cr_hist = cr_pdf_B->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
-//     RooDataHist* cr_hist_B_bar =
-//         cr_pdf_B_bar->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
+    thetat_->setBins(40);
+    thetab_->setBins(40);
+    phit_->setBins(40);
 
-//     // Add histos from both particle and anti-particle PDFs to create the
-//     // final RooHistPdf.
-//     cr_hist->add(*cr_hist_B_bar);
-//     RooHistPdf* cr_histpdf = new RooHistPdf("cr_histpdf", "cr_histpdf", used_vars, *cr_hist);
+    RooDataHist hist("hist", "hist", *observables, *data_);
+    tools::PlotVars2D(*thetat_, *thetab_, hist);
+    tools::PlotVars2D(*thetat_, *phit_, hist);
+    tools::PlotVars2D(*thetab_, *phit_, hist);
 
-//     RooHistPdf* scf_histpdf;
-//     if (scf) {
-//         // RooDataHist* scf_hist =
-//         //     scf_angular_pdf_->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
-//         // scf_histpdf = new RooHistPdf("scf_histpdf", "scf_histpdf", used_vars, *scf_hist);
-//     }
+    // We change the binning for 2D plots, so we have to generate new binned
+    // dataset, to avoid dealing with rebinning.
 
-//     RooHistPdf* bkg_histpdf;
-//     if (bkg) {
-//         // RooDataHist* bkg_hist =
-//         //     bkg_angular_pdf_->generateBinned(used_vars, 1000, RooFit::ExpectedData(true));
-//         // bkg_histpdf = new RooHistPdf("bkg_histpdf", "bkg_histpdf", used_vars, *bkg_hist);
-//     }
+    // We need this to get the exact number of events to be generated for
+    // the PDF distribution. This is unnecessary for the above, because we
+    // create a RooHistPdf from it and that is normalized to the data when
+    // plotted.
+    RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
+        data_->reduce("decaytype==decaytype::FB||decaytype==decaytype::SB"));
+    RooDataSet* dataset_A = dynamic_cast<RooDataSet*>(
+        data_->reduce("decaytype==decaytype::FA||decaytype==decaytype::SA"));
 
-//     RooAbsPdf* all_histpdf;
-//     if ((!scf) && (!bkg)) {
-//         all_histpdf = cr_histpdf;
-//     } else if (scf && (!bkg)) {
-//         all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
-//                                     RooArgList(*cr_histpdf, *scf_histpdf), cr_scf_f_);
-//     } else if (scf && bkg) {
-//         all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
-//                                     RooArgList(*cr_histpdf, *scf_histpdf, *bkg_histpdf),
-//                                     RooArgList(cr_f_, scf_f_));
-//     }
+    TString chan_name = channel_name;
+    RooAddPdf* pdf_FB = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FB}"));
+    RooAddPdf* pdf_FA = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FA}"));
+    RooDataHist* all_hist =
+        pdf_FB->generateBinned(*observables, dataset_B->sumEntries(), RooFit::ExpectedData(true));
+    RooDataHist* all_hist_FA =
+        pdf_FA->generateBinned(*observables, dataset_A->sumEntries(), RooFit::ExpectedData(true));
+    all_hist->add(*all_hist_FA);
 
-//     // Set the current directory back to the one for plots (ugly ROOT stuff)
-//     if (output_file_) {
-//         output_file_->cd();
-//     }
+    // // Set the current directory back to the one for plots (ugly ROOT stuff)
+    // if (output_file_) {
+    //     output_file_->cd();
+    // }
+    tools::PlotPull2D(*thetat_, *thetab_, hist, *all_hist);
+    tools::PlotPull2D(*thetat_, *phit_, hist, *all_hist);
+    tools::PlotPull2D(*thetab_, *phit_, hist, *all_hist);
+    // const double chi2 = Calculate3DChi2(hist, *all_hist);
+    // std::cout << "Chi2 = " << chi2 << std::endl;
 
-//     // const double margin_ap = 0.005;
-//     // const double margin_apa = 0.25;
-//     // const double margin_a0 = 0.0015;
-//     // const double margin_ata = 0.3;
-//     // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
-//     // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
-//     // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
-//     // SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
-//     // SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
-//     // SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
-//     // SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
-//     // SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
-//     // SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
-//     // SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
+    // // SaveChi2Scan(sim_pdf, ap_, margin_apa);
+    // // SaveChi2Scan(sim_pdf, apa_, margin_apa);
+    // // SaveChi2Scan(sim_pdf, a0_, margin_a0);
+    // // SaveChi2Scan(sim_pdf, ata_, margin_ata);
 
-//     // PlotWithPull(*thetat_, *dataset_, cr_histpdf);
-//     // PlotWithPull(*thetab_, *dataset_, cr_histpdf);
-//     // PlotWithPull(*phit_, *dataset_, cr_histpdf);
+    delete dataset_B;
+    delete dataset_A;
+}
 
-//     // RooHistPdf all_histpdf("all_histpdf", "all_histpdf", RooArgSet(*thetat_, *thetab_,
-//     // *phit_), *all_hist);
-//     std::vector<RooAbsPdf*> components;
-//     components.push_back(cr_histpdf);
-//     if (scf) {
-//         components.push_back(scf_histpdf);
-//     }
-//     if (bkg) {
-//         components.push_back(bkg_histpdf);
-//     }
-//     // thetab_->setBins(100);
+RooAbsPdf* FitterCPV::CreateHistPdf(const nlohmann::json common_config,
+                                    const std::string channel_name,
+                                    std::vector<RooAbsPdf*>& components) const {
+    // PDF for B_bar differs, so we have to generate them separately. (One
+    // could also use *extended* RooSimultaneous or 'ProtoData' for
+    // RooSimultaneous.)
+    RooAbsPdf* cr_pdf_B;
+    RooAbsPdf* cr_pdf_B_bar;
+    RooAbsPdf* scf_pdf;
+    RooAbsPdf* bkg_pdf;
 
-//     if (!do_time_independent_fit_) {
-//         PlotWithPull(*dt_, *dataset_, *all_histpdf, components);
-//     }
-//     PlotWithPull(*thetat_, *dataset_, *all_histpdf, components);
-//     PlotWithPull(*thetab_, *dataset_, *all_histpdf, components);
-//     PlotWithPull(*phit_, *dataset_, *all_histpdf, components);
+    TString chan_name = channel_name;
+    RooAddPdf* pdf_FB = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FB}"));
+    RooAddPdf* pdf_FA = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FA}"));
+    RooAddPdf* pdf_SB = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";SB}"));
+    RooAddPdf* pdf_SA = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";SA}"));
+    // pdf_FB->Print();
+    // pdf_FA->Print();
+    // pdf_SB->Print();
+    // pdf_SA->Print();
 
-//     // We need this to get the exact number of events to be generated for
-//     // the PDF distribution. This is unnecessary for the above, because we
-//     // create a RooHistPdf from it and that is normalized to the data when
-//     // plotted.
-//     RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
-//         dataset_->reduce("decaytype==decaytype::FB||decaytype==decaytype::SB"));
-//     RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(
-//         dataset_->reduce("decaytype==decaytype::FA||decaytype==decaytype::SA"));
+    const int cr_pdf_FB_index = pdf_FB->pdfList().index(chan_name + "_cr_angular_pdf_B");
+    cr_pdf_B = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().at(cr_pdf_FB_index));
+    // cr_pdf_B->Print();
 
-//     thetat_->setBins(40);
-//     thetab_->setBins(40);
-//     phit_->setBins(40);
-//     RooDataHist hist("hist", "hist", used_vars, *dataset_);
-//     tools::PlotVars2D(*thetat_, *thetab_, hist);
-//     tools::PlotVars2D(*thetat_, *phit_, hist);
-//     tools::PlotVars2D(*thetab_, *phit_, hist);
+    const int cr_pdf_FA_index = pdf_FA->pdfList().index(chan_name + "_cr_angular_pdf_B_bar");
+    cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(pdf_FA->pdfList().at(cr_pdf_FA_index));
+    // cr_pdf_B_bar->Print();
 
-//     // We change the binning for 2D plots, so we have to generate new binned
-//     // dataset, to avoid dealing with rebinning.
-//     delete cr_hist;
-//     delete cr_hist_B_bar;
+    bool scf = false;
+    bool bkg = false;
+    if (common_config["components"] == "CRSCF") {
+        scf = true;
+    } else if (common_config["components"] == "all") {
+        scf = true;
+        bkg = true;
+    }
 
-//     RooDataHist* all_hist =
-//         pdf_B->generateBinned(used_vars, dataset_B->sumEntries(), RooFit::ExpectedData(true));
-//     RooDataHist* all_hist_B_bar = pdf_B_bar->generateBinned(used_vars, dataset_B_bar->sumEntries(),
-//                                                             RooFit::ExpectedData(true));
-//     all_hist->add(*all_hist_B_bar);
+    RooArgSet* observables = pdf_->getObservables(data_);
 
-//     // Set the current directory back to the one for plots (ugly ROOT stuff)
-//     if (output_file_) {
-//         output_file_->cd();
-//     }
-//     tools::PlotPull2D(*thetat_, *thetab_, hist, *all_hist);
-//     tools::PlotPull2D(*thetat_, *phit_, hist, *all_hist);
-//     tools::PlotPull2D(*thetab_, *phit_, hist, *all_hist);
+    RooDataHist* cr_hist = cr_pdf_B->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
+    RooDataHist* cr_hist_B_bar =
+        cr_pdf_B_bar->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
 
-//     const double chi2 = Calculate3DChi2(hist, *all_hist);
-//     std::cout << "Chi2 = " << chi2 << std::endl;
+    // Add histos from both particle and anti-particle PDFs to create the
+    // final RooHistPdf.
+    cr_hist->add(*cr_hist_B_bar);
+    RooHistPdf* cr_histpdf = new RooHistPdf("cr_histpdf", "cr_histpdf", *observables, *cr_hist);
 
-//     // SaveChi2Scan(sim_pdf, ap_, margin_apa);
-//     // SaveChi2Scan(sim_pdf, apa_, margin_apa);
-//     // SaveChi2Scan(sim_pdf, a0_, margin_a0);
-//     // SaveChi2Scan(sim_pdf, ata_, margin_ata);
+    RooHistPdf* scf_histpdf;
+    if (scf) {
+        const int scf_pdf_FB_index = pdf_FB->pdfList().index(chan_name + "_scf_hist_pdf_fast");
+        scf_pdf = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().at(scf_pdf_FB_index));
+        RooDataHist* scf_hist =
+            scf_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
+        scf_histpdf = new RooHistPdf("scf_histpdf", "scf_histpdf", *observables, *scf_hist);
+    }
 
-//     delete dataset_B;
-//     delete dataset_B_bar;
-// }
+    RooHistPdf* bkg_histpdf;
+    if (bkg) {
+        const int bkg_pdf_FB_index = pdf_FB->pdfList().index(chan_name + "_bkg_pdf");
+        bkg_pdf = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().at(bkg_pdf_FB_index));
+        RooDataHist* bkg_hist =
+            bkg_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
+        bkg_histpdf = new RooHistPdf("bkg_histpdf", "bkg_histpdf", *observables, *bkg_hist);
+    }
+
+    RooAbsArg* cr_scf_f = pdf_->getVariables()->find(chan_name + "_cr_scf_f");
+    RooAbsArg* cr_f = pdf_->getVariables()->find(chan_name + "_cr_f");
+    RooAbsArg* scf_f = pdf_->getVariables()->find(chan_name + "_scf_f");
+    RooAbsPdf* all_histpdf;
+    if ((!scf) && (!bkg)) {
+        all_histpdf = cr_histpdf;
+    } else if (scf && (!bkg)) {
+        all_histpdf = new RooAddPdf("crscf_histpdf", "crscf_histpdf",
+                                    RooArgList(*cr_histpdf, *scf_histpdf), *cr_scf_f);
+    } else if (scf && bkg) {
+        all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
+                                    RooArgList(*cr_histpdf, *scf_histpdf, *bkg_histpdf),
+                                    RooArgList(*cr_f, *scf_f));
+    }
+
+    // // Set the current directory back to the one for plots (ugly ROOT stuff)
+    // if (output_file_) {
+    //     output_file_->cd();
+    // }
+
+    // // const double margin_ap = 0.005;
+    // // const double margin_apa = 0.25;
+    // // const double margin_a0 = 0.0015;
+    // // const double margin_ata = 0.3;
+    // // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
+    // // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
+    // // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
+    // // SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
+    // // SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
+    // // SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
+    // // SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
+    // // SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
+    // // SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
+    // // SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
+
+    components.push_back(cr_histpdf);
+    if (scf) {
+        components.push_back(scf_histpdf);
+    }
+    if (bkg) {
+        components.push_back(bkg_histpdf);
+    }
+
+    return all_histpdf;
+}
 
 /**
  * Read in a JSON file, parse it, and return a json object.
@@ -892,7 +913,6 @@ void FitterCPV::ChangeFitRanges(const nlohmann::json& config) {
 void FitterCPV::ChangeModelParameters(RooAbsPdf* pdf, const std::string channel_name,
                                       const nlohmann::json& model_parameters) {
     Log::LogLine(Log::info) << "Updating parameter values for channel " << channel_name;
-    pdf->getVariables()->Print();
     for (auto& parameter : model_parameters.items()) {
         const char* name = parameter.key().c_str();
         const double value = parameter.value().get<double>();
@@ -1153,105 +1173,106 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
  * @param components [optional] Component PDFs to plot alongside the full PDF
  * @param title [optional] Title for the y-axis
  */
-// void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, const RooAbsPdf& pdf,
-//                              const std::vector<RooAbsPdf*> components, const char* title) const {
-//     TString name = pdf.GetName();
-//     name += "_";
-//     name += var.GetName();
-//     TCanvas canvas(name, name, 500, 500);
+void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, const RooAbsPdf& pdf,
+                             const std::vector<RooAbsPdf*> components, const char* title) const {
+    TString name = pdf.GetName();
+    name += "_";
+    name += var.GetName();
+    TCanvas canvas(name, name, 500, 500);
 
-//     RooPlot* plot = var.frame();
-//     TPad* pad_var;
-//     TPad* pad_pull;
-//     pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
-//     pad_pull = new TPad("pad_pull", "pad_pull", 0, 0, 1, 0.25);
-//     pad_var->Draw();
-//     pad_pull->Draw();
+    RooPlot* plot = var.frame();
+    TPad* pad_var;
+    TPad* pad_pull;
+    pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
+    pad_pull = new TPad("pad_pull", "pad_pull", 0, 0, 1, 0.25);
+    pad_var->Draw();
+    pad_pull->Draw();
 
-//     pad_var->cd();
-//     pad_var->SetBottomMargin(0.0);
-//     pad_var->SetLeftMargin(0.12);
+    pad_var->cd();
+    pad_var->SetBottomMargin(0.0);
+    pad_var->SetLeftMargin(0.12);
 
-//     data.plotOn(plot);
+    data.plotOn(plot);
 
-//     // Renormalization required for certain plots, when using multiple CPUs but
-//     // not with a single CPU; possible RooFit bug
-//     double norm = 1;
-//     if (!name.Contains("hist") && num_CPUs_ > 1) {
-//         norm = 1.0 / data.numEntries();
-//     }
+    int num_CPUs_ = 4;
+    // Renormalization required for certain plots, when using multiple CPUs but
+    // not with a single CPU; possible RooFit bug
+    double norm = 1;
+    if (!name.Contains("hist") && num_CPUs_ > 1) {
+        norm = 1.0 / data.numEntries();
+    }
 
-//     // Plot components before the total PDF as the pull plots are made from the
-//     // last plotted PDF
-//     const int colors[] = {4, 7, 5};
-//     int i = 0;
-//     for (auto component : components) {
-//         pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
-//                    RooFit::NumCPU(num_CPUs_), RooFit::LineColor(colors[i++]),
-//                    RooFit::Components(*component), RooFit::Normalization(norm));
-//     }
+    // Plot components before the total PDF as the pull plots are made from the
+    // last plotted PDF
+    const int colors[] = {4, 7, 5};
+    int i = 0;
+    for (auto component : components) {
+        pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
+                   RooFit::NumCPU(num_CPUs_), RooFit::LineColor(colors[i++]),
+                   RooFit::Components(*component), RooFit::Normalization(norm));
+    }
 
-//     pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
-//                RooFit::NumCPU(num_CPUs_), RooFit::Normalization(norm));
+    pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
+               RooFit::NumCPU(num_CPUs_), RooFit::Normalization(norm));
 
-//     plot->GetXaxis()->SetTitle("");
-//     plot->GetXaxis()->SetLabelSize(0);
+    plot->GetXaxis()->SetTitle("");
+    plot->GetXaxis()->SetLabelSize(0);
 
-//     // This line makes sure the 0 is not drawn as it would overlap with the lower pad
-//     plot->GetYaxis()->SetRangeUser(0.001, plot->GetMaximum());
-//     plot->SetTitle("");
-//     plot->GetYaxis()->SetTitle(title);
-//     plot->GetYaxis()->SetTitleOffset(1.60);
-//     plot->Draw();
+    // This line makes sure the 0 is not drawn as it would overlap with the lower pad
+    plot->GetYaxis()->SetRangeUser(0.001, plot->GetMaximum());
+    plot->SetTitle("");
+    plot->GetYaxis()->SetTitle(title);
+    plot->GetYaxis()->SetTitleOffset(1.60);
+    plot->Draw();
 
-//     // This is not an OK way of calculating ndof - e.g., in a case where the PDF
-//     // is defined only on a subset of the var range, or there are empty bins,
-//     // etc. it will be wrong. However, RooFit doesn't give access to anything
-//     // like ndof itself, so this will have to do for now.
-//     const int num_floating_pars = result_ ? result_->floatParsFinal().getSize() : 0;
-//     const int ndof = var.getBinning().numBins() - num_floating_pars;
-//     const double chi2 = plot->chiSquare(num_floating_pars) * ndof;
-//     TPaveText* stat_box = CreateStatBox(chi2, ndof, true, true);
-//     if (stat_box) {
-//         stat_box->Draw();
-//     }
+    // This is not an OK way of calculating ndof - e.g., in a case where the PDF
+    // is defined only on a subset of the var range, or there are empty bins,
+    // etc. it will be wrong. However, RooFit doesn't give access to anything
+    // like ndof itself, so this will have to do for now.
+    const int num_floating_pars = result_ ? result_->floatParsFinal().getSize() : 0;
+    const int ndof = var.getBinning().numBins() - num_floating_pars;
+    const double chi2 = plot->chiSquare(num_floating_pars) * ndof;
+    TPaveText* stat_box = CreateStatBox(chi2, ndof, true, true);
+    if (stat_box) {
+        stat_box->Draw();
+    }
 
-//     pad_pull->cd();
-//     pad_pull->SetTopMargin(0.0);
-//     pad_pull->SetBottomMargin(0.35);
-//     pad_pull->SetLeftMargin(0.12);
+    pad_pull->cd();
+    pad_pull->SetTopMargin(0.0);
+    pad_pull->SetBottomMargin(0.35);
+    pad_pull->SetLeftMargin(0.12);
 
-//     // Create a new frame to draw the pull distribution and add the distribution to the frame
-//     RooPlot* plot_pull_ = var.frame(RooFit::Title("Pull Distribution"));
-//     plot_pull_->SetTitle("");
-//     RooHist* hpull = plot->pullHist();
-//     hpull->SetFillColor(kGray);
-//     // The only working way to get rid of error bars; HIST draw option doesn't work with RooPlot
-//     for (int i = 0; i < hpull->GetN(); i++) {
-//         hpull->SetPointError(i, 0, 0, 0, 0);
-//     }
-//     plot_pull_->addPlotable(hpull, "B");
-//     // We plot again without bars, so the points are not half covered by bars as in case of "BP"
-//     // draw option.
-//     // We need to create and plot a clone, because the ROOT object ownership is transfered to the
-//     // RooPlot by addPlotable().
-//     // If we just added the hpull twice, we would get a segfault.
-//     RooHist* hpull_clone = dynamic_cast<RooHist*>(hpull->Clone());
+    // Create a new frame to draw the pull distribution and add the distribution to the frame
+    RooPlot* plot_pull_ = var.frame(RooFit::Title("Pull Distribution"));
+    plot_pull_->SetTitle("");
+    RooHist* hpull = plot->pullHist();
+    hpull->SetFillColor(kGray);
+    // The only working way to get rid of error bars; HIST draw option doesn't work with RooPlot
+    for (int i = 0; i < hpull->GetN(); i++) {
+        hpull->SetPointError(i, 0, 0, 0, 0);
+    }
+    plot_pull_->addPlotable(hpull, "B");
+    // We plot again without bars, so the points are not half covered by bars as in case of "BP"
+    // draw option.
+    // We need to create and plot a clone, because the ROOT object ownership is transfered to the
+    // RooPlot by addPlotable().
+    // If we just added the hpull twice, we would get a segfault.
+    RooHist* hpull_clone = dynamic_cast<RooHist*>(hpull->Clone());
 
-//     // We plot again without bars, so the points are not half covered by bars
-//     plot_pull_->addPlotable(hpull_clone, "P");
+    // We plot again without bars, so the points are not half covered by bars
+    plot_pull_->addPlotable(hpull_clone, "P");
 
-//     plot_pull_->GetXaxis()->SetTickLength(0.03 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
-//     plot_pull_->GetXaxis()->SetTitle(TString(var.GetTitle()));
-//     plot_pull_->GetXaxis()->SetTitleOffset(4.0);
-//     plot_pull_->GetXaxis()->SetLabelOffset(0.01 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
-//     plot_pull_->GetYaxis()->SetRangeUser(-5, 5);
-//     plot_pull_->GetYaxis()->SetNdivisions(505);
-//     plot_pull_->Draw();
+    plot_pull_->GetXaxis()->SetTickLength(0.03 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
+    plot_pull_->GetXaxis()->SetTitle(TString(var.GetTitle()));
+    plot_pull_->GetXaxis()->SetTitleOffset(4.0);
+    plot_pull_->GetXaxis()->SetLabelOffset(0.01 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
+    plot_pull_->GetYaxis()->SetRangeUser(-5, 5);
+    plot_pull_->GetYaxis()->SetNdivisions(505);
+    plot_pull_->Draw();
 
-//     canvas.Write();
-//     canvas.SaveAs(constants::format);
-// }
+    canvas.Write();
+    canvas.SaveAs(constants::format);
+}
 
 /**
  * Create and return statbox with fit results to overlay on plots. Returns a nullptr pointer
@@ -1314,108 +1335,108 @@ TPaveText* FitterCPV::CreateStatBox(const double chi2, const int ndof, const boo
  * @param file_names Vector of paths to the ROOT files
  * @param num_events [optional] Maximum number of events to use (0 to read all)
  */
-void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_events) {
-    TChain* input_chain = new TChain("h2000");
-    for (auto file_name : file_names) {
-        input_chain->Add(file_name);
-    }
+// void FitterCPV::ReadInFile(std::vector<const char*> file_names, const int& num_events) {
+//     TChain* input_chain = new TChain("h2000");
+//     for (auto file_name : file_names) {
+//         input_chain->Add(file_name);
+//     }
 
-    Log::print(Log::info, "Reading %i input files...\n", file_names.size());
+//     Log::print(Log::info, "Reading %i input files...\n", file_names.size());
 
-    TTree* input_tree;
-    if (num_events) {
-        if (file_names.size() > 1) {
-            Log::print(Log::warning,
-                       "You limited the number of events to read, while reading multiple "
-                       "files. Since this limiting works sequentially not randomly, you "
-                       "will probably not get the result you want!\n");
-        }
-        input_tree = input_chain->CloneTree(num_events);
-    } else {
-        input_tree = input_chain->CloneTree();
-    }
+//     TTree* input_tree;
+//     if (num_events) {
+//         if (file_names.size() > 1) {
+//             Log::print(Log::warning,
+//                        "You limited the number of events to read, while reading multiple "
+//                        "files. Since this limiting works sequentially not randomly, you "
+//                        "will probably not get the result you want!\n");
+//         }
+//         input_tree = input_chain->CloneTree(num_events);
+//     } else {
+//         input_tree = input_chain->CloneTree();
+//     }
 
-    TString common_cuts = tools::GetCommonCutsString();
+//     TString common_cuts = tools::GetCommonCutsString();
 
-    TString FB_cuts;
-    TString FA_cuts;
-    TString SB_cuts;
-    TString SA_cuts;
-    if (perfect_tagging_) {
-        FB_cuts = "brecflav==1&&btagmcli<0";
-        FA_cuts = "brecflav==-1&&btagmcli>0";
-        SB_cuts = "brecflav==1&&btagmcli>0";
-        SA_cuts = "brecflav==-1&&btagmcli<0";
-    } else {
-        if (generator_level_) {
-            Log::print(Log::warning,
-                       "Attempting to use realistic tagging with generator level fit. This will "
-                       "probably end badly. Consider using the '--perfect-tag' switch.\n");
-        }
-        FB_cuts = "brecflav==1&&tagqr<0";
-        FA_cuts = "brecflav==-1&&tagqr>0";
-        SB_cuts = "brecflav==1&&tagqr>0";
-        SA_cuts = "brecflav==-1&&tagqr<0";
-    }
+//     TString FB_cuts;
+//     TString FA_cuts;
+//     TString SB_cuts;
+//     TString SA_cuts;
+//     if (perfect_tagging_) {
+//         FB_cuts = "brecflav==1&&btagmcli<0";
+//         FA_cuts = "brecflav==-1&&btagmcli>0";
+//         SB_cuts = "brecflav==1&&btagmcli>0";
+//         SA_cuts = "brecflav==-1&&btagmcli<0";
+//     } else {
+//         if (generator_level_) {
+//             Log::print(Log::warning,
+//                        "Attempting to use realistic tagging with generator level fit. This will "
+//                        "probably end badly. Consider using the '--perfect-tag' switch.\n");
+//         }
+//         FB_cuts = "brecflav==1&&tagqr<0";
+//         FA_cuts = "brecflav==-1&&tagqr>0";
+//         SB_cuts = "brecflav==1&&tagqr>0";
+//         SA_cuts = "brecflav==-1&&tagqr<0";
+//     }
 
-    // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
-    // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
-    RooDataSet* temp_dataset =
-        new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_, common_cuts);
-    Log::print(Log::debug, "Num events passing common cuts: %i\n", temp_dataset->numEntries());
+//     // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
+//     // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
+//     RooDataSet* temp_dataset =
+//         new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_, common_cuts);
+//     Log::print(Log::debug, "Num events passing common cuts: %i\n", temp_dataset->numEntries());
 
-    //  separate conditional vars from stuff like thetat
+//     //  separate conditional vars from stuff like thetat
 
-    // We add an identifying label to each of the 4 categories and then combine it into a single
-    // dataset for RooSimultaneous fitting
-    RooDataSet* dataset_FB = static_cast<RooDataSet*>(temp_dataset->reduce(FB_cuts));
-    decaytype_->setLabel("FB");
-    dataset_FB->addColumn(*decaytype_);
+//     // We add an identifying label to each of the 4 categories and then combine it into a single
+//     // dataset for RooSimultaneous fitting
+//     RooDataSet* dataset_FB = static_cast<RooDataSet*>(temp_dataset->reduce(FB_cuts));
+//     decaytype_->setLabel("FB");
+//     dataset_FB->addColumn(*decaytype_);
 
-    RooDataSet* dataset_FA = static_cast<RooDataSet*>(temp_dataset->reduce(FA_cuts));
-    decaytype_->setLabel("FA");
-    dataset_FA->addColumn(*decaytype_);
+//     RooDataSet* dataset_FA = static_cast<RooDataSet*>(temp_dataset->reduce(FA_cuts));
+//     decaytype_->setLabel("FA");
+//     dataset_FA->addColumn(*decaytype_);
 
-    RooDataSet* dataset_SB = static_cast<RooDataSet*>(temp_dataset->reduce(SB_cuts));
-    decaytype_->setLabel("SB");
-    dataset_SB->addColumn(*decaytype_);
+//     RooDataSet* dataset_SB = static_cast<RooDataSet*>(temp_dataset->reduce(SB_cuts));
+//     decaytype_->setLabel("SB");
+//     dataset_SB->addColumn(*decaytype_);
 
-    RooDataSet* dataset_SA = static_cast<RooDataSet*>(temp_dataset->reduce(SA_cuts));
-    decaytype_->setLabel("SA");
-    dataset_SA->addColumn(*decaytype_);
+//     RooDataSet* dataset_SA = static_cast<RooDataSet*>(temp_dataset->reduce(SA_cuts));
+//     decaytype_->setLabel("SA");
+//     dataset_SA->addColumn(*decaytype_);
 
-    delete temp_dataset;
+//     delete temp_dataset;
 
-    dataset_ = static_cast<RooDataSet*>(dataset_FB->Clone());
-    delete dataset_FB;
-    dataset_->append(*dataset_FA);
-    delete dataset_FA;
-    dataset_->append(*dataset_SB);
-    delete dataset_SB;
-    dataset_->append(*dataset_SA);
-    delete dataset_SA;
+//     dataset_ = static_cast<RooDataSet*>(dataset_FB->Clone());
+//     delete dataset_FB;
+//     dataset_->append(*dataset_FA);
+//     delete dataset_FA;
+//     dataset_->append(*dataset_SB);
+//     delete dataset_SB;
+//     dataset_->append(*dataset_SA);
+//     delete dataset_SA;
 
-    Log::print(Log::info, "Num events passing all initial cuts: %i\n", dataset_->numEntries());
+//     Log::print(Log::info, "Num events passing all initial cuts: %i\n", dataset_->numEntries());
 
-    delete input_tree;
+//     delete input_tree;
 
-    vrzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vrzerr_formula_));
-    vrzerr_->setRange(0, 10000);
-    vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));
-    vtzerr_->setRange(0, 10000);
+//     vrzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vrzerr_formula_));
+//     vrzerr_->setRange(0, 10000);
+//     vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));
+//     vtzerr_->setRange(0, 10000);
 
-    conditional_vars_argset_.add(*vrzerr_);
-    conditional_vars_argset_.add(*vtzerr_);
-    conditional_vars_argset_.add(*decaytype_);
+//     conditional_vars_argset_.add(*vrzerr_);
+//     conditional_vars_argset_.add(*vtzerr_);
+//     conditional_vars_argset_.add(*decaytype_);
 
-    // Bind the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
-    const RooArgSet* vars = dataset_->get();
-    for (RooRealVar** var : dataset_vars_) {
-        *var = static_cast<RooRealVar*>(vars->find((*var)->GetName()));
-    }
+//     // Bind the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
+//     const RooArgSet* vars = dataset_->get();
+//     for (RooRealVar** var : dataset_vars_) {
+//         *var = static_cast<RooRealVar*>(vars->find((*var)->GetName()));
+//     }
 
-    dataset_->get(1)->Print("v");
-}
+//     dataset_->get(1)->Print("v");
+// }
 
 /**
  * Set the directory to which to ouput plots.
@@ -1996,11 +2017,11 @@ const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const 
     const double stepsize = (max - min) / steps;
 
     RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
-        dataset_->reduce("decaytype==decaytype::FB||decaytype==decaytype::SB"));
+        data_->reduce("decaytype==decaytype::FB||decaytype==decaytype::SB"));
     RooDataSet* dataset_B_bar = dynamic_cast<RooDataSet*>(
-        dataset_->reduce("decaytype==decaytype::FA||decaytype==decaytype::SA"));
+        data_->reduce("decaytype==decaytype::FA||decaytype==decaytype::SA"));
 
-    RooDataHist hist("hist", "hist", RooArgSet(*thetat_, *thetab_, *phit_), *dataset_);
+    RooDataHist hist("hist", "hist", RooArgSet(*thetat_, *thetab_, *phit_), *data_);
 
     RooAbsPdf* pdf_B = pdf.getPdf("FB");
     RooAbsPdf* pdf_B_bar = pdf.getPdf("FA");

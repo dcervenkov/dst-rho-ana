@@ -117,7 +117,7 @@ void SetPlotDir(const char* plot_dir) {
         boost::filesystem::create_directories(plot_dir);
     }
     gEnv->SetValue("Canvas.PrintDirectory", plot_dir);
-    Log::print(Log::info, "Plot directory: %s\n",
+    Log::print(Log::info, "Setting plot directory: %s\n",
                gEnv->GetValue("Canvas.PrintDirectory", "not found"));
 }
 
@@ -336,7 +336,7 @@ TString GetCommonCutsString() {
 
 /**
  * Save text to a file
- * 
+ *
  * @param filename Path to the file to be written
  * @param text Text to be written to the file
  */
@@ -344,6 +344,20 @@ void SaveTextToFile(const std::string filename, const std::string text) {
     std::ofstream file(filename);
     file << text;
     file.close();
+}
+
+/**
+ * Transform RooArgSet of RooRealVars into a std::vector
+ */
+std::vector<RooRealVar*> ToVector(const RooArgSet& set) {
+    std::vector<RooRealVar*> vector;
+    TIterator* iterator = set.createIterator();
+    RooRealVar* arg;
+    while ((arg = dynamic_cast<RooRealVar*>(iterator->Next()))) {
+        vector.push_back(arg);
+    }
+    delete iterator;
+    return vector;
 }
 
 void LogTextFromFile(TFile* file, const char* field_name, const char* filename) {

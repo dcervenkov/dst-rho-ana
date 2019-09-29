@@ -74,7 +74,7 @@ class FitterCPV {
 
     bool ResultExists() const { return result_ ? true : false; };
 
-    void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
+    // void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);
     void SetSCFKDE(const char* file);
     void SetSCFHisto(const char* file);
@@ -84,6 +84,7 @@ class FitterCPV {
     const std::string CreateLatexPullTableString(const bool asymmetric = false);
     static nlohmann::json ReadJSONConfig(const char* filename);
     std::string ApplyJSONConfig(const nlohmann::json& config);
+    void CreatePlots(const nlohmann::json config) const;
 
     const void LogResults();
 
@@ -205,7 +206,10 @@ class FitterCPV {
                                       RooProdPdf*& pdf_SA, const std::string channel_name,
                                       const nlohmann::json channel_config, const bool scf);
 
-    void PlotFit(RooSimultaneous* pdf, const bool scf, const bool bkg);
+    void PlotChannel(const nlohmann::json common_config, const nlohmann::json channel_config,
+                     const std::string channel_name) const;
+    RooAbsPdf* CreateHistPdf(const nlohmann::json common_config, const std::string channel_name,
+                             std::vector<RooAbsPdf*>& components) const;
     bool IsTimeDependent() const;
 
     RooDataHist* scf_angular_kde_hist_ = nullptr;
@@ -220,7 +224,6 @@ class FitterCPV {
 
     std::array<double, 16> par_input_;
 
-    RooDataSet* dataset_ = nullptr;
     RooFitResult* result_ = nullptr;
 
     TFile* output_file_ = nullptr;

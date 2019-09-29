@@ -32,6 +32,7 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
                 const RooAbsData& pdf, const char* format = ".pdf", const bool residual = false);
 TString GetCommonCutsString();
 void SaveTextToFile(const std::string filename, const std::string text);
+std::vector<RooRealVar*> ToVector(const RooArgSet& set);
 
 void LogEnvironmentMetadata(TFile* file);
 void LogCLIArguments(TFile* file, int argc, char* argv[]);

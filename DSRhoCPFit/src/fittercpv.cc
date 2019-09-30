@@ -2287,6 +2287,9 @@ RooSimultaneous* FitterCPV::CreateChannelPDF(const std::string channel_name,
             ? CreateAngularPDF(channel_name, scf, bkg, channel_config)
             : CreateTimeDependentPDF(channel_name, common_config, channel_config);
 
+    if (common_config.contains("modelParameters")) {
+        ChangeModelParameters(channel_pdf, channel_name, common_config["modelParameters"]);
+    }
     if (channel_config.contains("modelParameters")) {
         ChangeModelParameters(channel_pdf, channel_name, channel_config["modelParameters"]);
     }

@@ -133,9 +133,10 @@ def main():
             os.mkdir(os.path.join("..", dir))
         for dir in dirs_to_delete:
             shutil.rmtree(os.path.join("..", dir))
+            os.mkdir(os.path.join("..", dir))
 
         subprocess.run(
-            "parallel --nice 10 -j " + options["cpus"] + " < " + TEMP_FILE, cwd="..", shell=True)
+            "nice parallel -j " + options["cpus"] + " < " + TEMP_FILE, cwd="..", shell=True)
         os.remove(TEMP_FILE)
     else:
         print("Aborting")

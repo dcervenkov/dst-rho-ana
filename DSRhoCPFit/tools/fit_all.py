@@ -135,7 +135,7 @@ def main():
             shutil.rmtree(os.path.join("..", dir))
 
         subprocess.run(
-            "parallel -j " + options["cpus"] + " < " + TEMP_FILE, cwd="..", shell=True)
+            "parallel --nice -j " + options["cpus"] + " < " + TEMP_FILE, cwd="..", shell=True)
         os.remove(TEMP_FILE)
     else:
         print("Aborting")

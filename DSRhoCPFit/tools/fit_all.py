@@ -96,7 +96,6 @@ def create_fit_cmds(options):
 
 def main():
     options = decode_arguments()
-    print(options)
     if not are_valid(options):
         sys.exit(1)
 

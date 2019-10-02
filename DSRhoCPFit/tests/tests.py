@@ -7,6 +7,7 @@ pass and 1 when any of them fail.
 import os
 import subprocess
 import sys
+import time
 
 # Define tests to be run
 test_configs = {
@@ -103,21 +104,30 @@ test_configs = {
                          "--MC=1"],
 }
 
-green_code = "\033[32m"
 red_code = "\033[31m"
+green_code = "\033[32m"
+yellow_code = "\033[33m"
 reset_code = "\033[0m"
 
 def run_test(name, config):
     """Run a single test defined by its name and config."""
     print("Running " + name)
     config.insert(0, "./DSRhoCPFit")
+    start = time.time()
     return_code = subprocess.call(config, cwd="../.")
+    elapsed = (time.time() - start)
 
     reference_result = ""
     current_result = ""
 
-    with open("references/" + name + ".reference", "r") as f:
-        reference_result = f.readline()
+    if (os.path.exists("references/" + name + ".reference")):
+        with open("references/" + name + ".reference", "r") as f:
+            reference_result = f.readline()
+    else:
+        print(yellow_code + "The result does NOT have a reference result!" + reset_code)
+        os.rename("current_result", name + ".result")
+        os.rename("current_result.root", name + ".result.root")
+        return 2, name, elapsed
 
     with open("current_result", "r") as f:
         current_result = f.readline()
@@ -131,32 +141,36 @@ def run_test(name, config):
             os.remove(name + ".result")
         if (os.path.exists(name + ".result.root")):
             os.remove(name + ".result.root")
-        return 0, name
+        return 0, name, elapsed
     else:
         print(red_code + "The result does NOT match the reference result!" + reset_code)
         os.rename("current_result", name + ".result")
         os.rename("current_result.root", name + ".result.root")
-        return 1, name
+        return 1, name, elapsed
 
 
 def print_results_table(results):
     """Print a summary of the results in a table."""
     print("\nSummary")
-    print("-" * 27)
+    print("-" * 34)
 
+    num_failed = 0
     for result in test_results:
         result_str = ""
-        if result[0]:
-            result_str = red_code + "FAIL" + reset_code
-        else:
+        if result[0] == 0:
             result_str = green_code + "pass" + reset_code
+        elif result[0] == 2:
+            result_str = yellow_code + "N/A" + reset_code
+            num_failed += 1
+        else:
+            result_str = red_code + "FAIL" + reset_code
+            num_failed += 1
 
-        print("{:<20} | {}".format(result[1], result_str))
+        # The padding is 13 because python counts the ANSI escape sequences as chars
+        print("{:<20} | {:>13} | {:>4.1f}".format(result[1], result_str, result[2]))
 
-    num_failed = sum(x[0] for x in test_results)
-
-    print("-" * 27)
-    print("{:<20} | {:>4}".format("Total Failed", num_failed))
+    print("-" * 34)
+    print("{:<20} | {:>4} | {:>4.1f}".format("Total Failed & Time", num_failed, sum([x[2] for x in results])))
 
 
 test_results = []
@@ -168,6 +182,7 @@ for test_name, test_config in test_configs.items():
 
     test_results.append(run_test(test_name, test_config))
 
+test_results.sort()
 print_results_table(test_results)
 
 

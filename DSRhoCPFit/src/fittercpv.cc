@@ -2248,14 +2248,14 @@ int FitterCPV::CloseToEdge(const std::vector<Double_t> vals, const double margin
  */
 RooSimultaneous* FitterCPV::CreatePDF(const nlohmann::json config) {
     std::map<std::string, RooAbsPdf*> pdf_map;
-    RooCategory* channel = new RooCategory("channel", "channel");
+    RooCategory* channel_cat = new RooCategory("channel_cat", "channel_cat");
 
     for (auto& chan : config["channels"].items()) {
         std::string channel_name = chan.key();
         auto channel_config = chan.value();
         Log::LogLine(Log::debug) << "Creating PDF for channel " << channel_name;
 
-        channel->defineType(channel_name.c_str());
+        channel_cat->defineType(channel_name.c_str());
         auto common_config = config;
         common_config.erase("channels");
 
@@ -2264,7 +2264,7 @@ RooSimultaneous* FitterCPV::CreatePDF(const nlohmann::json config) {
         pdf_map[channel_name] = channel_pdf;
     }
 
-    RooSimultaneous* pdf = new RooSimultaneous("pdf", "pdf", pdf_map, *channel);
+    RooSimultaneous* pdf = new RooSimultaneous("pdf", "pdf", pdf_map, *channel_cat);
     return pdf;
 }
 

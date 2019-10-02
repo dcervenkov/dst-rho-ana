@@ -2360,37 +2360,33 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
     int num_files = 0;
     if (common_config["MC"].get<bool>() == false) {
         for (auto& file_name : channel_config["inputFiles"]["data"].items()) {
-            chain->Add(file_name.value().get<std::string>().c_str());
+            if (!chain->Add(file_name.value().get<std::string>().c_str(), 0)) {
+                Log::LogLine(Log::error) << "File " << file_name.value() << " not found!";
+                exit(9);
+            }
             num_files++;
         }
     } else {
         for (auto& file_name : channel_config["inputFiles"]["signalMC"].items()) {
-            chain->Add(file_name.value().get<std::string>().c_str());
+            if (!chain->Add(file_name.value().get<std::string>().c_str(), 0)) {
+                Log::LogLine(Log::error) << "File " << file_name.value() << " not found!";
+                exit(9);
+            }
             num_files++;
         }
 
         if (common_config["components"] == "all") {
             for (auto& file_name : channel_config["inputFiles"]["genericMC"].items()) {
-                chain->Add(file_name.value().get<std::string>().c_str());
+                if (!chain->Add(file_name.value().get<std::string>().c_str(), 0)) {
+                    Log::LogLine(Log::error) << "File " << file_name.value() << " not found!";
+                    exit(9);
+                }
                 num_files++;
             }
         }
     }
 
-    Log::print(Log::info, "Reading %i input files...\n", num_files);
-
-    // TTree* input_tree;
-    // if (num_events) {
-    //     if (file_names.size() > 1) {
-    //         Log::print(Log::warning,
-    //                    "You limited the number of events to read, while reading multiple "
-    //                    "files. Since this limiting works sequentially not randomly, you "
-    //                    "will probably not get the result you want!\n");
-    //     }
-    //     input_tree = input_chain->CloneTree(num_events);
-    // } else {
-    //     input_tree = input_chain->CloneTree();
-    // }
+    Log::print(Log::info, "Reading %i input files for channel %s\n", num_files, channel_name.c_str());
 
     TTree* tree = nullptr;
     if (common_config.contains("events")) {

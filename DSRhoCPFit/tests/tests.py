@@ -65,6 +65,42 @@ test_configs = {
                             "--output=tests/current_result",
                             "--exclude-channels=Kpi",
                             "--MC=1"],
+
+    "2chan_ti_cr_fit": ["--config=tests/config_test.json",
+                        "--components=CR",
+                        "--time-independent",
+                        "--output=tests/current_result",
+                        "--MC=1"],
+
+    "2chan_ti_crscf_fit": ["--config=tests/config_test.json",
+                           "--components=CRSCF",
+                           "--time-independent",
+                           "--output=tests/current_result",
+                           "--MC=1"],
+
+    "2chan_ti_all_fit": ["--config=tests/config_test.json",
+                         "--components=all",
+                         "--time-independent",
+                         "--output=tests/current_result",
+                         "--MC=1"],
+
+    "2chan_td_cr_fit": ["--config=tests/config_test.json",
+                        "--components=CR",
+                        "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
+                        "--output=tests/current_result",
+                        "--MC=1"],
+
+    "2chan_td_crscf_fit": ["--config=tests/config_test.json",
+                           "--components=CRSCF",
+                           "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
+                           "--output=tests/current_result",
+                           "--MC=1"],
+
+    "2chan_td_all_fit": ["--config=tests/config_test.json",
+                         "--components=all",
+                         "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
+                         "--output=tests/current_result",
+                         "--MC=1"],
 }
 
 green_code = "\033[32m"

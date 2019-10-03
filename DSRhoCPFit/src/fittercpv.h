@@ -40,9 +40,10 @@ class FitterCPV {
 
     void PlotVar(RooRealVar& var, const RooAbsData&) const;
     void PlotVar(RooRealVar& var, const RooAbsPdf&) const;
-    void PlotWithPull(const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
+    void PlotWithPull(const std::string channel_name, const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
                       const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
-                      const int num_CPUs = 1, const char* title = "") const;
+                      const int num_CPUs = 1,
+                      const char* title = "") const;
 
     void Fit(const nlohmann::json config);
 
@@ -237,6 +238,7 @@ class FitterCPV {
 
     RooSimultaneous* pdf_;
     RooDataSet* data_;
+    RooCategory* channel_cat_;
 };
 
 #endif /* FITTERCPV_H_ */

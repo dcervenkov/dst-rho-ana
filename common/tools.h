@@ -25,11 +25,13 @@ void SetPlotDir(const char* plot_dir);
 TPaveText* CreateStatBox(double chi2, RooArgList* results = nullptr, bool position_top = true,
                          bool position_left = true);
 void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data1,
-                const RooAbsData& data2, const char* format = ".pdf");
+                const RooAbsData& data2, const std::string prefix = "",
+                const char* format = ".pdf");
 void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data,
-                const char* format = ".pdf", const double max = 0);
+                const std::string prefix = "", const char* format = ".pdf", const double max = 0);
 void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data,
-                const RooAbsData& pdf, const char* format = ".pdf", const bool residual = false);
+                const RooAbsData& pdf, const std::string prefix = "", const char* format = ".pdf",
+                const bool residual = false);
 TString GetCommonCutsString();
 void SaveTextToFile(const std::string filename, const std::string text);
 std::vector<RooRealVar*> ToVector(const RooArgSet& set);

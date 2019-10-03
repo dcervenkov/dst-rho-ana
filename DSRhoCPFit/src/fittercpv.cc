@@ -187,6 +187,8 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
     decaytype_->defineType("SB", 3);
     decaytype_->defineType("SA", 4);
 
+    channel_cat_ = new RooCategory("channel_cat", "channel_cat");
+
     // Make a copy of the input parameters for saving results, etc.
     par_input_ = par_input;
 
@@ -688,10 +690,13 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     std::vector<RooAbsPdf*> components;
     RooAbsPdf* all_histpdf = CreateHistPdf(common_config, channel_name, components);
 
+    std::string channel_cut = "channel_cat==channel_cat::" + channel_name;
+    RooDataSet* channel_data = dynamic_cast<RooDataSet*>(data_->reduce(channel_cut.c_str()));
+
     RooArgSet* observables = pdf_->getObservables(data_);
     for (auto observable : tools::ToVector(*observables)) {
-        // TODO Reduce data to the particular channel
-        PlotWithPull(*observable, *data_, *all_histpdf, components, common_config["numCPUs"]);
+        PlotWithPull(channel_name, *observable, *channel_data, *all_histpdf, components,
+                     common_config["numCPUs"]);
     }
 
     thetat_->setBins(40);
@@ -699,9 +704,9 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     phit_->setBins(40);
 
     RooDataHist hist("hist", "hist", *observables, *data_);
-    tools::PlotVars2D(*thetat_, *thetab_, hist);
-    tools::PlotVars2D(*thetat_, *phit_, hist);
-    tools::PlotVars2D(*thetab_, *phit_, hist);
+    tools::PlotVars2D(*thetat_, *thetab_, hist, channel_name);
+    tools::PlotVars2D(*thetat_, *phit_, hist, channel_name);
+    tools::PlotVars2D(*thetab_, *phit_, hist, channel_name);
 
     // We change the binning for 2D plots, so we have to generate new binned
     // dataset, to avoid dealing with rebinning.
@@ -711,9 +716,9 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     // create a RooHistPdf from it and that is normalized to the data when
     // plotted.
     RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
-        data_->reduce("decaytype==decaytype::FB||decaytype==decaytype::SB"));
+        channel_data->reduce("decaytype==decaytype::FB||decaytype==decaytype::SB"));
     RooDataSet* dataset_A = dynamic_cast<RooDataSet*>(
-        data_->reduce("decaytype==decaytype::FA||decaytype==decaytype::SA"));
+        channel_data->reduce("decaytype==decaytype::FA||decaytype==decaytype::SA"));
 
     TString chan_name = channel_name;
     RooAddPdf* pdf_FB = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FB}"));
@@ -728,9 +733,9 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     // if (output_file_) {
     //     output_file_->cd();
     // }
-    tools::PlotPull2D(*thetat_, *thetab_, hist, *all_hist);
-    tools::PlotPull2D(*thetat_, *phit_, hist, *all_hist);
-    tools::PlotPull2D(*thetab_, *phit_, hist, *all_hist);
+    tools::PlotPull2D(*thetat_, *thetab_, hist, *all_hist, channel_name);
+    tools::PlotPull2D(*thetat_, *phit_, hist, *all_hist, channel_name);
+    tools::PlotPull2D(*thetab_, *phit_, hist, *all_hist, channel_name);
     // const double chi2 = Calculate3DChi2(hist, *all_hist);
     // std::cout << "Chi2 = " << chi2 << std::endl;
 
@@ -1168,16 +1173,20 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
  * Make a plot of a variable with both data points and pdf projection and display a pull plot
  * beneath it. Then save to a file.
  *
+ * @param channel_name Name of the channel that is being plotted
  * @param var Variable to be plotted
  * @param data Dataset against which to plot
  * @param pdf PDF to use for plotting and pull calculation
  * @param components [optional] Component PDFs to plot alongside the full PDF
  * @param title [optional] Title for the y-axis
  */
-void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, const RooAbsPdf& pdf,
+void FitterCPV::PlotWithPull(const std::string channel_name, const RooRealVar& var,
+                             const RooAbsData& data, const RooAbsPdf& pdf,
                              const std::vector<RooAbsPdf*> components, const int num_CPUs,
                              const char* title) const {
-    TString name = pdf.GetName();
+    TString name = channel_name;
+    name += "_";
+    name += pdf.GetName();
     name += "_";
     name += var.GetName();
     TCanvas canvas(name, name, 500, 500);
@@ -1209,11 +1218,13 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
     int i = 0;
     for (auto component : components) {
         pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
+                   RooFit::Slice(*channel_cat_, channel_name.c_str()),
                    RooFit::NumCPU(num_CPUs), RooFit::LineColor(colors[i++]),
                    RooFit::Components(*component), RooFit::Normalization(norm));
     }
 
     pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
+               RooFit::Slice(*channel_cat_, channel_name.c_str()),
                RooFit::NumCPU(num_CPUs), RooFit::Normalization(norm));
 
     plot->GetXaxis()->SetTitle("");
@@ -2249,14 +2260,11 @@ int FitterCPV::CloseToEdge(const std::vector<Double_t> vals, const double margin
  */
 RooSimultaneous* FitterCPV::CreatePDF(const nlohmann::json config) {
     std::map<std::string, RooAbsPdf*> pdf_map;
-    RooCategory* channel_cat = new RooCategory("channel_cat", "channel_cat");
-
     for (auto& chan : config["channels"].items()) {
         std::string channel_name = chan.key();
         auto channel_config = chan.value();
         Log::LogLine(Log::debug) << "Creating PDF for channel " << channel_name;
 
-        channel_cat->defineType(channel_name.c_str());
         auto common_config = config;
         common_config.erase("channels");
 
@@ -2265,7 +2273,7 @@ RooSimultaneous* FitterCPV::CreatePDF(const nlohmann::json config) {
         pdf_map[channel_name] = channel_pdf;
     }
 
-    RooSimultaneous* pdf = new RooSimultaneous("pdf", "pdf", pdf_map, *channel_cat);
+    RooSimultaneous* pdf = new RooSimultaneous("pdf", "pdf", pdf_map, *channel_cat_);
     return pdf;
 }
 
@@ -2304,9 +2312,8 @@ RooSimultaneous* FitterCPV::CreateChannelPDF(const std::string channel_name,
 RooDataSet* FitterCPV::GetData(const nlohmann::json config) {
     std::vector<RooDataSet*> datasets;
 
-    RooCategory* channel_cat = new RooCategory("channel_cat", "channel_cat");
     for (auto& chan : config["channels"].items()) {
-        channel_cat->defineType(chan.key().c_str());
+        channel_cat_->defineType(chan.key().c_str());
     }
 
     for (auto& chan : config["channels"].items()) {
@@ -2318,8 +2325,8 @@ RooDataSet* FitterCPV::GetData(const nlohmann::json config) {
         common_config.erase("channels");
 
         RooDataSet* channel_dataset = GetChannelData(channel_name, channel_config, common_config);
-        channel_cat->setLabel(channel_name.c_str());
-        channel_dataset->addColumn(*channel_cat);
+        channel_cat_->setLabel(channel_name.c_str());
+        channel_dataset->addColumn(*channel_cat_);
         datasets.push_back(channel_dataset);
     }
 

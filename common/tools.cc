@@ -179,16 +179,23 @@ TPaveText* CreateStatBox(double chi2, RooArgList* results, bool position_top, bo
  * @param var1 First variable.
  * @param var2 Second variable.
  * @param data Data to be plotted.
+ * @param prefix [optional] Prefix to be added to filenames.
  * @param format [optional] Format in which to save the images.
  * @param max [optional] Maximum of the range
  */
-void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data,
+void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data, const std::string prefix,
                 const char* format, const double max) {
-    TCanvas canvas(
-        TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
-        TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" + TString(var2.GetName()),
-        500, 500);
+    TString name;
+    if (prefix.length()) {
+        name = prefix + "_";
+    }
+    name += data.GetName();
+    name += "_";
+    name += var1.GetName();
+    name += "_";
+    name += var2.GetName();
 
+    TCanvas canvas(name, name, 500, 500);
     TH2D* histo = static_cast<TH2D*>(data.createHistogram("histo", var1, RooFit::YVar(var2)));
 
     canvas.SetRightMargin(0.14);
@@ -215,13 +222,21 @@ void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
  * @param residual [optional] Plot a residual instead of a pull
  */
 void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data,
-                const RooAbsData& pdf, const char* format, const bool residual) {
-    TString type = residual ? "_residual" : "_pull";
-    TCanvas canvas(TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" +
-                       TString(var2.GetName()) + type,
-                   TString(data.GetName()) + "_" + TString(var1.GetName()) + "_" +
-                       TString(var2.GetName()) + type,
-                   500, 500);
+                const RooAbsData& pdf, const std::string prefix, const char* format, const bool residual) {
+    TString type = residual ? "residual" : "pull";
+    TString name;
+    if (prefix.length()) {
+        name = prefix + "_";
+    }
+    name += data.GetName();
+    name += "_";
+    name += var1.GetName();
+    name += "_";
+    name += var2.GetName();
+    name += "_";
+    name += type;
+
+    TCanvas canvas(name, name, 500, 500);
     gStyle->SetPalette(kLightTemperature);
 
     TH2D* histo1 = static_cast<TH2D*>(data.createHistogram("histo1", var1, RooFit::YVar(var2)));
@@ -287,15 +302,15 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
  * @param format [optional] Format in which to save the images.
  */
 void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data1,
-                const RooAbsData& data2, const char* format) {
+                const RooAbsData& data2, const std::string prefix, const char* format) {
     double max = 0;
     TH2D* histo1 = static_cast<TH2D*>(data1.createHistogram("histo1", var1, RooFit::YVar(var2)));
     TH2D* histo2 = static_cast<TH2D*>(data2.createHistogram("histo2", var1, RooFit::YVar(var2)));
     max = std::max(histo1->GetMaximum(), histo2->GetMaximum());
     delete histo1;
     delete histo2;
-    PlotVars2D(var1, var2, data1, format, max);
-    PlotVars2D(var1, var2, data2, format, max);
+    PlotVars2D(var1, var2, data1, prefix, format, max);
+    PlotVars2D(var1, var2, data2, prefix, format, max);
 }
 
 /**
@@ -357,8 +372,8 @@ std::vector<RooRealVar*> ToVector(const RooArgSet& set) {
     TIterator* iterator = set.createIterator();
     RooRealVar* arg;
     TObject* obj;
-    while (obj = iterator->Next()) {
-        if (arg = dynamic_cast<RooRealVar*>(obj)) {
+    while ((obj = iterator->Next())) {
+        if ((arg = dynamic_cast<RooRealVar*>(obj))) {
             vector.push_back(arg);
         }
     }

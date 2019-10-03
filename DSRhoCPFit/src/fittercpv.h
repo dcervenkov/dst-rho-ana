@@ -42,7 +42,7 @@ class FitterCPV {
     void PlotVar(RooRealVar& var, const RooAbsPdf&) const;
     void PlotWithPull(const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
                       const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
-                      const char* title = "") const;
+                      const int num_CPUs = 1, const char* title = "") const;
 
     void Fit(const nlohmann::json config);
 

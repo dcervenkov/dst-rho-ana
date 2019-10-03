@@ -653,6 +653,9 @@ void FitterCPV::Fit(const nlohmann::json config) {
     }
 }
 
+/**
+ * Create all relevant plots
+ */
 void FitterCPV::CreatePlots(const nlohmann::json config) const {
     for (auto& chan : config["channels"].items()) {
         const std::string channel_name = chan.key().c_str();
@@ -682,15 +685,13 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
                             const std::string channel_name) const {
     Log::LogLine(Log::info) << "Creating plots for channel " << channel_name;
 
-    pdf_->getComponents()->Print();
-    pdf_->getVariables()->Print();
-
     std::vector<RooAbsPdf*> components;
     RooAbsPdf* all_histpdf = CreateHistPdf(common_config, channel_name, components);
 
     RooArgSet* observables = pdf_->getObservables(data_);
     for (auto observable : tools::ToVector(*observables)) {
-        PlotWithPull(*observable, *data_, *all_histpdf, components);
+        // TODO Reduce data to the particular channel
+        PlotWithPull(*observable, *data_, *all_histpdf, components, common_config["numCPUs"]);
     }
 
     thetat_->setBins(40);
@@ -1174,7 +1175,8 @@ void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
  * @param title [optional] Title for the y-axis
  */
 void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, const RooAbsPdf& pdf,
-                             const std::vector<RooAbsPdf*> components, const char* title) const {
+                             const std::vector<RooAbsPdf*> components, const int num_CPUs,
+                             const char* title) const {
     TString name = pdf.GetName();
     name += "_";
     name += var.GetName();
@@ -1194,11 +1196,10 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
 
     data.plotOn(plot);
 
-    int num_CPUs_ = 4;
     // Renormalization required for certain plots, when using multiple CPUs but
     // not with a single CPU; possible RooFit bug
     double norm = 1;
-    if (!name.Contains("hist") && num_CPUs_ > 1) {
+    if (!name.Contains("hist") && num_CPUs > 1) {
         norm = 1.0 / data.numEntries();
     }
 
@@ -1208,12 +1209,12 @@ void FitterCPV::PlotWithPull(const RooRealVar& var, const RooAbsData& data, cons
     int i = 0;
     for (auto component : components) {
         pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
-                   RooFit::NumCPU(num_CPUs_), RooFit::LineColor(colors[i++]),
+                   RooFit::NumCPU(num_CPUs), RooFit::LineColor(colors[i++]),
                    RooFit::Components(*component), RooFit::Normalization(norm));
     }
 
     pdf.plotOn(plot, RooFit::ProjWData(conditional_vars_argset_, data, kFALSE),
-               RooFit::NumCPU(num_CPUs_), RooFit::Normalization(norm));
+               RooFit::NumCPU(num_CPUs), RooFit::Normalization(norm));
 
     plot->GetXaxis()->SetTitle("");
     plot->GetXaxis()->SetLabelSize(0);

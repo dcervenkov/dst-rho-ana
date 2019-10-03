@@ -348,13 +348,19 @@ void SaveTextToFile(const std::string filename, const std::string text) {
 
 /**
  * Transform RooArgSet of RooRealVars into a std::vector
+ * 
+ * Objects other than RooRealVars (e.g., RooCategory are not added to the final
+ * vector).
  */
 std::vector<RooRealVar*> ToVector(const RooArgSet& set) {
     std::vector<RooRealVar*> vector;
     TIterator* iterator = set.createIterator();
     RooRealVar* arg;
-    while ((arg = dynamic_cast<RooRealVar*>(iterator->Next()))) {
-        vector.push_back(arg);
+    TObject* obj;
+    while (obj = iterator->Next()) {
+        if (arg = dynamic_cast<RooRealVar*>(obj)) {
+            vector.push_back(arg);
+        }
     }
     delete iterator;
     return vector;

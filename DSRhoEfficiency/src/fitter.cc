@@ -373,8 +373,8 @@ void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooD
 }
 
 void Fitter::PlotVars2D(const RooRealVar& var1, const RooRealVar& var2) const {
-    tools::PlotVars2D(var1, var2, *evtgen_dataset_, constants::format);
-    tools::PlotVars2D(var1, var2, *gsim_dataset_, constants::format);
+    tools::PlotVars2D(var1, var2, *evtgen_dataset_, "", constants::format);
+    tools::PlotVars2D(var1, var2, *gsim_dataset_, "", constants::format);
 }
 
 void Fitter::PlotEfficiency(RooRealVar& var, bool plot_model, bool legend_position_top,
@@ -788,8 +788,8 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, constants::format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, constants::format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, "", constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, "", constants::format, true);
         }
     }
 
@@ -823,8 +823,8 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, constants::format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, constants::format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, "", constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, "", constants::format, true);
         }
     }
 }
@@ -865,10 +865,10 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo, constants::format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo, constants::format, true);
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo, constants::format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo, constants::format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo, "", constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_gsim_kde_histo, roo_gsim_histo, "", constants::format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo, "", constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_evtgen_kde_histo, roo_evtgen_histo, "", constants::format, true);
         }
     }
 
@@ -900,8 +900,8 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D, constants::format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D, constants::format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D, "", constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_kde_histo_2D, "", constants::format, true);
         }
     }
 }
@@ -938,8 +938,8 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, constants::format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, constants::format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, "", constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_simulated_histo, roo_gsim_histo, "", constants::format, true);
         }
     }
 
@@ -973,8 +973,8 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
 
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, constants::format);
-            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, constants::format, true);
+            tools::PlotVars2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, "", constants::format);
+            tools::PlotPull2D(*vars_[i], *vars_[j], roo_eff_histo_2D, roo_eff_pdf_histo_2D, "", constants::format, true);
         }
     }
 

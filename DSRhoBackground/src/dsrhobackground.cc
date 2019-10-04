@@ -149,13 +149,13 @@ int main(int argc, char* argv[]) {
                            RooArgSet(fitter.thetat_, fitter.thetab_, fitter.phit_),
                            *fitter.dataset_);
 
-            tools::PlotVars2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, constants::format);
-            tools::PlotVars2D(fitter.thetat_, fitter.phit_, data_hist, *pdf_hist, constants::format);
-            tools::PlotVars2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, constants::format);
+            tools::PlotVars2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, "", constants::format);
+            tools::PlotVars2D(fitter.thetat_, fitter.phit_, data_hist, *pdf_hist, "", constants::format);
+            tools::PlotVars2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, "", constants::format);
 
-            tools::PlotPull2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, constants::format, true);
-            tools::PlotPull2D(fitter.thetat_, fitter.phit_, data_hist, *pdf_hist, constants::format, true);
-            tools::PlotPull2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, constants::format, true);
+            tools::PlotPull2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, "", constants::format, true);
+            tools::PlotPull2D(fitter.thetat_, fitter.phit_, data_hist, *pdf_hist, "", constants::format, true);
+            tools::PlotPull2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, "", constants::format, true);
         }
 
         fitter.PrintResultsJSON();

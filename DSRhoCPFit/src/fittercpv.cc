@@ -801,7 +801,7 @@ RooAbsPdf* FitterCPV::CreateHistPdf(const nlohmann::json common_config,
 
     RooHistPdf* scf_histpdf;
     if (scf) {
-        const int scf_pdf_FB_index = pdf_FB->pdfList().index(chan_name + "_scf_hist_pdf_fast");
+        const int scf_pdf_FB_index = pdf_FB->pdfList().index(chan_name + "_scf_pdf");
         scf_pdf = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().at(scf_pdf_FB_index));
         RooDataHist* scf_hist =
             scf_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
@@ -2089,7 +2089,7 @@ const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const 
 /**
  * Create a functional model of the background angular distribution.
  */
-RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix) {
+RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix) const {
     TString pfx = prefix;
 
     // Background phit model
@@ -2231,8 +2231,8 @@ RooAbsPdf* FitterCPV::GetHistoSCF(const std::string filename) const {
     // We create a RooHistPdfFast (our version of RooHistPdf that implements
     // caching of its "analytical integral") from the original RooHistPdf to
     // avoid the huge performance hit due to a RooFit bug.
-    return new RooHistPdfFast("scf_hist_pdf_fast", "scf_hist_pdf_fast",
-                              RooArgSet(*thetat_, *thetab_, *phit_), temp_pdf->dataHist());
+    return new RooHistPdfFast("scf_pdf", "scf_pdf", RooArgSet(*thetat_, *thetab_, *phit_),
+                              temp_pdf->dataHist());
 }
 /**
  * Determine whether angular coordinates are close to (any) edge of the phasespace.
@@ -2492,8 +2492,9 @@ RooAbsPdf* FitterCPV::CreateSCFPDF(const std::string channel_name,
         histo_pdf->SetName(name.c_str());
         return histo_pdf;
     } else {
-        Log::LogLine(Log::error) << "No known scf specified";
-        exit(8);
+        std::string name = channel_name;
+        name += "_scf_";
+        return CreateAngularSCFBKGPDF(name);
     }
 }
 

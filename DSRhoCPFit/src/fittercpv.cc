@@ -485,7 +485,9 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
     // hybrid histo-KDE models. I'm reluctant to remove it as it might be useful
     // in the systematics estimation.
     std::vector<std::string> efficiency_files;
-    efficiency_files.push_back(channel_config["efficiencyFile"]);
+    if (efficiency_model > 4) {
+        efficiency_files.push_back(channel_config["efficiencyFile"]);
+    }
 
     AngularPDF* cr_pdf_B = new AngularPDF(
         (prefix + "cr_angular_pdf_B").Data(), (prefix + "cr_angular_pdf_B").Data(), false,

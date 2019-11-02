@@ -71,23 +71,23 @@ protected:
 	// Model 2
 	RooPolynomial model2_thetat_ {"thetat_model", "thetat_model", *thetat_, RooArgList() };
 
-	RooRealVar model2_thetab_p0_ { "model2_thetab_p0", "p_{0}", 0.089 };
-	RooRealVar model2_thetab_p1_ { "model2_thetab_p1", "p_{1}", -0.358 };
-	RooRealVar model2_thetab_p2_ { "model2_thetab_p2", "p_{2}", -0.024 };
+	RooRealVar model2_thetab_p0_ { "model2_thetab_p0", "p_{0}", 0.075 };
+	RooRealVar model2_thetab_p1_ { "model2_thetab_p1", "p_{1}", -0.369 };
+	RooRealVar model2_thetab_p2_ { "model2_thetab_p2", "p_{2}", -0.036 };
 	RooChebychev model2_thetab_ {"model2_thetab", "model2_thetab", *thetab_,
 			RooArgList(model2_thetab_p0_, model2_thetab_p1_, model2_thetab_p2_)};
 
-	RooRealVar model2_phit_p1_ { "model2_phit_p1", "p_{1}", 0.0052400};
-	RooRealVar model2_phit_p2_ { "model2_phit_p2", "p_{2}", 0.0954615};
-	RooRealVar model2_phit_gaus1_mean_ { "model2_phit_gaus1_mean", "#mu_{1}", -1.50063 };
-	RooRealVar model2_phit_gaus1_sigma_ { "model2_phit_gaus1_sigma", "#sigma_{1}", 0.45245 };
-	RooRealVar model2_phit_gaus2_mean_ { "model2_phit_gaus2_mean", "#mu_{2}", 1.84009 };
-	RooRealVar model2_phit_gaus2_sigma_ { "model2_phit_gaus2_sigma", "#sigma_{2}", 0.38441 };
+	RooRealVar model2_phit_p1_ { "model2_phit_p1", "p_{1}", 0.008};
+	RooRealVar model2_phit_p2_ { "model2_phit_p2", "p_{2}", 0.093};
+	RooRealVar model2_phit_gaus1_mean_ { "model2_phit_gaus1_mean", "#mu_{1}", -1.488 };
+	RooRealVar model2_phit_gaus1_sigma_ { "model2_phit_gaus1_sigma", "#sigma_{1}", 0.475 };
+	RooRealVar model2_phit_gaus2_mean_ { "model2_phit_gaus2_mean", "#mu_{2}", 1.841 };
+	RooRealVar model2_phit_gaus2_sigma_ { "model2_phit_gaus2_sigma", "#sigma_{2}", 0.390 };
 	RooChebychev model2_phit_cheb_ { "model2_phit_cheb", "model2_phit_cheb", *phit_, RooArgList(model2_phit_p1_, model2_phit_p2_) };
 	RooGaussian model2_phit_gaus1_ { "model2_phit_gaus1", "model2_phit_gaus1", *phit_, model2_phit_gaus1_mean_, model2_phit_gaus1_sigma_ };
 	RooGaussian model2_phit_gaus2_ { "model2_phit_gaus2", "model2_phit_gaus2", *phit_, model2_phit_gaus2_mean_, model2_phit_gaus2_sigma_ };
-	RooRealVar model2_f_phit_gaus1_ { "model2_f_phit_gaus1", "f_{G_{1}}", 0.04134 };
-	RooRealVar model2_f_phit_gaus2_ { "model2_f_phit_gaus2", "f_{G_{2}}", 0.03965 };
+	RooRealVar model2_f_phit_gaus1_ { "model2_f_phit_gaus1", "f_{G_{1}}", 0.042 };
+	RooRealVar model2_f_phit_gaus2_ { "model2_f_phit_gaus2", "f_{G_{2}}", 0.041 };
 	RooAddPdf model2_phit_ { "model2_phit", "model2_phit", RooArgList(model2_phit_gaus1_, model2_phit_gaus2_, model2_phit_cheb_),
 		RooArgList(model2_f_phit_gaus1_, model2_f_phit_gaus2_) };
 
@@ -111,7 +111,7 @@ protected:
 	double GetModel3Efficiency() const { return model3_thetat_.getVal() * model3_thetab_.getVal() * model3_phit_.getVal(); }
 
     RooRealVar model4_thetat_p1_{"model4_thetat_p1", "p_{1}", 0};
-    RooRealVar model4_thetat_p2_{"model4_thetat_p2", "p_{2}", 0.10726};
+    RooRealVar model4_thetat_p2_{"model4_thetat_p2", "p_{2}", 0.084};
     RooFormulaVar thetat_plus_pi2{"thetat_plus_pi2", "thetat + pi/2", "thetat - 1.571", RooArgSet(*thetat_)};
     RooPolynomial model4_thetat_{"model4_thetat", "model4_thetat", thetat_plus_pi2, RooArgList{model4_thetat_p1_, model4_thetat_p2_}};
 

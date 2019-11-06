@@ -56,11 +56,12 @@ public:
 
 	RooRealVar* benergy_;
 	RooRealVar* mbc_;
+	RooRealVar* de_;
+	RooRealVar* csbdtg_;
 
 	RooRealVar* shcosthb_;
 
 	RooRealVar* dt_;
-	RooFormulaVar* dt_formula_;
 
 	RooRealVar* vrzerr_;
 	RooFormulaVar* vrzerr_formula_;

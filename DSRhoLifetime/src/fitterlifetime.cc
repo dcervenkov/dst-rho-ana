@@ -41,6 +41,8 @@
 #include "tools.h"
 
 FitterLifetime::FitterLifetime() {
+	dt_ = new RooRealVar("dt", "#Deltat [ps]", constants::cuts::dt_low, constants::cuts::dt_high);
+
 	vrusable_ = new RooRealVar( "vrusable", "vrusable", 0, 1 );
 	vrvtxz_ = new RooRealVar( "vrvtxz", "vrvtxz", -10, 10 );
 	vrerr6_ = new RooRealVar( "vrerr6", "vrerr6", -1, 1 );
@@ -71,11 +73,12 @@ FitterLifetime::FitterLifetime() {
 
 	benergy_ = new RooRealVar( "benergy", "benergy", 0, 100 );
 	mbc_ = new RooRealVar( "mbc", "mbc", 5, 6 );
+	de_ = new RooRealVar("de", "de", -1, 1);
+	csbdtg_ = new RooRealVar("csbdtg", "csbdtg", -1, 1);
 
 	shcosthb_ = new RooRealVar( "shcosthb", "shcosthb", -1, 1 );
 
 	// TODO: beta*gamma should be computed not a constant and c should be taken from constants.cc
-	dt_formula_ = new RooFormulaVar( "dt", "#Deltat [ps]", "(vrvtxz-vtvtxz)/(0.425*0.0299792458)", RooArgSet(*vrvtxz_, *vtvtxz_));
 	vrzerr_formula_ = new RooFormulaVar( "vrzerr", "#sigma z_{rec} [cm]", "sqrt(vrerr6)", RooArgSet(*vrerr6_));
 	vtzerr_formula_ = new RooFormulaVar( "vtzerr", "#sigma z_{tag} [cm]", "sqrt(vterr6)", RooArgSet(*vterr6_));
 
@@ -92,6 +95,7 @@ FitterLifetime::FitterLifetime() {
 	// iterate through them for convenience
 	vars_.push_back(&expno_);
 	vars_.push_back(&expmc_);
+	vars_.push_back(&dt_);
 
 	vars_.push_back(&evmcflag_);
 	vars_.push_back(&brecflav_);
@@ -101,6 +105,8 @@ FitterLifetime::FitterLifetime() {
 
 	vars_.push_back(&benergy_);
 	vars_.push_back(&mbc_);
+	vars_.push_back(&de_);
+	vars_.push_back(&csbdtg_);
 
 	vars_.push_back(&shcosthb_);
 
@@ -134,7 +140,6 @@ FitterLifetime::FitterLifetime() {
 	make_plots_ = false;
 	perfect_tagging_ = false;
 
-	dt_ = nullptr;
 	vrzerr_ = nullptr;
 	vtzerr_ = nullptr;
 	vars = nullptr;
@@ -514,10 +519,8 @@ void FitterLifetime::ReadInFile(const char* file_path, const int& num_events) {
 	delete input_tree;
 	input_file->Close();
 
-	// TODO: Shouldn't dt_ be added to argset_?
 	vrzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vrzerr_formula_));
 	vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));
-	dt_ = static_cast<RooRealVar*>(dataset_->addColumn(*dt_formula_));
 
 	argset_.add(*vrzerr_);
 	argset_.add(*vtzerr_);
@@ -531,8 +534,7 @@ void FitterLifetime::ReadInFile(const char* file_path, const int& num_events) {
 }
 
 void FitterLifetime::SetOutputDir(const char* output_dir) {
-	gEnv->SetValue("Canvas.PrintDirectory", output_dir);
-	printf("print dir: %s\n",gEnv->GetValue("Canvas.PrintDirectory","not found"));
+	tools::SetPlotDir(output_dir);
 	if (make_plots_) {
 		output_file_ = new TFile(TString(output_dir) + "/plots.root", "RECREATE");
 	}

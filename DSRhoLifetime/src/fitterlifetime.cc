@@ -89,10 +89,10 @@ FitterLifetime::FitterLifetime() {
     dm_ = new RooRealVar("dm", "#Deltam", constants::dm - 1, constants::dm + 1);
 
     decaytype_ = new RooCategory("decaytype", "decaytype");
-    decaytype_->defineType("a", 1);
-    decaytype_->defineType("ab", 2);
-    decaytype_->defineType("b", 3);
-    decaytype_->defineType("bb", 4);
+    decaytype_->defineType("FB", 1);
+    decaytype_->defineType("FA", 2);
+    decaytype_->defineType("SB", 3);
+    decaytype_->defineType("SA", 4);
 
     // All the variables present in the ntuple are added to a vector so we can later
     // iterate through them for convenience
@@ -196,31 +196,31 @@ void FitterLifetime::Test() {
     bS.setConstant(true);
     bA.setConstant(true);
 
-    DtPDF mixing_pdf_a("mixing_pdf_a", "mixing_pdf_a", true, perfect_tagging_, S, A, *tagwtag_,
+    DtPDF mixing_pdf_FB("mixing_pdf_FB", "mixing_pdf_FB", true, perfect_tagging_, S, A, *tagwtag_,
                        *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
                        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
                        *vtistagl_);
 
-    DtPDF mixing_pdf_ab("mixing_pdf_ab", "mixing_pdf_ab", true, perfect_tagging_, bS, bA, *tagwtag_,
+    DtPDF mixing_pdf_FA("mixing_pdf_FA", "mixing_pdf_FA", true, perfect_tagging_, bS, bA, *tagwtag_,
                         *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
                         *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
                         *vtistagl_);
 
-    DtPDF mixing_pdf_b("mixing_pdf_b", "mixing_pdf_b", false, perfect_tagging_, S, A, *tagwtag_,
+    DtPDF mixing_pdf_SB("mixing_pdf_SB", "mixing_pdf_SB", false, perfect_tagging_, S, A, *tagwtag_,
                        *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
                        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
                        *vtistagl_);
 
-    DtPDF mixing_pdf_bb("mixing_pdf_bb", "mixing_pdf_bb", false, perfect_tagging_, bS, bA,
+    DtPDF mixing_pdf_SA("mixing_pdf_SA", "mixing_pdf_SA", false, perfect_tagging_, bS, bA,
                         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_,
                         *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_,
                         *vtndf_, *vtistagl_);
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf.addPdf(mixing_pdf_a, "a");
-    sim_pdf.addPdf(mixing_pdf_ab, "ab");
-    sim_pdf.addPdf(mixing_pdf_b, "b");
-    sim_pdf.addPdf(mixing_pdf_bb, "bb");
+    sim_pdf.addPdf(mixing_pdf_FB, "FB");
+    sim_pdf.addPdf(mixing_pdf_FA, "FA");
+    sim_pdf.addPdf(mixing_pdf_SB, "SB");
+    sim_pdf.addPdf(mixing_pdf_SA, "SA");
 
     dt_->setRange("dtFitRange", constants::cuts::dt_low, constants::cuts::dt_high);
 
@@ -243,21 +243,21 @@ void FitterLifetime::Test() {
                                 RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
         if (make_plots_) {
-            RooDataSet* dataset_a =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::a"));
-            PlotWithPull(*dt_, *dataset_a, mixing_pdf_a);
+            RooDataSet* dataset_FB =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::FB"));
+            PlotWithPull(*dt_, *dataset_FB, mixing_pdf_FB);
 
-            RooDataSet* dataset_b =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::b"));
-            PlotWithPull(*dt_, *dataset_b, mixing_pdf_b);
+            RooDataSet* dataset_FA =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::FA"));
+            PlotWithPull(*dt_, *dataset_FA, mixing_pdf_FA);
 
-            RooDataSet* dataset_ab =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::ab"));
-            PlotWithPull(*dt_, *dataset_ab, mixing_pdf_ab);
+            RooDataSet* dataset_SB =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::SB"));
+            PlotWithPull(*dt_, *dataset_SB, mixing_pdf_SB);
 
-            RooDataSet* dataset_bb =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::bb"));
-            PlotWithPull(*dt_, *dataset_bb, mixing_pdf_bb);
+            RooDataSet* dataset_SA =
+                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::SA"));
+            PlotWithPull(*dt_, *dataset_SA, mixing_pdf_SA);
         }
     }
 }
@@ -409,20 +409,20 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     TString common_cuts = tools::GetCommonCutsString();
     common_cuts += "&&evmcflag==1";
 
-    TString a_cuts;
-    TString ab_cuts;
-    TString b_cuts;
-    TString bb_cuts;
+    TString FB_cuts;
+    TString FA_cuts;
+    TString SB_cuts;
+    TString SA_cuts;
     if (perfect_tagging_) {
-        a_cuts = "brecflav==1&&btagmcli<0";
-        ab_cuts = "brecflav==-1&&btagmcli>0";
-        b_cuts = "brecflav==1&&btagmcli>0";
-        bb_cuts = "brecflav==-1&&btagmcli<0";
+        FB_cuts = "brecflav==1&&btagmcli<0";
+        FA_cuts = "brecflav==-1&&btagmcli>0";
+        SB_cuts = "brecflav==1&&btagmcli>0";
+        SA_cuts = "brecflav==-1&&btagmcli<0";
     } else {
-        a_cuts = "brecflav==1&&tagqr<0";
-        ab_cuts = "brecflav==-1&&tagqr>0";
-        b_cuts = "brecflav==1&&tagqr>0";
-        bb_cuts = "brecflav==-1&&tagqr<0";
+        FB_cuts = "brecflav==1&&tagqr<0";
+        FA_cuts = "brecflav==-1&&tagqr>0";
+        SB_cuts = "brecflav==1&&tagqr>0";
+        SA_cuts = "brecflav==-1&&tagqr<0";
     }
 
     // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
@@ -432,32 +432,32 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
 
     // We add an identifying label to each of the 4 categories and then combine it into a single
     // dataset for RooSimultaneous fitting
-    RooDataSet* dataset_a = static_cast<RooDataSet*>(temp_dataset->reduce(a_cuts));
-    decaytype_->setLabel("a");
-    dataset_a->addColumn(*decaytype_);
+    RooDataSet* dataset_FB = static_cast<RooDataSet*>(temp_dataset->reduce(FB_cuts));
+    decaytype_->setLabel("FB");
+    dataset_FB->addColumn(*decaytype_);
 
-    RooDataSet* dataset_ab = static_cast<RooDataSet*>(temp_dataset->reduce(ab_cuts));
-    decaytype_->setLabel("ab");
-    dataset_ab->addColumn(*decaytype_);
+    RooDataSet* dataset_FA = static_cast<RooDataSet*>(temp_dataset->reduce(FA_cuts));
+    decaytype_->setLabel("FA");
+    dataset_FA->addColumn(*decaytype_);
 
-    RooDataSet* dataset_b = static_cast<RooDataSet*>(temp_dataset->reduce(b_cuts));
-    decaytype_->setLabel("b");
-    dataset_b->addColumn(*decaytype_);
+    RooDataSet* dataset_SB = static_cast<RooDataSet*>(temp_dataset->reduce(SB_cuts));
+    decaytype_->setLabel("SB");
+    dataset_SB->addColumn(*decaytype_);
 
-    RooDataSet* dataset_bb = static_cast<RooDataSet*>(temp_dataset->reduce(bb_cuts));
-    decaytype_->setLabel("bb");
-    dataset_bb->addColumn(*decaytype_);
+    RooDataSet* dataset_SA = static_cast<RooDataSet*>(temp_dataset->reduce(SA_cuts));
+    decaytype_->setLabel("SA");
+    dataset_SA->addColumn(*decaytype_);
 
     delete temp_dataset;
 
-    dataset_ = static_cast<RooDataSet*>(dataset_a->Clone());
-    delete dataset_a;
-    dataset_->append(*dataset_ab);
-    delete dataset_ab;
-    dataset_->append(*dataset_b);
-    delete dataset_b;
-    dataset_->append(*dataset_bb);
-    delete dataset_bb;
+    dataset_ = static_cast<RooDataSet*>(dataset_FB->Clone());
+    delete dataset_FB;
+    dataset_->append(*dataset_FA);
+    delete dataset_FA;
+    dataset_->append(*dataset_SB);
+    delete dataset_SB;
+    dataset_->append(*dataset_SA);
+    delete dataset_SA;
 
     vrzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vrzerr_formula_));
     vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));

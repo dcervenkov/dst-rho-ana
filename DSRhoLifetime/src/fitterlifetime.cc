@@ -38,6 +38,7 @@
 // Local includes
 #include "constants.h"
 #include "dtpdf.h"
+#include "log.h"
 #include "tools.h"
 
 FitterLifetime::FitterLifetime() {
@@ -380,14 +381,29 @@ TPaveText* FitterLifetime::CreateStatBox(const double chi2, const bool position_
     return stat_box;
 }
 
-void FitterLifetime::ReadInFile(const char* file_path, const int& num_events) {
-    TFile* input_file = new TFile(file_path);
-    TTree* input_tree = dynamic_cast<TTree*>(input_file->Get("h2000"));
+void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const int& num_events) {
+    TChain* chain = new TChain("h2000");
+    int num_files = 0;
+	for (auto& file_name : file_names) {
+		if (!chain->Add(file_name, 0)) {
+			Log::LogLine(Log::error) << "File " << file_name << " not found!";
+			exit(9);
+		}
+		num_files++;
+	}
 
+    Log::print(Log::info, "Reading %i input files\n", num_files);
+
+    TTree* tree = nullptr;
     if (num_events) {
-        TTree* temp_tree = input_tree;
-        input_tree = temp_tree->CloneTree(num_events);
-        delete temp_tree;
+        double fraction_events = (double) num_events / chain->GetEntries();
+        std::string fraction_string = "LocalEntry$<LocalEntries$*";
+        fraction_string += std::to_string(fraction_events);
+        Log::print(
+            Log::info,
+            "Taking a total of %i events (%.1f%%) properly distributed across all input files\n",
+            num_events, fraction_events * 100);
+        tree = chain->CopyTree(fraction_string.c_str());
     }
 
     TString common_cuts = tools::GetCommonCutsString();
@@ -412,7 +428,7 @@ void FitterLifetime::ReadInFile(const char* file_path, const int& num_events) {
     // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
     // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
     RooDataSet* temp_dataset =
-        new RooDataSet("dataset", "dataset", input_tree, argset_, common_cuts);
+        new RooDataSet("dataset", "dataset", tree == nullptr ? chain : tree, argset_, common_cuts);
 
     // We add an identifying label to each of the 4 categories and then combine it into a single
     // dataset for RooSimultaneous fitting
@@ -442,9 +458,6 @@ void FitterLifetime::ReadInFile(const char* file_path, const int& num_events) {
     delete dataset_b;
     dataset_->append(*dataset_bb);
     delete dataset_bb;
-
-    delete input_tree;
-    input_file->Close();
 
     vrzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vrzerr_formula_));
     vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));

@@ -26,14 +26,20 @@ int main(int argc, char* argv[]) {
     fitter_options options = {};
     const int optionless_argc = ProcessCmdLineOptions(argc, argv, optionless_argv, options);
 
-    if (optionless_argc != 3) {
+    if (optionless_argc < 3) {
         printf("ERROR: Wrong number of arguments.\n");
-        printf("Usage: %s [OPTION]... INPUT-FILE OUTPUT_DIR\n", optionless_argv[0]);
+        printf("Usage: %s [OPTION]... OUTPUT_DIR INPUT-FILE(S)...\n", optionless_argv[0]);
         return 2;
     }
 
-    const char* file_path = optionless_argv[1];
-    const char* output_dir = optionless_argv[2];
+    const char* output_dir = optionless_argv[1];
+
+    std::vector<const char*> file_names;
+    for (int i = 2; i < optionless_argc; i++) {
+        file_names.push_back(optionless_argv[i]);
+        printf("%s\n", optionless_argv[i]);
+    }
+
 
     tools::SetupPlotStyle();
     colors::setColors();
@@ -48,9 +54,9 @@ int main(int argc, char* argv[]) {
     if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
 
     if (options.num_events_set) {
-        fitter.ReadInFile(file_path, options.num_events);
+        fitter.ReadInFile(file_names, options.num_events);
     } else {
-        fitter.ReadInFile(file_path);
+        fitter.ReadInFile(file_names);
     }
 
     fitter.Test();

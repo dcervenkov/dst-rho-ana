@@ -43,7 +43,7 @@ class FitterLifetime {
     void SetPerfectTagging(const bool& perfect_tagging) { perfect_tagging_ = perfect_tagging; };
     int GetPerfectTagging() const { return perfect_tagging_; };
 
-    void ReadInFile(const char* file_path, const int& num_events = 0);
+	void ReadInFile(const std::vector<const char*> file_names, const int& num_events = 0);
     void SetOutputDir(const char* output_dir);
 
     RooRealVar* expno_;

@@ -100,9 +100,11 @@ class FitterLifetime {
     RooAddPdf* CreateVoigtGaussDtPdf(const std::string prefix);
     nlohmann::json ReadInJSONFile(const char* filename) const;
 
-    std::vector<RooRealVar**> vars_;
+    std::vector<RooRealVar**> conditional_vars_;
+    std::vector<RooRealVar**> dataset_vars_;
     const RooArgSet* vars;
-    RooArgSet argset_;
+    RooArgSet conditional_argset_;
+    RooArgSet dataset_argset_;
 
     RooDataSet* dataset_ = nullptr;
     RooFitResult* result_ = nullptr;

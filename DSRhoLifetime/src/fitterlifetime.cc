@@ -102,45 +102,51 @@ FitterLifetime::FitterLifetime() {
 
     // All the variables present in the ntuple are added to a vector so we can later
     // iterate through them for convenience
-    vars_.push_back(&expno_);
-    vars_.push_back(&expmc_);
-    vars_.push_back(&dt_);
+    conditional_vars_.push_back(&expno_);
+    conditional_vars_.push_back(&expmc_);
 
-    vars_.push_back(&evmcflag_);
-    vars_.push_back(&brecflav_);
-    vars_.push_back(&btagmcli_);
-    vars_.push_back(&tagqr_);
-    vars_.push_back(&tagwtag_);
+    conditional_vars_.push_back(&evmcflag_);
+    conditional_vars_.push_back(&brecflav_);
+    conditional_vars_.push_back(&btagmcli_);
+    conditional_vars_.push_back(&tagqr_);
+    conditional_vars_.push_back(&tagwtag_);
 
-    vars_.push_back(&benergy_);
-    vars_.push_back(&mbc_);
-    vars_.push_back(&de_);
-    vars_.push_back(&csbdtg_);
+    conditional_vars_.push_back(&benergy_);
+    conditional_vars_.push_back(&mbc_);
+    conditional_vars_.push_back(&de_);
+    conditional_vars_.push_back(&csbdtg_);
 
-    vars_.push_back(&shcosthb_);
+    conditional_vars_.push_back(&shcosthb_);
 
-    vars_.push_back(&vrusable_);
-    vars_.push_back(&vrvtxz_);
-    vars_.push_back(&vrerr6_);
-    vars_.push_back(&vrchi2_);
-    vars_.push_back(&vreffxi_);
-    vars_.push_back(&vrndf_);
-    vars_.push_back(&vreffndf_);
-    vars_.push_back(&vrntrk_);
+    conditional_vars_.push_back(&vrusable_);
+    conditional_vars_.push_back(&vrvtxz_);
+    conditional_vars_.push_back(&vrerr6_);
+    conditional_vars_.push_back(&vrchi2_);
+    conditional_vars_.push_back(&vreffxi_);
+    conditional_vars_.push_back(&vrndf_);
+    conditional_vars_.push_back(&vreffndf_);
+    conditional_vars_.push_back(&vrntrk_);
 
-    vars_.push_back(&vtusable_);
-    vars_.push_back(&vtvtxz_);
-    vars_.push_back(&vterr6_);
-    vars_.push_back(&vtchi2_);
-    vars_.push_back(&vtndf_);
-    vars_.push_back(&vtntrk_);
+    conditional_vars_.push_back(&vtusable_);
+    conditional_vars_.push_back(&vtvtxz_);
+    conditional_vars_.push_back(&vterr6_);
+    conditional_vars_.push_back(&vtchi2_);
+    conditional_vars_.push_back(&vtndf_);
+    conditional_vars_.push_back(&vtntrk_);
 
-    vars_.push_back(&vtistagl_);
+    conditional_vars_.push_back(&vtistagl_);
+
+    dataset_vars_ = conditional_vars_;
+    dataset_vars_.push_back(&dt_);
 
     // The variables present in the ntuple are added to an RooArgSet that will be needed
     // when we create a RooDataSet from the input_tree
-    for (auto var : vars_) {
-        argset_.add(**var);
+    for (auto var : conditional_vars_) {
+        conditional_argset_.add(**var);
+    }
+
+    for (auto var : dataset_vars_) {
+        dataset_argset_.add(**var);
     }
 
     num_CPUs_ = 1;
@@ -183,12 +189,55 @@ void FitterLifetime::PlotVar(RooRealVar& var) const {
 }
 
 void FitterLifetime::Test() {
-    // DtPDF lifetime_pdf("lifetime_pdf", "lifetime_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
-    //                    *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
-    //                    *vtchi2_, *vtndf_, *vtistagl_);
-    RooAddPdf* lifetime_pdf = CreateVoigtGaussDtPdf("scf_dt_cf");
+    RooArgList lifetime_pdfs;
+    bool scf = true;
+    bool bkg = true;
+    // bool scf = false;
+    // bool bkg = false;
+    // if (common_config["components"] == "CRSCF") {
+    //     scf = true;
+    // } else if (common_config["components"] == "all") {
+    //     scf = true;
+    //     bkg = true;
+    // }
+
+    TString prefix = "";
+
+    DtPDF* lifetime_cp_pdf = new DtPDF("lifetime_pdf", "lifetime_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
+                       *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
+                       *vtchi2_, *vtndf_, *vtistagl_);
+    lifetime_pdfs.add(*lifetime_cp_pdf);
+
     nlohmann::json json = ReadInJSONFile("config.json");
-    tools::ChangeModelParameters(lifetime_pdf, json["modelParameters"]);
+
+    if (scf) {
+        RooAddPdf* lifetime_scf_pdf = CreateVoigtGaussDtPdf("scf_dt");
+        tools::ChangeModelParameters(lifetime_scf_pdf, json["modelParameters"]);
+        lifetime_pdfs.add(*lifetime_scf_pdf);
+    }
+
+    if (bkg) {
+        RooAddPdf* lifetime_bkg_pdf = CreateVoigtGaussDtPdf("bkg_dt");
+        tools::ChangeModelParameters(lifetime_bkg_pdf, json["modelParameters"]);
+        lifetime_pdfs.add(*lifetime_bkg_pdf);
+    }
+
+    RooArgList fractions;
+    if (scf && !bkg) {
+        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
+        cr_scf_f_->setConstant();
+        fractions.add(*cr_scf_f_);
+    } else if (scf && bkg) {
+        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+        cr_f_->setConstant();
+        scf_f_->setConstant();
+        fractions.add(*cr_f_);
+        fractions.add(*scf_f_);
+    }
+
+    RooAddPdf* lifetime_pdf = new RooAddPdf(prefix + "lifetime_pdf", prefix + "lifetime_pdf", lifetime_pdfs, fractions);
+
 
     // Small pars (r = 0.01)
     //	RooRealVar S("S", "S", 0.0144908);
@@ -231,14 +280,14 @@ void FitterLifetime::Test() {
     sim_pdf.addPdf(mixing_pdf_SB, "SB");
     sim_pdf.addPdf(mixing_pdf_SA, "SA");
 
-    dt_->setRange("dtFitRange", constants::cuts::dt_low, constants::cuts::dt_high);
+    // dt_->setRange("dtFitRange", constants::cuts::dt_low, constants::cuts::dt_high);
 
     //	tau_->setConstant(true);
     //	dm_->setConstant(true);
 
     if (do_lifetime_fit_) {
-        result_ = lifetime_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(argset_),
-                                     RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
+        result_ = lifetime_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
+                                     RooFit::Minimizer("Minuit2"),
                                      RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         if (make_plots_) {
             PlotWithPull(*dt_, *dataset_, *lifetime_pdf);
@@ -246,8 +295,8 @@ void FitterLifetime::Test() {
     }
 
     if (do_mixing_fit_) {
-        result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(argset_),
-                                RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
+        result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
+                                RooFit::Minimizer("Minuit2"),
                                 RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
         if (make_plots_) {
@@ -286,11 +335,10 @@ void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
     pad_var->SetLeftMargin(0.12);
 
     data.plotOn(plot);
-    pdf.plotOn(plot);
     // TODO: Arguments should not be hardcoded
     // Can't use more CPUs because a bug (?) in ROOT causes wrong normalization
-    // pdf.plotOn(plot, RooFit::ProjWData(argset_, data, kFALSE), RooFit::NumCPU(num_CPUs_),
-    //            RooFit::NormRange("dtFitRange"), RooFit::Normalization(1.0 / data.numEntries()));
+    pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE), RooFit::NumCPU(num_CPUs_),
+               RooFit::Normalization(1.0 / data.numEntries()));
     plot->GetXaxis()->SetTitle("");
     plot->GetXaxis()->SetLabelSize(0);
 
@@ -416,7 +464,7 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     }
 
     TString common_cuts = tools::GetCommonCutsString();
-    common_cuts += "&&evmcflag!=1";
+    // common_cuts += "&&evmcflag!=1";
 
     TString FB_cuts;
     TString FA_cuts;
@@ -437,7 +485,7 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
     // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
     RooDataSet* temp_dataset =
-        new RooDataSet("dataset", "dataset", tree == nullptr ? chain : tree, argset_, common_cuts);
+        new RooDataSet("dataset", "dataset", tree == nullptr ? chain : tree, dataset_argset_, common_cuts);
 
     // We add an identifying label to each of the 4 categories and then combine it into a single
     // dataset for RooSimultaneous fitting
@@ -471,13 +519,16 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     vrzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vrzerr_formula_));
     vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));
 
-    argset_.add(*vrzerr_);
-    argset_.add(*vtzerr_);
-    argset_.add(*decaytype_);
+    dataset_argset_.add(*vrzerr_);
+    dataset_argset_.add(*vtzerr_);
+    dataset_argset_.add(*decaytype_);
+    conditional_argset_.add(*vrzerr_);
+    conditional_argset_.add(*vtzerr_);
+    conditional_argset_.add(*decaytype_);
 
     // Bind the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
     vars = dataset_->get();
-    for (RooRealVar** var : vars_) {
+    for (RooRealVar** var : conditional_vars_) {
         *var = static_cast<RooRealVar*>(vars->find((*var)->GetName()));
     }
 }

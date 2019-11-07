@@ -912,36 +912,6 @@ void FitterCPV::ChangeFitRanges(const nlohmann::json& config) {
     }
 }
 
-/**
- * Set model parameters (SCF, BKG, etc.) according to a JSON config
- *
- * @param pdf The model whose parameters are to be changed
- * @param model_parameters JSON config with model parameter values
- */
-void FitterCPV::ChangeModelParameters(RooAbsPdf* pdf, const std::string channel_name,
-                                      const nlohmann::json& model_parameters) {
-    Log::LogLine(Log::info) << "Updating parameter values for channel " << channel_name;
-    for (auto& parameter : model_parameters.items()) {
-        const char* name = parameter.key().c_str();
-        const double value = parameter.value().get<double>();
-
-        RooArgSet* pdf_parameters = pdf->getVariables();
-
-        std::string full_name = channel_name;
-        full_name += "_";
-        full_name += name;
-        RooRealVar* rooparameter =
-            dynamic_cast<RooRealVar*>(pdf_parameters->find(full_name.c_str()));
-
-        if (rooparameter) {
-            Log::print(Log::debug, "Changing parameter %s to %f\n", name, value);
-            rooparameter->setVal(value);
-        } else {
-            Log::print(Log::warning, "Parameter %s not found in model, skipping...\n", name);
-        }
-    }
-}
-
 void FitterCPV::GenerateToys(const int num_events, const int num_toys) {
     Log::print(Log::info, "Generating dataset with %i events...\n", num_events);
 
@@ -2189,10 +2159,10 @@ RooSimultaneous* FitterCPV::CreateChannelPDF(const std::string channel_name,
             : CreateTimeDependentPDF(channel_name, common_config, channel_config);
 
     if (common_config.contains("modelParameters")) {
-        ChangeModelParameters(channel_pdf, channel_name, common_config["modelParameters"]);
+        tools::ChangeModelParameters(channel_pdf, channel_name + "_", common_config["modelParameters"]);
     }
     if (channel_config.contains("modelParameters")) {
-        ChangeModelParameters(channel_pdf, channel_name, channel_config["modelParameters"]);
+        tools::ChangeModelParameters(channel_pdf, channel_name + "_", channel_config["modelParameters"]);
     }
 
     return channel_pdf;

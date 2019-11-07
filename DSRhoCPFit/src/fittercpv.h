@@ -172,8 +172,6 @@ class FitterCPV {
 
     void PrepareVarArgsets();
     void ChangeFitRanges(const nlohmann::json& config);
-    void ChangeModelParameters(RooAbsPdf* pdf, const std::string channel_name,
-                               const nlohmann::json& config);
     TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
                              const bool position_left) const;
     TH3D* GetBinnedEfficiency(std::vector<std::string> file, const int model);

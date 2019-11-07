@@ -9,6 +9,9 @@
 
 #include "fitterlifetime.h"
 
+// Standard includes
+#include <fstream>
+
 // BASF includes
 #include "tatami/tatami.h"
 
@@ -19,12 +22,14 @@
 #include "RooDataSet.h"
 #include "RooExtendPdf.h"
 #include "RooFitResult.h"
+#include "RooGaussian.h"
 #include "RooGenericPdf.h"
 #include "RooHist.h"
 #include "RooHistPdf.h"
 #include "RooPlot.h"
 #include "RooRealVar.h"
 #include "RooSimultaneous.h"
+#include "RooVoigtian.h"
 #include "TAxis.h"
 #include "TCanvas.h"
 #include "TEnv.h"
@@ -39,6 +44,7 @@
 #include "constants.h"
 #include "dtpdf.h"
 #include "log.h"
+#include "nlohmann/json.hpp"
 #include "tools.h"
 
 FitterLifetime::FitterLifetime() {
@@ -177,9 +183,12 @@ void FitterLifetime::PlotVar(RooRealVar& var) const {
 }
 
 void FitterLifetime::Test() {
-    DtPDF lifetime_pdf("lifetime_pdf", "lifetime_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
-                       *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
-                       *vtchi2_, *vtndf_, *vtistagl_);
+    // DtPDF lifetime_pdf("lifetime_pdf", "lifetime_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
+    //                    *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
+    //                    *vtchi2_, *vtndf_, *vtistagl_);
+    RooAddPdf* lifetime_pdf = CreateVoigtGaussDtPdf("scf_dt_cf");
+    nlohmann::json json = ReadInJSONFile("config.json");
+    tools::ChangeModelParameters(lifetime_pdf, json["modelParameters"]);
 
     // Small pars (r = 0.01)
     //	RooRealVar S("S", "S", 0.0144908);
@@ -228,12 +237,11 @@ void FitterLifetime::Test() {
     //	dm_->setConstant(true);
 
     if (do_lifetime_fit_) {
-        result_ = lifetime_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(argset_),
+        result_ = lifetime_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(argset_),
                                      RooFit::Minimizer("Minuit2"), RooFit::Range("dtFitRange"),
                                      RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-
         if (make_plots_) {
-            PlotWithPull(*dt_, *dataset_, lifetime_pdf);
+            PlotWithPull(*dt_, *dataset_, *lifetime_pdf);
         }
     }
 
@@ -278,10 +286,11 @@ void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
     pad_var->SetLeftMargin(0.12);
 
     data.plotOn(plot);
+    pdf.plotOn(plot);
     // TODO: Arguments should not be hardcoded
     // Can't use more CPUs because a bug (?) in ROOT causes wrong normalization
-    pdf.plotOn(plot, RooFit::ProjWData(argset_, data, kFALSE), RooFit::NumCPU(num_CPUs_),
-               RooFit::NormRange("dtFitRange"), RooFit::Normalization(1.0 / data.numEntries()));
+    // pdf.plotOn(plot, RooFit::ProjWData(argset_, data, kFALSE), RooFit::NumCPU(num_CPUs_),
+    //            RooFit::NormRange("dtFitRange"), RooFit::Normalization(1.0 / data.numEntries()));
     plot->GetXaxis()->SetTitle("");
     plot->GetXaxis()->SetLabelSize(0);
 
@@ -407,7 +416,7 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     }
 
     TString common_cuts = tools::GetCommonCutsString();
-    common_cuts += "&&evmcflag==1";
+    common_cuts += "&&evmcflag!=1";
 
     TString FB_cuts;
     TString FA_cuts;
@@ -478,4 +487,48 @@ void FitterLifetime::SetOutputDir(const char* output_dir) {
     if (make_plots_) {
         output_file_ = new TFile(TString(output_dir) + "/plots.root", "RECREATE");
     }
+}
+
+/**
+ * Create a Voigtian + Gaussian PDF.
+ *
+ * A common prefix is prepended to all object names.
+ *
+ * @param prefix Text to be prepended to the ROOT name
+ *
+ */
+RooAddPdf* FitterLifetime::CreateVoigtGaussDtPdf(const std::string prefix) {
+    TString pre(prefix);
+
+    RooRealVar* voigt_mu = new RooRealVar(pre + "_voigt_mu", "v_{#mu}", -0.249);
+    RooRealVar* voigt_sigma = new RooRealVar(pre + "_voigt_sigma_", "v_{#sigma}", 1.910);
+    RooRealVar* voigt_width = new RooRealVar(pre + "_voigt_width_", "v_{w}", 0.684);
+    RooVoigtian* voigt = new RooVoigtian(pre + "_voigt", pre + "_voigt", *dt_, *voigt_mu,
+                                         *voigt_width, *voigt_sigma);
+
+    RooRealVar* gaus_mu = new RooRealVar(pre + "_gaus_mu", "g_{#mu}", -0.105);
+    RooRealVar* gaus_sigma = new RooRealVar(pre + "_gaus_sigma_", "g_{#sigma}", 0.881);
+    RooGaussian* gaus = new RooGaussian(pre + "_gaus", pre + "_gaus", *dt_, *gaus_mu, *gaus_sigma);
+
+    RooRealVar* f = new RooRealVar(pre + "_f", "f_{v/g}", 0.720);
+    RooAddPdf* model =
+        new RooAddPdf(pre + "_model", pre + "_model", RooArgList(*voigt, *gaus), RooArgList(*f));
+
+    return model;
+}
+
+/**
+ * Read a JSON config from a specified filename.
+ */
+nlohmann::json FitterLifetime::ReadInJSONFile(const char* filename) const {
+    std::ifstream filestream(filename);
+    if (!filestream.good()) {
+        Log::print(Log::error, "Specified config file '%s' doesn't exist!\n", filename);
+        exit(5);
+    }
+    Log::print(Log::debug, "Reading JSON config file '%s'\n", filename);
+
+    nlohmann::json json;
+    filestream >> json;
+    return json;
 }

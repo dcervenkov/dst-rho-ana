@@ -11,12 +11,14 @@
 #define FITTERLIFETIME_H_
 
 // ROOT includes
+#include "RooAddPdf.h"
 #include "RooRealVar.h"
 #include "TCanvas.h"
 #include "TPaveText.h"
 
 // Local includes
 #include "constants.h"
+#include "nlohmann/json.hpp"
 
 class FitterLifetime {
    public:
@@ -95,6 +97,8 @@ class FitterLifetime {
    private:
     TPaveText* CreateStatBox(const double chi2, const bool position_top,
                              const bool position_left) const;
+    RooAddPdf* CreateVoigtGaussDtPdf(const std::string prefix);
+    nlohmann::json ReadInJSONFile(const char* filename) const;
 
     std::vector<RooRealVar**> vars_;
     const RooArgSet* vars;

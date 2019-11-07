@@ -466,8 +466,8 @@ std::vector<std::string> SplitString(const std::string& input_string, char delim
  * @param prefix String that precedes all model parameter names (e.g. channel name)
  * @param model_parameters JSON config with model parameter values
  */
-void ChangeModelParameters(RooAbsPdf* pdf, const std::string prefix,
-                           const nlohmann::json& model_parameters) {
+void ChangeModelParameters(RooAbsPdf* pdf, const nlohmann::json& model_parameters,
+                           const std::string prefix) {
     Log::LogLine(Log::info) << "Updating parameter values for channel " << prefix;
     for (auto& parameter : model_parameters.items()) {
         const char* name = parameter.key().c_str();

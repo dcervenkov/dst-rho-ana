@@ -2159,10 +2159,10 @@ RooSimultaneous* FitterCPV::CreateChannelPDF(const std::string channel_name,
             : CreateTimeDependentPDF(channel_name, common_config, channel_config);
 
     if (common_config.contains("modelParameters")) {
-        tools::ChangeModelParameters(channel_pdf, channel_name + "_", common_config["modelParameters"]);
+        tools::ChangeModelParameters(channel_pdf, common_config["modelParameters"], channel_name + "_");
     }
     if (channel_config.contains("modelParameters")) {
-        tools::ChangeModelParameters(channel_pdf, channel_name + "_", channel_config["modelParameters"]);
+        tools::ChangeModelParameters(channel_pdf, channel_config["modelParameters"], channel_name + "_");
     }
 
     return channel_pdf;

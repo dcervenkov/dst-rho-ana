@@ -53,6 +53,7 @@ FitterLifetime::FitterLifetime() {
     vrusable_ = new RooRealVar("vrusable", "vrusable", 0, 1);
     vrvtxz_ = new RooRealVar("vrvtxz", "vrvtxz", -10, 10);
     vrerr6_ = new RooRealVar("vrerr6", "vrerr6", -1, 1);
+    vrzerr_ = new RooRealVar("vrzerr2", "vrzerr2", 0.002);
     vrchi2_ = new RooRealVar("vrchi2", "vrchi2", 0, 10000000);
     vreffxi_ = new RooRealVar("vreffxi", "vreffxi", 0, 10000000);
     vrndf_ = new RooRealVar("vrndf", "vrndf", 0, 100);
@@ -64,6 +65,7 @@ FitterLifetime::FitterLifetime() {
     vtchi2_ = new RooRealVar("vtchi2", "vtchi2", 1.6);
     vtndf_ = new RooRealVar("vtndf", "vtndf", 4);
     vterr6_ = new RooRealVar("vterr6", "vterr6", -1, 1);
+    vtzerr_ = new RooRealVar("vtzerr2", "vtzerr2", 0.005);
     vtchi2_ = new RooRealVar("vtchi2", "vtchi2", 0, 10000000);
     vtndf_ = new RooRealVar("vtndf", "vtndf", 0, 100);
     vtntrk_ = new RooRealVar("vtntrk", "vtntrk", 0, 100);
@@ -86,10 +88,10 @@ FitterLifetime::FitterLifetime() {
     shcosthb_ = new RooRealVar("shcosthb", "shcosthb", -1, 1);
 
     // TODO: beta*gamma should be computed not a constant and c should be taken from constants.cc
-    vrzerr_formula_ =
-        new RooFormulaVar("vrzerr", "#sigma z_{rec} [cm]", "sqrt(vrerr6)", RooArgSet(*vrerr6_));
-    vtzerr_formula_ =
-        new RooFormulaVar("vtzerr", "#sigma z_{tag} [cm]", "sqrt(vterr6)", RooArgSet(*vterr6_));
+    // vrzerr_formula_ =
+    //     new RooFormulaVar("vrzerr", "#sigma z_{rec} [cm]", "sqrt(vrerr6)", RooArgSet(*vrerr6_));
+    // vtzerr_formula_ =
+    //     new RooFormulaVar("vtzerr", "#sigma z_{tag} [cm]", "sqrt(vterr6)", RooArgSet(*vterr6_));
 
     tau_ = new RooRealVar("tau", "#tau", constants::tau - 1, constants::tau + 1);
     dm_ = new RooRealVar("dm", "#Deltam", constants::dm - 1, constants::dm + 1);
@@ -155,8 +157,8 @@ FitterLifetime::FitterLifetime() {
     make_plots_ = false;
     perfect_tagging_ = false;
 
-    vrzerr_ = nullptr;
-    vtzerr_ = nullptr;
+    // vrzerr_ = nullptr;
+    // vtzerr_ = nullptr;
     vars = nullptr;
 }
 
@@ -190,8 +192,8 @@ void FitterLifetime::PlotVar(RooRealVar& var) const {
 
 void FitterLifetime::Test() {
     RooArgList lifetime_pdfs;
-    bool scf = false;
-    bool bkg = false;
+    bool scf = true;
+    bool bkg = true;
     // bool scf = false;
     // bool bkg = false;
     // if (common_config["components"] == "CRSCF") {
@@ -203,7 +205,7 @@ void FitterLifetime::Test() {
 
     TString prefix = "";
 
-    DtPDF* lifetime_cp_pdf = new DtPDF("lifetime_pdf", "lifetime_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
+    DtPDF* lifetime_cp_pdf = new DtPDF("lifetime_cp_pdf", "lifetime_cp_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
                        *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
                        *vtchi2_, *vtndf_, *vtistagl_);
     lifetime_pdfs.add(*lifetime_cp_pdf);
@@ -237,9 +239,6 @@ void FitterLifetime::Test() {
     }
 
     RooAddPdf* lifetime_pdf = new RooAddPdf(prefix + "lifetime_pdf", prefix + "lifetime_pdf", lifetime_pdfs, fractions);
-    RooDataHist* hist = lifetime_pdf->generateBinned(*dt_, 1000, RooFit::ExpectedData(true));
-    RooHistPdf* hist_pdf = new RooHistPdf("hist_pdf", "hist_pdf", *dt_, *hist);
-
 
     // Small pars (r = 0.01)
     //	RooRealVar S("S", "S", 0.0144908);
@@ -284,7 +283,7 @@ void FitterLifetime::Test() {
 
     // dt_->setRange("dtFitRange", constants::cuts::dt_low, constants::cuts::dt_high);
 
-    //	tau_->setConstant(true);
+    // tau_->setConstant(true);
     //	dm_->setConstant(true);
 
     if (do_lifetime_fit_) {
@@ -292,7 +291,7 @@ void FitterLifetime::Test() {
                                      RooFit::Minimizer("Minuit2"),
                                      RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         if (make_plots_) {
-            PlotWithPull(*dt_, *dataset_, *hist_pdf);
+            PlotWithPull(*dt_, *dataset_, *lifetime_pdf);
         }
     }
 
@@ -324,7 +323,7 @@ void FitterLifetime::Test() {
 void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
                                   const RooAbsPdf& pdf, const char* title) const {
     TCanvas canvas(pdf.GetName(), var.GetTitle(), 500, 500);
-    RooPlot* plot = var.frame(RooFit::Range("dtFitRange"));
+    RooPlot* plot = var.frame();
     TPad* pad_var;
     TPad* pad_pull;
     pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
@@ -337,11 +336,8 @@ void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
     pad_var->SetLeftMargin(0.12);
 
     data.plotOn(plot);
-    pdf.plotOn(plot);
-    // TODO: Arguments should not be hardcoded
-    // Can't use more CPUs because a bug (?) in ROOT causes wrong normalization
-    // pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE), RooFit::NumCPU(num_CPUs_),
-    //            RooFit::Normalization(1.0 / data.numEntries()));
+    // Can't use more CPUs because a bug (?) in ROOT causes it to take much longer
+    pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE));
     plot->GetXaxis()->SetTitle("");
     plot->GetXaxis()->SetLabelSize(0);
 
@@ -364,8 +360,7 @@ void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
     pad_pull->SetLeftMargin(0.12);
 
     // Create a new frame to draw the pull distribution and add the distribution to the frame
-    RooPlot* plot_pull_ =
-        var.frame(RooFit::Title("Pull Distribution"), RooFit::Range("dtFitRange"));
+    RooPlot* plot_pull_ = var.frame(RooFit::Title("Pull Distribution"));
     plot_pull_->SetTitle("");
     RooHist* hpull = plot->pullHist();
     hpull->SetFillColor(kGray);
@@ -467,7 +462,7 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     }
 
     TString common_cuts = tools::GetCommonCutsString();
-    common_cuts += "&&evmcflag==1";
+    // common_cuts += "&&evmcflag==1";
 
     TString FB_cuts;
     TString FA_cuts;
@@ -519,15 +514,24 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     dataset_->append(*dataset_SA);
     delete dataset_SA;
 
-    vrzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vrzerr_formula_));
-    vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));
+    // vrzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vrzerr_formula_));
+    // vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));
+    // vrzerr_->setMin(-100);
+    // vrzerr_->setMax(100);
+    // vtzerr_->setMin(-100);
+    // vtzerr_->setMax(100);
 
-    dataset_argset_.add(*vrzerr_);
-    dataset_argset_.add(*vtzerr_);
+    // dataset_argset_.add(*vrzerr_);
+    // dataset_argset_.add(*vtzerr_);
     dataset_argset_.add(*decaytype_);
-    conditional_argset_.add(*vrzerr_);
-    conditional_argset_.add(*vtzerr_);
+    // conditional_argset_.add(*vrzerr_);
+    // conditional_argset_.add(*vtzerr_);
     conditional_argset_.add(*decaytype_);
+
+    TFile f("dataset.root", "RECREATE");
+    dataset_->Write();
+    f.ls();
+    f.Close();
 
     // Bind the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
     vars = dataset_->get();

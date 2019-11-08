@@ -190,8 +190,8 @@ void FitterLifetime::PlotVar(RooRealVar& var) const {
 
 void FitterLifetime::Test() {
     RooArgList lifetime_pdfs;
-    bool scf = true;
-    bool bkg = true;
+    bool scf = false;
+    bool bkg = false;
     // bool scf = false;
     // bool bkg = false;
     // if (common_config["components"] == "CRSCF") {
@@ -237,6 +237,8 @@ void FitterLifetime::Test() {
     }
 
     RooAddPdf* lifetime_pdf = new RooAddPdf(prefix + "lifetime_pdf", prefix + "lifetime_pdf", lifetime_pdfs, fractions);
+    RooDataHist* hist = lifetime_pdf->generateBinned(*dt_, 1000, RooFit::ExpectedData(true));
+    RooHistPdf* hist_pdf = new RooHistPdf("hist_pdf", "hist_pdf", *dt_, *hist);
 
 
     // Small pars (r = 0.01)
@@ -290,7 +292,7 @@ void FitterLifetime::Test() {
                                      RooFit::Minimizer("Minuit2"),
                                      RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         if (make_plots_) {
-            PlotWithPull(*dt_, *dataset_, *lifetime_pdf);
+            PlotWithPull(*dt_, *dataset_, *hist_pdf);
         }
     }
 
@@ -335,10 +337,11 @@ void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
     pad_var->SetLeftMargin(0.12);
 
     data.plotOn(plot);
+    pdf.plotOn(plot);
     // TODO: Arguments should not be hardcoded
     // Can't use more CPUs because a bug (?) in ROOT causes wrong normalization
-    pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE), RooFit::NumCPU(num_CPUs_),
-               RooFit::Normalization(1.0 / data.numEntries()));
+    // pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE), RooFit::NumCPU(num_CPUs_),
+    //            RooFit::Normalization(1.0 / data.numEntries()));
     plot->GetXaxis()->SetTitle("");
     plot->GetXaxis()->SetLabelSize(0);
 
@@ -464,7 +467,7 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     }
 
     TString common_cuts = tools::GetCommonCutsString();
-    // common_cuts += "&&evmcflag!=1";
+    common_cuts += "&&evmcflag==1";
 
     TString FB_cuts;
     TString FA_cuts;

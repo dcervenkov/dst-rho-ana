@@ -204,13 +204,11 @@ void FitterLifetime::Test() {
 
     if (scf) {
         RooAddPdf* lifetime_scf_pdf = CreateVoigtGaussDtPdf("scf_dt");
-        tools::ChangeModelParameters(lifetime_scf_pdf, json["modelParameters"]);
         lifetime_pdfs.add(*lifetime_scf_pdf);
     }
 
     if (bkg) {
         RooAddPdf* lifetime_bkg_pdf = CreateVoigtGaussDtPdf("bkg_dt");
-        tools::ChangeModelParameters(lifetime_bkg_pdf, json["modelParameters"]);
         lifetime_pdfs.add(*lifetime_bkg_pdf);
     }
 
@@ -229,6 +227,10 @@ void FitterLifetime::Test() {
     }
 
     RooAddPdf* lifetime_pdf = new RooAddPdf(prefix + "lifetime_pdf", prefix + "lifetime_pdf", lifetime_pdfs, fractions);
+    Log::LogLine(Log::debug) << "Global parameters:";
+    tools::ChangeModelParameters(lifetime_pdf, json["modelParameters"]);
+    Log::LogLine(Log::debug) << "Channel parameters:";
+    tools::ChangeModelParameters(lifetime_pdf, json["channels"]["Kpi"]["modelParameters"]);
 
     // Small pars (r = 0.01)
     //	RooRealVar S("S", "S", 0.0144908);

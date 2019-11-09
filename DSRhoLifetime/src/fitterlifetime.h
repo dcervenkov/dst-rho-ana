@@ -27,7 +27,7 @@ class FitterLifetime {
 
     void PlotVar(RooRealVar& var) const;
     void PlotWithPull(const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
-                      const char* title = "") const;
+                      const RooArgList& components = RooArgList(), const char* title = "") const;
     void Test();
 
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };

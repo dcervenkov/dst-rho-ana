@@ -85,12 +85,6 @@ FitterLifetime::FitterLifetime() {
 
     shcosthb_ = new RooRealVar("shcosthb", "shcosthb", -1, 1);
 
-    // TODO: beta*gamma should be computed not a constant and c should be taken from constants.cc
-    // vrzerr_formula_ =
-    //     new RooFormulaVar("vrzerr", "#sigma z_{rec} [cm]", "sqrt(vrerr6)", RooArgSet(*vrerr6_));
-    // vtzerr_formula_ =
-    //     new RooFormulaVar("vtzerr", "#sigma z_{tag} [cm]", "sqrt(vterr6)", RooArgSet(*vterr6_));
-
     tau_ = new RooRealVar("tau", "#tau", constants::tau - 1, constants::tau + 1);
     dm_ = new RooRealVar("dm", "#Deltam", constants::dm - 1, constants::dm + 1);
 
@@ -155,8 +149,6 @@ FitterLifetime::FitterLifetime() {
     make_plots_ = false;
     perfect_tagging_ = false;
 
-    // vrzerr_ = nullptr;
-    // vtzerr_ = nullptr;
     vars = nullptr;
 }
 
@@ -279,8 +271,6 @@ void FitterLifetime::Test() {
     sim_pdf.addPdf(mixing_pdf_SB, "SB");
     sim_pdf.addPdf(mixing_pdf_SA, "SA");
 
-    // dt_->setRange("dtFitRange", constants::cuts::dt_low, constants::cuts::dt_high);
-
     // tau_->setConstant(true);
     //	dm_->setConstant(true);
 
@@ -289,7 +279,7 @@ void FitterLifetime::Test() {
                                      RooFit::Minimizer("Minuit2"),
                                      RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         if (make_plots_) {
-            PlotWithPull(*dt_, *dataset_, *lifetime_pdf);
+            PlotWithPull(*dt_, *dataset_, *lifetime_pdf, lifetime_pdfs);
         }
     }
 
@@ -319,7 +309,8 @@ void FitterLifetime::Test() {
 }
 
 void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
-                                  const RooAbsPdf& pdf, const char* title) const {
+                                  const RooAbsPdf& pdf, const RooArgList& components,
+                                  const char* title) const {
     TCanvas canvas(pdf.GetName(), var.GetTitle(), 500, 500);
     RooPlot* plot = var.frame();
     TPad* pad_var;
@@ -334,6 +325,22 @@ void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
     pad_var->SetLeftMargin(0.12);
 
     data.plotOn(plot);
+
+    components.Print();
+    // Plot components before the total PDF as the pull plots are made from the
+    // last plotted PDF
+    const int colors[] = {4, 7, 5};
+    const int styles[] = {3345, 3354, 3395};
+    int i = 0;
+    std::vector<RooAbsPdf*> components_vec = tools::ToVector<RooAbsPdf*>(components);
+    for (auto component : components_vec) {
+        pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE),
+                   RooFit::LineColor(colors[i]), RooFit::FillColor(colors[i]), 
+                   RooFit::Components(*component), RooFit::FillStyle(styles[i]),
+                   RooFit::DrawOption("FL"), RooFit::VLines());
+                   i++;
+    }
+
     // Can't use more CPUs because a bug (?) in ROOT causes it to take much longer
     pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE));
     plot->GetXaxis()->SetTitle("");
@@ -512,24 +519,8 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     dataset_->append(*dataset_SA);
     delete dataset_SA;
 
-    // vrzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vrzerr_formula_));
-    // vtzerr_ = static_cast<RooRealVar*>(dataset_->addColumn(*vtzerr_formula_));
-    // vrzerr_->setMin(-100);
-    // vrzerr_->setMax(100);
-    // vtzerr_->setMin(-100);
-    // vtzerr_->setMax(100);
-
-    // dataset_argset_.add(*vrzerr_);
-    // dataset_argset_.add(*vtzerr_);
     dataset_argset_.add(*decaytype_);
-    // conditional_argset_.add(*vrzerr_);
-    // conditional_argset_.add(*vtzerr_);
     conditional_argset_.add(*decaytype_);
-
-    TFile f("dataset.root", "RECREATE");
-    dataset_->Write();
-    f.ls();
-    f.Close();
 
     // Bind the variables to the dataset, so that dataset->get(i) changes values of, e.g., expno_
     vars = dataset_->get();

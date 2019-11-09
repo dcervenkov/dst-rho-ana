@@ -34,7 +34,7 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
                 const bool residual = false);
 TString GetCommonCutsString();
 void SaveTextToFile(const std::string filename, const std::string text);
-std::vector<RooRealVar*> ToVector(const RooArgSet& set);
+
 
 void LogEnvironmentMetadata(TFile* file);
 void LogCLIArguments(TFile* file, int argc, char* argv[]);
@@ -45,4 +45,26 @@ void LogText(TFile* file, const char* field_name, const std::string text);
 std::vector<std::string> SplitString(const std::string& input_string, char delimiter);
 void ChangeModelParameters(RooAbsPdf* pdf, const nlohmann::json& config,
                            const std::string prefix = "");
+
+/**
+ * Transform RooArgSet of RooRealVars into a std::vector
+ * 
+ * Objects other than RooRealVars (e.g., RooCategory are not added to the final
+ * vector).
+ */
+template <class T>
+std::vector<T> ToVector(const RooAbsCollection& set) {
+    std::vector<T> vector;
+    TIterator* iterator = set.createIterator();
+    T arg;
+    TObject* obj;
+    while ((obj = iterator->Next())) {
+        if ((arg = dynamic_cast<T>(obj))) {
+            vector.push_back(arg);
+        }
+    }
+    delete iterator;
+    return vector;
+}
+
 }  // namespace tools

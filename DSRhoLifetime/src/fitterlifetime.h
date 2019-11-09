@@ -66,12 +66,6 @@ class FitterLifetime {
 
     RooRealVar* dt_;
 
-    RooRealVar* vrzerr_;
-    RooFormulaVar* vrzerr_formula_;
-
-    RooRealVar* vtzerr_;
-    RooFormulaVar* vtzerr_formula_;
-
     RooRealVar* tau_;
     RooRealVar* dm_;
 

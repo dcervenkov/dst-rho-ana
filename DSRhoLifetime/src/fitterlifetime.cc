@@ -53,7 +53,6 @@ FitterLifetime::FitterLifetime() {
     vrusable_ = new RooRealVar("vrusable", "vrusable", 0, 1);
     vrvtxz_ = new RooRealVar("vrvtxz", "vrvtxz", -10, 10);
     vrerr6_ = new RooRealVar("vrerr6", "vrerr6", -1, 1);
-    vrzerr_ = new RooRealVar("vrzerr2", "vrzerr2", 0.002);
     vrchi2_ = new RooRealVar("vrchi2", "vrchi2", 0, 10000000);
     vreffxi_ = new RooRealVar("vreffxi", "vreffxi", 0, 10000000);
     vrndf_ = new RooRealVar("vrndf", "vrndf", 0, 100);
@@ -65,7 +64,6 @@ FitterLifetime::FitterLifetime() {
     vtchi2_ = new RooRealVar("vtchi2", "vtchi2", 1.6);
     vtndf_ = new RooRealVar("vtndf", "vtndf", 4);
     vterr6_ = new RooRealVar("vterr6", "vterr6", -1, 1);
-    vtzerr_ = new RooRealVar("vtzerr2", "vtzerr2", 0.005);
     vtchi2_ = new RooRealVar("vtchi2", "vtchi2", 0, 10000000);
     vtndf_ = new RooRealVar("vtndf", "vtndf", 0, 100);
     vtntrk_ = new RooRealVar("vtntrk", "vtntrk", 0, 100);
@@ -206,7 +204,7 @@ void FitterLifetime::Test() {
     TString prefix = "";
 
     DtPDF* lifetime_cp_pdf = new DtPDF("lifetime_cp_pdf", "lifetime_cp_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
-                       *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_,
+                       *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_,
                        *vtchi2_, *vtndf_, *vtistagl_);
     lifetime_pdfs.add(*lifetime_cp_pdf);
 
@@ -257,22 +255,22 @@ void FitterLifetime::Test() {
 
     DtPDF mixing_pdf_FB("mixing_pdf_FB", "mixing_pdf_FB", true, perfect_tagging_, S, A, *tagwtag_,
                        *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-                       *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
+                       *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
                        *vtistagl_);
 
     DtPDF mixing_pdf_FA("mixing_pdf_FA", "mixing_pdf_FA", true, perfect_tagging_, bS, bA, *tagwtag_,
                         *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-                        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
+                        *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
                         *vtistagl_);
 
     DtPDF mixing_pdf_SB("mixing_pdf_SB", "mixing_pdf_SB", false, perfect_tagging_, S, A, *tagwtag_,
                        *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-                       *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_,
+                       *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
                        *vtistagl_);
 
     DtPDF mixing_pdf_SA("mixing_pdf_SA", "mixing_pdf_SA", false, perfect_tagging_, bS, bA,
                         *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_,
-                        *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_,
+                        *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_,
                         *vtndf_, *vtistagl_);
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);

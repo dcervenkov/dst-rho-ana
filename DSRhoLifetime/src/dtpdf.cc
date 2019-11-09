@@ -159,34 +159,34 @@ Double_t DtPDF::evaluate() const {
         // not normalized, hence the 0.5/tau factors
         pdf_const = EfRkRdetRnp_fullrec( dt, constants::btype,
                 tau, ak, ck,
-                vrntrk, vrzerr,	vrchi2, vrndf,
-                vtntrk, vtzerr,	vtchi2, vtndf,
+                vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
+                vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
                 vtistagl, dtres_param );
         pdf_sin = AfRkRdetRnp_fullrec( dt, constants::btype,
                 tau, dm, ak, ck,
-                vrntrk, vrzerr,	vrchi2, vrndf,
-                vtntrk, vtzerr,	vtchi2, vtndf,
+                vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
+                vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
                 vtistagl, dtres_param ) * 0.5/tau;
         pdf_cos = MfRkRdetRnp_fullrec( dt, constants::btype,
                 tau, dm, ak, ck,
-                vrntrk, vrzerr,	vrchi2, vrndf,
-                vtntrk, vtzerr,	vtchi2, vtndf,
+                vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
+                vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
                 vtistagl, dtres_param ) * 0.5/tau;
 
         norm_const = norm_EfRkRdetRnp_fullrec(constants::cuts::dt_low, constants::cuts::dt_high, constants::btype,
                 tau, ak, ck,
-                vrntrk, vrzerr,	vrchi2, vrndf,
-                vtntrk, vtzerr,	vtchi2, vtndf,
+                vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
+                vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
                 vtistagl, dtres_param );
         norm_sin = norm_AfRkRdetRnp_fullrec(constants::cuts::dt_low, constants::cuts::dt_high, constants::btype,
                 tau, dm, ak, ck,
-                vrntrk, vrzerr,	vrchi2, vrndf,
-                vtntrk, vtzerr,	vtchi2, vtndf,
+                vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
+                vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
                 vtistagl, dtres_param ) * 0.5/tau;
         norm_cos = norm_MfRkRdetRnp_fullrec(constants::cuts::dt_low, constants::cuts::dt_high, constants::btype,
                 tau, dm, ak, ck,
-                vrntrk, vrzerr,	vrchi2, vrndf,
-                vtntrk, vtzerr,	vtchi2, vtndf,
+                vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
+                vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
                 vtistagl, dtres_param ) * 0.5/tau;
 
         double r = 1 - 2 * wtag;
@@ -207,21 +207,21 @@ Double_t DtPDF::evaluate() const {
     } else {
         pdf = EfRkRdetRnp_fullrec( dt, constants::btype,
                 tau, ak, ck,
-                vrntrk, vrzerr,	vrchi2, vrndf,
-                vtntrk, vtzerr,	vtchi2, vtndf,
+                vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
+                vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
                 vtistagl, dtres_param );
 
         norm = norm_EfRkRdetRnp_fullrec(constants::cuts::dt_low, constants::cuts::dt_high, constants::btype,
                     tau, ak, ck,
-                    vrntrk, vrzerr,	vrchi2, vrndf,
-                    vtntrk, vtzerr,	vtchi2, vtndf,
+                    vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
+                    vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
                     vtistagl, dtres_param );
     }
 
     double alpha = 1;
 
-//	return Belle::AddOutlier(expno, dt, pdf, vrntrk, vtntrk, dtres_param,
-//			norm, constants::cut_dt_low, constants::cut_dt_high, alpha);
+	// return Belle::AddOutlier(expno, dt, pdf, vrntrk, vtntrk, dtres_param,
+	// 		norm, constants::cuts::dt_low, constants::cuts::dt_high, alpha);
 
     return Belle::AddOutlierWithBkg((int) expno, dt, 1, pdf, pdf, (int) vrntrk, (int) vtntrk, dtres_param,
             norm / alpha, norm / alpha, constants::cuts::dt_low, constants::cuts::dt_high, alpha, 1);

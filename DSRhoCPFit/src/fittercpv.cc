@@ -696,7 +696,7 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     RooDataSet* channel_data = dynamic_cast<RooDataSet*>(data_->reduce(channel_cut.c_str()));
 
     RooArgSet* observables = pdf_->getObservables(data_);
-    for (auto observable : tools::ToVector(*observables)) {
+    for (auto observable : tools::ToVector<RooRealVar*>(*observables)) {
         PlotWithPull(channel_name, *observable, *channel_data, *all_histpdf, components,
                      common_config["numCPUs"]);
     }

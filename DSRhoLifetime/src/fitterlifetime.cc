@@ -328,19 +328,20 @@ void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
 
     data.plotOn(plot);
 
-    components.Print();
-    // Plot components before the total PDF as the pull plots are made from the
-    // last plotted PDF
-    const int colors[] = {4, 7, 5};
-    const int styles[] = {3345, 3354, 3395};
-    int i = 0;
-    std::vector<RooAbsPdf*> components_vec = tools::ToVector<RooAbsPdf*>(components);
-    for (auto component : components_vec) {
-        pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE),
-                   RooFit::LineColor(colors[i]), RooFit::FillColor(colors[i]), 
-                   RooFit::Components(*component), RooFit::FillStyle(styles[i]),
-                   RooFit::DrawOption("FL"), RooFit::VLines());
-                   i++;
+    if (components.getSize() > 1) {
+        // Plot components before the total PDF as the pull plots are made from the
+        // last plotted PDF
+        const int colors[] = {4, 7, 5};
+        const int styles[] = {3345, 3354, 3395};
+        int i = 0;
+        std::vector<RooAbsPdf*> components_vec = tools::ToVector<RooAbsPdf*>(components);
+        for (auto component : components_vec) {
+            pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE),
+                    RooFit::LineColor(colors[i]), RooFit::FillColor(colors[i]),
+                    RooFit::Components(*component), RooFit::FillStyle(styles[i]),
+                    RooFit::DrawOption("FL"), RooFit::VLines());
+                    i++;
+        }
     }
 
     // Can't use more CPUs because a bug (?) in ROOT causes it to take much longer

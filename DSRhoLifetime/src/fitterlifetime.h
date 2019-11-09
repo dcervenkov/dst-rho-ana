@@ -27,7 +27,7 @@ class FitterLifetime {
 
     void PlotVar(RooRealVar& var) const;
     void PlotWithPull(const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
-                      const RooArgList& components = RooArgList(), const char* title = "") const;
+                      const std::vector<RooAbsPdf*>& components = {}, const char* title = "") const;
     void Test();
 
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
@@ -91,7 +91,8 @@ class FitterLifetime {
    private:
     TPaveText* CreateStatBox(const double chi2, const bool position_top,
                              const bool position_left) const;
-    RooAddPdf* CreateVoigtGaussDtPdf(const std::string prefix);
+    RooAddPdf* CreateVoigtGaussDtPdf(const std::string prefix) const;
+    RooAbsPdf* CreateLifetimePDF(std::vector<RooAbsPdf*>& components, const bool scf, const bool bkg) const;
     nlohmann::json ReadInJSONFile(const char* filename) const;
 
     std::vector<RooRealVar**> conditional_vars_;

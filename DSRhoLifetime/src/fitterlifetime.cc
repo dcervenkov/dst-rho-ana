@@ -181,56 +181,6 @@ void FitterLifetime::PlotVar(RooRealVar& var) const {
 }
 
 void FitterLifetime::Test() {
-    RooArgList lifetime_pdfs;
-    bool scf = true;
-    bool bkg = true;
-    // bool scf = false;
-    // bool bkg = false;
-    // if (common_config["components"] == "CRSCF") {
-    //     scf = true;
-    // } else if (common_config["components"] == "all") {
-    //     scf = true;
-    //     bkg = true;
-    // }
-
-    TString prefix = "";
-
-    DtPDF* lifetime_cp_pdf = new DtPDF("lifetime_cp_pdf", "lifetime_cp_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
-                       *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_,
-                       *vtchi2_, *vtndf_, *vtistagl_);
-    lifetime_pdfs.add(*lifetime_cp_pdf);
-
-    nlohmann::json json = ReadInJSONFile("config.json");
-
-    if (scf) {
-        RooAddPdf* lifetime_scf_pdf = CreateVoigtGaussDtPdf("scf_dt");
-        lifetime_pdfs.add(*lifetime_scf_pdf);
-    }
-
-    if (bkg) {
-        RooAddPdf* lifetime_bkg_pdf = CreateVoigtGaussDtPdf("bkg_dt");
-        lifetime_pdfs.add(*lifetime_bkg_pdf);
-    }
-
-    RooArgList fractions;
-    if (scf && !bkg) {
-        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
-        cr_scf_f_->setConstant();
-        fractions.add(*cr_scf_f_);
-    } else if (scf && bkg) {
-        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
-        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
-        cr_f_->setConstant();
-        scf_f_->setConstant();
-        fractions.add(*cr_f_);
-        fractions.add(*scf_f_);
-    }
-
-    RooAddPdf* lifetime_pdf = new RooAddPdf(prefix + "lifetime_pdf", prefix + "lifetime_pdf", lifetime_pdfs, fractions);
-    Log::LogLine(Log::debug) << "Global parameters:";
-    tools::ChangeModelParameters(lifetime_pdf, json["modelParameters"]);
-    Log::LogLine(Log::debug) << "Channel parameters:";
-    tools::ChangeModelParameters(lifetime_pdf, json["channels"]["Kpi"]["modelParameters"]);
 
     // Small pars (r = 0.01)
     //	RooRealVar S("S", "S", 0.0144908);
@@ -277,11 +227,13 @@ void FitterLifetime::Test() {
     //	dm_->setConstant(true);
 
     if (do_lifetime_fit_) {
+        std::vector<RooAbsPdf*> components;
+        RooAbsPdf* lifetime_pdf = CreateLifetimePDF(components, true, true);
         result_ = lifetime_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
                                      RooFit::Minimizer("Minuit2"),
                                      RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         if (make_plots_) {
-            PlotWithPull(*dt_, *dataset_, *lifetime_pdf, lifetime_pdfs);
+            PlotWithPull(*dt_, *dataset_, *lifetime_pdf, components);
         }
     }
 
@@ -311,7 +263,7 @@ void FitterLifetime::Test() {
 }
 
 void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
-                                  const RooAbsPdf& pdf, const RooArgList& components,
+                                  const RooAbsPdf& pdf, const std::vector<RooAbsPdf*>& components,
                                   const char* title) const {
     TCanvas canvas(pdf.GetName(), var.GetTitle(), 500, 500);
     RooPlot* plot = var.frame();
@@ -328,14 +280,13 @@ void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
 
     data.plotOn(plot);
 
-    if (components.getSize() > 1) {
+    if (components.size() > 1) {
         // Plot components before the total PDF as the pull plots are made from the
         // last plotted PDF
         const int colors[] = {4, 7, 5};
         const int styles[] = {3345, 3354, 3395};
         int i = 0;
-        std::vector<RooAbsPdf*> components_vec = tools::ToVector<RooAbsPdf*>(components);
-        for (auto component : components_vec) {
+        for (auto component : components) {
             pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE),
                     RooFit::LineColor(colors[i]), RooFit::FillColor(colors[i]),
                     RooFit::Components(*component), RooFit::FillStyle(styles[i]),
@@ -547,7 +498,7 @@ void FitterLifetime::SetOutputDir(const char* output_dir) {
  * @param prefix Text to be prepended to the ROOT name
  *
  */
-RooAddPdf* FitterLifetime::CreateVoigtGaussDtPdf(const std::string prefix) {
+RooAddPdf* FitterLifetime::CreateVoigtGaussDtPdf(const std::string prefix) const {
     TString pre(prefix);
 
     RooRealVar* voigt_mu = new RooRealVar(pre + "_voigt_mu", "v_{#mu}", -0.249);
@@ -581,4 +532,50 @@ nlohmann::json FitterLifetime::ReadInJSONFile(const char* filename) const {
     nlohmann::json json;
     filestream >> json;
     return json;
+}
+
+RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components, const bool scf, const bool bkg) const {
+
+    DtPDF* lifetime_cp_pdf = new DtPDF("lifetime_cp_pdf", "lifetime_cp_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
+                       *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_,
+                       *vtchi2_, *vtndf_, *vtistagl_);
+
+    RooArgList lifetime_pdfs;
+    lifetime_pdfs.add(*lifetime_cp_pdf);
+
+    nlohmann::json json = ReadInJSONFile("config.json");
+
+    if (scf) {
+        RooAddPdf* lifetime_scf_pdf = CreateVoigtGaussDtPdf("scf_dt");
+        lifetime_pdfs.add(*lifetime_scf_pdf);
+    }
+
+    if (bkg) {
+        RooAddPdf* lifetime_bkg_pdf = CreateVoigtGaussDtPdf("bkg_dt");
+        lifetime_pdfs.add(*lifetime_bkg_pdf);
+    }
+
+    TString prefix = "";
+    RooArgList fractions;
+    if (scf && !bkg) {
+        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
+        cr_scf_f_->setConstant();
+        fractions.add(*cr_scf_f_);
+    } else if (scf && bkg) {
+        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+        cr_f_->setConstant();
+        scf_f_->setConstant();
+        fractions.add(*cr_f_);
+        fractions.add(*scf_f_);
+    }
+
+    RooAddPdf* lifetime_pdf = new RooAddPdf(prefix + "lifetime_pdf", prefix + "lifetime_pdf", lifetime_pdfs, fractions);
+    Log::LogLine(Log::debug) << "Global parameters:";
+    tools::ChangeModelParameters(lifetime_pdf, json["modelParameters"]);
+    Log::LogLine(Log::debug) << "Channel parameters:";
+    tools::ChangeModelParameters(lifetime_pdf, json["channels"]["Kpi"]["modelParameters"]);
+
+    components = tools::ToVector<RooAbsPdf*>(lifetime_pdfs);
+    return lifetime_pdf;
 }

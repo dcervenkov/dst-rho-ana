@@ -16,6 +16,9 @@
 #include "TChain.h"
 #include "TPaveText.h"
 
+// Local includes
+#include "nlohmann/json.hpp"
+
 namespace tools {
 
 std::vector<TString> GetListOfFiles(const char* dir, const char* ext);

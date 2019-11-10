@@ -183,9 +183,6 @@ void FitterLifetime::PlotVar(RooRealVar& var) const {
 }
 
 void FitterLifetime::Test() {
-
-    const bool scf = true;
-    const bool bkg = true;
     // Small pars (r = 0.01)
     //	RooRealVar S("S", "S", 0.0144908);
     //	RooRealVar A("A", "A", -0.999801);
@@ -230,7 +227,7 @@ void FitterLifetime::Test() {
     mixing_pdfs_SB.add(*cr_mixing_pdf_SB);
     mixing_pdfs_SA.add(*cr_mixing_pdf_SA);
 
-    if (scf) {
+    if (scf_) {
         RooAddPdf* scf_dt_pdf_F = CreateVoigtGaussDtPdf("scf_dt_cf");
         RooAddPdf* scf_dt_pdf_S = CreateVoigtGaussDtPdf("scf_dt_dcs");
         mixing_pdfs_FB.add(*scf_dt_pdf_F);
@@ -239,7 +236,7 @@ void FitterLifetime::Test() {
         mixing_pdfs_SA.add(*scf_dt_pdf_S);
     }
 
-    if (bkg) {
+    if (bkg_) {
         RooAddPdf* bkg_dt_pdf_F = CreateVoigtGaussDtPdf("bkg_dt_cf");
         RooAddPdf* bkg_dt_pdf_S = CreateVoigtGaussDtPdf("bkg_dt_dcs");
         mixing_pdfs_FB.add(*bkg_dt_pdf_F);
@@ -250,11 +247,11 @@ void FitterLifetime::Test() {
 
     TString prefix = "";
     RooArgList fractions;
-    if (scf && !bkg) {
+    if (scf_ && !bkg_) {
         RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
         cr_scf_f_->setConstant();
         fractions.add(*cr_scf_f_);
-    } else if (scf && bkg) {
+    } else if (scf_ && bkg_) {
         RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
         RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
         cr_f_->setConstant();
@@ -284,7 +281,7 @@ void FitterLifetime::Test() {
 
     if (do_lifetime_fit_) {
         std::vector<RooAbsPdf*> components;
-        RooAbsPdf* lifetime_pdf = CreateLifetimePDF(components, true, true);
+        RooAbsPdf* lifetime_pdf = CreateLifetimePDF(components, scf_, bkg_);
         result_ = lifetime_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
                                      RooFit::Minimizer("Minuit2"),
                                      RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
@@ -477,7 +474,9 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     }
 
     TString common_cuts = tools::GetCommonCutsString();
-    // common_cuts += "&&evmcflag==1";
+    if (scf_ || bkg_) {
+        common_cuts += "&&evmcflag==1";
+    }
 
     TString FB_cuts;
     TString FA_cuts;
@@ -638,4 +637,13 @@ void FitterLifetime::SaveTXTResults(const char* results_file) const {
     buffer << std::endl;
 
     tools::SaveTextToFile(std::string(results_file), buffer.str());
+}
+
+void FitterLifetime::SetComponents(const std::string components) {
+    if (components == "CRSCF") {
+        scf_ = true;
+    } else if (components == "all") {
+        scf_ = true;
+        bkg_ = true;
+    }
 }

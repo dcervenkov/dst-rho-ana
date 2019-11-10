@@ -23,6 +23,8 @@ struct fitter_options {
     bool config_set;
     const char* channel;
     bool channel_set;
+    const char* components;
+    bool components_set;
     int num_events;
     bool num_events_set;
     bool perfect_tagging;

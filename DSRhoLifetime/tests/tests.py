@@ -16,11 +16,13 @@ cmd = "./DSRhoLifetime"
 test_configs = {
     "lifetime_fit": ["--config=tests/config.json",
                      "--channel=Kpi",
+                     "--components=all",
                      "--lifetime",
                      "tests/current_result",
                      "tests/data/Kpi.root"],
     "mixing_fit": ["--config=tests/config.json",
                    "--channel=Kpi",
+                   "--components=all",
                    "--mixing",
                    "tests/current_result",
                    "tests/data/Kpi.root"],

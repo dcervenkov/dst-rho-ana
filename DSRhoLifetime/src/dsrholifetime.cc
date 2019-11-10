@@ -66,6 +66,7 @@ int main(int argc, char* argv[]) {
         fitter.ReadInFile(file_names);
     }
     if (options.channel_set) fitter.SetChannel(options.channel);
+    if (options.components_set) fitter.SetComponents(options.components);
 
     fitter.Test();
 
@@ -84,6 +85,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"config", required_argument, 0, 'g'},
         {"channel", required_argument, 0, 'a'},
         {"cpus", required_argument, 0, 'c'},
+        {"components", required_argument, 0, 'o'},
         {"events", required_argument, 0, 'e'},
         {"plot-dir", required_argument, 0, 'p'},
         {"lifetime", no_argument, 0, 'l'},
@@ -93,7 +95,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {nullptr, no_argument, nullptr, 0}};
 
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "a:c:e:g:plmth", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "a:c:e:g:o:plmth", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -116,6 +118,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.config = optarg;
                 options.config_set = true;
                 break;
+            case 'o':
+                options.components = optarg;
+                options.components_set = true;
+                break;
             case 'p':
                 options.plot_dir = optarg;
                 options.plot_dir_set = true;
@@ -136,15 +142,16 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("Usage: %s [OPTION]... INPUT-FILE OUTPUT_DIR\n\n", argv[0]);
                 printf(
                     "Mandatory arguments to long options are mandatory for short options too.\n");
-                printf("-a, --channel=CHANNEL   channel whose SCF and BKG pars to load\n");
-                printf("-c, --cpus=NUM_CPUS     number of CPU cores to use for fitting and plotting\n");
-                printf("-e, --events=NUM_EVENTS number of events to be imported from the input file\n");
-                printf("-g, --config=CONFIG-FILE         read in configuration from the specified file\n");
-                printf("-h, --help              display this text and exit\n");
-                printf("-l, --lifetime          make a lifetime fit\n");
-                printf("-m, --mixing            make a mixing fit\n");
-                printf("-p, --plot-dir=DIR      create lifetime/mixing plots and save to DIR\n");
-                printf("-t, --perfecttag        use MC info to get perfect tagging\n");
+                printf("-a, --channel=CHANNEL        channel whose SCF and BKG pars to load\n");
+                printf("-c, --cpus=NUM_CPUS          number of CPU cores to use for fitting and plotting\n");
+                printf("-e, --events=NUM_EVENTS      number of events to be imported from the input file\n");
+                printf("-g, --config=CONFIG-FILE     read in configuration from the specified file\n");
+                printf("-h, --help                   display this text and exit\n");
+                printf("-l, --lifetime               make a lifetime fit\n");
+                printf("-m, --mixing                 make a mixing fit\n");
+                printf("-o, --components=COMPONENTS  components which to read and fit (CR, CRSCF, all)\n");
+                printf("-p, --plot-dir=DIR           create lifetime/mixing plots and save to DIR\n");
+                printf("-t, --perfecttag             use MC info to get perfect tagging\n");
                 exit(0);
                 break;
             default:

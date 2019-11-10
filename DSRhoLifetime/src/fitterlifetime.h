@@ -36,6 +36,7 @@ class FitterLifetime {
     void SetChannel(const std::string channel) { channel_ = channel; };
     std::string GetChannel() { return channel_; };
 
+
     void SetDoLifetimeFit(const bool& do_lifetime_fit) { do_lifetime_fit_ = do_lifetime_fit; };
     int GetDoLifetimeFit() const { return do_lifetime_fit_; };
 
@@ -48,6 +49,7 @@ class FitterLifetime {
     void SetPerfectTagging(const bool& perfect_tagging) { perfect_tagging_ = perfect_tagging; };
     int GetPerfectTagging() const { return perfect_tagging_; };
 
+    void SetComponents(const std::string components);
 	void ReadInFile(const std::vector<const char*> file_names, const int& num_events = 0);
     void SaveTXTResults(const char* results_file) const;
 
@@ -117,6 +119,9 @@ class FitterLifetime {
 
     nlohmann::json config_;
     std::string channel_;
+    std::string components_;
+    bool scf_ = false;
+    bool bkg_ = false;
 };
 
 #endif /* FITTERLIFETIME_H_ */

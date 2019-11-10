@@ -47,7 +47,9 @@
 #include "nlohmann/json.hpp"
 #include "tools.h"
 
-FitterLifetime::FitterLifetime() {
+FitterLifetime::FitterLifetime(const nlohmann::json config) {
+    config_ = config;
+
     dt_ = new RooRealVar("dt", "#Deltat [ps]", constants::cuts::dt_low, constants::cuts::dt_high);
 
     vrusable_ = new RooRealVar("vrusable", "vrusable", 0, 1);
@@ -228,8 +230,6 @@ void FitterLifetime::Test() {
     mixing_pdfs_SB.add(*cr_mixing_pdf_SB);
     mixing_pdfs_SA.add(*cr_mixing_pdf_SA);
 
-    nlohmann::json json = ReadInJSONFile("config.json");
-
     if (scf) {
         RooAddPdf* scf_dt_pdf_F = CreateVoigtGaussDtPdf("scf_dt_cf");
         RooAddPdf* scf_dt_pdf_S = CreateVoigtGaussDtPdf("scf_dt_dcs");
@@ -275,9 +275,9 @@ void FitterLifetime::Test() {
     sim_pdf.addPdf(*mixing_pdf_SA, "SA");
 
     Log::LogLine(Log::debug) << "Global parameters:";
-    tools::ChangeModelParameters(&sim_pdf, json["modelParameters"]);
+    tools::ChangeModelParameters(&sim_pdf, config_["modelParameters"]);
     Log::LogLine(Log::debug) << "Channel parameters:";
-    tools::ChangeModelParameters(&sim_pdf, json["channels"]["Kpi"]["modelParameters"]);
+    tools::ChangeModelParameters(&sim_pdf, config_["channels"]["Kpi"]["modelParameters"]);
 
     // tau_->setConstant(true);
     //	dm_->setConstant(true);
@@ -592,8 +592,6 @@ RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components
     RooArgList lifetime_pdfs;
     lifetime_pdfs.add(*lifetime_cp_pdf);
 
-    nlohmann::json json = ReadInJSONFile("config.json");
-
     if (scf) {
         RooAddPdf* lifetime_scf_pdf = CreateVoigtGaussDtPdf("scf_dt");
         lifetime_pdfs.add(*lifetime_scf_pdf);
@@ -621,9 +619,9 @@ RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components
 
     RooAddPdf* lifetime_pdf = new RooAddPdf(prefix + "lifetime_pdf", prefix + "lifetime_pdf", lifetime_pdfs, fractions);
     Log::LogLine(Log::debug) << "Global parameters:";
-    tools::ChangeModelParameters(lifetime_pdf, json["modelParameters"]);
+    tools::ChangeModelParameters(lifetime_pdf, config_["modelParameters"]);
     Log::LogLine(Log::debug) << "Channel parameters:";
-    tools::ChangeModelParameters(lifetime_pdf, json["channels"]["Kpi"]["modelParameters"]);
+    tools::ChangeModelParameters(lifetime_pdf, config_["channels"]["Kpi"]["modelParameters"]);
 
     components = tools::ToVector<RooAbsPdf*>(lifetime_pdfs);
     return lifetime_pdf;

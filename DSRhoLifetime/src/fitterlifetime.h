@@ -22,7 +22,7 @@
 
 class FitterLifetime {
    public:
-    FitterLifetime();
+    FitterLifetime(const nlohmann::json config);
     virtual ~FitterLifetime();
 
     void PlotVar(RooRealVar& var) const;
@@ -111,6 +111,8 @@ class FitterLifetime {
     bool do_mixing_fit_;
     bool make_plots_;
     bool perfect_tagging_;
+
+    nlohmann::json config_;
 };
 
 #endif /* FITTERLIFETIME_H_ */

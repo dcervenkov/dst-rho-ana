@@ -15,6 +15,7 @@
 
 // Local includes
 #include "colors.h"
+#include "config.h"
 #include "constants.h"
 #include "fitterlifetime.h"
 #include "tools.h"
@@ -44,7 +45,11 @@ int main(int argc, char* argv[]) {
     tools::SetupPlotStyle();
     colors::setColors();
 
-    FitterLifetime fitter;
+
+    Config config;
+    config.ReadInJSONFile(options.config);
+
+    FitterLifetime fitter(config.json);
 
     if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
     if (options.plot_dir_set) {
@@ -75,6 +80,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                           fitter_options& options) {
     int c;
     struct option long_options[] = {
+        {"config", required_argument, 0, 'g'},
         {"cpus", required_argument, 0, 'c'},
         {"events", required_argument, 0, 'e'},
         {"plot-dir", required_argument, 0, 'p'},
@@ -85,7 +91,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {nullptr, no_argument, nullptr, 0}};
 
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:e:plmth", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:e:g:plmth", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -99,6 +105,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'e':
                 options.num_events = atoi(optarg);
                 options.num_events_set = true;
+                break;
+            case 'g':
+                options.config = optarg;
+                options.config_set = true;
                 break;
             case 'p':
                 options.plot_dir = optarg;
@@ -122,6 +132,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                     "Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS     number of CPU cores to use for fitting and plotting\n");
                 printf("-e, --events=NUM_EVENTS number of events to be imported from the input file\n");
+                printf("-g, --config=CONFIG-FILE         read in configuration from the specified file\n");
                 printf("-h, --help              display this text and exit\n");
                 printf("-l, --lifetime          make a lifetime fit\n");
                 printf("-m, --mixing            make a mixing fit\n");

@@ -277,7 +277,7 @@ void FitterLifetime::Test() {
     Log::LogLine(Log::debug) << "Global parameters:";
     tools::ChangeModelParameters(&sim_pdf, config_["modelParameters"]);
     Log::LogLine(Log::debug) << "Channel parameters:";
-    tools::ChangeModelParameters(&sim_pdf, config_["channels"]["Kpi"]["modelParameters"]);
+    tools::ChangeModelParameters(&sim_pdf, config_["channels"][channel_]["modelParameters"]);
 
     // tau_->setConstant(true);
     //	dm_->setConstant(true);
@@ -621,7 +621,7 @@ RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components
     Log::LogLine(Log::debug) << "Global parameters:";
     tools::ChangeModelParameters(lifetime_pdf, config_["modelParameters"]);
     Log::LogLine(Log::debug) << "Channel parameters:";
-    tools::ChangeModelParameters(lifetime_pdf, config_["channels"]["Kpi"]["modelParameters"]);
+    tools::ChangeModelParameters(lifetime_pdf, config_["channels"][channel_]["modelParameters"]);
 
     components = tools::ToVector<RooAbsPdf*>(lifetime_pdfs);
     return lifetime_pdf;

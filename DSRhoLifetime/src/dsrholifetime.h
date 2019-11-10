@@ -21,6 +21,8 @@ struct fitter_options {
     bool plot_dir_set;
     const char* config;
     bool config_set;
+    const char* channel;
+    bool channel_set;
     int num_events;
     bool num_events_set;
     bool perfect_tagging;

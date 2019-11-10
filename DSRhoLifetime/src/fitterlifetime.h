@@ -33,6 +33,9 @@ class FitterLifetime {
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
     int GetNumCPUs() { return num_CPUs_; };
 
+    void SetChannel(const std::string channel) { channel_ = channel; };
+    std::string GetChannel() { return channel_; };
+
     void SetDoLifetimeFit(const bool& do_lifetime_fit) { do_lifetime_fit_ = do_lifetime_fit; };
     int GetDoLifetimeFit() const { return do_lifetime_fit_; };
 
@@ -113,6 +116,7 @@ class FitterLifetime {
     bool perfect_tagging_;
 
     nlohmann::json config_;
+    std::string channel_;
 };
 
 #endif /* FITTERLIFETIME_H_ */

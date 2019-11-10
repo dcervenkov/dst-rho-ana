@@ -65,6 +65,7 @@ int main(int argc, char* argv[]) {
     } else {
         fitter.ReadInFile(file_names);
     }
+    if (options.channel_set) fitter.SetChannel(options.channel);
 
     fitter.Test();
 
@@ -81,6 +82,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     int c;
     struct option long_options[] = {
         {"config", required_argument, 0, 'g'},
+        {"channel", required_argument, 0, 'a'},
         {"cpus", required_argument, 0, 'c'},
         {"events", required_argument, 0, 'e'},
         {"plot-dir", required_argument, 0, 'p'},
@@ -91,12 +93,16 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {nullptr, no_argument, nullptr, 0}};
 
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:e:g:plmth", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "a:c:e:g:plmth", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
                 if (optarg) printf(" with arg %s", optarg);
                 printf("\n");
+                break;
+            case 'a':
+                options.channel = optarg;
+                options.channel_set = true;
                 break;
             case 'c':
                 options.num_CPUs = atoi(optarg);
@@ -130,6 +136,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("Usage: %s [OPTION]... INPUT-FILE OUTPUT_DIR\n\n", argv[0]);
                 printf(
                     "Mandatory arguments to long options are mandatory for short options too.\n");
+                printf("-a, --channel=CHANNEL   channel whose SCF and BKG pars to load\n");
                 printf("-c, --cpus=NUM_CPUS     number of CPU cores to use for fitting and plotting\n");
                 printf("-e, --events=NUM_EVENTS number of events to be imported from the input file\n");
                 printf("-g, --config=CONFIG-FILE         read in configuration from the specified file\n");

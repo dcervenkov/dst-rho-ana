@@ -17,8 +17,8 @@ struct fitter_options {
     bool do_lifetime_fit_set;
     bool do_mixing_fit;
     bool do_mixing_fit_set;
-    bool make_plots;
-    bool make_plots_set;
+    const char* plot_dir;
+    bool plot_dir_set;
     int num_events;
     bool num_events_set;
     bool perfect_tagging;

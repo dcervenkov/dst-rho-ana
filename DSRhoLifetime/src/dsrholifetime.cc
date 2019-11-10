@@ -28,11 +28,11 @@ int main(int argc, char* argv[]) {
 
     if (optionless_argc < 3) {
         printf("ERROR: Wrong number of arguments.\n");
-        printf("Usage: %s [OPTION]... OUTPUT_DIR INPUT-FILE(S)...\n", optionless_argv[0]);
+        printf("Usage: %s [OPTION]... RESULTS_FILE INPUT-FILE(S)...\n", optionless_argv[0]);
         return 2;
     }
 
-    const char* output_dir = optionless_argv[1];
+    const char* results_file = optionless_argv[1];
 
     std::vector<const char*> file_names;
     for (int i = 2; i < optionless_argc; i++) {
@@ -45,10 +45,12 @@ int main(int argc, char* argv[]) {
     colors::setColors();
 
     FitterLifetime fitter;
-    fitter.SetOutputDir(output_dir);
 
     if (options.num_CPUs_set) fitter.SetNumCPUs(options.num_CPUs);
-    if (options.make_plots_set) fitter.SetMakePlots(options.make_plots);
+    if (options.plot_dir_set) {
+        tools::SetPlotDir(options.plot_dir);
+        fitter.SetMakePlots(true);
+    }
     if (options.do_lifetime_fit_set) fitter.SetDoLifetimeFit(options.do_lifetime_fit);
     if (options.do_mixing_fit_set) fitter.SetDoMixingFit(options.do_mixing_fit);
     if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
@@ -60,6 +62,8 @@ int main(int argc, char* argv[]) {
     }
 
     fitter.Test();
+
+    fitter.SaveTXTResults(results_file);
 
     return 0;
 }
@@ -73,7 +77,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     struct option long_options[] = {
         {"cpus", required_argument, 0, 'c'},
         {"events", required_argument, 0, 'e'},
-        {"plot", no_argument, 0, 'p'},
+        {"plot-dir", required_argument, 0, 'p'},
         {"lifetime", no_argument, 0, 'l'},
         {"mixing", no_argument, 0, 'm'},
         {"perfecttag", no_argument, 0, 't'},
@@ -97,8 +101,8 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.num_events_set = true;
                 break;
             case 'p':
-                options.make_plots = true;
-                options.make_plots_set = true;
+                options.plot_dir = optarg;
+                options.plot_dir_set = true;
                 break;
             case 'l':
                 options.do_lifetime_fit = true;
@@ -121,7 +125,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-h, --help              display this text and exit\n");
                 printf("-l, --lifetime          make a lifetime fit\n");
                 printf("-m, --mixing            make a mixing fit\n");
-                printf("-p, --plot              create lifetime/mixing plots\n");
+                printf("-p, --plot-dir=DIR      create lifetime/mixing plots and save to DIR\n");
                 printf("-t, --perfecttag        use MC info to get perfect tagging\n");
                 exit(0);
                 break;

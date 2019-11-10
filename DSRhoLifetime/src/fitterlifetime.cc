@@ -539,13 +539,6 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     }
 }
 
-void FitterLifetime::SetOutputDir(const char* output_dir) {
-    tools::SetPlotDir(output_dir);
-    if (make_plots_) {
-        output_file_ = new TFile(TString(output_dir) + "/plots.root", "RECREATE");
-    }
-}
-
 /**
  * Create a Voigtian + Gaussian PDF.
  *
@@ -634,4 +627,17 @@ RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components
 
     components = tools::ToVector<RooAbsPdf*>(lifetime_pdfs);
     return lifetime_pdf;
+}
+
+void FitterLifetime::SaveTXTResults(const char* results_file) const {
+    std::stringstream buffer;
+    if (do_lifetime_fit_ || do_mixing_fit_) {
+        buffer << tau_->getVal() << ", " << tau_->getError(); 
+    }
+    if (do_mixing_fit_) {
+        buffer << ", " << dm_->getVal() << ", " << dm_->getError(); 
+    }
+    buffer << std::endl;
+
+    tools::SaveTextToFile(std::string(results_file), buffer.str());
 }

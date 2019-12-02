@@ -59,14 +59,13 @@ int main(int argc, char* argv[]) {
     if (options.do_lifetime_fit_set) fitter.SetDoLifetimeFit(options.do_lifetime_fit);
     if (options.do_mixing_fit_set) fitter.SetDoMixingFit(options.do_mixing_fit);
     if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
-
+    if (options.channel_set) fitter.SetChannel(options.channel);
+    if (options.components_set) fitter.SetComponents(options.components);
     if (options.num_events_set) {
         fitter.ReadInFile(file_names, options.num_events);
     } else {
         fitter.ReadInFile(file_names);
     }
-    if (options.channel_set) fitter.SetChannel(options.channel);
-    if (options.components_set) fitter.SetComponents(options.components);
 
     fitter.Test();
 

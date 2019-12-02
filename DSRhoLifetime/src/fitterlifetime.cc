@@ -280,6 +280,7 @@ void FitterLifetime::Test() {
     //	dm_->setConstant(true);
 
     if (do_lifetime_fit_) {
+        Log::print(Log::info, "Fitting %i events\n", dataset_->numEntries());
         std::vector<RooAbsPdf*> components;
         RooAbsPdf* lifetime_pdf = CreateLifetimePDF(components, scf_, bkg_);
         result_ = lifetime_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
@@ -291,6 +292,7 @@ void FitterLifetime::Test() {
     }
 
     if (do_mixing_fit_) {
+        Log::print(Log::info, "Fitting %i events\n", dataset_->numEntries());
         result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
                                 RooFit::Minimizer("Minuit2"),
                                 RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
@@ -474,7 +476,8 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     }
 
     TString common_cuts = tools::GetCommonCutsString();
-    if (scf_ || bkg_) {
+    if (scf_ == false && bkg_ == false) {
+        Log::LogLine(Log::debug) << "Using evmcflag==1";
         common_cuts += "&&evmcflag==1";
     }
 

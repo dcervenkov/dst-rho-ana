@@ -1,6 +1,342 @@
 {
     "plots": [
         {
+            "fileName": "shcosthb",
+            "formula": "shcosthb",
+            "xAxisTitle": "#cos(#theta_{b})",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "benergy",
+            "formula": "benergy",
+            "xAxisTitle": "E(B)",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "Eb_cms",
+            "formula": "sqrt(5.2794*5.2794 + benergy*benergy - mbc*mbc)",
+            "xAxisTitle": "E^*(B)",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "vrntrk",
+            "formula": "vrntrk",
+            "xAxisTitle": "vrntrk",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "vtntrk",
+            "formula": "vtntrk",
+            "xAxisTitle": "vtntrk",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "vrzerr",
+            "formula": "sqrt(vrerr6)",
+            "xAxisTitle": "vrzerr",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "vtzerr",
+            "formula": "sqrt(vterr6)",
+            "xAxisTitle": "vtzerr",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "vrchi2",
+            "formula": "vrchi2",
+            "xAxisTitle": "vrchi2",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "vtchi2",
+            "formula": "vtchi2",
+            "xAxisTitle": "vtchi2",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "vrndf",
+            "formula": "vrndf",
+            "xAxisTitle": "vrndf",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "vtndf",
+            "formula": "vtndf",
+            "xAxisTitle": "vtndf",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "vtistagl",
+            "formula": "vtistagl",
+            "xAxisTitle": "vtistagl",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "files": ["../data/Kpi/realistic_mc/DSRho-*.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 4,
+                    "label": "CR",
+                    "cut": "evmcflag==1"
+                },
+                {
+                    "color": 7,
+                    "label": "SCF",
+                    "cut": "evmcflag!=1"
+                },
+                {
+                    "label": "BKG",
+                    "color": 5,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/realistic_mc/DSRhoSkim*.root"
+                    ]
+                }
+            ]
+        },
+        {
             "fileName": "de",
             "formula": "de",
             "xAxisTitle": "#DeltaE",

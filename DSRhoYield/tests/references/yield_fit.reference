@@ -1,0 +1,9 @@
+*all*
+103 entries, fit status: 0
+n_bkg                           1000.000000 -0.504741  0.504741
+n_signal_plus_cross_model       10000.000000 -0.504725  0.504725
+width_factor                    0.943088 -0.167930  0.167930
+chi^2 = 0.527900
+
+rel://files/DSRhoYield/ver7/K/all.png
+

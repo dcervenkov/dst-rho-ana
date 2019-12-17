@@ -58,6 +58,7 @@ def error_of_sum(errors):
     return sqrt(total)
 
 def process_MC(channels, streams):
+    print "Processing MC results\n"
     for channel in channels:
         print channel
         header = "{} +- {} | {} | {} | {}".format("Yield", "Err", "Count", "Bias", "Purity")
@@ -67,6 +68,7 @@ def process_MC(channels, streams):
         errors = []
         counts = []
         biases = []
+        purities = []
         for stream in streams:
             sig_yield, sig_yield_error, scf_yield, scf_yield_error, bkg_yield, bkg_yield_error = recover_yield(
                 "plots/" + channel + "_stream" + str(stream) + "/fit_results.root")
@@ -80,12 +82,14 @@ def process_MC(channels, streams):
             errors.append(sig_yield_error)
             counts.append(sig_count)
             biases.append(sig_yield - sig_count)
+            purities.append(purity)
 
-        print "Averages: "
-        print str(sum(yields)/len(yields)), "+-",  str(sum(errors)/len(errors)), str(sum(counts)/len(counts)), str(sum(biases)/len(biases))
+        print get_table_midline(header)
+        print "{} +- {} | {} | {:4} | {:.2f}".format(sum(yields)/len(yields), str(sum(errors)/len(errors)), sum(counts)/len(counts), sum(biases)/len(biases), sum(purities)/len(purities))
         print
 
 def process_data(channels):
+    print "Processing data results\n"
     header = "{} | {} +- {} | {}".format("Channel", "Yield", "Err","Purity")
     print header
     print get_table_midline(header)
@@ -109,5 +113,5 @@ r = RooRealVar()
 channels = ["Kpi", "Kpipi0", "K3pi"]
 streams = range(0, 6)
 
-# process_MC(channels, streams)
+process_MC(channels, streams)
 process_data(channels)

@@ -138,7 +138,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.perfect_tagging_set = true;
                 break;
             case 'h':
-                printf("Usage: %s [OPTION]... INPUT-FILE OUTPUT_DIR\n\n", argv[0]);
+                printf("Usage: %s [OPTION]... RESULTS_FILE INPUT-FILE(S)...\n\n", argv[0]);
                 printf(
                     "Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-a, --channel=CHANNEL        channel whose SCF and BKG pars to load\n");

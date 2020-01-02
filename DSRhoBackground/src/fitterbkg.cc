@@ -176,6 +176,11 @@ FitterBKG::FitterBKG() {
     model_parameters_.push_back(&bkg_thetab_gaus_sigma_r_);
     model_parameters_.push_back(&bkg_thetab_exp_alpha_);
     model_parameters_.push_back(&bkg_thetab_f_);
+
+    bkg_physics_dt_model_ =
+        new DtBKG("bkg_physics_dt_model", "bkg_physics_dt_model", dt_, *vrerr6_, *vterr6_,
+                  bkg_dt_tau_, bkg_dt_f_delta_, bkg_dt_mu_delta_, bkg_dt_mu_lifetime_,
+                  bkg_dt_f_tail_, bkg_dt_S_main_, bkg_dt_S_tail_);
 }
 
 FitterBKG::~FitterBKG() {

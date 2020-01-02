@@ -72,6 +72,11 @@ int main(int argc, char* argv[]) {
         fitter.PlotKDE(kde);
     } else if (options.histo) {
         fitter.CreateHistoPDF(fitter.dataset_);
+    } else if (options.physics) {
+        fitter.Fit(fitter.bkg_physics_dt_model_, fitter.dataset_);
+        if (options.plot_dir_set) {
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, *fitter.bkg_physics_dt_model_);
+        }
     } else {
         // We must plot after each fit otherwise the results printed on the plot
         // would be of the last fit
@@ -186,10 +191,11 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"kde", no_argument, 0, 'k'},
                                     {"histo", no_argument, 0, 's'},
                                     {"plot-dir", required_argument, 0, 'p'},
+                                    {"physics", no_argument, 0, 'y'},
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:p:ksh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:p:ksyh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -210,12 +216,16 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.plot_dir = optarg;
                 options.plot_dir_set = true;
                 break;
+            case 'y':
+                options.physics = true;
+                break;
             case 'h':
                 printf("Usage: %s [OPTION]... INPUT-FILES\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS       number of CPU cores to use for fitting and plotting\n");
                 printf("-k, --kde                 use kernel density estimation\n");
                 printf("-s, --histo               create a histogram PDF\n");
+                printf("-y, --physics             fit physics-based dt PDF\n");
                 printf("-h, --help                display this text and exit\n");
                 printf("-p, --plot-dir=PLOT_DIR   create lifetime/mixing plots\n");
                 exit(0);

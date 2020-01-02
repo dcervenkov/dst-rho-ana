@@ -12,6 +12,11 @@ ROOT_FLAGS := $(shell root-config --cflags)
 ROOT_LIBS := $(shell root-config --libs) -lRooFitCore -lRooFit
 INCS := -Isrc -I$(HOME)/bin/belle/packages/Meerkat/inc
 
+BELLE_LIB_DIR ?= /belle
+BELLE_INCS := -isystem $(BELLE_LIB_DIR)/belle/b20091203_2126/include
+BELLE_LIBS := -L$(BELLE_LIB_DIR)/belle/b20091203_2126/x86_64-unknown-linux-gnu/opt/lib -ltatami -lbelleutil
+CERN_LIBS := -L$(BELLE_LIB_DIR)/cern/2006/lib64 -lmathlib
+
 .PHONY: all clean
 
 all:: $(TARGET)
@@ -19,10 +24,10 @@ all:: $(TARGET)
 -include $(DEP_FILES)
 
 $(TARGET): $(OBJ_FILES)
-	$(CXX) -o $@ $^ $(LD_FLAGS) $(LD_LIBS) $(ROOT_LIBS)
+	$(CXX) -o $@ $^ $(LD_FLAGS) $(LD_LIBS) $(ROOT_LIBS) $(BELLE_LIBS) $(CERN_LIBS) 
 
 obj/%.o: src/%.cc | obj
-	$(CXX) $(CXX_FLAGS) $(INCS) $(ROOT_FLAGS) -c -MMD -o $@ $<
+	$(CXX) $(CXX_FLAGS) $(INCS) $(BELLE_INCS) $(ROOT_FLAGS) -c -MMD -o $@ $<
 
 obj:
 	mkdir obj

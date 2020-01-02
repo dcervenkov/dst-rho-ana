@@ -35,6 +35,7 @@
 
 // Local includes
 #include "constants.h"
+#include "dtbkg.h"
 
 class FitterBKG {
    public:
@@ -129,6 +130,15 @@ class FitterBKG {
     TChain* input_tree = nullptr;
     TTree* data_tree = nullptr;
 
+    // Physics-based background dt model
+    RooRealVar bkg_dt_tau_{"bkg_dt_tau", "#tau_{bkg}", 1.5, 0.1, 10};
+    RooRealVar bkg_dt_f_delta_{"bkg_dt_f_delta", "f_{d}", 0.1, 0, 1};
+    RooRealVar bkg_dt_mu_delta_{"bkg_dt_mu_delta", "#mu_{d}", 0, -1, 1};
+    RooRealVar bkg_dt_mu_lifetime_{"bkg_dt_mu_lifetime", "#mu_{l}", 0, -1, 1};
+    RooRealVar bkg_dt_f_tail_{"bkg_dt_f_tail", "f_{t}", 0.1, 0, 1};
+    RooRealVar bkg_dt_S_main_{"bkg_dt_S_main", "S_{m}", 1, 0, 400};
+    RooRealVar bkg_dt_S_tail_{"bkg_dt_S_tail", "S_{t}", 1, 0, 400};
+
     // Background dt model
     RooRealVar bkg_dt_voigt_mu_{"bkg_dt_voigt_mu", "v_{#mu}", -0.303, -1, 1};
     RooRealVar bkg_dt_voigt_sigma_{"bkg_dt_voigt_sigma_", "v_{#sigma}", 2.323, 0, 10};
@@ -185,6 +195,8 @@ class FitterBKG {
                               RooArgList(bkg_thetab_exp_, bkg_thetab_gaus_), RooArgList(bkg_thetab_f_)};
 
     RooProdPdf model_{"model", "model", RooArgList(bkg_phit_model_, bkg_thetab_model_, bkg_thetat_model_)};
+
+    DtBKG* bkg_physics_dt_model_;
 }
 
 ;

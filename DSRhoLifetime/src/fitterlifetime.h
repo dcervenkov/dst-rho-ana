@@ -36,6 +36,8 @@ class FitterLifetime {
     void SetChannel(const std::string channel) { channel_ = channel; };
     std::string GetChannel() { return channel_; };
 
+    void SetUsePhysicalPdf(const bool& use_physical_pdf) { use_physical_pdf_ = use_physical_pdf; };
+    int GetUsePhysicalPdf() const { return use_physical_pdf_; };
 
     void SetDoLifetimeFit(const bool& do_lifetime_fit) { do_lifetime_fit_ = do_lifetime_fit; };
     int GetDoLifetimeFit() const { return do_lifetime_fit_; };
@@ -97,7 +99,8 @@ class FitterLifetime {
     TPaveText* CreateStatBox(const double chi2, const bool position_top,
                              const bool position_left) const;
     RooAddPdf* CreateVoigtGaussDtPdf(const std::string prefix) const;
-    RooAbsPdf* CreateLifetimePDF(std::vector<RooAbsPdf*>& components, const bool scf, const bool bkg) const;
+    RooAbsPdf* CreatePhysicsBkgDtPdf(const std::string prefix) const;
+    RooAbsPdf* CreateLifetimePDF(std::vector<RooAbsPdf*>& components, const bool scf, const bool bkg, const bool physical_pdf) const;
     nlohmann::json ReadInJSONFile(const char* filename) const;
 
     std::vector<RooRealVar**> conditional_vars_;
@@ -116,6 +119,7 @@ class FitterLifetime {
     bool do_mixing_fit_;
     bool make_plots_;
     bool perfect_tagging_;
+    bool use_physical_pdf_ = false;
 
     nlohmann::json config_;
     std::string channel_;

@@ -50,6 +50,12 @@ test_configs = {
                        "--mixing",
                        "tests/current_result",
                        "tests/data/Kpi.root"],
+    "physpdf_lifetime_all": ["--config=tests/config.json",
+                                      "--channel=Kpi",
+                                      "--components=all",
+                                      "--lifetime",
+                                      "tests/current_result",
+                                      "tests/data/Kpi.root"],
 }
 
 red_code = "\033[31m"

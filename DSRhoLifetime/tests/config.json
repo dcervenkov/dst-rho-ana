@@ -14,6 +14,14 @@
         }
     },
     "modelParameters": {
+        "bkg_dt_S_main": 99.2262,
+        "bkg_dt_S_tail": 0.281797,
+        "bkg_dt_f_delta": 0.222605,
+        "bkg_dt_f_tail": 0.00494,
+        "bkg_dt_mu_delta": 0.0191497,
+        "bkg_dt_mu_lifetime": -0.166077,
+        "bkg_dt_tau": 1.56112,
+
         "scf_dt_voigt_mu": -0.294,
         "scf_dt_voigt_sigma_": 2.233,
         "scf_dt_voigt_width_": 1.109,

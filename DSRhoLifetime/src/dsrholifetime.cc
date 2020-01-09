@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
     if (options.do_mixing_fit_set) fitter.SetDoMixingFit(options.do_mixing_fit);
     if (options.perfect_tagging_set) fitter.SetPerfectTagging(options.perfect_tagging);
     if (options.channel_set) fitter.SetChannel(options.channel);
+    if (options.physical_pdf_set) fitter.SetUsePhysicalPdf(options.physical_pdf);
     if (options.components_set) fitter.SetComponents(options.components);
     if (options.num_events_set) {
         fitter.ReadInFile(file_names, options.num_events);
@@ -90,11 +91,12 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"lifetime", no_argument, 0, 'l'},
         {"mixing", no_argument, 0, 'm'},
         {"perfecttag", no_argument, 0, 't'},
+        {"physicalpdf", no_argument, 0, 'y'},
         {"help", no_argument, 0, 'h'},
         {nullptr, no_argument, nullptr, 0}};
 
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "a:c:e:g:o:plmth", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "a:c:e:g:o:plmtyh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -136,6 +138,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 't':
                 options.perfect_tagging = true;
                 options.perfect_tagging_set = true;
+                break;
+            case 'y':
+                options.physical_pdf = true;
+                options.physical_pdf_set = true;
                 break;
             case 'h':
                 printf("Usage: %s [OPTION]... RESULTS_FILE INPUT-FILE(S)...\n\n", argv[0]);

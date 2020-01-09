@@ -42,6 +42,7 @@
 
 // Local includes
 #include "constants.h"
+#include "dtbkg.h"
 #include "dtpdf.h"
 #include "log.h"
 #include "nlohmann/json.hpp"
@@ -282,7 +283,7 @@ void FitterLifetime::Test() {
     if (do_lifetime_fit_) {
         Log::print(Log::info, "Fitting %i events\n", dataset_->numEntries());
         std::vector<RooAbsPdf*> components;
-        RooAbsPdf* lifetime_pdf = CreateLifetimePDF(components, scf_, bkg_);
+        RooAbsPdf* lifetime_pdf = CreateLifetimePDF(components, scf_, bkg_, use_physical_pdf_);
         result_ = lifetime_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
                                      RooFit::Minimizer("Minuit2"),
                                      RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
@@ -570,6 +571,31 @@ RooAddPdf* FitterLifetime::CreateVoigtGaussDtPdf(const std::string prefix) const
 }
 
 /**
+ * Create a Physics conv. Resolution PDF.
+ *
+ * A common prefix is prepended to all object names.
+ *
+ * @param prefix Text to be prepended to the ROOT name
+ *
+ */
+RooAbsPdf* FitterLifetime::CreatePhysicsBkgDtPdf(const std::string prefix) const {
+    TString pre(prefix);
+
+    RooRealVar* tau = new RooRealVar(pre + "_tau", "#tau_{bkg}", 1.5);
+    RooRealVar* f_delta = new RooRealVar(pre + "_f_delta", "f_{d}", 0);
+    RooRealVar* mu_delta = new RooRealVar(pre + "_mu_delta", "#mu_{d}", 0);
+    RooRealVar* mu_lifetime = new RooRealVar(pre + "_mu_lifetime", "#mu_{l}", 0);
+    RooRealVar* f_tail = new RooRealVar(pre + "_f_tail", "f_{t}", 0);
+    RooRealVar* S_main = new RooRealVar(pre + "_S_main", "S_{m}", 1);
+    RooRealVar* S_tail = new RooRealVar(pre + "_S_tail", "S_{t}", 1);
+
+    DtBKG* model = new DtBKG(pre + "model", pre + "model", *dt_, *vrerr6_, *vterr6_, *tau,
+                              *f_delta, *mu_delta, *mu_lifetime, *f_tail, *S_main, *S_tail);
+
+    return model;
+}
+
+/**
  * Read a JSON config from a specified filename.
  */
 nlohmann::json FitterLifetime::ReadInJSONFile(const char* filename) const {
@@ -585,8 +611,8 @@ nlohmann::json FitterLifetime::ReadInJSONFile(const char* filename) const {
     return json;
 }
 
-RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components, const bool scf, const bool bkg) const {
-
+RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components, const bool scf,
+                                             const bool bkg, const bool physical_pdf) const {
     DtPDF* lifetime_cp_pdf = new DtPDF("lifetime_cp_pdf", "lifetime_cp_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
                        *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_,
                        *vtchi2_, *vtndf_, *vtistagl_);
@@ -600,7 +626,8 @@ RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components
     }
 
     if (bkg) {
-        RooAddPdf* lifetime_bkg_pdf = CreateVoigtGaussDtPdf("bkg_dt");
+        RooAbsPdf* lifetime_bkg_pdf =
+            (physical_pdf ? CreatePhysicsBkgDtPdf("bkg_dt") : CreateVoigtGaussDtPdf("bkg_dt"));
         lifetime_pdfs.add(*lifetime_bkg_pdf);
     }
 

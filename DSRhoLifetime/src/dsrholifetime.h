@@ -29,6 +29,8 @@ struct fitter_options {
     bool num_events_set;
     bool perfect_tagging;
     bool perfect_tagging_set;
+    bool physical_pdf;
+    bool physical_pdf_set;
 };
 
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,

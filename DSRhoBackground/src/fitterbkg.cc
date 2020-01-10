@@ -472,12 +472,12 @@ void FitterBKG::Fit(RooAbsPdf* pdf, RooDataSet* data) {
     result_ = pdf->fitTo(*data, RooFit::Save(), RooFit::Minimizer("Minuit2"), RooFit::NumCPU(num_CPUs_));
 }
 
-void FitterBKG::CreateHistoPDF(RooDataSet* data) {
+void FitterBKG::CreateHistoPDF(RooDataSet* data, const std::string results_file) {
     RooDataHist data_hist("data_hist", "data_hist", RooArgSet(thetat_, thetab_, phit_), *data);
     RooHistPdf* scf_hist_pdf = new RooHistPdf("scf_hist_pdf", "scf_hist_pdf",
                                               RooArgSet(thetat_, thetab_, phit_), data_hist);
 
-    TFile f("scf_histo.root", "RECREATE");
+    TFile f(results_file.c_str(), "RECREATE");
     scf_hist_pdf->Write();
     f.Close();
 }
@@ -536,7 +536,7 @@ double FitterBKG::Interpolate(const TH3F* histo, int x_org, int y_org, int z_org
 }
 
 
-AdaptiveKernelDensity FitterBKG::FitKDE(RooDataSet* data) {
+AdaptiveKernelDensity FitterBKG::CreateKDEPDF(RooDataSet* data, const std::string results_file) {
     OneDimPhaseSpace* phasespace_thetat = new OneDimPhaseSpace("phasespace_thetat", thetat_.getMin(), thetat_.getMax());
     OneDimPhaseSpace* phasespace_thetab = new OneDimPhaseSpace("phasespace_thetab", thetab_.getMin(), thetab_.getMax());
     OneDimPhaseSpace* phasespace_phit = new OneDimPhaseSpace("phasespace_phit", phit_.getMin(), phit_.getMax());

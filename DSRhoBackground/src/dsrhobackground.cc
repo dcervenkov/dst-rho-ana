@@ -14,6 +14,9 @@
 #include <stdio.h>
 #include <vector>
 
+// Boost includes
+#include <boost/filesystem.hpp>
+
 // ROOT includes
 #include "RooDataHist.h"
 #include "RooDataSet.h"
@@ -35,14 +38,18 @@ int main(int argc, char* argv[]) {
     fitter_options options = {};
     const int optionless_argc = ProcessCmdLineOptions(argc, argv, optionless_argv, options);
 
-    if (optionless_argc < 2) {
+    if (optionless_argc < 3) {
         printf("ERROR: Wrong number of arguments.\n");
-        printf("Usage: %s [OPTION]... INPUT-FILE(S)...\n", optionless_argv[0]);
+        printf("Usage: %s [OPTION]... RESULTS-FILE INPUT-FILE(S)...\n", optionless_argv[0]);
         return 2;
     }
 
+    std::string results_file = optionless_argv[1];
     std::vector<const char*> file_names;
-    for (int i = 1; i < optionless_argc; i++) {
+    if (boost::filesystem::is_regular_file(results_file)) {
+        Log::LogLine(Log::warning) << "Rewriting results file '" << results_file << "'";
+    }
+    for (int i = 2; i < optionless_argc; i++) {
         file_names.push_back(optionless_argv[i]);
     }
 
@@ -71,10 +78,10 @@ int main(int argc, char* argv[]) {
         fitter.thetat_.setBins(50);
         fitter.thetab_.setBins(50);
         fitter.phit_.setBins(50);
-        AdaptiveKernelDensity kde = fitter.FitKDE(fitter.dataset_);
+        AdaptiveKernelDensity kde = fitter.CreateKDEPDF(fitter.dataset_, results_file);
         fitter.PlotKDE(kde);
     } else if (options.histo) {
-        fitter.CreateHistoPDF(fitter.dataset_);
+        fitter.CreateHistoPDF(fitter.dataset_, results_file);
     } else if (options.physics) {
         fitter.Fit(fitter.bkg_physics_dt_model_, fitter.dataset_);
         JSON_formatted_results += tools::FormatResultsJSON(
@@ -182,7 +189,10 @@ int main(int argc, char* argv[]) {
             constants::format, true);
         }
 
+    }
+    if (!JSON_formatted_results.empty()) {
         std::cout << JSON_formatted_results;
+        tools::SaveTextToFile(results_file, JSON_formatted_results);
     }
 
     return 0;

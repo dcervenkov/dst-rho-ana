@@ -1,0 +1,62 @@
+{
+    "command": "./DSRhoLifetime",
+    "comparison_file": "current_result",
+    "tests": {
+        "lifetime_fit_CR": [
+            "--config=tests/config.json",
+            "--channel=Kpi",
+            "--components=CR",
+            "--lifetime",
+            "tests/current_result",
+            "tests/data/Kpi.root"
+        ],
+        "lifetime_fit_CRSCF": [
+            "--config=tests/config.json",
+            "--channel=Kpi",
+            "--components=CRSCF",
+            "--lifetime",
+            "tests/current_result",
+            "tests/data/Kpi.root"
+        ],
+        "lifetime_fit_all": [
+            "--config=tests/config.json",
+            "--channel=Kpi",
+            "--components=all",
+            "--lifetime",
+            "tests/current_result",
+            "tests/data/Kpi.root"
+        ],
+        "mixing_fit_CR": [
+            "--config=tests/config.json",
+            "--channel=Kpi",
+            "--components=CR",
+            "--mixing",
+            "tests/current_result",
+            "tests/data/Kpi.root"
+        ],
+        "mixing_fit_CRSCF": [
+            "--config=tests/config.json",
+            "--channel=Kpi",
+            "--components=CRSCF",
+            "--mixing",
+            "tests/current_result",
+            "tests/data/Kpi.root"
+        ],
+        "mixing_fit_all": [
+            "--config=tests/config.json",
+            "--channel=Kpi",
+            "--components=all",
+            "--mixing",
+            "tests/current_result",
+            "tests/data/Kpi.root"
+        ],
+        "physpdf_lifetime_all": [
+            "--config=tests/config.json",
+            "--channel=Kpi",
+            "--components=all",
+            "--lifetime",
+            "tests/current_result",
+            "tests/data/Kpi.root"
+        ]
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "command": "./DSRhoYield",
+    "comparison_file": "current_result",
+    "post_commands": [
+        [
+            "root",
+            "-q",
+            "-b",
+            "extract_result.cxx"
+        ]
+    ],
+    "tests": {
+        "yield_fit": [
+            "tests/data",
+            "tests/data",
+            "plots/test"
+        ]
+    }
+}

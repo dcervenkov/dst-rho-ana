@@ -63,11 +63,11 @@ script:
 
   - cd ${TRAVIS_BUILD_DIR}/printTree && xmkmf && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit && make
-  - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit/tests && python tests.py
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit/tests && ./run_tests.py
   - cd ${TRAVIS_BUILD_DIR}/DSRhoBackground && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoEfficiency && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoLifetime && make
-  - cd ${TRAVIS_BUILD_DIR}/DSRhoLifetime/tests && python tests.py
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoLifetime/tests && ./run_tests.py
   - cd ${TRAVIS_BUILD_DIR}/DSRhoPeek && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoYield && make
-  - cd ${TRAVIS_BUILD_DIR}/DSRhoYield/tests && python tests.py
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoYield/tests && ./run_tests.py

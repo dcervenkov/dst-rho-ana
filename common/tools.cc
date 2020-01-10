@@ -359,6 +359,12 @@ TString GetCommonCutsString() {
  * @param text Text to be written to the file
  */
 void SaveTextToFile(const std::string filename, const std::string text) {
+    boost::filesystem::path path(filename);
+    path.remove_filename();
+    if (!boost::filesystem::is_directory(path)) {
+        Log::LogLine(Log::debug) << "Result directory " << path << " doesn't exist; creating";
+        boost::filesystem::create_directories(path);
+    }
     std::ofstream file(filename);
     file << text;
     file.close();

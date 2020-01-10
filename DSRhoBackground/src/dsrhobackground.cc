@@ -64,6 +64,9 @@ int main(int argc, char* argv[]) {
         return 3;
     }
 
+    const RooArgSet observables(fitter.thetab_, fitter.thetat_, fitter.phit_, fitter.dt_);
+    std::string JSON_formatted_results;
+
     if (options.KDE) {
         fitter.thetat_.setBins(50);
         fitter.thetab_.setBins(50);
@@ -74,6 +77,8 @@ int main(int argc, char* argv[]) {
         fitter.CreateHistoPDF(fitter.dataset_);
     } else if (options.physics) {
         fitter.Fit(fitter.bkg_physics_dt_model_, fitter.dataset_);
+        JSON_formatted_results += tools::FormatResultsJSON(
+            "Physics-based dt Parameters", fitter.bkg_physics_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, *fitter.bkg_physics_dt_model_);
         }
@@ -90,32 +95,40 @@ int main(int argc, char* argv[]) {
             fitter.PlotWithPull(fitter.thetat_, *fitter.dataset_, fitter.bkg_thetat_model_);
         }
 
+        std::vector<const RooAbsPdf*> angular_pdfs = {
+            &fitter.bkg_thetab_model_, &fitter.bkg_thetat_model_, &fitter.bkg_phit_model_};
         fitter.Fit(&fitter.bkg_thetab_model_, fitter.dataset_);
+        JSON_formatted_results += tools::FormatResultsJSON("Angular PDFs' Parameters", angular_pdfs, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.thetab_, *fitter.dataset_, fitter.bkg_thetab_model_);
         }
 
         fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_);
+        JSON_formatted_results += tools::FormatResultsJSON("dt Parameters", &fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, fitter.bkg_dt_model_);
         }
 
         fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_a_);
+        JSON_formatted_results += tools::FormatResultsJSON("dt a Parameters", &fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_a_, fitter.bkg_dt_model_);
         }
 
         fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_ab_);
+        JSON_formatted_results += tools::FormatResultsJSON("dt ab Parameters", &fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_ab_, fitter.bkg_dt_model_);
         }
 
         fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_b_);
+        JSON_formatted_results += tools::FormatResultsJSON("dt b Parameters", &fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_b_, fitter.bkg_dt_model_);
         }
 
         fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_bb_);
+        JSON_formatted_results += tools::FormatResultsJSON("dt bb Parameters", &fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_bb_, fitter.bkg_dt_model_);
         }
@@ -125,6 +138,7 @@ int main(int argc, char* argv[]) {
         dataset_cf->append(*fitter.dataset_a_);
         dataset_cf->append(*fitter.dataset_ab_);
         fitter.Fit(&fitter.bkg_dt_model_, dataset_cf);
+        JSON_formatted_results += tools::FormatResultsJSON("dt cf Parameters", &fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *dataset_cf, fitter.bkg_dt_model_);
         }
@@ -134,6 +148,7 @@ int main(int argc, char* argv[]) {
         dataset_dcs->append(*fitter.dataset_b_);
         dataset_dcs->append(*fitter.dataset_bb_);
         fitter.Fit(&fitter.bkg_dt_model_, dataset_dcs);
+        JSON_formatted_results += tools::FormatResultsJSON("dt dcs Parameters", &fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *dataset_dcs, fitter.bkg_dt_model_);
         }
@@ -145,25 +160,29 @@ int main(int argc, char* argv[]) {
 
             RooProdPdf* bkg_pdf =
                 new RooProdPdf("bkg_pdf", "bkg_pdf",
-                               RooArgList(fitter.bkg_thetat_model_, fitter.bkg_thetab_model_,
-                                          fitter.bkg_phit_model_));
+                                RooArgList(fitter.bkg_thetat_model_, fitter.bkg_thetab_model_,
+                                            fitter.bkg_phit_model_));
 
-            RooDataHist* pdf_hist = bkg_pdf->generateBinned(RooArgSet(fitter.thetat_, fitter.thetab_, fitter.phit_), fitter.dataset_->numEntries(), true);
+            RooDataHist* pdf_hist = bkg_pdf->generateBinned(RooArgSet(fitter.thetat_,
+            fitter.thetab_, fitter.phit_), fitter.dataset_->numEntries(), true);
 
             RooDataHist data_hist("data_hist", "data_hist",
-                           RooArgSet(fitter.thetat_, fitter.thetab_, fitter.phit_),
-                           *fitter.dataset_);
+                            RooArgSet(fitter.thetat_, fitter.thetab_, fitter.phit_),
+                            *fitter.dataset_);
 
-            tools::PlotVars2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, "", constants::format);
-            tools::PlotVars2D(fitter.thetat_, fitter.phit_, data_hist, *pdf_hist, "", constants::format);
-            tools::PlotVars2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, "", constants::format);
+            tools::PlotVars2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, "",
+            constants::format); tools::PlotVars2D(fitter.thetat_, fitter.phit_, data_hist,
+            *pdf_hist, "", constants::format); tools::PlotVars2D(fitter.thetab_,
+            fitter.phit_, data_hist, *pdf_hist, "", constants::format);
 
-            tools::PlotPull2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, "", constants::format, true);
-            tools::PlotPull2D(fitter.thetat_, fitter.phit_, data_hist, *pdf_hist, "", constants::format, true);
-            tools::PlotPull2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, "", constants::format, true);
+            tools::PlotPull2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, "",
+            constants::format, true); tools::PlotPull2D(fitter.thetat_, fitter.phit_,
+            data_hist, *pdf_hist, "", constants::format, true);
+            tools::PlotPull2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, "",
+            constants::format, true);
         }
 
-        fitter.PrintResultsJSON();
+        std::cout << JSON_formatted_results;
     }
 
     return 0;

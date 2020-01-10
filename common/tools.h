@@ -12,6 +12,7 @@
 // ROOT includes
 #include "RooAbsData.h"
 #include "RooArgList.h"
+#include "RooArgSet.h"
 #include "RooRealVar.h"
 #include "TChain.h"
 #include "TPaveText.h"
@@ -48,6 +49,10 @@ void LogText(TFile* file, const char* field_name, const std::string text);
 std::vector<std::string> SplitString(const std::string& input_string, char delimiter);
 void ChangeModelParameters(RooAbsPdf* pdf, const nlohmann::json& config,
                            const std::string prefix = "");
+std::string FormatResultsJSON(std::string name, std::vector<const RooAbsPdf*> models,
+                              const RooArgSet& observables);
+std::string FormatResultsJSON(std::string name, const RooAbsPdf* model,
+                              const RooArgSet& observables);
 
 /**
  * Transform RooArgSet of RooRealVars into a std::vector

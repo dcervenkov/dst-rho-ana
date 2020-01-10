@@ -664,10 +664,3 @@ void FitterBKG::PlotKDE(AdaptiveKernelDensity kde) const {
     }
 
 }
-
-void FitterBKG::PrintResultsJSON() const {
-    printf("Resulting parameters in JSON format:\n\n");
-    for (auto var : model_parameters_) {
-        printf("\"%s\": %f,\n", var->GetName(), var->getVal());
-    }
-}

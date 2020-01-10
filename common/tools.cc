@@ -6,6 +6,7 @@
  *  @brief A collections of various tools and utilities
  *
  */
+#include "tools.h"
 
 // Standard includes
 #include <algorithm>
@@ -467,6 +468,50 @@ void ChangeModelParameters(RooAbsPdf* pdf, const nlohmann::json& model_parameter
             Log::print(Log::warning, "Parameter %s not found in model, skipping...\n", name);
         }
     }
+}
+
+/**
+ * Format parameters of the supplied models into a JSON formatted string
+ * 
+ * @param name Name of the parameter section; to be printed in the header
+ * @param models Models whose parameters are to be printed
+ * @param observables Observables that should be removed from the list of parameters
+ * 
+ * @return std::string JSON formatted string
+ */
+std::string FormatResultsJSON(std::string name, std::vector<const RooAbsPdf*> models,
+                              const RooArgSet& observables) {
+    std::string formatted_result = "=== ";
+    formatted_result += name;
+    formatted_result += " ===\n";
+    const std::size_t buf_size = 1024;
+    char buffer[buf_size];
+    for (auto& model : models) {
+        RooArgSet* vars = model->getVariables();
+        vars->remove(observables);
+        std::vector<RooRealVar*> vector_of_vars = ToVector<RooRealVar*>(*vars);
+        for (auto& var : vector_of_vars) {
+            int ret = snprintf(buffer, buf_size, "\"%s\": %f,\n", var->GetName(), var->getVal());
+            assert(ret >= 0);
+            formatted_result.append(buffer);
+        }
+    }
+    return formatted_result;
+}
+
+/**
+ * Format parameters of the supplied model into a JSON formatted string
+ * 
+ * @param name Name of the parameter section; to be printed in the header
+ * @param model Model whose parameters are to be printed
+ * @param observables Observables that should be removed from the list of parameters
+ * 
+ * @return std::string JSON formatted string
+ */
+std::string FormatResultsJSON(std::string name, const RooAbsPdf* model,
+                              const RooArgSet& observables) {
+    std::vector<const RooAbsPdf*> models = {model};
+    return FormatResultsJSON(name, models, observables);
 }
 
 }  // namespace tools

@@ -53,6 +53,7 @@ std::string FormatResultsJSON(std::string name, std::vector<const RooAbsPdf*> mo
                               const RooArgSet& observables);
 std::string FormatResultsJSON(std::string name, const RooAbsPdf* model,
                               const RooArgSet& observables);
+void CreateDirsIfNecessary(const std::string file);
 
 /**
  * Transform RooArgSet of RooRealVars into a std::vector

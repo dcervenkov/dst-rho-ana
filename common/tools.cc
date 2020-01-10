@@ -359,12 +359,7 @@ TString GetCommonCutsString() {
  * @param text Text to be written to the file
  */
 void SaveTextToFile(const std::string filename, const std::string text) {
-    boost::filesystem::path path(filename);
-    path.remove_filename();
-    if (!boost::filesystem::is_directory(path)) {
-        Log::LogLine(Log::debug) << "Result directory " << path << " doesn't exist; creating";
-        boost::filesystem::create_directories(path);
-    }
+    CreateDirsIfNecessary(filename);
     std::ofstream file(filename);
     file << text;
     file.close();
@@ -518,6 +513,24 @@ std::string FormatResultsJSON(std::string name, const RooAbsPdf* model,
                               const RooArgSet& observables) {
     std::vector<const RooAbsPdf*> models = {model};
     return FormatResultsJSON(name, models, observables);
+}
+
+/**
+ * Create a directory structure if it doesn't exist
+ * 
+ * Normally a file couldn't be created if a directory where it's supposed to
+ * reside doesn't exist. This function creates the necessary directory
+ * structure if it doesn't exist. It does nothing if it exists.
+ * 
+ * @param file Path to a file that might need a directory structure
+ */
+void CreateDirsIfNecessary(const std::string file) {
+    boost::filesystem::path path(file);
+    path.remove_filename();
+    if (!boost::filesystem::is_directory(path)) {
+        Log::LogLine(Log::debug) << "Directory " << path << " doesn't exist; creating";
+        boost::filesystem::create_directories(path);
+    }
 }
 
 }  // namespace tools

@@ -477,6 +477,7 @@ void FitterBKG::CreateHistoPDF(RooDataSet* data, const std::string results_file)
     RooHistPdf* scf_hist_pdf = new RooHistPdf("scf_hist_pdf", "scf_hist_pdf",
                                               RooArgSet(thetat_, thetab_, phit_), data_hist);
 
+    tools::CreateDirsIfNecessary(results_file);
     TFile f(results_file.c_str(), "RECREATE");
     scf_hist_pdf->Write();
     f.Close();
@@ -577,8 +578,8 @@ AdaptiveKernelDensity FitterBKG::CreateKDEPDF(RooDataSet* data, const std::strin
                               ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &formula_density);
                             //   ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
 
-    const char* output_file = "scf_kde";
-    kde.writeToTextFile(output_file);
+    tools::CreateDirsIfNecessary(results_file);
+    kde.writeToTextFile(results_file.c_str());
 
     return kde;
 

@@ -18,6 +18,7 @@
 #include "config.h"
 #include "constants.h"
 #include "fitterlifetime.h"
+#include "gitversion.h"
 #include "tools.h"
 
 int main(int argc, char* argv[]) {
@@ -92,11 +93,12 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"mixing", no_argument, 0, 'm'},
         {"perfecttag", no_argument, 0, 't'},
         {"physicalpdf", no_argument, 0, 'y'},
+        {"version", no_argument, 0, 'v'},
         {"help", no_argument, 0, 'h'},
         {nullptr, no_argument, nullptr, 0}};
 
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "a:c:e:g:o:plmtyh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "a:c:e:g:o:plmtyvh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -143,6 +145,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.physical_pdf = true;
                 options.physical_pdf_set = true;
                 break;
+            case 'v':
+                printf("Version: %s\n", gitversion);
+                exit(0);
+                break;
             case 'h':
                 printf("Usage: %s [OPTION]... RESULTS_FILE INPUT-FILE(S)...\n\n", argv[0]);
                 printf(
@@ -157,6 +163,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-o, --components=COMPONENTS  components which to read and fit (CR, CRSCF, all)\n");
                 printf("-p, --plot-dir=DIR           create lifetime/mixing plots and save to DIR\n");
                 printf("-t, --perfecttag             use MC info to get perfect tagging\n");
+                printf("-v, --version                print program version and exit\n");
                 exit(0);
                 break;
             default:

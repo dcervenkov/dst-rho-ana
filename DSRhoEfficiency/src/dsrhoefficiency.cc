@@ -19,6 +19,7 @@
 #include "colors.h"
 #include "constants.h"
 #include "fitter.h"
+#include "gitversion.h"
 #include "tools.h"
 
 int main(int argc, char* argv[]) {
@@ -161,10 +162,11 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"efficiency-model", required_argument, 0, 'e'},
                                     {"efficiency-file", required_argument, 0, 'f'},
                                     {"mirror-margin", required_argument, 0, 'm'},
+                                    {"version", no_argument, 0, 'v'},
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "a:b:e:f:m:h", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "a:b:e:f:m:vh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -186,6 +188,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'm':
                 options.mirror_margin = atof(optarg);
                 break;
+            case 'v':
+                printf("Version: %s\n", gitversion);
+                exit(0);
+                break;
             case 'h':
                 printf("Usage: %s [OPTION]... EVTGEN-FILE GSIM-FILE PLOT-DIR\n\n", argv[0]);
                 printf(
@@ -204,6 +210,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                     "-m, --mirror-margin=MARGIN       fraction of phasespace to mirror to each "
                     "side in each dimension\n");
                 printf("-h, --help                       display this text and exit\n");
+                printf("-v, --version                    print program version and exit\n");
                 exit(0);
                 break;
             default:

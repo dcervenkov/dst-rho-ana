@@ -29,6 +29,7 @@
 #include "colors.h"
 #include "constants.h"
 #include "fitterbkg.h"
+#include "gitversion.h"
 #include "log.h"
 #include "tools.h"
 
@@ -221,10 +222,11 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"histo", no_argument, 0, 's'},
                                     {"plot-dir", required_argument, 0, 'p'},
                                     {"physics", no_argument, 0, 'y'},
+                                    {"version", no_argument, 0, 'v'},
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:p:ksyh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:p:ksyvh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -248,6 +250,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'y':
                 options.physics = true;
                 break;
+            case 'v':
+                printf("Version: %s\n", gitversion);
+                exit(0);
+                break;
             case 'h':
                 printf("Usage: %s [OPTION]... INPUT-FILES\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
@@ -257,6 +263,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-y, --physics             fit physics-based dt PDF\n");
                 printf("-h, --help                display this text and exit\n");
                 printf("-p, --plot-dir=PLOT_DIR   create lifetime/mixing plots\n");
+                printf("-v, --version             print program version and exit\n");
                 exit(0);
                 break;
             default:

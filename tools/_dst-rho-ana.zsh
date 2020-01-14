@@ -57,6 +57,7 @@ _dsrhobackground_complete()
 	'--cpus=[number of CPU cores to use for fitting and plotting]' \
 	'--kde[use kernel density estimation]' \
 	'--help[display help]' \
+	'--physics[use a physics-based dt PDF]' \
 	'--histo[create a histogram PDF]' \
 	'--plot-dir=[create lifetime/mixing plots]:directory:_files' \
 	'*:input files:_files'

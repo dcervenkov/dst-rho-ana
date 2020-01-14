@@ -39,7 +39,6 @@ int main(int argc, char* argv[]) {
     std::vector<const char*> file_names;
     for (int i = 2; i < optionless_argc; i++) {
         file_names.push_back(optionless_argv[i]);
-        printf("%s\n", optionless_argv[i]);
     }
 
 

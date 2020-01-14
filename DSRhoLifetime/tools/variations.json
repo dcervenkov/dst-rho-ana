@@ -1,0 +1,10 @@
+{
+    "parameters": {
+        "bkg_dt_voigt_mu": [-0.205, 0.024],
+        "bkg_dt_voigt_sigma_": [1.986, 0.068],
+        "bkg_dt_voigt_width_": [1.037, 0.076],
+        "bkg_dt_gaus_mu": [-0.025, 0.013],
+        "bkg_dt_gaus_sigma_": [0.716, 0.023],
+        "bkg_dt_f": [0.610, 0.017]
+    }
+}

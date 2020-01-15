@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
  * @param argc Standard argc
  * @param argv Standard argv
  * @param optionless_argv Pointer where to write the new argv with processed switches removed
- * @param options Struct which holds the variables acted upon by switches
+ * @param config JSON object that holds the settings
  */
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,
                           nlohmann::json& config) {

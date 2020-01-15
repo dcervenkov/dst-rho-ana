@@ -76,7 +76,19 @@ int main(int argc, char* argv[]) {
 }
 
 /*
- * TODO: Doxygen
+ * Parses command line input and extracts switches and options from it, e.g.,
+ * -h or --help. Then it acts accordingly, e.g., displaying help or setting
+ * variables in an option struct. It also returns optionless_argv and
+ * optionless_argc (return value) for easy integration with existing code.
+ *
+ * CAVEAT:
+ * In order to pass negative numbers as arguments, one has to use the POSIX
+ * "--" end of options indicator.
+ *
+ * @param argc Standard argc
+ * @param argv Standard argv
+ * @param optionless_argv Pointer where to write the new argv with processed switches removed
+ * @param options Struct which holds the variables acted upon by switches
  */
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,
                           fitter_options& options) {

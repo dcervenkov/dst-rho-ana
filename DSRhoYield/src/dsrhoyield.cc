@@ -10,6 +10,7 @@
 #include "dsrhoyield.h"
 
 // Standard includes
+#include <getopt.h>
 #include <iostream>
 
 // ROOT includes
@@ -20,37 +21,24 @@
 // Local includes
 #include "colors.h"
 #include "fitter.h"
+#include "gitversion.h"
 #include "log.h"
 #include "tools.h"
 
-//#define GRAPHICS
-
 int main(int argc, char* argv[]) {
-#ifdef GRAPHICS
-    TApplication* rootapp = new TApplication("DSRhoYield", &argc, argv);
-    /**
-     * When using TApplication it removes arguments it "handles" from
-     * the argument array. E.g. -b, -x, -q, --help, <dir>, <file>, etc.
-     * For more info read TApplication's GetOptions function help.
-     * The solution is to use rootapp->Argc() and rootapp->Argv(i).
-     * The next few lines are for compatibility of GRAPHIC vs. non-GRAPHIC -
-     * they recreate the original argc and argv when using GRAPHIC.
-     **/
-    argc = rootapp->Argc();
-    for (int i = 0; i < argc; i++) {
-        argv[i] = rootapp->Argv(i);
-    }
-#endif  // GRAPHICS
-
-    if (argc != 4) {
+    if (argc < 4) {
         printf("ERROR: Wrong number of arguments.\n");
-        printf("Usage: DSRhoPeek TRAINING-DIR DATA-DIR PLOT-DIR\n");
+        printf("Usage: DSRhoPeek [OPTION]... TRAINING-DIR DATA-DIR OUTPUT-DIR\n");
         return 2;
     }
 
-    const char* trainingDir = argv[1];
-    const char* dataDir = argv[2];
-    const char* outputDir = argv[3];
+    char** optionless_argv = nullptr;
+    fit_options options;
+    ProcessCmdLineOptions(argc, argv, optionless_argv, options);
+
+    const char* trainingDir = optionless_argv[1];
+    const char* dataDir = optionless_argv[2];
+    const char* outputDir = optionless_argv[3];
 
     Log::setLogLevel(Log::debug);
 
@@ -61,6 +49,8 @@ int main(int argc, char* argv[]) {
     // The various parameters are first fixed from training data (6 MC streams)
     TChain* training_data = tools::ReadDataFromDir(trainingDir);
     Fitter fitter(outputDir);
+    fitter.SetNumCPUs(options.cpus);
+    fitter.SetMC(options.mc);
 
     fitter.Setup(Components::signal);
     fitter.FitTo(training_data);
@@ -109,10 +99,75 @@ int main(int argc, char* argv[]) {
 	//	fitter.Setup(Components::background);
 	//	Log::print(Log::info, "Correlation - background: %f\n", fitter.GetCorrelation(training_data, fitter.de_, fitter.thetab_, true));
 
-#ifdef GRAPHICS
-    // Write the file to disk so the ROOT file is complete, but don't close the TApp windows
-    fitter.CloseOutput();
-    rootapp->Run();
-#endif  // GRAPHICS
     return 0;
+}
+
+/*
+ * Parses command line input and extracts switches and options from it, e.g.,
+ * -h or --help. Then it acts accordingly, e.g., displaying help or setting
+ * variables in an option struct. It also returns optionless_argv and
+ * optionless_argc (return value) for easy integration with existing code.
+ *
+ * CAVEAT:
+ * In order to pass negative numbers as arguments, one has to use the POSIX
+ * "--" end of options indicator.
+ *
+ * @param argc Standard argc
+ * @param argv Standard argv
+ * @param optionless_argv Pointer where to write the new argv with processed switches removed
+ * @param options Struct which holds the variables acted upon by switches
+ */
+int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,
+                          fit_options& options) {
+    int c;
+    struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
+                                    {"MC", no_argument, 0, 'm'},
+                                    {"version", no_argument, 0, 'v'},
+                                    {"help", no_argument, 0, 'h'},
+                                    {nullptr, no_argument, nullptr, 0}};
+    int option_index = 0;
+    while ((c = getopt_long(argc, argv, "c:mvh", long_options,
+                            &option_index)) != -1) {
+        switch (c) {
+            case 0:
+                printf("option %s", long_options[option_index].name);
+                if (optarg) printf(" with arg %s", optarg);
+                printf("\n");
+                break;
+            case 'c':
+                options.cpus = atoi(optarg);
+                break;
+            case 'm':
+                options.mc = true;
+                break;
+            case 'v':
+                printf("Version: %s\n", gitversion);
+                exit(0);
+            case 'h':
+                printf("Usage: %s [OPTION]... TRAINING-DIR DATA-DIR OUTPUT-DIR\n\n", argv[0]);
+                printf("Mandatory arguments to long options are mandatory for short options too.\n");
+                printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
+                printf("-h, --help                       display this text and exit\n");
+                printf("-m, --MC                         final fit is on MC (default: data)\n");
+                printf("-o, --output                     basename of the output files\n");
+                printf("-p, --plot-dir=PLOT-DIR          directory for plots\n");
+                printf("-v, --version                	 display version and exit\n");
+                exit(0);
+                break;
+            default:
+                printf("?? getopt returned character code 0%o ??\n", c);
+                exit(1);
+        }
+    }
+
+    // Create a char** that will become the new argv, with the options removed
+    const int optionless_argc = argc - optind + 1;
+    optionless_argv = new char*[optionless_argc];
+    // We want to keep the program name argument
+    optionless_argv[0] = argv[0];
+    for (int i = 1; i < optionless_argc; i++) {
+        optionless_argv[i] = argv[i - 1 + optind];
+    }
+
+    return optionless_argc;
 }

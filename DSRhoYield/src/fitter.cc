@@ -96,7 +96,7 @@ void Fitter::FitTo(TChain* chain) {
     //	fit_result_ = active_model_->fitTo(*data_set_, RooFit::Save(), RooFit::Minimizer("Minuit2"),
     //RooFit::Hesse(1), RooFit::Minos(1), RooFit::NumCPU(4));
     fit_result_ = active_model_->fitTo(*data_set_, RooFit::Save(), RooFit::Minimizer("Minuit2"),
-                                       RooFit::NumCPU(4));
+                                       RooFit::NumCPU(numCPUs_));
 }
 
 /**
@@ -141,7 +141,11 @@ void Fitter::Setup(Components component) {
         case Components::all:
             active_model_ = &model_;
             active_model_name_ = "all";
-            width_factor_.setConstant(false);
+            if (MC_) {
+                width_factor_.setConstant(true);
+            } else {
+                width_factor_.setConstant(false);
+            }
             break;
 
     }  // switch
@@ -593,6 +597,10 @@ double Fitter::GetCorrelation(TChain* chain, const RooRealVar& var1, const RooRe
 void Fitter::PrintResults() {
     printf("\nResults:\n");
 
+    if (!MC_) {
+        printf("F_w   = %f +- %f\n", width_factor_.getVal(),
+               width_factor_.getPropagatedError(*fit_result_));
+    }
     printf("f_cr  = %f +- %f\n", f_cr_.getVal(), f_cr_.getPropagatedError(*fit_result_));
     printf("f_scf = %f +- %f\n", f_scf_.getVal(), f_scf_.getPropagatedError(*fit_result_));
     printf("f_bkg = %f +- %f\n", f_bkg_.getVal(), f_bkg_.getPropagatedError(*fit_result_));

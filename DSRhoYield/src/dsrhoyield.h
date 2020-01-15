@@ -7,7 +7,12 @@
  *
  */
 
-#ifndef DSRHOYIELD_H_
-#define DSRHOYIELD_H_
+#pragma once
 
-#endif /* DSRHOYIELD_H_ */
+struct fit_options {
+    bool mc = false;
+    int cpus = 1;
+};
+
+int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,
+                          fit_options& options);

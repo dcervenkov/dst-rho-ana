@@ -50,8 +50,13 @@ class Fitter {
     double GetCorrelation(TChain* chain, const RooRealVar& var1, const RooRealVar& var2,
                           bool save_plot = false);
     void PrintResults();
+    void SetNumCPUs(int numCPUs) { numCPUs_ = numCPUs; };
+    void SetMC(bool MC) { MC_ = MC; };
 
    private:
+    int numCPUs_ = 1;
+    bool MC_ = false;
+
     RooArgSet dataset_vars_;
 
     RooRealVar thetat_{"thetat", "#theta_{t} [rad]", constants::cuts::thetat_low,

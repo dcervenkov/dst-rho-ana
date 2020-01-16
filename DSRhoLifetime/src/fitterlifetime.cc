@@ -621,7 +621,8 @@ RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components
     lifetime_pdfs.add(*lifetime_cp_pdf);
 
     if (scf) {
-        RooAddPdf* lifetime_scf_pdf = CreateVoigtGaussDtPdf("scf_dt");
+        RooAbsPdf* lifetime_scf_pdf =
+            (physical_pdf ? CreatePhysicsBkgDtPdf("scf_dt") : CreateVoigtGaussDtPdf("scf_dt"));
         lifetime_pdfs.add(*lifetime_scf_pdf);
     }
 

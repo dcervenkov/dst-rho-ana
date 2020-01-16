@@ -103,7 +103,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
         {"lifetime", no_argument, 0, 'l'},
         {"mixing", no_argument, 0, 'm'},
         {"perfecttag", no_argument, 0, 't'},
-        {"physicalpdf", no_argument, 0, 'y'},
+        {"physics", no_argument, 0, 'y'},
         {"version", no_argument, 0, 'v'},
         {"help", no_argument, 0, 'h'},
         {nullptr, no_argument, nullptr, 0}};
@@ -174,6 +174,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-o, --components=COMPONENTS  components which to read and fit (CR, CRSCF, all)\n");
                 printf("-p, --plot-dir=DIR           create lifetime/mixing plots and save to DIR\n");
                 printf("-t, --perfecttag             use MC info to get perfect tagging\n");
+                printf("-y, --physics                use physics-based PDF for SCF and BKG\n");
                 printf("-v, --version                print program version and exit\n");
                 exit(0);
                 break;

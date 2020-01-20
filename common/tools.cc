@@ -20,12 +20,15 @@
 #include "RooAbsData.h"
 #include "RooAbsPdf.h"
 #include "RooDataHist.h"
+#include "RooHist.h"
+#include "RooPlot.h"
 #include "RooRealVar.h"
 #include "TCanvas.h"
 #include "TChain.h"
 #include "TEnv.h"
 #include "TFile.h"
 #include "TH2D.h"
+#include "TLegend.h"
 #include "TList.h"
 #include "TPaveStats.h"
 #include "TStyle.h"
@@ -174,6 +177,206 @@ TPaveText* CreateStatBox(double chi2, RooArgList* results, bool position_top, bo
     snprintf(line, 1000, "#chi^{2} = %.2f\n", chi2);
     stat_box->AddText(line);
     return stat_box;
+}
+
+/**
+ * Make a simple plot of a variable and save it to a file.
+ *
+ * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
+ */
+void PlotVar(const RooRealVar& var, const RooAbsData& data) {
+    TCanvas* canvas = new TCanvas(var.GetName(), var.GetTitle(), 500, 500);
+
+    RooPlot* plot = var.frame();
+
+    data.plotOn(plot);
+    plot->Draw();
+
+    plot->SetTitle("");
+    plot->GetXaxis()->SetTitle(TString(var.GetTitle()));
+    plot->GetYaxis()->SetTitle("");
+
+    canvas->Write();
+    canvas->SaveAs(constants::format);
+}
+
+/**
+ * Make a simple plot of a variable and save it to a file.
+ *
+ * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
+ *
+ * @param var Variable to be plotted
+ * @param pdf PDF to be plotted
+ * @param norm_vars Variables which are to be projected out, not used as slices
+ */
+void PlotVar(const RooRealVar& var, const RooAbsPdf& pdf, const RooArgSet& norm_vars) {
+    TString name = pdf.GetName();
+    name += "_";
+    name += var.GetName();
+    TCanvas canvas(name, name, 500, 500);
+
+    RooPlot* plot = var.frame();
+
+    // From RooFit manual: "No variables are projected by default when PDF is
+    // plotted on an empty frame" One has to be careful to explicitly project
+    // over intended variables in this case, otherwise they are only slices.
+    plot->updateNormVars(norm_vars);
+
+    pdf.plotOn(plot);
+    plot->Draw();
+
+    plot->SetTitle("");
+    plot->GetXaxis()->SetTitle(TString(var.GetTitle()));
+    plot->GetYaxis()->SetTitle("");
+
+    canvas.Write();
+    canvas.SaveAs(constants::format);
+}
+
+/**
+ * Create a plot of two RooDataHists with an optional pull or residual subplot
+ *
+ * @param var Variable to be plotted
+ * @param data1 First histogram to be plotted
+ * @param data2 Second histogram to be plotted
+ * @param draw_pull Whether a pull subplot should be created
+ * @param draw_residual Whether a residual subplot should be created
+ */
+void PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist& data2,
+             bool draw_pull, bool draw_residual) {
+    if (draw_pull && draw_residual) {
+        Log::print(Log::error, "Requested to plot var with both pull and residual. Select only one!\n");
+        return;
+    }
+
+    TCanvas canvas(
+        TString(var.GetName()) + "_" + TString(data1.GetName()) + "_" + TString(data2.GetName()),
+        TString(var.GetTitle()) + " canvas", 500, 500);
+
+    RooPlot* plot = var.frame();
+
+    TPad* pad_var;
+    TPad* pad_pull;
+    if (draw_pull || draw_residual) {
+        pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
+        pad_var->SetBottomMargin(0.0);
+        pad_pull = new TPad("pad_pull", "pad_pull", 0, 0, 1, 0.25);
+        pad_pull->Draw();
+        plot->GetXaxis()->SetTitle("");
+        plot->GetXaxis()->SetLabelSize(0);
+        // This line makes sure the 0 is not drawn as it would overlap with the lower
+        // pad
+        plot->GetYaxis()->SetRangeUser(0.001, plot->GetMaximum());
+    } else {
+        pad_var = new TPad("pad_var", "pad_var", 0, 0, 1, 1);
+    }
+    pad_var->Draw();
+    pad_var->cd();
+    pad_var->SetLeftMargin(0.12);
+
+    data1.plotOn(plot, RooFit::DataError(RooAbsData::None), RooFit::Name("data1"));
+    data2.plotOn(plot, RooFit::MarkerColor(2), RooFit::LineColor(2),
+                 RooFit::DataError(RooAbsData::None), RooFit::Name("data2"));
+
+    plot->SetTitle("");
+    plot->GetYaxis()->SetTitle("");
+    plot->GetYaxis()->SetTitleOffset(1.60);
+    plot->Draw();
+
+    TLegend *leg1 = new TLegend(0.65,0.73,0.86,0.87);
+    leg1->SetFillColor(kWhite);
+    leg1->SetLineColor(kWhite);
+    leg1->AddEntry(plot->findObject("data1"), data1.GetTitle(),"LP");
+    leg1->AddEntry(plot->findObject("data2"), data2.GetTitle(), "LP");
+    leg1->Draw();
+
+    if (draw_pull || draw_residual) {
+        pad_pull->cd();
+        pad_pull->SetTopMargin(0.0);
+        pad_pull->SetBottomMargin(0.35);
+        pad_pull->SetLeftMargin(0.12);
+
+        // Create a new frame to draw the pull distribution and add the distribution
+        // to the frame
+        RooPlot* plot_pull = var.frame(RooFit::Title("Pull Distribution"));
+        plot_pull->SetTitle("");
+
+        TH1* data1_histo = data1.createHistogram("data1", var);
+        TH1* data2_histo = data2.createHistogram("data2", var);
+        TH1* pull_histo = dynamic_cast<TH1*>(data1_histo->Clone("pull_histo"));
+
+        double p1;
+        double p2;
+        const int questionable_limit = 10;
+        int questionable_bins = 0;
+        for (int i = 1; i <= pull_histo->GetNbinsX(); i++) {
+            p1 = data1_histo->GetBinContent(i);
+            p2 = data2_histo->GetBinContent(i);
+            if (draw_residual) {
+                pull_histo->SetBinContent(i, p1 - p2);
+            } else if (draw_pull) {
+                pull_histo->SetBinContent(i, (p1 - p2) / std::sqrt(p2));
+                if (p2 < questionable_limit) {
+                    questionable_bins++;
+                }
+            }
+        }
+
+        if (questionable_bins) {
+            const int total_bins = pull_histo->GetNbinsX();
+            Log::print(
+                Log::warning,
+                "There were %i/%i (%.0f%%) bins with less than %i events - Poisson approximation "
+                "questionable! Consider using residuals.\n",
+                questionable_bins, total_bins, 100 * (double)questionable_bins / total_bins,
+                questionable_limit);
+        }
+
+        RooHist* hpull = new RooHist(*pull_histo, 0, 1, RooAbsData::ErrorType::None);
+
+        hpull->SetFillColor(kGray);
+        // The only working way to get rid of error bars; HIST draw option doesn't
+        // work with RooPlot
+        for (int i = 0; i < hpull->GetN(); i++) {
+            hpull->SetPointError(i, 0, 0, 0, 0);
+        }
+        plot_pull->addPlotable(hpull, "B");
+        // We plot again without bars, so the points are not half covered by
+        // bars as in case of "BP" draw option. We need to create and plot a
+        // clone, because the ROOT object ownership is transfered to the RooPlot
+        // by addPlotable().
+        // If we just added the hpull twice, we would get a segfault.
+        RooHist* hpull_clone = dynamic_cast<RooHist*>(hpull->Clone());
+        // We plot again without bars, so the points are not half covered by bars
+        plot_pull->addPlotable(hpull_clone, "P");
+
+        plot_pull->GetXaxis()->SetTickLength(0.03 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
+        plot_pull->GetXaxis()->SetTitle(TString(var.GetTitle()));
+        plot_pull->GetXaxis()->SetTitleOffset(4.0);
+        plot_pull->GetXaxis()->SetLabelOffset(0.01 * pad_var->GetAbsHNDC() /
+                                              pad_pull->GetAbsHNDC());
+        plot_pull->GetYaxis()->SetTitle("");
+        // plot_pull->GetYaxis()->SetRangeUser(0.8, 1.19);
+        double max = std::max(-pull_histo->GetMinimum(), pull_histo->GetMaximum());
+        plot_pull->GetYaxis()->SetRangeUser(-max, +max);
+        // plot_pull->GetYaxis()->SetRangeUser(-5, 5);
+        plot_pull->GetYaxis()->SetNdivisions(505);
+        plot_pull->Draw();
+
+        delete data1_histo;
+        delete data2_histo;
+        delete pull_histo;
+    }
+
+    canvas.Write();
+    canvas.SaveAs(constants::format);
+
+    delete plot;
+
+    delete pad_var;
+    if (draw_pull) {
+        delete pad_pull;
+    }
 }
 
 /*
@@ -473,11 +676,11 @@ void ChangeModelParameters(RooAbsPdf* pdf, const nlohmann::json& model_parameter
 
 /**
  * Format parameters of the supplied models into a JSON formatted string
- * 
+ *
  * @param name Name of the parameter section; to be printed in the header
  * @param models Models whose parameters are to be printed
  * @param observables Observables that should be removed from the list of parameters
- * 
+ *
  * @return std::string JSON formatted string
  */
 std::string FormatResultsJSON(std::string name, std::vector<const RooAbsPdf*> models,
@@ -502,11 +705,11 @@ std::string FormatResultsJSON(std::string name, std::vector<const RooAbsPdf*> mo
 
 /**
  * Format parameters of the supplied model into a JSON formatted string
- * 
+ *
  * @param name Name of the parameter section; to be printed in the header
  * @param model Model whose parameters are to be printed
  * @param observables Observables that should be removed from the list of parameters
- * 
+ *
  * @return std::string JSON formatted string
  */
 std::string FormatResultsJSON(std::string name, const RooAbsPdf* model,
@@ -517,11 +720,11 @@ std::string FormatResultsJSON(std::string name, const RooAbsPdf* model,
 
 /**
  * Create a directory structure if it doesn't exist
- * 
+ *
  * Normally a file couldn't be created if a directory where it's supposed to
  * reside doesn't exist. This function creates the necessary directory
  * structure if it doesn't exist. It does nothing if it exists.
- * 
+ *
  * @param file Path to a file that might need a directory structure
  */
 void CreateDirsIfNecessary(const std::string file) {

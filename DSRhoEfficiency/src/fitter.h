@@ -35,8 +35,6 @@ class Fitter {
     Fitter(const char* evtgen_filepath, const char* gsim_filepath, const char* output_dir);
     virtual ~Fitter();
     void PlotVar(const RooRealVar& var) const;
-    void PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist& data2,
-                 const bool draw_pull, const bool draw_residual) const;
     void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2) const;
     void PlotEfficiency(RooRealVar& var, bool plot_model = true, bool legend_position_top = true,
                         bool legend_position_left = true);

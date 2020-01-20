@@ -38,8 +38,6 @@ class FitterCPV {
 
     void InitVars(std::array<double, 16> par_input);
 
-    void PlotVar(RooRealVar& var, const RooAbsData&) const;
-    void PlotVar(RooRealVar& var, const RooAbsPdf&) const;
     void PlotWithPull(const std::string channel_name, const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
                       const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
                       const int num_CPUs = 1,

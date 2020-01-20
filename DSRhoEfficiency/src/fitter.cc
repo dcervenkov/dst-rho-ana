@@ -228,148 +228,7 @@ void Fitter::PlotVar(const RooRealVar& var) const {
     RooDataHist evtgen_datahist("evtgen_datahist", "evtgen_datahist", RooArgSet(var),
                                 *evtgen_dataset_);
     RooDataHist gsim_datahist("gsim_datahist", "gsim_datahist", RooArgSet(var), *gsim_dataset_);
-    PlotVar(var, evtgen_datahist, gsim_datahist, false, false);
-}
-
-void Fitter::PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist& data2,
-                     const bool draw_pull, const bool draw_residual) const {
-    if (draw_pull && draw_residual) {
-        Log::print(Log::error, "Requested to plot var with both pull and residual. Select only one!\n");
-        return;
-    }
-
-    TCanvas canvas(
-        TString(var.GetName()) + "_" + TString(data1.GetName()) + "_" + TString(data2.GetName()),
-        TString(var.GetTitle()) + " canvas", 500, 500);
-
-    RooPlot* plot = var.frame();
-
-    TPad* pad_var;
-    TPad* pad_pull;
-    if (draw_pull || draw_residual) {
-        pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
-        pad_var->SetBottomMargin(0.0);
-        pad_pull = new TPad("pad_pull", "pad_pull", 0, 0, 1, 0.25);
-        pad_pull->Draw();
-        plot->GetXaxis()->SetTitle("");
-        plot->GetXaxis()->SetLabelSize(0);
-        // This line makes sure the 0 is not drawn as it would overlap with the lower
-        // pad
-        plot->GetYaxis()->SetRangeUser(0.001, plot->GetMaximum());
-    } else {
-        pad_var = new TPad("pad_var", "pad_var", 0, 0, 1, 1);
-    }
-    pad_var->Draw();
-    pad_var->cd();
-    pad_var->SetLeftMargin(0.12);
-
-    data1.plotOn(plot, RooFit::DataError(RooAbsData::None), RooFit::Name("data1"));
-    data2.plotOn(plot, RooFit::MarkerColor(2), RooFit::LineColor(2),
-                 RooFit::DataError(RooAbsData::None), RooFit::Name("data2"));
-
-    plot->SetTitle("");
-    plot->GetYaxis()->SetTitle("");
-    plot->GetYaxis()->SetTitleOffset(1.60);
-    plot->Draw();
-
-    TLegend *leg1 = new TLegend(0.65,0.73,0.86,0.87);
-    leg1->SetFillColor(kWhite);
-    leg1->SetLineColor(kWhite);
-    leg1->AddEntry(plot->findObject("data1"), data1.GetTitle(),"LP");
-    leg1->AddEntry(plot->findObject("data2"), data2.GetTitle(), "LP");
-    leg1->Draw();
-
-    if (draw_pull || draw_residual) {
-        pad_pull->cd();
-        pad_pull->SetTopMargin(0.0);
-        pad_pull->SetBottomMargin(0.35);
-        pad_pull->SetLeftMargin(0.12);
-
-        // Create a new frame to draw the pull distribution and add the distribution
-        // to the frame
-        RooPlot* plot_pull = var.frame(RooFit::Title("Pull Distribution"));
-        plot_pull->SetTitle("");
-
-        TH1* data1_histo = data1.createHistogram("data1", var);
-        TH1* data2_histo = data2.createHistogram("data2", var);
-        TH1* pull_histo = dynamic_cast<TH1*>(data1_histo->Clone("pull_histo"));
-
-        double p1;
-        double p2;
-        const int questionable_limit = 10;
-        int questionable_bins = 0;
-        for (int i = 1; i <= pull_histo->GetNbinsX(); i++) {
-            p1 = data1_histo->GetBinContent(i);
-            p2 = data2_histo->GetBinContent(i);
-            if (draw_residual) {
-                pull_histo->SetBinContent(i, p1 - p2);
-            } else if (draw_pull) {
-                pull_histo->SetBinContent(i, (p1 - p2) / std::sqrt(p2));
-                if (p2 < questionable_limit) {
-                    questionable_bins++;
-                }
-            }
-        }
-
-        if (questionable_bins) {
-            const int total_bins = pull_histo->GetNbinsX();
-            Log::print(
-                Log::warning,
-                "There were %i/%i (%.0f%%) bins with less than %i events - Poisson approximation "
-                "questionable! Consider using residuals.\n",
-                questionable_bins, total_bins, 100 * (double)questionable_bins / total_bins,
-                questionable_limit);
-        }
-
-        RooHist* hpull = new RooHist(*pull_histo, 0, 1, RooAbsData::ErrorType::None);
-
-        hpull->SetFillColor(kGray);
-        // The only working way to get rid of error bars; HIST draw option doesn't
-        // work with RooPlot
-        for (int i = 0; i < hpull->GetN(); i++) {
-            hpull->SetPointError(i, 0, 0, 0, 0);
-        }
-        plot_pull->addPlotable(hpull, "B");
-        // We plot again without bars, so the points are not half covered by
-        // bars as in case of "BP" draw option. We need to create and plot a
-        // clone, because the ROOT object ownership is transfered to the RooPlot
-        // by addPlotable().
-        // If we just added the hpull twice, we would get a segfault.
-        RooHist* hpull_clone = dynamic_cast<RooHist*>(hpull->Clone());
-        // We plot again without bars, so the points are not half covered by bars
-        plot_pull->addPlotable(hpull_clone, "P");
-
-        plot_pull->GetXaxis()->SetTickLength(0.03 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
-        plot_pull->GetXaxis()->SetTitle(TString(var.GetTitle()));
-        plot_pull->GetXaxis()->SetTitleOffset(4.0);
-        plot_pull->GetXaxis()->SetLabelOffset(0.01 * pad_var->GetAbsHNDC() /
-                                              pad_pull->GetAbsHNDC());
-        plot_pull->GetYaxis()->SetTitle("");
-        // plot_pull->GetYaxis()->SetRangeUser(0.8, 1.19);
-        double max = std::max(-pull_histo->GetMinimum(), pull_histo->GetMaximum());
-        plot_pull->GetYaxis()->SetRangeUser(-max, +max);
-        // plot_pull->GetYaxis()->SetRangeUser(-5, 5);
-        plot_pull->GetYaxis()->SetNdivisions(505);
-        plot_pull->Draw();
-
-        delete data1_histo;
-        delete data2_histo;
-        delete pull_histo;
-    }
-
-    // Set the current directory back to the one for plots (ugly ROOT stuff)
-    if (output_file_) {
-        output_file_->cd();
-    }
-    canvas.Write();
-    canvas.SaveAs(constants::format);
-
-    delete plot;
-
-    delete pad_var;
-    if (draw_pull) {
-        delete pad_pull;
-    }
+    tools::PlotVar(var, evtgen_datahist, gsim_datahist, false, false);
 }
 
 void Fitter::PlotVars2D(const RooRealVar& var1, const RooRealVar& var2) const {
@@ -782,8 +641,8 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
                                RooArgList(thetat_, thetab_, phit_), evtgen_histo);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_simulated_histo, roo_gsim_histo, true, false);
-        PlotVar(*var, roo_evtgen_histo, roo_gsim_histo, true, false);
+        tools::PlotVar(*var, roo_simulated_histo, roo_gsim_histo, true, false);
+        tools::PlotVar(*var, roo_evtgen_histo, roo_gsim_histo, true, false);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -818,7 +677,7 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
                                      RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_eff_histo_1D, roo_eff_pdf_histo_1D, true, false);
+        tools::PlotVar(*var, roo_eff_histo_1D, roo_eff_pdf_histo_1D, true, false);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -859,8 +718,8 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
                                  RooArgList(thetat_, thetab_, phit_), evtgen_histo);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_gsim_kde_histo, roo_gsim_histo, true, false);
-        PlotVar(*var, roo_evtgen_kde_histo, roo_evtgen_histo, true, false);
+        tools::PlotVar(*var, roo_gsim_kde_histo, roo_gsim_histo, true, false);
+        tools::PlotVar(*var, roo_evtgen_kde_histo, roo_evtgen_histo, true, false);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -895,7 +754,7 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
                                      RooArgList(thetat_, thetab_, phit_), eff_kde);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_eff_histo_1D, roo_eff_kde_histo_1D, true, false);
+        tools::PlotVar(*var, roo_eff_histo_1D, roo_eff_kde_histo_1D, true, false);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -932,8 +791,8 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
                                RooArgList(thetat_, thetab_, phit_), evtgen_histo);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_simulated_histo, roo_gsim_histo, true, false);
-        PlotVar(*var, roo_evtgen_histo, roo_gsim_histo, true, false);
+        tools::PlotVar(*var, roo_simulated_histo, roo_gsim_histo, true, false);
+        tools::PlotVar(*var, roo_evtgen_histo, roo_gsim_histo, true, false);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -968,7 +827,7 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
                                      RooArgList(thetat_, thetab_, phit_), scaled_binned_pdf);
 
     for (auto&& var : vars_) {
-        PlotVar(*var, roo_eff_histo_1D, roo_eff_pdf_histo_1D, false, true);
+        tools::PlotVar(*var, roo_eff_histo_1D, roo_eff_pdf_histo_1D, false, true);
     }
 
     for (int i = 0; i < 3; i++) {

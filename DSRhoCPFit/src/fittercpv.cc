@@ -277,60 +277,6 @@ void FitterCPV::PrepareVarArgsets() {
     }
 }
 
-/**
- * Make a simple plot of a variable and save it to a file.
- *
- * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
- */
-void FitterCPV::PlotVar(RooRealVar& var, const RooAbsData& data) const {
-    TCanvas* canvas = new TCanvas(var.GetName(), var.GetTitle(), 500, 500);
-
-    double range_min;
-    double range_max;
-    data.getRange(var, range_min, range_max, 0.05);
-
-    RooPlot* plot = var.frame(range_min, range_max);
-
-    data.plotOn(plot);
-    plot->Draw();
-
-    plot->SetTitle("");
-    plot->GetXaxis()->SetTitle(TString(var.GetTitle()));
-    plot->GetYaxis()->SetTitle("");
-
-    canvas->Write();
-    canvas->SaveAs(constants::format);
-}
-
-/**
- * Make a simple plot of a variable and save it to a file.
- *
- * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
- */
-void FitterCPV::PlotVar(RooRealVar& var, const RooAbsPdf& pdf) const {
-    TString name = pdf.GetName();
-    name += "_";
-    name += var.GetName();
-    TCanvas canvas(name, name, 500, 500);
-
-    RooPlot* plot = var.frame();
-
-    // From RooFit manual: "No variables are projected by default when PDF is
-    // plotted on an empty frame" One has to be careful to explicitly project
-    // over intended variables in this case, otherwise they are only slices.
-    plot->updateNormVars(dataset_vars_argset_);
-
-    pdf.plotOn(plot);
-    plot->Draw();
-
-    plot->SetTitle("");
-    plot->GetXaxis()->SetTitle(TString(var.GetTitle()));
-    plot->GetYaxis()->SetTitle("");
-
-    canvas.Write();
-    canvas.SaveAs(constants::format);
-}
-
 void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_FB, DtCPPDF*& cr_pdf_FA, DtCPPDF*& cr_pdf_SB,
                                DtCPPDF*& cr_pdf_SA, const std::string channel_name,
                                const nlohmann::json common_config,
@@ -771,12 +717,13 @@ RooAbsPdf* FitterCPV::CreateHistPdf(const nlohmann::json common_config,
     // pdf_SB->Print();
     // pdf_SA->Print();
 
-    const int cr_pdf_FB_index = pdf_FB->pdfList().index(chan_name + "_cr_angular_pdf_B");
-    cr_pdf_B = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().at(cr_pdf_FB_index));
+    // TODO: Make this work for TD PDFs as well
+    cr_pdf_B = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().find(chan_name + "_cr_angular_pdf_B"));
+    assert(cr_pdf_B != nullptr);
     // cr_pdf_B->Print();
 
-    const int cr_pdf_FA_index = pdf_FA->pdfList().index(chan_name + "_cr_angular_pdf_B_bar");
-    cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(pdf_FA->pdfList().at(cr_pdf_FA_index));
+    cr_pdf_B_bar = dynamic_cast<RooAbsPdf*>(pdf_FA->pdfList().find(chan_name + "_cr_angular_pdf_B_bar"));
+    assert(cr_pdf_B_bar != nullptr);
     // cr_pdf_B_bar->Print();
 
     bool scf = false;

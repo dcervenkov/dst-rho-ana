@@ -136,8 +136,8 @@ class FitterBKG {
     RooRealVar bkg_dt_mu_delta_{"bkg_dt_mu_delta", "#mu_{d}", 0, -1, 1};
     RooRealVar bkg_dt_mu_lifetime_{"bkg_dt_mu_lifetime", "#mu_{l}", 0, -1, 1};
     RooRealVar bkg_dt_f_tail_{"bkg_dt_f_tail", "f_{t}", 0.1, 0, 1};
-    RooRealVar bkg_dt_S_main_{"bkg_dt_S_main", "S_{m}", 1, 0, 400};
-    RooRealVar bkg_dt_S_tail_{"bkg_dt_S_tail", "S_{t}", 1, 0, 400};
+    RooRealVar bkg_dt_S_main_{"bkg_dt_S_main", "S_{m}", 1, 0, 1000};
+    RooRealVar bkg_dt_S_tail_{"bkg_dt_S_tail", "S_{t}", 1, 0, 1000};
 
     // Background dt model
     RooRealVar bkg_dt_voigt_mu_{"bkg_dt_voigt_mu", "v_{#mu}", -0.303, -1, 1};

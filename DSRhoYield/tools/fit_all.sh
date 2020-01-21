@@ -1,8 +1,10 @@
 #!/bin/bash
 
+mkdir -p logs
+mkdir -p plots
 for CHANNEL in "Kpi" "Kpipi0" "K3pi"; do
     for STREAM in $(seq 0 5); do
         ./DSRhoYield ../data/${CHANNEL}/realistic_mc ../data/${CHANNEL}/realistic_mc/stream${STREAM} plots/${CHANNEL}_stream${STREAM} &> logs/${CHANNEL}_stream${STREAM} &
-        #./DSRhoYield ../data/${CHANNEL}/mc ../data/${CHANNEL}/mc/stream${STREAM} plots/${CHANNEL}_stream${STREAM}_genMC &> logs/${CHANNEL}_stream${STREAM}_genMC &
     done
+    ./DSRhoYield ../data/${CHANNEL}/realistic_mc ../data/${CHANNEL} plots/${CHANNEL} &> logs/${CHANNEL} &
 done

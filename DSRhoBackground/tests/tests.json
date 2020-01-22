@@ -1,0 +1,15 @@
+{
+    "command": "./DSRhoBackground",
+    "comparison_file": "current_result",
+    "tests": {
+        "empirical_fit": [
+            "tests/current_result",
+            "tests/data/signalMC.root"
+        ],
+        "physics_fit": [
+            "--physics",
+            "tests/current_result",
+            "tests/data/signalMC.root"
+        ]
+    }
+}

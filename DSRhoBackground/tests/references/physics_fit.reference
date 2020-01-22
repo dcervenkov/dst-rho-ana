@@ -1,0 +1,10 @@
+=== Physics-based dt Parameters ===
+"bkg_dt_S_main": 3.955615,
+"bkg_dt_S_tail": 581.643117,
+"bkg_dt_f_delta": 0.012393,
+"bkg_dt_f_tail": 0.266225,
+"bkg_dt_mu_delta": 0.004235,
+"bkg_dt_mu_lifetime": -0.404761,
+"bkg_dt_tau": 1.402621,
+"vrerr6": 0.000000,
+"vterr6": 0.000000,

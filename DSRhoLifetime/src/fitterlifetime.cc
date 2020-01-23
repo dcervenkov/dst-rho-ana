@@ -163,26 +163,6 @@ FitterLifetime::~FitterLifetime() {
     }
 }
 
-void FitterLifetime::PlotVar(RooRealVar& var) const {
-    TCanvas* canvas = new TCanvas(var.GetName(), var.GetTitle(), 500, 500);
-
-    double range_min;
-    double range_max;
-    dataset_->getRange(var, range_min, range_max, 0.05);
-
-    RooPlot* plot = var.frame(range_min, range_max);
-
-    dataset_->plotOn(plot);
-    plot->Draw();
-
-    plot->SetTitle("");
-    plot->GetXaxis()->SetTitle(TString(var.GetTitle()));
-    plot->GetYaxis()->SetTitle("");
-
-    canvas->Write();
-    canvas->SaveAs(constants::format);
-}
-
 void FitterLifetime::Test() {
     // tau_->setConstant(true);
     //	dm_->setConstant(true);
@@ -195,7 +175,7 @@ void FitterLifetime::Test() {
                                      RooFit::Minimizer("Minuit2"),
                                      RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
         if (make_plots_) {
-            PlotWithPull(*dt_, *dataset_, *lifetime_pdf, components);
+            tools::PlotWithPull(*dt_, conditional_argset_, *dataset_, *lifetime_pdf, result_, components);
         }
     }
 
@@ -301,154 +281,25 @@ void FitterLifetime::Test() {
         if (make_plots_) {
             RooDataSet* dataset_FB =
                 static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::FB"));
-            PlotWithPull(*dt_, *dataset_FB, *mixing_pdf_FB, tools::ToVector<RooAbsPdf*>(mixing_pdfs_FB));
+            tools::PlotWithPull(*dt_, conditional_argset_, *dataset_FB, *mixing_pdf_FB, result_,
+                                tools::ToVector<RooAbsPdf*>(mixing_pdfs_FB));
 
             RooDataSet* dataset_FA =
                 static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::FA"));
-            PlotWithPull(*dt_, *dataset_FA, *mixing_pdf_FA, tools::ToVector<RooAbsPdf*>(mixing_pdfs_FA));
+            tools::PlotWithPull(*dt_, conditional_argset_, *dataset_FA, *mixing_pdf_FA, result_,
+                                tools::ToVector<RooAbsPdf*>(mixing_pdfs_FA));
 
             RooDataSet* dataset_SB =
                 static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::SB"));
-            PlotWithPull(*dt_, *dataset_SB, *mixing_pdf_SB, tools::ToVector<RooAbsPdf*>(mixing_pdfs_SB));
+            tools::PlotWithPull(*dt_, conditional_argset_, *dataset_SB, *mixing_pdf_SB, result_,
+                                tools::ToVector<RooAbsPdf*>(mixing_pdfs_SB));
 
             RooDataSet* dataset_SA =
                 static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::SA"));
-            PlotWithPull(*dt_, *dataset_SA, *mixing_pdf_SA, tools::ToVector<RooAbsPdf*>(mixing_pdfs_SA));
+            tools::PlotWithPull(*dt_, conditional_argset_, *dataset_SA, *mixing_pdf_SA, result_,
+                                tools::ToVector<RooAbsPdf*>(mixing_pdfs_SA));
         }
     }
-}
-
-void FitterLifetime::PlotWithPull(const RooRealVar& var, const RooAbsData& data,
-                                  const RooAbsPdf& pdf, const std::vector<RooAbsPdf*>& components,
-                                  const char* title) const {
-    TCanvas canvas(pdf.GetName(), var.GetTitle(), 500, 500);
-    RooPlot* plot = var.frame();
-    TPad* pad_var;
-    TPad* pad_pull;
-    pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
-    pad_pull = new TPad("pad_pull", "pad_pull", 0, 0, 1, 0.25);
-    pad_var->Draw();
-    pad_pull->Draw();
-
-    pad_var->cd();
-    pad_var->SetBottomMargin(0.0);
-    pad_var->SetLeftMargin(0.12);
-
-    data.plotOn(plot);
-
-    if (components.size() > 1) {
-        // Plot components before the total PDF as the pull plots are made from the
-        // last plotted PDF
-        const int colors[] = {4, 7, 5};
-        const int styles[] = {3345, 3354, 3395};
-        int i = 0;
-        for (auto component : components) {
-            pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE),
-                    RooFit::LineColor(colors[i]), RooFit::FillColor(colors[i]),
-                    RooFit::Components(*component), RooFit::FillStyle(styles[i]),
-                    RooFit::DrawOption("FL"), RooFit::VLines());
-                    i++;
-        }
-    }
-
-    // Can't use more CPUs because a bug (?) in ROOT causes it to take much longer
-    pdf.plotOn(plot, RooFit::ProjWData(conditional_argset_, data, kFALSE));
-    plot->GetXaxis()->SetTitle("");
-    plot->GetXaxis()->SetLabelSize(0);
-
-    // This line makes sure the 0 is not drawn as it would overlap with the lower pad
-    plot->GetYaxis()->SetRangeUser(0.001, plot->GetMaximum());
-    plot->SetTitle("");
-    plot->GetYaxis()->SetTitle(title);
-    plot->GetYaxis()->SetTitleOffset(1.60);
-    plot->Draw();
-
-    const double chi2 = plot->chiSquare();
-    TPaveText* stat_box = CreateStatBox(chi2, true, true);
-    if (stat_box) {
-        stat_box->Draw();
-    }
-
-    pad_pull->cd();
-    pad_pull->SetTopMargin(0.0);
-    pad_pull->SetBottomMargin(0.35);
-    pad_pull->SetLeftMargin(0.12);
-
-    // Create a new frame to draw the pull distribution and add the distribution to the frame
-    RooPlot* plot_pull_ = var.frame(RooFit::Title("Pull Distribution"));
-    plot_pull_->SetTitle("");
-    RooHist* hpull = plot->pullHist();
-    hpull->SetFillColor(kGray);
-    // The only working way to get rid of error bars; HIST draw option doesn't work with RooPlot
-    for (int i = 0; i < hpull->GetN(); i++) {
-        hpull->SetPointError(i, 0, 0, 0, 0);
-    }
-    plot_pull_->addPlotable(hpull, "B");
-    // We plot again without bars, so the points are not half covered by bars as in case of "BP"
-    // draw option. We need to create and plot a clone, because the ROOT object ownership is
-    // transfered to the RooPlot by addPlotable(). If we just added the hpull twice, we would get a
-    // segfault.
-    RooHist* hpull_clone = dynamic_cast<RooHist*>(hpull->Clone());
-    plot_pull_->addPlotable(hpull_clone, "P");
-
-    plot_pull_->GetXaxis()->SetTickLength(0.03 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
-    plot_pull_->GetXaxis()->SetTitle(TString(var.GetTitle()));
-    plot_pull_->GetXaxis()->SetTitleOffset(4.0);
-    plot_pull_->GetXaxis()->SetLabelOffset(0.01 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
-    plot_pull_->GetYaxis()->SetRangeUser(-5, 5);
-    plot_pull_->GetYaxis()->SetNdivisions(505);
-    plot_pull_->Draw();
-
-    canvas.Write();
-    canvas.SaveAs(constants::format);
-}
-
-TPaveText* FitterLifetime::CreateStatBox(const double chi2, const bool position_top,
-                                         const bool position_left) const {
-    // If no fit result exists return a null pointer
-    if (!result_) {
-        printf("WARNING: No result exists, can't create stat box!\n");
-        return nullptr;
-    }
-
-    const RooArgList results = result_->floatParsFinal();
-    double x_left, x_right, y_bottom, y_top;
-    const double line_height = 0.06;
-
-    if (position_top) {
-        y_top = 0.9;
-        y_bottom = y_top - results.getSize() * line_height;
-    } else {
-        y_bottom = 0.023;
-        y_top = y_bottom + results.getSize() * line_height;
-    }
-
-    if (position_left) {
-        x_left = 0.30;
-        x_right = 0.30;
-    } else {
-        x_left = 0.7;
-        x_right = 0.7;
-    }
-
-    TPaveText* stat_box = new TPaveText(x_left, y_bottom, x_right, y_top, "NDC");
-    stat_box->SetShadowColor(kWhite);
-    stat_box->SetBorderSize(0);
-    stat_box->SetFillColor(kWhite);
-    stat_box->SetTextFont(43);
-    stat_box->SetTextSize(14);
-    stat_box->SetY1NDC(0.1);
-
-    char line[1000];
-    for (int i = 0; i < results.getSize(); i++) {
-        snprintf(line, 1000, "%s = %.3f +- %.3f", results[i].GetTitle(),
-                 dynamic_cast<RooRealVar&>(results[i]).getVal(),
-                 dynamic_cast<RooRealVar&>(results[i]).getError());
-        stat_box->AddText(line);
-    }
-    snprintf(line, 1000, "#chi^{2} = %.2f\n", chi2);
-    stat_box->AddText(line);
-    return stat_box;
 }
 
 void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const int& num_events) {

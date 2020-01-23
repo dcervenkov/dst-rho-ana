@@ -26,12 +26,17 @@ std::vector<TString> GetListOfFiles(const char* dir, const char* ext);
 TChain* ReadDataFromDir(const char* dir);
 void SetupPlotStyle();
 void SetPlotDir(const char* plot_dir);
-TPaveText* CreateStatBox(double chi2, RooArgList* results = nullptr, bool position_top = true,
-                         bool position_left = true);
+TPaveText* CreateStatBox(double chi2, int ndof, const RooArgList& results,
+                         bool position_top = true, bool position_left = true);
 void PlotVar(const RooRealVar& var, const RooAbsData& data);
 void PlotVar(const RooRealVar& var, const RooAbsPdf&);
 void PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist& data2,
              bool draw_pull, bool draw_residual);
+void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const RooDataSet& data,
+                  const RooAbsPdf& pdf, const RooFitResult* const result,
+                  const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
+                  int numCPUs = 1, std::string prefix = "", std::string title = "",
+                  std::vector<RooCmdArg> options = std::vector<RooCmdArg>());
 void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data1,
                 const RooAbsData& data2, const std::string prefix = "",
                 const char* format = ".pdf");
@@ -58,6 +63,18 @@ std::string FormatResultsJSON(std::string name, std::vector<const RooAbsPdf*> mo
 std::string FormatResultsJSON(std::string name, const RooAbsPdf* model,
                               const RooArgSet& observables);
 void CreateDirsIfNecessary(const std::string file);
+RooLinkedList VecToCmdList(std::vector<RooCmdArg>& commands);
+
+/**
+ * Return a concatenation of two std::vectors
+ */
+template <class T>
+std::vector<T> AddVectors(const std::vector<T>& vector1, const std::vector<T>& vector2) {
+    std::vector<T> new_vector(vector1);
+    new_vector.reserve(vector1.size() + vector2.size());
+    new_vector.insert(new_vector.end(), vector2.begin(), vector2.end());
+    return new_vector;
+}
 
 /**
  * Transform RooArgSet of RooRealVars into a std::vector

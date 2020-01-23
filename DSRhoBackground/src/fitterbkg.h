@@ -46,9 +46,7 @@ class FitterBKG {
     int GetNumCPUs() { return num_CPUs_; };
 
     void PlotVar(RooRealVar& var, const RooDataSet* data) const;
-    void PlotWithPull(const RooRealVar& var, const RooDataSet&, const RooAbsPdf& pdf,
-                      const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
-                      const char* title = "") const;
+    void PlotWithPull(RooRealVar& var, const RooDataSet& data, const RooAbsPdf& pdf) const;
     void PlotKDE(AdaptiveKernelDensity kde) const;
 
     void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
@@ -108,8 +106,6 @@ class FitterBKG {
     RooDataSet* dataset_bb_ = nullptr;
 
    private:
-    TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
-                             const bool position_left) const;
     TH3F* ConvertDensityToHisto(AdaptiveKernelDensity pdf) const;
     TH3F* Create3DHisto(const RooDataSet* dataset) const;
 

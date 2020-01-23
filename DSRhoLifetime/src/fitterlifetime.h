@@ -25,9 +25,6 @@ class FitterLifetime {
     FitterLifetime(const nlohmann::json config);
     virtual ~FitterLifetime();
 
-    void PlotVar(RooRealVar& var) const;
-    void PlotWithPull(const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
-                      const std::vector<RooAbsPdf*>& components = {}, const char* title = "") const;
     void Test();
 
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };

@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 // Boost includes
 #include <boost/filesystem.hpp>
@@ -20,6 +21,8 @@
 #include "RooAbsData.h"
 #include "RooAbsPdf.h"
 #include "RooDataHist.h"
+#include "RooDataSet.h"
+#include "RooFitResult.h"
 #include "RooHist.h"
 #include "RooPlot.h"
 #include "RooRealVar.h"
@@ -30,6 +33,7 @@
 #include "TH2D.h"
 #include "TLegend.h"
 #include "TList.h"
+#include "TMath.h"
 #include "TPaveStats.h"
 #include "TStyle.h"
 #include "TSystemDirectory.h"
@@ -135,28 +139,25 @@ void SetPlotDir(const char* plot_dir) {
  * @param position_top Place the box at the top (or bottom).
  * @param position_left Place the box to the left (or right).
  */
-TPaveText* CreateStatBox(double chi2, RooArgList* results, bool position_top, bool position_left) {
+TPaveText* CreateStatBox(double chi2, int ndof, const RooArgList& results, bool position_top,
+                         bool position_left) {
     double x_left, x_right, y_bottom, y_top;
     const double line_height = 0.06;
 
-    if (!results) {
-        results = new RooArgList();
-    }
-
     if (position_top) {
         y_top = 0.9;
-        y_bottom = y_top - results->getSize() * line_height;
+        y_bottom = y_top - (results.getSize() + 2) * line_height;
     } else {
-        y_bottom = 0.05;
-        y_top = y_bottom + results->getSize() * line_height;
+        y_bottom = 0.023;
+        y_top = y_bottom + (results.getSize() + 2) * line_height;
     }
 
     if (position_left) {
         x_left = 0.3;
-        x_right = 0.301;
+        x_right = 0.3;
     } else {
         x_left = 0.7;
-        x_right = 0.701;
+        x_right = 0.7;
     }
 
     TPaveText* stat_box = new TPaveText(x_left, y_bottom, x_right, y_top, "NDC");
@@ -168,13 +169,15 @@ TPaveText* CreateStatBox(double chi2, RooArgList* results, bool position_top, bo
     stat_box->SetY1NDC(0.1);
 
     char line[1000];
-    for (int i = 0; i < results->getSize(); i++) {
+    for (int i = 0; i < results.getSize(); i++) {
         snprintf(line, 1000, "%s = %.3f +- %.3f", results[i].GetTitle(),
-                 static_cast<RooRealVar*>(results->at(i))->getVal(),
-                 static_cast<RooRealVar*>(results->at(i))->getError());
+                 static_cast<RooRealVar*>(results.at(i))->getVal(),
+                 static_cast<RooRealVar*>(results.at(i))->getError());
         stat_box->AddText(line);
     }
-    snprintf(line, 1000, "#chi^{2} = %.2f\n", chi2);
+    snprintf(line, 1000, "#chi^{2}/ndof = %.2f (%.1f/%i)\n", chi2 / ndof, chi2, ndof);
+    stat_box->AddText(line);
+    snprintf(line, 1000, "p = %.2f\n", TMath::Prob(chi2, ndof));
     stat_box->AddText(line);
     return stat_box;
 }
@@ -245,7 +248,8 @@ void PlotVar(const RooRealVar& var, const RooAbsPdf& pdf, const RooArgSet& norm_
 void PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist& data2,
              bool draw_pull, bool draw_residual) {
     if (draw_pull && draw_residual) {
-        Log::print(Log::error, "Requested to plot var with both pull and residual. Select only one!\n");
+        Log::print(Log::error,
+                   "Requested to plot var with both pull and residual. Select only one!\n");
         return;
     }
 
@@ -283,10 +287,10 @@ void PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist&
     plot->GetYaxis()->SetTitleOffset(1.60);
     plot->Draw();
 
-    TLegend *leg1 = new TLegend(0.65,0.73,0.86,0.87);
+    TLegend* leg1 = new TLegend(0.65, 0.73, 0.86, 0.87);
     leg1->SetFillColor(kWhite);
     leg1->SetLineColor(kWhite);
-    leg1->AddEntry(plot->findObject("data1"), data1.GetTitle(),"LP");
+    leg1->AddEntry(plot->findObject("data1"), data1.GetTitle(), "LP");
     leg1->AddEntry(plot->findObject("data2"), data2.GetTitle(), "LP");
     leg1->Draw();
 
@@ -379,6 +383,158 @@ void PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist&
     }
 }
 
+/**
+ * Make a plot of a variable with both data points and pdf projection and display a pull plot
+ * beneath it. Then save to a file.
+ *
+ * @param var Variable to be plotted
+ * @param data Dataset against which to plot
+ * @param pdf PDF to use for plotting and pull calculation
+ * @param components [optional] Component PDFs to plot alongside the full PDF
+ * @param title [optional] Title for the y-axis
+ */
+void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const RooDataSet& data,
+                  const RooAbsPdf& pdf, const RooFitResult* const result,
+                  const std::vector<RooAbsPdf*> components, int numCPUs, std::string prefix,
+                  std::string title, std::vector<RooCmdArg> options) {
+    TString name;
+    if (prefix.size()) {
+        name += prefix.c_str();
+        name += "_";
+    }
+    name += pdf.GetName();
+    name += "_";
+    name += data.GetName();
+    name += "_";
+    name += var.GetName();
+    TCanvas canvas(name, name, 500, 500);
+
+    RooPlot* plot = var.frame();
+    TPad* pad_var;
+    TPad* pad_pull;
+    pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
+    pad_pull = new TPad("pad_pull", "pad_pull", 0, 0, 1, 0.25);
+    pad_var->Draw();
+    pad_pull->Draw();
+
+    pad_var->cd();
+    pad_var->SetBottomMargin(0.0);
+    pad_var->SetLeftMargin(0.12);
+
+    data.plotOn(plot);
+
+    // Renormalization required for certain plots, when using multiple CPUs but
+    // not with a single CPU; possible RooFit bug
+    // TODO: Figure out if this is indeed a bug
+    double norm = 1;
+    if (!name.Contains("hist") && numCPUs > 1) {
+        norm = 1.0 / data.numEntries();
+    }
+
+    options.push_back(RooFit::ProjWData(projection_vars, data, kFALSE));
+    options.push_back(RooFit::NumCPU(numCPUs));
+    options.push_back(RooFit::Normalization(norm));
+
+    if (components.size() > 1) {
+        // Plot components before the total PDF as the pull plots are made from the
+        // last plotted PDF
+        const int colors[] = {4, 7, 5};
+        const int styles[] = {3345, 3354, 3395};
+        int i = 0;
+        for (auto component : components) {
+            std::vector<RooCmdArg> component_options;
+            component_options.push_back(RooFit::LineColor(colors[i]));
+            component_options.push_back(RooFit::FillColor(colors[i]));
+            component_options.push_back(RooFit::FillStyle(styles[i]));
+            component_options.push_back(RooFit::DrawOption("FL"));
+            component_options.push_back(RooFit::VLines());
+            RooArgSet set(*component);
+            component_options.push_back(RooFit::Components(set));
+
+            std::vector<RooCmdArg> all_options = AddVectors(options, component_options);
+            RooLinkedList roo_options = VecToCmdList(all_options);
+
+            pdf.plotOn(plot, roo_options);
+            i++;
+        }
+    }
+
+    RooLinkedList roo_options = VecToCmdList(options);
+    pdf.plotOn(plot, roo_options);
+
+    plot->GetXaxis()->SetTitle("");
+    plot->GetXaxis()->SetLabelSize(0);
+
+    // This line makes sure the 0 is not drawn as it would overlap with the lower pad
+    plot->GetYaxis()->SetRangeUser(0.001, plot->GetMaximum());
+    plot->SetTitle("");
+    plot->GetYaxis()->SetTitle(title.c_str());
+    plot->GetYaxis()->SetTitleOffset(1.60);
+    plot->Draw();
+
+    // This is not an OK way of calculating ndof - e.g., in a case where the PDF
+    // is defined only on a subset of the var range, or there are empty bins,
+    // etc. it will be wrong. However, RooFit doesn't give access to anything
+    // like ndof itself, so this will have to do for now.
+    const int num_floating_pars = result ? result->floatParsFinal().getSize() : 0;
+    const int ndof = var.getBinning().numBins() - num_floating_pars;
+    const double chi2 = plot->chiSquare(num_floating_pars) * ndof;
+    TPaveText* stat_box = CreateStatBox(chi2, ndof, result->floatParsFinal(), true, true);
+    if (stat_box) {
+        stat_box->Draw();
+    }
+
+    pad_pull->cd();
+    pad_pull->SetTopMargin(0.0);
+    pad_pull->SetBottomMargin(0.35);
+    pad_pull->SetLeftMargin(0.12);
+
+    // Create a new frame to draw the pull distribution and add the distribution to the frame
+    RooPlot* plot_pull_ = var.frame(RooFit::Title("Pull Distribution"));
+    plot_pull_->SetTitle("");
+    RooHist* hpull = plot->pullHist();
+    hpull->SetFillColor(kGray);
+    // The only working way to get rid of error bars; HIST draw option doesn't work with RooPlot
+    for (int i = 0; i < hpull->GetN(); i++) {
+        hpull->SetPointError(i, 0, 0, 0, 0);
+    }
+    plot_pull_->addPlotable(hpull, "B");
+    // We plot again without bars, so the points are not half covered by bars as in case of "BP"
+    // draw option.
+    // We need to create and plot a clone, because the ROOT object ownership is transfered to the
+    // RooPlot by addPlotable().
+    // If we just added the hpull twice, we would get a segfault.
+    RooHist* hpull_clone = dynamic_cast<RooHist*>(hpull->Clone());
+
+    // We plot again without bars, so the points are not half covered by bars
+    plot_pull_->addPlotable(hpull_clone, "P");
+
+    plot_pull_->GetXaxis()->SetTickLength(0.03 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
+    plot_pull_->GetXaxis()->SetTitle(TString(var.GetTitle()));
+    plot_pull_->GetXaxis()->SetTitleOffset(4.0);
+    plot_pull_->GetXaxis()->SetLabelOffset(0.01 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
+    plot_pull_->GetYaxis()->SetRangeUser(-5, 5);
+    plot_pull_->GetYaxis()->SetNdivisions(505);
+    plot_pull_->Draw();
+
+    canvas.Write();
+    canvas.SaveAs(constants::format);
+}
+
+/**
+ * Convert a vector of RooFit options into a list that plotOn understands
+ *
+ * @param commands A vector of commands such as RooFit::NumCPU(4)
+ * @return RooLinkedList The resulting command list that RooFit understands
+ */
+RooLinkedList VecToCmdList(std::vector<RooCmdArg>& commands) {
+    RooLinkedList cmd_list;
+    for (auto& cmd : commands) {
+        cmd_list.Add(&cmd);
+    }
+    return cmd_list;
+}
+
 /*
  * Create and save 2D plots of supplied vars and data
  *
@@ -389,8 +545,8 @@ void PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist&
  * @param format [optional] Format in which to save the images.
  * @param max [optional] Maximum of the range
  */
-void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data, const std::string prefix,
-                const char* format, const double max) {
+void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data,
+                const std::string prefix, const char* format, const double max) {
     TString name;
     if (prefix.length()) {
         name = prefix + "_";
@@ -428,7 +584,8 @@ void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
  * @param residual [optional] Plot a residual instead of a pull
  */
 void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data,
-                const RooAbsData& pdf, const std::string prefix, const char* format, const bool residual) {
+                const RooAbsData& pdf, const std::string prefix, const char* format,
+                const bool residual) {
     TString type = residual ? "residual" : "pull";
     TString name;
     if (prefix.length()) {

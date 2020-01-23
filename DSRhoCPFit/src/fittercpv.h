@@ -38,11 +38,6 @@ class FitterCPV {
 
     void InitVars(std::array<double, 16> par_input);
 
-    void PlotWithPull(const std::string channel_name, const RooRealVar& var, const RooAbsData&, const RooAbsPdf& pdf,
-                      const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
-                      const int num_CPUs = 1,
-                      const char* title = "") const;
-
     void Fit(const nlohmann::json config);
 
     void GenerateToys(const int num_events, const int num_toys);
@@ -170,8 +165,6 @@ class FitterCPV {
 
     void PrepareVarArgsets();
     void ChangeFitRanges(const nlohmann::json& config);
-    TPaveText* CreateStatBox(const double chi2, const int ndof, const bool position_top,
-                             const bool position_left) const;
     TH3D* GetBinnedEfficiency(std::vector<std::string> file, const int model);
     const void SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var, const double margin = 0);
     const void SaveLikelihoodScan(RooAbsPdf& pdf, RooRealVar* var1, RooRealVar* var2,

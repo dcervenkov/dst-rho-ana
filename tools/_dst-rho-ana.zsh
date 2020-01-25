@@ -61,19 +61,6 @@ _dsrhobackground_complete()
 	'--histo[create a histogram PDF]' \
 	'--plot-dir=[create lifetime/mixing plots]:directory:_files' \
 	'*:input files:_files'
-
-	case "$state" in
-		jsonfiles)
-			local -a json_files
-			json_files=(*.json)
-			_multi_parts / json_files
-			;;
-		rootfiles)
-			local -a root_files
-			root_files=(*.root)
-			_multi_parts / root_files
-			;;
-	esac
 }
 
 _dsrholifetime_complete()
@@ -95,22 +82,21 @@ _dsrholifetime_complete()
 		components)
 			_values -s ' ' 'type' CR CRSCF all
 			;;
-		channels)
-			_values -s ' ' 'type' Kpi Kpipi0 K3pi
-			;;
-		jsonfiles)
-			local -a json_files
-			json_files=(*.json)
-			_multi_parts / json_files
-			;;
-		rootfiles)
-			local -a root_files
-			root_files=(*.root)
-			_multi_parts / root_files
-			;;
 	esac
+}
+
+_dsrhoyield_complete()
+{
+	_arguments \
+	'--cpus=[number of CPU cores to use for fitting and plotting]' \
+	'--MC[whether the fit is MC or data]' \
+	'--version[show version]' \
+	'--help[display help]' \
+	'--plot-dir=[create lifetime/mixing plots]:directory:_files'
 }
 
 compdef _dsrhocpfit_complete DSRhoCPFit
 compdef _dsrhobackground_complete DSRhoBackground
 compdef _dsrholifetime_complete DSRhoLifetime
+compdef _dsrhoyield_complete DSRhoYield
+

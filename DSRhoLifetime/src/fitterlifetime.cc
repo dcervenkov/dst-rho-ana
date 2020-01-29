@@ -52,6 +52,10 @@ FitterLifetime::FitterLifetime(const nlohmann::json config) {
     config_ = config;
 
     dt_ = new RooRealVar("dt", "#Deltat [ps]", constants::cuts::dt_low, constants::cuts::dt_high);
+    thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", constants::cuts::thetat_low, constants::cuts::thetat_high);
+    thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", constants::cuts::thetab_low,
+                             constants::cuts::thetab_high);
+    phit_ = new RooRealVar("phit", "#phi_{t} [rad]", constants::cuts::phit_low, constants::cuts::phit_high);
 
     vrusable_ = new RooRealVar("vrusable", "vrusable", 0, 1);
     vrvtxz_ = new RooRealVar("vrvtxz", "vrvtxz", -10, 10);
@@ -75,7 +79,7 @@ FitterLifetime::FitterLifetime(const nlohmann::json config) {
     expno_ = new RooRealVar("expno", "expno", 0, 100);
     expmc_ = new RooRealVar("expmc", "expmc", 0, 10);
 
-    evmcflag_ = new RooRealVar("evmcflag", "evmcflag", 0, 10);
+    evmcflag_ = new RooRealVar("evmcflag", "evmcflag", -1, 10);
     brecflav_ = new RooRealVar("brecflav", "brecflav", -1, 1);
     btagmcli_ = new RooRealVar("btagmcli", "btagmcli", -1000, 1000);
     tagqr_ = new RooRealVar("tagqr", "tagqr", -1, 1);
@@ -135,6 +139,9 @@ FitterLifetime::FitterLifetime(const nlohmann::json config) {
 
     dataset_vars_ = conditional_vars_;
     dataset_vars_.push_back(&dt_);
+    dataset_vars_.push_back(&phit_);
+    dataset_vars_.push_back(&thetab_);
+    dataset_vars_.push_back(&thetat_);
 
     // The variables present in the ntuple are added to an RooArgSet that will be needed
     // when we create a RooDataSet from the input_tree
@@ -339,13 +346,13 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
     TString SA_cuts;
     if (perfect_tagging_) {
         FB_cuts = "brecflav==1&&btagmcli<0";
-        FA_cuts = "brecflav==-1&&btagmcli>0";
-        SB_cuts = "brecflav==1&&btagmcli>0";
+        FA_cuts = "brecflav==-1&&btagmcli>=0";
+        SB_cuts = "brecflav==1&&btagmcli>=0";
         SA_cuts = "brecflav==-1&&btagmcli<0";
     } else {
         FB_cuts = "brecflav==1&&tagqr<0";
-        FA_cuts = "brecflav==-1&&tagqr>0";
-        SB_cuts = "brecflav==1&&tagqr>0";
+        FA_cuts = "brecflav==-1&&tagqr>=0";
+        SB_cuts = "brecflav==1&&tagqr>=0";
         SA_cuts = "brecflav==-1&&tagqr<0";
     }
 

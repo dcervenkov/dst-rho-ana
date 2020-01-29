@@ -708,6 +708,18 @@ TString GetCommonCutsString() {
     common_cuts += constants::cuts::dt_low;
     common_cuts += "&&dt<";
     common_cuts += constants::cuts::dt_high;
+    common_cuts += ")&&(phit>";
+    common_cuts += constants::cuts::phit_low;
+    common_cuts += "&&phit<";
+    common_cuts += constants::cuts::phit_high;
+    common_cuts += ")&&(thetab>";
+    common_cuts += constants::cuts::thetab_low;
+    common_cuts += "&&thetab<";
+    common_cuts += constants::cuts::thetab_high;
+    common_cuts += ")&&(thetat>";
+    common_cuts += constants::cuts::thetat_low;
+    common_cuts += "&&thetat<";
+    common_cuts += constants::cuts::thetat_high;
     common_cuts += ")";
     return common_cuts;
 }

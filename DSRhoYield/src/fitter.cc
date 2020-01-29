@@ -91,7 +91,7 @@ void Fitter::CloseOutput() {
 void Fitter::FitTo(TChain* chain) {
     if (data_set_) delete data_set_;
     data_set_ = new RooDataSet("data_set", "data_set", chain, dataset_vars_, data_cut_);
-    data_set_->Print();
+    Log::print(Log::info, "Fitting %i events\n", data_set_->numEntries());
 
     //	fit_result_ = active_model_->fitTo(*data_set_, RooFit::Save(), RooFit::Minimizer("Minuit2"),
     //RooFit::Hesse(1), RooFit::Minos(1), RooFit::NumCPU(4));

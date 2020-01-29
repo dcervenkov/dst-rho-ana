@@ -2061,8 +2061,8 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
     // TODO: Treat case that key exists but is false
     if (common_config.contains("perfectTagging")) {
         FB_cuts = "brecflav==1&&btagmcli<0";
-        FA_cuts = "brecflav==-1&&btagmcli>0";
-        SB_cuts = "brecflav==1&&btagmcli>0";
+        FA_cuts = "brecflav==-1&&btagmcli>=0";
+        SB_cuts = "brecflav==1&&btagmcli>=0";
         SA_cuts = "brecflav==-1&&btagmcli<0";
     } else {
         // TODO: Treat case that key exists but is false
@@ -2072,8 +2072,8 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
                        "probably end badly. Consider using the '--perfect-tag' switch.\n");
         }
         FB_cuts = "brecflav==1&&tagqr<0";
-        FA_cuts = "brecflav==-1&&tagqr>0";
-        SB_cuts = "brecflav==1&&tagqr>0";
+        FA_cuts = "brecflav==-1&&tagqr>=0";
+        SB_cuts = "brecflav==1&&tagqr>=0";
         SA_cuts = "brecflav==-1&&tagqr<0";
     }
 

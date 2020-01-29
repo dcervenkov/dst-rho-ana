@@ -275,10 +275,14 @@ void FitterLifetime::Test() {
         sim_pdf.addPdf(*mixing_pdf_SB, "SB");
         sim_pdf.addPdf(*mixing_pdf_SA, "SA");
 
-        Log::LogLine(Log::debug) << "Global parameters:";
-        tools::ChangeModelParameters(&sim_pdf, config_["modelParameters"]);
-        Log::LogLine(Log::debug) << "Channel parameters:";
-        tools::ChangeModelParameters(&sim_pdf, config_["channels"][channel_]["modelParameters"]);
+        if (config_.contains("modelParameters")) {
+            Log::LogLine(Log::debug) << "Global parameters:";
+            tools::ChangeModelParameters(&sim_pdf, config_["modelParameters"]);
+        }
+        if (config_.contains("channels")) {
+            Log::LogLine(Log::debug) << "Channel parameters:";
+            tools::ChangeModelParameters(&sim_pdf, config_["channels"][channel_]["modelParameters"]);
+        }
 
         Log::print(Log::info, "Fitting %i events\n", dataset_->numEntries());
         result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
@@ -506,10 +510,15 @@ RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components
     }
 
     RooAddPdf* lifetime_pdf = new RooAddPdf(prefix + "lifetime_pdf", prefix + "lifetime_pdf", lifetime_pdfs, fractions);
-    Log::LogLine(Log::debug) << "Global parameters:";
-    tools::ChangeModelParameters(lifetime_pdf, config_["modelParameters"]);
-    Log::LogLine(Log::debug) << "Channel parameters:";
-    tools::ChangeModelParameters(lifetime_pdf, config_["channels"][channel_]["modelParameters"]);
+
+    if (config_.contains("modelParameters")) {
+        Log::LogLine(Log::debug) << "Global parameters:";
+        tools::ChangeModelParameters(lifetime_pdf, config_["modelParameters"]);
+    }
+    if (config_.contains("channels")) {
+        Log::LogLine(Log::debug) << "Channel parameters:";
+        tools::ChangeModelParameters(lifetime_pdf, config_["channels"][channel_]["modelParameters"]);
+    }
 
     components = tools::ToVector<RooAbsPdf*>(lifetime_pdfs);
     return lifetime_pdf;

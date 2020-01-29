@@ -1,0 +1,66 @@
+{
+    "fitRanges": {
+        "dt": {
+            "min": -10,
+            "max": 10
+        },
+        "thetat": {
+            "min": 0,
+            "max": 3.1415
+        },
+        "thetab": {
+            "min": 0.5,
+            "max": 2.95
+        }
+    },
+    "modelParameters": {
+        "bkg_dt_S_main": 93.181089,
+        "bkg_dt_S_tail": 678.284519,
+        "bkg_dt_f_delta": 0.210928,
+        "bkg_dt_f_tail": 0.053559,
+        "bkg_dt_mu_delta": 0.030687,
+        "bkg_dt_mu_lifetime": -0.157375,
+        "bkg_dt_tau": 1.410963
+    },
+    "channels": {
+        "Kpi": {
+            "modelParameters": {
+                "scf_dt_S_main": 109.705130,
+                "scf_dt_S_tail": 43.807693,
+                "scf_dt_f_delta": 0.019840,
+                "scf_dt_f_tail": 0.299992,
+                "scf_dt_mu_delta": 0.596766,
+                "scf_dt_mu_lifetime": -0.238487,
+                "scf_dt_tau": 1.592953,
+                "cr_f": 0.741,
+                "scf_f": 0.092
+            }
+        },
+        "Kpipi0": {
+            "modelParameters": {
+                "scf_dt_S_main": 112.164976,
+                "scf_dt_S_tail": 49.334905,
+                "scf_dt_f_delta": 0.000113,
+                "scf_dt_f_tail": 0.298876,
+                "scf_dt_mu_delta": -0.056144,
+                "scf_dt_mu_lifetime": -0.225967,
+                "scf_dt_tau": 1.598783,
+                "cr_f": 0.612,
+                "scf_f": 0.124
+            }
+        },
+        "K3pi": {
+            "modelParameters": {
+                "scf_dt_S_main": 112.251671,
+                "scf_dt_S_tail": 48.764921,
+                "scf_dt_f_delta": 0.022871,
+                "scf_dt_f_tail": 0.299998,
+                "scf_dt_mu_delta": 0.566822,
+                "scf_dt_mu_lifetime": -0.254248,
+                "scf_dt_tau": 1.615646,
+                "cr_f": 0.695,
+                "scf_f": 0.096
+            }
+        }
+    }
+}

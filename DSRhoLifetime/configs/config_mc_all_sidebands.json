@@ -1,0 +1,36 @@
+{
+    "fitRanges": {
+        "dt": {
+            "min": -10,
+            "max": 10
+        },
+        "thetat": {
+            "min": 0,
+            "max": 3.1415
+        },
+        "thetab": {
+            "min": 0.5,
+            "max": 2.95
+        }
+    },
+    "modelParameters": {
+        "scf_dt_S_main": 113.970639,
+        "scf_dt_S_tail": 46.139692,
+        "scf_dt_f_delta": 0.024217,
+        "scf_dt_f_tail": 0.299997,
+        "scf_dt_mu_delta": 0.519313,
+        "scf_dt_mu_lifetime": -0.253504,
+        "scf_dt_tau": 1.609696,
+
+        "bkg_dt_S_main": 95.681991,
+        "bkg_dt_S_tail": 511.265240,
+        "bkg_dt_f_delta": 0.101576,
+        "bkg_dt_f_tail": 0.035787,
+        "bkg_dt_mu_delta": 0.046054,
+        "bkg_dt_mu_lifetime": -0.132501,
+        "bkg_dt_tau": 1.491034,
+
+        "cr_f": 0.687,
+        "scf_f": 0.108
+    }
+}

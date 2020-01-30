@@ -48,6 +48,11 @@
 #include "nlohmann/json.hpp"
 #include "tools.h"
 
+/**
+ * Constructor that takes a JSON config with extra info
+ *
+ * @param config JSON config with all neccessary information for fits and plots
+ */
 FitterLifetime::FitterLifetime(const nlohmann::json config) {
     config_ = config;
 
@@ -170,6 +175,10 @@ FitterLifetime::~FitterLifetime() {
     }
 }
 
+/**
+ * Currently a function that does everything - creating PDFs, fitting, plotting
+ */
+ // TODO: Separate into smaller, better named functions
 void FitterLifetime::Test() {
     // tau_->setConstant(true);
     //	dm_->setConstant(true);
@@ -313,6 +322,15 @@ void FitterLifetime::Test() {
     }
 }
 
+/**
+ * Read in the supplied list of files and add type FB,FA,...
+ *
+ * When num_events is specified they are distributed properly (based on number
+ * of events in each file) among all the files.
+ *
+ * @param file_names List of files to be read in
+ * @param num_events Number of events to be read
+ */
 void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const int& num_events) {
     TChain* chain = new TChain("h2000");
     int num_files = 0;
@@ -473,6 +491,15 @@ nlohmann::json FitterLifetime::ReadInJSONFile(const char* filename) const {
     return json;
 }
 
+/**
+ * Create a lifetime PDF
+ *
+ * @param components Individual components (CR, SCF, BKG) are returned in this vector
+ * @param scf Whether to include the SCF term in the PDF
+ * @param bkg Whether to include the BKG term in the PDF
+ * @param physical_pdf Whether to use the physics-based (Tatami-based) SCF and BKG PDFs
+ * @return RooAbsPdf* The final lifetime PDF
+ */
 RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components, const bool scf,
                                              const bool bkg, const bool physical_pdf) const {
     DtPDF* lifetime_cp_pdf = new DtPDF("lifetime_cp_pdf", "lifetime_cp_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
@@ -524,19 +551,29 @@ RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components
     return lifetime_pdf;
 }
 
+/**
+ * Save results to a plain text file
+ *
+ * @param results_file The file to which to save the results
+ */
 void FitterLifetime::SaveTXTResults(const char* results_file) const {
     std::stringstream buffer;
     if (do_lifetime_fit_ || do_mixing_fit_) {
-        buffer << tau_->getVal() << ", " << tau_->getError(); 
+        buffer << tau_->getVal() << ", " << tau_->getError();
     }
     if (do_mixing_fit_) {
-        buffer << ", " << dm_->getVal() << ", " << dm_->getError(); 
+        buffer << ", " << dm_->getVal() << ", " << dm_->getError();
     }
     buffer << std::endl;
 
     tools::SaveTextToFile(std::string(results_file), buffer.str());
 }
 
+/**
+ * A helper function to set the scf_ and bkg_ member variables
+ *
+ * @param components Either CR, CRSCF, or all
+ */
 void FitterLifetime::SetComponents(const std::string components) {
     if (components == "CRSCF") {
         scf_ = true;

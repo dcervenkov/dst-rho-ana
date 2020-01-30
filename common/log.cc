@@ -69,6 +69,12 @@ void print(LogLevel level, const char* fmt, ...) {
     }
 }
 
+/**
+ * std::cout-like constructor. To be used the same way as std::cout.
+ *
+ * @param level Log level of the message
+ * @param out Stream to which the message should be sent
+ */
 LogLine::LogLine(LogLevel level, std::ostream& out) : out_(out), level_(level) {
     if (level_ >= log_level) {
         switch (level) {

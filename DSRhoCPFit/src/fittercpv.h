@@ -68,7 +68,6 @@ class FitterCPV {
 
     bool ResultExists() const { return result_ ? true : false; };
 
-    // void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);
     void SetSCFKDE(const char* file);
     void SetSCFHisto(const char* file);

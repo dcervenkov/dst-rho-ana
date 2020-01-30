@@ -6,14 +6,19 @@
             "root",
             "-q",
             "-b",
-            "extract_result.cxx"
+            "extract_result.cxx(\"plots\")"
+        ],
+        [
+            "rm",
+            "-r",
+            "plots"
         ]
     ],
     "tests": {
         "yield_fit": [
             "tests/data",
             "tests/data",
-            "plots/test"
+            "tests/plots"
         ]
     }
 }

@@ -132,13 +132,13 @@ def main():
                 f.write(" ".join(command) + "\n")
 
         for dir in dirs_to_create:
-            os.mkdir(os.path.join("..", dir))
+            os.makedirs(os.path.join("..", dir))
         for dir in dirs_to_delete:
             shutil.rmtree(os.path.join("..", dir))
-            os.mkdir(os.path.join("..", dir))
+            os.makedirs(os.path.join("..", dir))
 
         subprocess.run(
-            "nice parallel --will-cite -j " + str(options.cpus) + " < " + TEMP_FILE, cwd="..", shell=True)
+            "nice parallel --will-cite --bar -j " + str(options.cpus) + " < " + TEMP_FILE, cwd="..", shell=True)
         os.remove(TEMP_FILE)
     else:
         print("Aborting")
@@ -146,4 +146,7 @@ def main():
 
 
 if __name__ == "__main__":
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(dname)
     main()

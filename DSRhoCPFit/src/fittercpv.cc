@@ -78,7 +78,13 @@ FitterCPV::FitterCPV(nlohmann::json config) {
     vrzerr_ = nullptr;
     vtzerr_ = nullptr;
 
-    InitVars(constants::par_input);
+    const int var_bins = config.contains("plotBins1D") ? config["plotBins1D"].get<int>() : 100;
+    if (config.contains("initialPars")) {
+        InitVars(ToParInputArray(config["initialPars"]), var_bins);
+    } else {
+        InitVars(constants::par_input, var_bins);
+    }
+
     if (config.contains("fitRanges")) {
         ChangeFitRanges(config["fitRanges"]);
     }
@@ -101,7 +107,7 @@ FitterCPV::~FitterCPV() {
 /**
  * Initialize all the member variables to reasonable values.
  */
-void FitterCPV::InitVars(std::array<double, 16> par_input) {
+void FitterCPV::InitVars(std::array<double, 16> par_input, const int var_bins) {
     ap_ = new RooRealVar("ap", "|a_{#parallel}|", par_input[0], 0, 0.5);
     apa_ = new RooRealVar("apa", "arg(a_{#parallel})", par_input[1], 0, 1);
     a0_ = new RooRealVar("a0", "|a_{0}|", par_input[2], 0.8, 1);
@@ -138,6 +144,11 @@ void FitterCPV::InitVars(std::array<double, 16> par_input) {
                                  constants::cuts::thetab_high);
         phit_ = new RooRealVar("phit", "#phi_{t} [rad]", -TMath::Pi(), TMath::Pi());
     }
+
+    thetat_->setBins(var_bins);
+    thetab_->setBins(var_bins);
+    phit_->setBins(var_bins);
+    dt_->setBins(var_bins);
 
     vrusable_ = new RooRealVar("vrusable", "vrusable", 0, 1);
     vrvtxz_ = new RooRealVar("vrvtxz", "vrvtxz", -10, 10);
@@ -2138,10 +2149,28 @@ RooAbsPdf* FitterCPV::CreateSCFPDF(const std::string channel_name,
 
 /**
  * Check whether the current fitter is time-dependent or not
- * 
+ *
  * @return true Time-dependent
  * @return false Not time-dependent
  */
 bool FitterCPV::IsTimeDependent() const {
     return pdf_->getObservables(data_)->contains(*dt_);
+}
+
+/**
+ * Take JSON config with initial parameter values and output ordered std::array
+ *
+ * @param initial_pars JSON config with the initial parameter values
+ * @return std::array<double, 16> Ordered array readable by InitVars()
+ */
+std::array<double, 16> FitterCPV::ToParInputArray(nlohmann::json initial_pars) {
+    const char* names[16] = {"ap", "apa", "a0",  "ata", "xp",  "x0",  "xt",  "yp",
+                           "y0", "yt",  "xpb", "x0b", "xtb", "ypb", "y0b", "ytb"};
+    std::array<double, 16> pars;
+    for (int i = 0; i < 16; i++) {
+        if (!initial_pars.contains(names[i])) {
+            Log::LogLine(Log::error) << "'" << names[i] << "' not present in initialPars!";
+        }
+        pars[i] = initial_pars[names[i]].get<double>();
+    }
 }

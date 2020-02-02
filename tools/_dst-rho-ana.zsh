@@ -19,6 +19,7 @@ _dsrhocpfit_complete()
 	'--help[display help]' \
 	'--time-independent[make a time-independent fit]' \
 	'--log[save copy of log to results file]' \
+	'--plot-bins=[number of bins in plots]' \
 	'--plot-dir=[create lifetime/mixing plots]:directory:_files' \
 	'--perfect-tag[use MC info to get perfect tagging]' \
 	'--fix=[fix specified argument(s) to input values in the fit]:parameter:->parameters' \

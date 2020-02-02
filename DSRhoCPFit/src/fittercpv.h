@@ -36,8 +36,6 @@ class FitterCPV {
     FitterCPV(nlohmann::json config);
     virtual ~FitterCPV();
 
-    void InitVars(std::array<double, 16> par_input);
-
     void Fit(const nlohmann::json config);
 
     void GenerateToys(const int num_events, const int num_toys);
@@ -154,6 +152,9 @@ class FitterCPV {
     RooCategory* decaytype_;
 
    private:
+    void InitVars(std::array<double, 16> par_input, const int var_bins);
+    std::array<double, 16> ToParInputArray(nlohmann::json initial_pars);
+
     RooSimultaneous* CreatePDF(const nlohmann::json config);
     RooSimultaneous* CreateChannelPDF(const std::string channel_name,
                                       const nlohmann::json channel_config,

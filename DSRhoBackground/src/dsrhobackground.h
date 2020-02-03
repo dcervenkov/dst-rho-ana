@@ -14,6 +14,8 @@ struct fitter_options {
     bool KDE;
     bool histo;
     bool physics;
+    bool nodelta;
+    bool notail;
     int num_CPUs;
     bool num_CPUs_set;
     char* plot_dir;

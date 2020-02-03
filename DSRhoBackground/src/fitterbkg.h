@@ -44,6 +44,8 @@ class FitterBKG {
 
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
     int GetNumCPUs() { return num_CPUs_; };
+    void SetNoDeltaPDF();
+    void SetNoTailPDF();
 
     void PlotVar(RooRealVar& var, const RooDataSet* data) const;
     void PlotWithPull(RooRealVar& var, const RooDataSet& data, const RooAbsPdf& pdf) const;
@@ -140,7 +142,7 @@ class FitterBKG {
     RooRealVar bkg_dt_voigt_sigma_{"bkg_dt_voigt_sigma_", "v_{#sigma}", 2.323, 0, 10};
     RooRealVar bkg_dt_voigt_width_{"bkg_dt_voigt_width_", "v_{w}", 0.851, 0, 10};
     RooVoigtian bkg_dt_voigt_{"bkg_dt_voigt", "bkg_dt_voigt", dt_, bkg_dt_voigt_mu_, bkg_dt_voigt_width_, bkg_dt_voigt_sigma_};
-    
+
     RooRealVar bkg_dt_gaus_mu_{"bkg_dt_gaus_mu", "g_{#mu}", -0.161 -1, 1};
     RooRealVar bkg_dt_gaus_sigma_{"bkg_dt_gaus_sigma_", "g_{#sigma}", 1.096, 0, 10};
     RooGaussian bkg_dt_gaus_{"bkg_dt_gaus", "bkg_dt_gaus", dt_, bkg_dt_gaus_mu_, bkg_dt_gaus_sigma_};

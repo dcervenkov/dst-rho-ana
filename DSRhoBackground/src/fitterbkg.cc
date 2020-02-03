@@ -509,3 +509,24 @@ void FitterBKG::PlotKDE(AdaptiveKernelDensity kde) const {
     }
 
 }
+
+/**
+ * Disable certain parts of the physics-based PDF
+ */
+void FitterBKG::SetNoDeltaPDF() {
+    bkg_dt_f_delta_ = 0;
+    bkg_dt_f_delta_.setConstant();
+    bkg_dt_mu_delta_ = 0;
+    bkg_dt_mu_delta_.setConstant();
+}
+
+
+/**
+ * Disable certain parts of the physics-based PDF
+ */
+void FitterBKG::SetNoTailPDF() {
+    bkg_dt_f_tail_ = 0;
+    bkg_dt_f_tail_.setConstant();
+    bkg_dt_S_tail_ = 0;
+    bkg_dt_S_tail_.setConstant();
+}

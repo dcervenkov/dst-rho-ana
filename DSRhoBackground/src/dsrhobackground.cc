@@ -84,6 +84,12 @@ int main(int argc, char* argv[]) {
     } else if (options.histo) {
         fitter.CreateHistoPDF(fitter.dataset_, results_file);
     } else if (options.physics) {
+        if (options.nodelta) {
+            fitter.SetNoDeltaPDF();
+        }
+        if (options.notail) {
+            fitter.SetNoTailPDF();
+        }
         fitter.Fit(fitter.bkg_physics_dt_model_, fitter.dataset_);
         JSON_formatted_results += tools::FormatResultsJSON(
             "Physics-based dt Parameters", fitter.bkg_physics_dt_model_, observables);
@@ -222,11 +228,13 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"histo", no_argument, 0, 's'},
                                     {"plot-dir", required_argument, 0, 'p'},
                                     {"physics", no_argument, 0, 'y'},
+                                    {"nodelta", no_argument, 0, 'd'},
+                                    {"notail", no_argument, 0, 't'},
                                     {"version", no_argument, 0, 'v'},
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:p:ksyvh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:p:ksydtvh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -250,6 +258,12 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'y':
                 options.physics = true;
                 break;
+            case 'd':
+                options.nodelta = true;
+                break;
+            case 't':
+                options.notail = true;
+                break;
             case 'v':
                 printf("Version: %s\n", gitversion);
                 exit(0);
@@ -261,6 +275,8 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-k, --kde                 use kernel density estimation\n");
                 printf("-s, --histo               create a histogram PDF\n");
                 printf("-y, --physics             fit physics-based dt PDF\n");
+                printf("-d, --nodelta             disable certain parts of physics-based PDF\n");
+                printf("-t, --notail              disable certain parts of physics-based PDF\n");
                 printf("-h, --help                display this text and exit\n");
                 printf("-p, --plot-dir=PLOT_DIR   create lifetime/mixing plots\n");
                 printf("-v, --version             print program version and exit\n");

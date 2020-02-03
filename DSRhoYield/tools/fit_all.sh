@@ -18,7 +18,7 @@ for CHANNEL in "Kpi" "Kpipi0" "K3pi"; do
 done
 
 echo "Running $(wc -l ${CMD_FILE} | cut -d' ' -f1) fits..."
-parallel --will-cite --bar < ${CMD_FILE}
+parallel --will-cite --bar --nice 10 < ${CMD_FILE}
 
 if [ "$?" -eq 0 ]; then
     rm ${CMD_FILE}

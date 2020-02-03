@@ -51,7 +51,7 @@ done
 echo "./DSRhoLifetime -c 1 --physics --components=all --config=configs/config_mc_all_sidebands.json --channel=Kpi --lifetime --plot-dir=plots/mc_sidebands results/mc_sidebands ../data/K*/realistic_mc/stream0/DSRho-*.root ../data/K*/sidebands/*.root &> logs/mc_sidebands" >> ${CMD_FILE}
 
 echo "Running $(wc -l ${CMD_FILE} | cut -d' ' -f1) fits..."
-parallel --will-cite --bar < ${CMD_FILE}
+parallel --will-cite --bar --nice 10 < ${CMD_FILE}
 
 if [ "$?" -eq 0 ]; then
     rm ${CMD_FILE}

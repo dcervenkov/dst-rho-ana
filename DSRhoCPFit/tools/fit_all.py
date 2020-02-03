@@ -138,7 +138,7 @@ def main():
             os.makedirs(os.path.join("..", dir))
 
         subprocess.run(
-            "nice parallel --will-cite --bar -j " + str(options.cpus) + " < " + TEMP_FILE, cwd="..", shell=True)
+            "parallel --will-cite --bar --nice 10 -j " + str(options.cpus) + " < " + TEMP_FILE, cwd="..", shell=True)
         os.remove(TEMP_FILE)
     else:
         print("Aborting")

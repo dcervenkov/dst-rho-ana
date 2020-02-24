@@ -80,6 +80,7 @@ FitterCPV::FitterCPV(nlohmann::json config) {
 
     const int var_bins = config.contains("plotBins1D") ? config["plotBins1D"].get<int>() : 100;
     if (config.contains("initialPars")) {
+        Log::LogLine(Log::info) << "Updating initial paramater values from config.";
         InitVars(ToParInputArray(config["initialPars"]), var_bins);
     } else {
         InitVars(constants::par_input, var_bins);
@@ -2174,6 +2175,7 @@ std::array<double, 16> FitterCPV::ToParInputArray(nlohmann::json initial_pars) {
         }
         pars[i] = initial_pars[names[i]].get<double>();
     }
+    return pars;
 }
 
 

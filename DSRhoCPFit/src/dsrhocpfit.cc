@@ -103,6 +103,9 @@ int main(int argc, char* argv[]) {
         tools::LogText(output_file, "latex_pull_table_asym",
                        fitter.CreateLatexPullTableString(true).c_str());
         tools::SaveTextToFile(config.GetOutputFilename(), fitter.CreateResultsString());
+        if (config.json.contains("correlation-plot") && config.json["correlation-plot"].get<bool>() == true) {
+                fitter.PlotCorrelationMatrix();
+        }
     }
 
     if (config.json.contains("plotDir")) {
@@ -142,6 +145,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
                                     {"config", required_argument, 0, 'g'},
                                     {"components", required_argument, 0, 'e'},
+                                    {"correlation-plot", no_argument, 0, 'a'},
                                     {"events", required_argument, 0, 'n'},
                                     {"exclude-channels", required_argument, 0, 'x'},
                                     {"MC", required_argument, 0, 'm'},
@@ -173,6 +177,9 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 break;
             case 'e':
                 config["components"] = optarg;
+                break;
+            case 'a':
+                config["correlation-plot"] = true;
                 break;
             case 'n':
                 config["events"] = atoi(optarg);
@@ -215,6 +222,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
                 printf("-e, --components=CR|CRSCF|all    do a specified fit type\n");
+                printf("-a, --correlation-plot           create a plot of the correlation matrix\n");
                 printf("-f, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit;\n");
                 printf("                                 additional short-hand ARGs are: all, xy, trans and nota0\n");
                 printf("-g, --config=CONFIG-FILE         read in configuration from the specified file\n");

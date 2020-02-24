@@ -76,6 +76,7 @@ class FitterCPV {
     static nlohmann::json ReadJSONConfig(const char* filename);
     std::string ApplyJSONConfig(const nlohmann::json& config);
     void CreatePlots(const nlohmann::json config) const;
+    void PlotCorrelationMatrix() const;
 
     const void LogResults();
 

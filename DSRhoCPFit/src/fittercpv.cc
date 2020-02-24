@@ -590,7 +590,7 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const std::string channel_nam
 }
 
 /**
- * Fit specified PDF, show the results, and create plots if config demands it
+ * Fit specified PDF, print the results and global correlations
  *
  * @param timedep Whether a time-dependent fit should be carried out
  * @param scf Add self-crossfeed component to the fit
@@ -611,6 +611,7 @@ void FitterCPV::Fit(const nlohmann::json config) {
 
     if (result_) {
         result_->Print();
+        result_->globalCorr()->printMultiline(std::cout, 1 + 4 + 128);
     }
 }
 
@@ -2173,4 +2174,20 @@ std::array<double, 16> FitterCPV::ToParInputArray(nlohmann::json initial_pars) {
         }
         pars[i] = initial_pars[names[i]].get<double>();
     }
+}
+
+
+/**
+ * Create and save a plot of the correlation matrix
+ */
+void FitterCPV::PlotCorrelationMatrix() const {
+    std::vector<std::string> ordered_labels;
+    for (auto& par : parameters_) {
+        if ((*par)->hasError()) {
+            ordered_labels.push_back((*par)->GetName());
+        }
+    }
+
+    const RooFitResult const_result(*result_);
+    tools::PlotCorrelationMatrix(const_result, ordered_labels);
 }

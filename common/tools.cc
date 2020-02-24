@@ -905,4 +905,77 @@ void CreateDirsIfNecessary(const std::string file) {
     }
 }
 
+/**
+ * Rearrange a correlation histogram based on a vector of labels
+ *
+ * This function is quite finnicky with the indices, because of ROOT's peculiar
+ * histogram indexing convention.
+ *
+ * @param matrix Original correlation histogram
+ * @param ordered_labels The requested ordering
+ *
+ * @return TH2* An ordered copy of the original
+ */
+TH2* ArrangeCorrelationMatrix(const TH2* matrix, std::vector<std::string> ordered_labels) {
+    TH2* ordered_corr_matrix = dynamic_cast<TH2*>(matrix->Clone("ordered_corr_matrix"));
+    ordered_corr_matrix->Reset();
+    const uint num_bins = matrix->GetNbinsX();
+    assert(ordered_labels.size() == num_bins);
+
+    // First we get the "migration" address book (since X axis is labeled from
+    // bins 1 to N, while Y is labeled from N to 1, we have to do it separately)
+    int new_addr_x[ordered_labels.size()];
+    int new_addr_y[ordered_labels.size()];
+    for (uint old_bin = 0; old_bin < num_bins; old_bin++) {
+        std::string label_x = matrix->GetXaxis()->GetBinLabel(old_bin + 1);
+        std::string label_y = matrix->GetXaxis()->GetBinLabel(num_bins - old_bin);
+        for (uint new_bin = 0; new_bin < ordered_labels.size(); new_bin++) {
+            // Switch the labels themselves
+            ordered_corr_matrix->GetXaxis()->SetBinLabel(new_bin + 1, ordered_labels[new_bin].c_str());
+            ordered_corr_matrix->GetYaxis()->SetBinLabel(num_bins - new_bin, ordered_labels[new_bin].c_str());
+
+            // Fill in the address book
+            if (ordered_labels[new_bin] == label_x) {
+                new_addr_x[old_bin] = new_bin + 1;
+            }
+            if (ordered_labels[new_bin] == label_y) {
+                new_addr_y[old_bin] = new_bin + 1;
+            }
+        }
+    }
+
+    // Migrate the contents, keeping in mind the different counting for Y axis
+    for(uint x = 1; x <= num_bins; x++) {
+        for(uint y = 1; y <= num_bins; y++) {
+            int old_bin = matrix->GetBin(x, y);
+            double content = matrix->GetBinContent(old_bin);
+            int new_bin = ordered_corr_matrix->GetBin(new_addr_x[x - 1], num_bins - new_addr_y[y - 1] + 1);
+            ordered_corr_matrix->SetBinContent(new_bin, content);
+        }
+    }
+    return ordered_corr_matrix;
+}
+
+/**
+ * Create and save a plot of a correlation matrix with ordered labels
+ *
+ * @param matrix Original correlation histogram
+ * @param ordered_labels The requested ordering
+ */
+void PlotCorrelationMatrix(const RooFitResult& result, std::vector<std::string> ordered_labels) {
+    TCanvas correlation_plot("correlation_plot", "correlation_plot", 500, 500);
+    gStyle->SetPalette(kLightTemperature);
+    gStyle->SetPaintTextFormat("1.1f");
+
+    TH2* corr_histo = tools::ArrangeCorrelationMatrix(result.correlationHist(), ordered_labels);
+    corr_histo->SetTitle("");
+    corr_histo->SetMaximum(1);
+    corr_histo->SetMinimum(-1);
+    corr_histo->SetMarkerSize(1.1);
+    corr_histo->LabelsOption("v");
+    corr_histo->Draw("col text");
+    correlation_plot.SaveAs(constants::format);
+    gStyle->SetPalette(kViridis);
+}
+
 }  // namespace tools

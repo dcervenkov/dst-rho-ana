@@ -15,6 +15,7 @@
 #include "RooArgSet.h"
 #include "RooRealVar.h"
 #include "TChain.h"
+#include "TH2.h"
 #include "TPaveText.h"
 
 // Local includes
@@ -64,6 +65,8 @@ std::string FormatResultsJSON(std::string name, const RooAbsPdf* model,
                               const RooArgSet& observables);
 void CreateDirsIfNecessary(const std::string file);
 RooLinkedList VecToCmdList(std::vector<RooCmdArg>& commands);
+TH2* ArrangeCorrelationMatrix(const TH2* matrix, std::vector<std::string> ordered_labels);
+void PlotCorrelationMatrix(const RooFitResult& result, std::vector<std::string> ordered_labels);
 
 /**
  * Return a concatenation of two std::vectors
@@ -78,7 +81,7 @@ std::vector<T> AddVectors(const std::vector<T>& vector1, const std::vector<T>& v
 
 /**
  * Transform RooArgSet of RooRealVars into a std::vector
- * 
+ *
  * Objects other than RooRealVars (e.g., RooCategory are not added to the final
  * vector).
  */

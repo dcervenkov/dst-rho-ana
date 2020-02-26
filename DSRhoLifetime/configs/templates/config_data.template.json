@@ -1,0 +1,61 @@
+{
+    "fitRanges": {
+        "dt": {
+            "min": -10,
+            "max": 10
+        },
+        "thetat": {
+            "min": 0,
+            "max": 3.1415
+        },
+        "thetab": {
+            "min": 0.5,
+            "max": 2.95
+        }
+    },
+    "modelParameters": {
+        "substitute": [
+            {
+                "file": "data_sidebands_bkg.json"
+            }
+        ]
+    },
+    "channels": {
+        "Kpi": {
+            "modelParameters": {
+                "substitute": [
+                    {
+                        "file": "Kpi_mc_scf.json",
+                        "replace": ["bkg", "scf"]
+                    }
+                ],
+                "cr_f": 0.764,
+                "scf_f": 0.094
+            }
+        },
+        "Kpipi0": {
+            "modelParameters": {
+                "substitute": [
+                    {
+                        "file": "Kpipi0_mc_scf.json",
+                        "replace": ["bkg", "scf"]
+                    }
+                ],
+                "cr_f": 0.653,
+                "scf_f": 0.132
+            }
+        },
+        "K3pi": {
+            "modelParameters": {
+                "substitute": [
+                    {
+                        "file": "K3pi_mc_scf.json",
+                        "replace": ["bkg", "scf"]
+                    }
+                ],
+                "cr_f": 0.728,
+                "scf_f": 0.101
+            }
+        }
+    }
+}

@@ -8,7 +8,6 @@ object and store the text in its title member.)
 
 from __future__ import print_function
 import argparse
-import rootpy
 import os
 from rootpy.io import root_open
 import sys
@@ -35,8 +34,10 @@ def root_print(filename, names):
             if name in root_file:
                 value = root_file[name].GetTitle()
             else:
-                print("ERROR: '" + name + "' not present in file '" + filename + "'", file=sys.stderr)
-                print("The following objects are present in the file:\n" + "\n".join([obj.GetName() for obj in root_file]), file=sys.stderr)
+                print("ERROR: '" + name + "' not present in file '" +
+                      filename + "'", file=sys.stderr)
+                print("The following objects are present in the file:\n" +
+                      "\n".join([obj.GetName() for obj in root_file]), file=sys.stderr)
                 sys.exit(1)
 
             if len(names) > 1:
@@ -59,23 +60,24 @@ def stdout_redirected(to=os.devnull):
     '''
     fd = sys.stdout.fileno()
 
-    ##### assert that Python and C stdio write using the same file descriptor
-    ####assert libc.fileno(ctypes.c_void_p.in_dll(libc, "stdout")) == fd == 1
+    # assert that Python and C stdio write using the same file descriptor
+    # assert libc.fileno(ctypes.c_void_p.in_dll(libc, "stdout")) == fd == 1
 
     def _redirect_stdout(to):
-        sys.stdout.close() # + implicit flush()
-        os.dup2(to.fileno(), fd) # fd writes to 'to' file
-        sys.stdout = os.fdopen(fd, 'w') # Python writes to fd
+        sys.stdout.close()  # + implicit flush()
+        os.dup2(to.fileno(), fd)  # fd writes to 'to' file
+        sys.stdout = os.fdopen(fd, 'w')  # Python writes to fd
 
     with os.fdopen(os.dup(fd), 'w') as old_stdout:
         with open(to, 'w') as file:
             _redirect_stdout(to=file)
         try:
-            yield # allow code to be run with the redirected stdout
+            yield  # allow code to be run with the redirected stdout
         finally:
-            _redirect_stdout(to=old_stdout) # restore stdout.
-                                            # buffering and flags such as
-                                            # CLOEXEC may be different
+            _redirect_stdout(to=old_stdout)  # restore stdout.
+            # buffering and flags such as
+            # CLOEXEC may be different
+
 
 def main():
     filenames, names = decode_arguments()
@@ -92,5 +94,6 @@ def main():
             print("=" * 40)
             print(filename)
         root_print(filename, names)
+
 
 main()

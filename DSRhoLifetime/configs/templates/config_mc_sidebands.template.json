@@ -16,7 +16,7 @@
     "modelParameters": {
         "substitute": [
             {
-                "file": "data_sidebands_bkg"
+                "file": "data_sidebands_bkg.json"
             }
         ]
     },

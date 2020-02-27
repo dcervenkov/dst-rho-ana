@@ -32,26 +32,6 @@
                 "cr_f": 0.635,
                 "scf_f": 0.079
             }
-        },
-        "Kpipi0": {
-            "modelParameters": {
-                "substitute": [
-                    {
-                        "file": "Kpipi0_mc_scf.json",
-                        "replace": ["bkg", "scf"]
-                    }
-                ],
-            }
-        },
-        "K3pi": {
-            "modelParameters": {
-                "substitute": [
-                    {
-                        "file": "K3pi_mc_scf.json",
-                        "replace": ["bkg", "scf"]
-                    }
-                ],
-            }
         }
     }
 }

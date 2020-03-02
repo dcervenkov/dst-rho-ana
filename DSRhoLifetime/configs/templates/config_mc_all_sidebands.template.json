@@ -16,10 +16,10 @@
     "modelParameters": {
         "substitute": [
             {
-                "file": "data_sidebands_bkg.json"
+                "file": "../../../DSRhoBackground/results/data_sidebands_bkg.json"
             },
             {
-                "file": "mc_scf.json",
+                "file": "../../../DSRhoBackground/results/mc_scf.json",
                 "replace": ["bkg", "scf"]
             }
         ],

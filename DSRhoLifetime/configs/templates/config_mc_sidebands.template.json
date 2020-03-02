@@ -16,7 +16,7 @@
     "modelParameters": {
         "substitute": [
             {
-                "file": "data_sidebands_bkg.json"
+                "file": "../../../DSRhoBackground/results/data_sidebands_bkg.json"
             }
         ]
     },
@@ -25,7 +25,7 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "Kpi_mc_scf.json",
+                        "file": "../../../DSRhoBackground/results/Kpi_mc_scf.json",
                         "replace": ["bkg", "scf"]
                     }
                 ],
@@ -37,7 +37,7 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "Kpipi0_mc_scf.json",
+                        "file": "../../../DSRhoBackground/results/Kpipi0_mc_scf.json",
                         "replace": ["bkg", "scf"]
                     }
                 ],
@@ -49,7 +49,7 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "K3pi_mc_scf.json",
+                        "file": "../../../DSRhoBackground/results/K3pi_mc_scf.json",
                         "replace": ["bkg", "scf"]
                     }
                 ],

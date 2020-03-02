@@ -93,7 +93,7 @@ def substitute_files(dictionary, from_dir):
 
 def main():
     template_path = sys.argv[1]
-    sub_path = sys.argv[2]
+    sub_path = os.path.dirname(template_path)
     config_template = read_in_json(template_path)
     config_full = substitute_files(config_template, sub_path)
     print(json.dumps(config_full, sort_keys=True, indent=2))

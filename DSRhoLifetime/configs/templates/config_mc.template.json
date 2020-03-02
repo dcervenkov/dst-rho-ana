@@ -16,7 +16,7 @@
     "modelParameters": {
         "substitute": [
             {
-                "file": "mc_bkg.json"
+                "file": "../../../DSRhoBackground/results/mc_bkg.json"
             }
         ]
     },
@@ -25,36 +25,39 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "Kpi_mc_scf.json",
+                        "file": "../../../DSRhoBackground/results/Kpi_mc_scf.json",
                         "replace": ["bkg", "scf"]
+                    },
+                    {
+                        "file": "../../../DSRhoYield/results/Kpi_mc_fractions.json"
                     }
-                ],
-                "cr_f": 0.741,
-                "scf_f": 0.092
+                ]
             }
         },
         "Kpipi0": {
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "Kpipi0_mc_scf.json",
+                        "file": "../../../DSRhoBackground/results/Kpipi0_mc_scf.json",
                         "replace": ["bkg", "scf"]
+                    },
+                    {
+                        "file": "../../../DSRhoYield/results/Kpipi0_mc_fractions.json"
                     }
-                ],
-                "cr_f": 0.612,
-                "scf_f": 0.124
+                ]
             }
         },
         "K3pi": {
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "K3pi_mc_scf.json",
+                        "file": "../../../DSRhoBackground/results/K3pi_mc_scf.json",
                         "replace": ["bkg", "scf"]
+                    },
+                    {
+                        "file": "../../../DSRhoYield/results/K3pi_mc_fractions.json"
                     }
-                ],
-                "cr_f": 0.695,
-                "scf_f": 0.096
+                ]
             }
         }
     }

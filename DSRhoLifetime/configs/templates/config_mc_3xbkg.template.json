@@ -16,7 +16,7 @@
     "modelParameters": {
         "substitute": [
             {
-                "file": "mc_bkg.json"
+                "file": "../../../DSRhoBackground/results/mc_bkg.json"
             }
         ]
     },
@@ -25,7 +25,7 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "Kpi_mc_scf.json",
+                        "file": "../../../DSRhoBackground/results/Kpi_mc_scf.json",
                         "replace": ["bkg", "scf"]
                     }
                 ],

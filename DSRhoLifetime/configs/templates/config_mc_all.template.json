@@ -16,10 +16,10 @@
     "modelParameters": {
         "substitute": [
             {
-                "file": "mc_bkg.json"
+                "file": "../../../DSRhoBackground/results/mc_bkg.json"
             },
             {
-                "file": "mc_scf.json",
+                "file": "../../../DSRhoBackground/results/mc_scf.json",
                 "replace": ["bkg", "scf"]
             }
         ],

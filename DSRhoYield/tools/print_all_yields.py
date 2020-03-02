@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 from math import sqrt
+import json
 import os
 import sys
 import ROOT
@@ -39,8 +40,9 @@ class MarkdownTable:
                 if type(row[col]) is str:
                     cells.append(len(row[col]))
                 else:
-                    cells.append(self.get_length_of_number(
-                        row[col], self.precision[col]))
+                    cells.append(
+                        self.get_length_of_number(row[col], self.precision[col])
+                    )
             cells.append(len(self.header[col]))
             columns.append(max(cells))
         return columns
@@ -64,8 +66,8 @@ class MarkdownTable:
         row_text = ""
         for col, cell in enumerate(row):
             format_string = self.get_format_string(
-                self.columns_widths[col], (
-                    None if type(row[col]) is str else self.precision[col])
+                self.columns_widths[col],
+                (None if type(row[col]) is str else self.precision[col]),
             )
             row_text += format_string.format(row[col])
 
@@ -79,25 +81,22 @@ class MarkdownTable:
 
 
 def print_line_bold(string):
-    print(u"\u001b[1m", end='')
+    print(u"\u001b[1m", end="")
     print(string)
-    print(u"\u001b[0m", end='')
+    print(u"\u001b[0m", end="")
 
 
 def recover_yield(filename):
     file = ROOT.TFile(filename)
     sig_plus_cf = float(
-        str(file.Get("all;1").GetLineWith(
-            "n_signal_plus_cross_model")).split()[1]
+        str(file.Get("all;1").GetLineWith("n_signal_plus_cross_model")).split()[1]
     )
     sig_plus_cf_error = float(
-        str(file.Get("all;1").GetLineWith(
-            "n_signal_plus_cross_model")).split()[3]
+        str(file.Get("all;1").GetLineWith("n_signal_plus_cross_model")).split()[3]
     )
     f_sig_cf = float(
         str(
-            file.Get("signal_plus_crossfeed;1").GetLineWith(
-                "signal_plus_cross_f")
+            file.Get("signal_plus_crossfeed;1").GetLineWith("signal_plus_cross_f")
         ).split()[1]
     )
 
@@ -121,16 +120,18 @@ def recover_count(dir):
 
 
 def common_cuts():
-    return ("vrusable == 1 &&"
-            "vtusable==1&&"
-            "((vrchi2/vrndf) < 50 | |vrntrk == 1) &&"
-            "((vtchi2/vtndf)<50||vtntrk==1)&&"
-            "((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&"
-            "((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&"
-            "csbdtg > -0.6 &&"
-            "(de>-0.14&&de<0.068)&&"
-            "(dt>-10&&dt<10)&&"
-            "thetab>0.5")
+    return (
+        "vrusable == 1 &&"
+        "vtusable==1&&"
+        "((vrchi2/vrndf) < 50 | |vrntrk == 1) &&"
+        "((vtchi2/vtndf)<50||vtntrk==1)&&"
+        "((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&"
+        "((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&"
+        "csbdtg > -0.6 &&"
+        "(de>-0.14&&de<0.068)&&"
+        "(dt>-10&&dt<10)&&"
+        "thetab>0.5"
+    )
 
 
 def weighted_mean(number_list, weights):
@@ -193,8 +194,7 @@ def process_MC(channels, streams):
                 bkg_yield,
                 bkg_yield_error,
             ) = recover_yield(
-                "plots/" + channel + "_stream" +
-                str(stream) + "/fit_results.root"
+                "plots/" + channel + "_stream" + str(stream) + "/fit_results.root"
             )
             sig_count = recover_count(
                 "../data/" + channel + "/realistic_mc/stream" + str(stream)
@@ -244,12 +244,18 @@ def process_MC(channels, streams):
         table.print()
         print()
 
+        data = {
+            "cr_scf_f": sum(cr_crscf_fractions) / len(cr_crscf_fractions),
+            "cr_f": sum(cr_fractions) / len(cr_fractions),
+            "scf_f": sum(scf_fractions) / len(scf_fractions),
+        }
+
+        save_to_json(data, os.path.join("results", channel + "_mc_fractions.json"))
+
 
 def process_data(channels):
     print_line_bold("Data")
-    header = [
-        "Channel", "Yield", "Err", "CR/CR+SCF", "CR/all", "SCF/all", "BKG/all"
-    ]
+    header = ["Channel", "Yield", "Err", "CR/CR+SCF", "CR/all", "SCF/all", "BKG/all"]
     precision = [None, 0, 0, 3, 3, 3, 3]
 
     table = MarkdownTable(header)
@@ -273,51 +279,87 @@ def process_data(channels):
             bkg_yield_error,
         ) = recover_yield("plots/" + channel + "/fit_results.root")
 
-        cr_crscf, cr, scf, bkg = calculate_fractions(
-            sig_yield, scf_yield, bkg_yield)
+        (
+            cr_crscf_fraction,
+            cr_fraction,
+            scf_fraction,
+            bkg_fraction,
+        ) = calculate_fractions(sig_yield, scf_yield, bkg_yield)
 
         table.add_row(
-            [channel, sig_yield, sig_yield_error, cr_crscf, cr, scf, bkg])
+            [
+                channel,
+                sig_yield,
+                sig_yield_error,
+                cr_crscf_fraction,
+                cr_fraction,
+                scf_fraction,
+                bkg_fraction,
+            ]
+        )
 
         yields.append(sig_yield)
         errors.append(sig_yield_error)
 
-        cr_crscf_fractions.append(cr_crscf)
-        cr_fractions.append(cr)
-        scf_fractions.append(scf)
-        bkg_fractions.append(bkg)
+        cr_crscf_fractions.append(cr_crscf_fraction)
+        cr_fractions.append(cr_fraction)
+        scf_fractions.append(scf_fraction)
+        bkg_fractions.append(bkg_fraction)
 
-    table.add_row([
-        "Total",
-        sum(yields),
-        error_of_sum(errors),
-        weighted_mean(cr_crscf_fractions, yields),
-        weighted_mean(cr_fractions, yields),
-        weighted_mean(scf_fractions, yields),
-        weighted_mean(bkg_fractions, yields),
-    ])
+        data = {
+            "cr_scf_f": cr_crscf_fraction,
+            "cr_f": cr_fraction,
+            "scf_f": scf_fraction,
+        }
+
+        save_to_json(data, os.path.join("results", channel + "_data_fractions.json"))
+
+    table.add_row(
+        [
+            "Tot/Avg",
+            sum(yields),
+            error_of_sum(errors),
+            weighted_mean(cr_crscf_fractions, yields),
+            weighted_mean(cr_fractions, yields),
+            weighted_mean(scf_fractions, yields),
+            weighted_mean(bkg_fractions, yields),
+        ]
+    )
 
     table.print()
+
+    data = {
+        "cr_scf_f": weighted_mean(cr_crscf_fractions, yields),
+        "cr_f": weighted_mean(cr_fractions, yields),
+        "scf_f": weighted_mean(scf_fractions, yields)
+    }
+
+    save_to_json(data, os.path.join("results", "avg_data_fractions.json"))
+
+
+def save_to_json(data, filename):
+    with open(filename, "w") as f:
+        json.dump(data, f, indent=2, sort_keys=True)
 
 
 @contextmanager
 def stdout_redirected(to=os.devnull):
-    '''
+    """
     import os
 
     with stdout_redirected(to=filename):
         print("from Python")
         os.system("echo non-Python applications are also supported")
-    '''
+    """
     fd = sys.stdout.fileno()
 
     def _redirect_stdout(to):
         sys.stdout.close()  # + implicit flush()
         os.dup2(to.fileno(), fd)  # fd writes to 'to' file
-        sys.stdout = os.fdopen(fd, 'w')  # Python writes to fd
+        sys.stdout = os.fdopen(fd, "w")  # Python writes to fd
 
-    with os.fdopen(os.dup(fd), 'w') as old_stdout:
-        with open(to, 'w') as file:
+    with os.fdopen(os.dup(fd), "w") as old_stdout:
+        with open(to, "w") as file:
             _redirect_stdout(to=file)
         try:
             yield  # allow code to be run with the redirected stdout

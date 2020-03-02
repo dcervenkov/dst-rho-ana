@@ -56,7 +56,7 @@ def remove_extra_keys(dictionary):
 def replace_key_substring(dictionary, old, new):
     """Recursively replace substrings in all keys in a dictionary."""
     if type(dictionary) is dict:
-        for key in dictionary.keys():
+        for key in dictionary.copy().keys():
             dictionary[key.replace(old, new)] = dictionary.pop(key)
             if type(dictionary[key.replace(old, new)]) is dict:
                 dictionary[key.replace(old, new)] = replace_key_substring(

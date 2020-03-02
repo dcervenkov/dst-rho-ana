@@ -2,7 +2,10 @@
 
 from __future__ import print_function
 from math import sqrt
+import os
+import sys
 import ROOT
+from contextlib import contextmanager
 
 
 class MarkdownTable:
@@ -297,8 +300,36 @@ def process_data(channels):
     table.print()
 
 
-# Just to init RooFit to make it print its loading line now
-r = ROOT.RooRealVar()
+@contextmanager
+def stdout_redirected(to=os.devnull):
+    '''
+    import os
+
+    with stdout_redirected(to=filename):
+        print("from Python")
+        os.system("echo non-Python applications are also supported")
+    '''
+    fd = sys.stdout.fileno()
+
+    def _redirect_stdout(to):
+        sys.stdout.close()  # + implicit flush()
+        os.dup2(to.fileno(), fd)  # fd writes to 'to' file
+        sys.stdout = os.fdopen(fd, 'w')  # Python writes to fd
+
+    with os.fdopen(os.dup(fd), 'w') as old_stdout:
+        with open(to, 'w') as file:
+            _redirect_stdout(to=file)
+        try:
+            yield  # allow code to be run with the redirected stdout
+        finally:
+            _redirect_stdout(to=old_stdout)  # restore stdout.
+            # buffering and flags such as
+            # CLOEXEC may be different
+
+
+with stdout_redirected():
+    # Just to init RooFit to make it print its loading line now
+    r = ROOT.RooRealVar()
 
 channels = ["Kpi", "Kpipi0", "K3pi"]
 streams = range(0, 6)

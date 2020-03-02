@@ -208,6 +208,7 @@ void Fitter::WriteFitResults() {
                  static_cast<RooRealVar&>(results[i]).getErrorLo(),
                  static_cast<RooRealVar&>(results[i]).getErrorHi());
         macro.AddLine(line);
+        results[i].Write();
     }
 
     RooPlot* frame_de = de_.frame();

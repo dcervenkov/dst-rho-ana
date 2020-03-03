@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for CHANNEL in Kpi Kpipi0 K3pi; do
+for CHANNEL in Kpi Kpipi0 K3pi together; do
     echo "${CHANNEL}"
     for TYPE in CR CRSCF all; do
         printf "%6s " ${TYPE}

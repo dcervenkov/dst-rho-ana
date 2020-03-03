@@ -29,6 +29,22 @@ for CHANNEL in Kpi Kpipi0 K3pi; do
     done
 done
 
+# As above, but with all channels together in a single fit
+mkdir -p results/together
+mkdir -p logs/together
+for TYPE in lifetime mixing; do
+    for COMPONENT in CR CRSCF; do
+        for STREAM in $(seq -w 00 98); do
+            echo "./DSRhoLifetime -c 1 --physics --components=${COMPONENT} --config=configs/config_mc_all.json --channel=Kpi --${TYPE} results/together/${COMPONENT}_${TYPE}_${STREAM} ../data/*/signal_mc/DSRho-mdst_*_basf2_${STREAM}_svd?.root &> logs/together/${COMPONENT}_${TYPE}_${STREAM}" >> ${CMD_FILE}
+        done
+    done
+    for COMPONENT in all; do
+        for STREAM in $(seq -w 0 5); do
+            echo "./DSRhoLifetime -c 1 --physics --components=${COMPONENT} --config=configs/config_mc_all.json --channel=Kpi --${TYPE} results/together/${COMPONENT}_${TYPE}_${STREAM} ../data/*/realistic_mc/stream${STREAM}/*.root &> logs/together/${COMPONENT}_${TYPE}_${STREAM}" >> ${CMD_FILE}
+        done
+    done
+done
+
 # Fits with all components, with plots, on all available MC (6 streams) and data
 for CHANNEL in Kpi Kpipi0 K3pi; do
     for STREAM in $(seq 0 5); do

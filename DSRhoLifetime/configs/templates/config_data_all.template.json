@@ -16,11 +16,11 @@
     "modelParameters": {
         "substitute": [
             {
-                "file": "../../../DSRhoBackground/results/mc_scf.json",
+                "file": "../../../DSRhoBackground/results/together_mc_scf.json",
                 "replace": ["bkg", "scf"]
             },
             {
-                "file": "../../../DSRhoBackground/results/mc_bkg.json"
+                "file": "../../../DSRhoBackground/results/together_mc_bkg.json"
             },
             {
                 "file": "../../../DSRhoYield/results/avg_data_fractions.json"

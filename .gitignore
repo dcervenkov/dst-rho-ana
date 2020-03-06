@@ -39,6 +39,9 @@
 # Jupyter files
 .ipynb_checkpoints
 
+# Snakemake directory
+.snakemake
+
 # VS Code files
 */.vscode
 compile_commands.json

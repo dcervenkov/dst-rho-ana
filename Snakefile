@@ -23,10 +23,13 @@ DATA_SIDEBANDS = {
 }
 
 
-def get_data_for_background(channel, mc, scf):
+def get_data_for_background(wildcards):
+    channel = wildcards.channel
+    mc = wildcards.mc
+    bkg_type = wildcards.bkg_type
     if channel == "together":
         if mc == "mc":
-            if scf == "scf":
+            if bkg_type == "scf":
                 return (MC_SIGNAL_6_STREAMS["Kpi"] +
                         MC_SIGNAL_6_STREAMS["Kpipi0"] +
                         MC_SIGNAL_6_STREAMS["K3pi"])
@@ -40,7 +43,7 @@ def get_data_for_background(channel, mc, scf):
                     DATA_SIDEBANDS["K3pi"])
     else:
         if mc == "mc":
-            if scf == "scf":
+            if bkg_type == "scf":
                 return MC_SIGNAL_6_STREAMS[channel]
             else:
                 return MC_WO_SIGNAL[channel]
@@ -50,35 +53,50 @@ def get_data_for_background(channel, mc, scf):
 
 rule all:
     input:
-        expand("DSRhoYield/plots/{channel}_stream{stream}",
-               channel=CHANNELS, stream=STREAMS),
-        expand("DSRhoYield/plots/{channel}", channel=CHANNELS),
+        yield_jobs = (
+            expand("DSRhoYield/plots/{channel}_stream{stream}",
+                   channel=CHANNELS, stream=STREAMS),
+            expand("DSRhoYield/plots/{channel}", channel=CHANNELS)
+            ),
 
-        expand("DSRhoBackground/results/{channel}_mc_{bkg_type}.json",
-               channel=CHANNELS_AND_TOGETHER, bkg_type=BKG_TYPES),
-        expand("DSRhoBackground/results/{channel}_data_sidebands.json",
-               channel=CHANNELS_AND_TOGETHER),
+        background_jobs = (
+            expand("DSRhoBackground/results/{channel}_mc_{bkg_type}.json",
+                   channel=CHANNELS_AND_TOGETHER, bkg_type=BKG_TYPES),
+            expand("DSRhoBackground/results/{channel}_data_sidebands.json",
+                   channel=CHANNELS_AND_TOGETHER),
 
-        expand("DSRhoBackground/results/nonphys_{channel}_mc_{bkg_type}.json",
-               channel=CHANNELS_AND_TOGETHER, bkg_type=BKG_TYPES),
-        expand("DSRhoBackground/results/nonphys_{channel}_data_sidebands.json",
-               channel=CHANNELS_AND_TOGETHER),
+            expand("DSRhoBackground/results/nonphys_{channel}_mc_{bkg_type}.json",
+                   channel=CHANNELS_AND_TOGETHER, bkg_type=BKG_TYPES),
+            expand("DSRhoBackground/results/nonphys_{channel}_data_sidebands.json",
+                   channel=CHANNELS_AND_TOGETHER)
+            ),
+        lifetime_jobs = (
+            expand("DSRhoLifetime/results/{channel}/{component}_{type}_{stream}",
+                   channel=CHANNELS_AND_TOGETHER, component=["CR", "CRSCF"], type=["lifetime", "mixing"],
+                   stream=[f"{stream:02}" for stream in range(99)]),
+            expand("DSRhoLifetime/results/{channel}/{component}_{type}_{stream}",
+                   channel=CHANNELS_AND_TOGETHER, component=["all"], type=["lifetime", "mixing"],
+                   stream=range(6)),
 
-        expand("DSRhoLifetime/results/{channel}/{component}_{type}_{stream}",
-               channel=CHANNELS, component=["CR", "CRSCF"], type=["lifetime", "mixing"],
-               stream=[f"{stream:02}" for stream in range(99)]),
-        expand("DSRhoLifetime/results/{channel}/{component}_{type}_{stream}",
-               channel=CHANNELS, component=["all"], type=["lifetime", "mixing"],
-               stream=range(6)),
+            expand("DSRhoLifetime/results/{channel}_{component}_{type}_{stream}",
+                   channel=CHANNELS, component=["all"], type=["lifetime", "mixing"],
+                   stream=range(6)),
+            expand("DSRhoLifetime/plots/{channel}_{component}_{type}_{stream}",
+                   channel=CHANNELS, component=["all"], type=["lifetime", "mixing"],
+                   stream=range(6))
+            )
 
-        expand("DSRhoLifetime/results/{channel}_{component}_{type}_{stream}",
-               channel=CHANNELS, component=["all"], type=["lifetime", "mixing"],
-               stream=range(6)),
-        expand("DSRhoLifetime/plots/{channel}_{component}_{type}_{stream}",
-               channel=CHANNELS, component=["all"], type=["lifetime", "mixing"],
-               stream=range(6)),
+rule yield_jobs:
+    input:
+        rules.all.input.yield_jobs
 
-        glob.glob("DSRhoLifetime/configs/*.json")
+rule background_jobs:
+    input:
+        rules.all.input.background_jobs
+
+rule lifetime_jobs:
+    input:
+        rules.all.input.lifetime_jobs
 
 rule yield_mc:
     input:
@@ -116,8 +134,7 @@ rule yield_summary:
 
 rule background:
     input:
-        lambda wildcards:
-            get_data_for_background(wildcards.channel, wildcards.mc, wildcards.bkg_type)
+        get_data_for_background
     output:
         result = "DSRhoBackground/results/{channel}_{mc}_{bkg_type}.json",
         plotdir = directory("DSRhoBackground/plots/{channel}_{mc}_{bkg_type}")
@@ -135,8 +152,7 @@ rule background:
 
 rule background_nonphys:
     input:
-        lambda wildcards:
-            get_data_for_background(wildcards.channel, wildcards.mc, wildcards.bkg_type)
+        get_data_for_background
     output:
         result = "DSRhoBackground/results/nonphys_{channel}_{mc}_{bkg_type}.json",
         plotdir = directory("DSRhoBackground/plots/nonphys_{channel}_{mc}_{bkg_type}")
@@ -168,12 +184,15 @@ rule lifetime_no_plots_channel:
         "DSRhoLifetime/results/{channel}/{component}_{type}_{stream}"
     log:
         "DSRhoLifetime/logs/{channel}/{component}_{type}_{stream}"
+    wildcard_constraints:
+        channel = "Kpi|Kpipi0|K3pi"
     params:
         "--cpus=1 ",
         "--components={component} ",
         # "--config={input.config}",
         "--config=DSRhoLifetime/configs/config_mc.json",
         "--channel={channel}",
+        "--physics",
         "--{type}"
     shell:
         "./DSRhoLifetime/DSRhoLifetime {params} {output} {input.data} &> {log}"
@@ -195,6 +214,7 @@ rule lifetime_no_plots_together:
         # "--config={input.config}",
         "--config=DSRhoLifetime/configs/config_mc_all.json",
         "--channel=Kpi",
+        "--physics",
         "--{type}"
     shell:
         "./DSRhoLifetime/DSRhoLifetime {params} {output} {input.data} &> {log}"
@@ -215,6 +235,7 @@ rule lifetime_plots_channel:
         "--cpus=1 ",
         "--components={component} ",
         "--channel={channel}",
+        "--physics",
         "--{type}"
     shell:
         "./DSRhoLifetime/DSRhoLifetime {params} --config={input.config} "
@@ -237,6 +258,7 @@ rule lifetime_plots_together:
         "--cpus=1 ",
         "--components={component} ",
         "--channel=Kpi",
+        "--physics",
         "--{type}"
     shell:
         "./DSRhoLifetime/DSRhoLifetime {params} --config={input.config} "

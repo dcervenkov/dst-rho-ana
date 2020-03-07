@@ -1,36 +1,35 @@
 {
-    "fitRanges": {
-        "dt": {
-            "min": -10,
-            "max": 10
-        },
-        "thetat": {
-            "min": 0,
-            "max": 3.1415
-        },
-        "thetab": {
-            "min": 0.5,
-            "max": 2.95
-        }
+  "fitRanges": {
+    "dt": {
+      "max": 10,
+      "min": -10
     },
-    "modelParameters": {
-        "bkg_dt_S_main": 95.681991,
-        "bkg_dt_S_tail": 511.265240,
-        "bkg_dt_f_delta": 0.101576,
-        "bkg_dt_f_tail": 0.035787,
-        "bkg_dt_mu_delta": 0.046054,
-        "bkg_dt_mu_lifetime": -0.132501,
-        "bkg_dt_tau": 1.491034,
-
-        "scf_dt_S_main": 113.970639,
-        "scf_dt_S_tail": 46.139692,
-        "scf_dt_f_delta": 0.024217,
-        "scf_dt_f_tail": 0.299997,
-        "scf_dt_mu_delta": 0.519313,
-        "scf_dt_mu_lifetime": -0.253504,
-        "scf_dt_tau": 1.609696,
-
-        "cr_f": 0.707,
-        "scf_f": 0.112
+    "thetab": {
+      "max": 2.95,
+      "min": 0.5
+    },
+    "thetat": {
+      "max": 3.1415,
+      "min": 0
     }
+  },
+  "modelParameters": {
+    "bkg_dt_S_main": 96.169654,
+    "bkg_dt_S_tail": 0.0,
+    "bkg_dt_f_delta": 0.229635,
+    "bkg_dt_f_tail": 0.0,
+    "bkg_dt_mu_delta": 0.023308,
+    "bkg_dt_mu_lifetime": -0.168238,
+    "bkg_dt_tau": 1.57526,
+    "cr_f": 0.7099195879937991,
+    "cr_scf_f": 0.8640484955717296,
+    "scf_dt_S_main": 97.126701,
+    "scf_dt_S_tail": 0.0,
+    "scf_dt_f_delta": 0.0,
+    "scf_dt_f_tail": 0.0,
+    "scf_dt_mu_delta": 0.0,
+    "scf_dt_mu_lifetime": -0.23125,
+    "scf_dt_tau": 1.576385,
+    "scf_f": 0.11079298930784662
+  }
 }

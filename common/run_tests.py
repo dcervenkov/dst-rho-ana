@@ -75,7 +75,7 @@ def run_test(config):
     if 'post_commands' in config:
         for post_command in config['post_commands']:
             subprocess.call(post_command)
-    
+
     if 'temporary_files' not in config:
         config['temporary_files'] = []
 
@@ -84,7 +84,7 @@ def run_test(config):
 
     if os.path.exists("references/" + name + ".reference"):
         with open("references/" + name + ".reference", "r") as f:
-            reference_result = f.readline()
+            reference_result = f.read()
     else:
         print(YELLOW_CODE + "The result does NOT have a reference result!" + RESET_CODE)
         os.rename(config['comparison_file'], name + ".result")
@@ -92,7 +92,7 @@ def run_test(config):
         return 2, name, elapsed
 
     with open(config['comparison_file'], "r") as f:
-        current_result = f.readline()
+        current_result = f.read()
 
     if return_code == 0 and reference_result == current_result:
         print(GREEN_CODE + "The result matches the reference result." + RESET_CODE)

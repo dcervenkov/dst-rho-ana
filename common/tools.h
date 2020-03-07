@@ -59,10 +59,8 @@ void LogText(TFile* file, const char* field_name, const std::string text);
 std::vector<std::string> SplitString(const std::string& input_string, char delimiter);
 void ChangeModelParameters(RooAbsPdf* pdf, const nlohmann::json& config,
                            const std::string prefix = "");
-std::string FormatResultsJSON(std::string name, std::vector<const RooAbsPdf*> models,
-                              const RooArgSet& observables);
-std::string FormatResultsJSON(std::string name, const RooAbsPdf* model,
-                              const RooArgSet& observables);
+std::string FormatResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables);
+std::string FormatResultsJSON(const RooAbsPdf* model, const RooArgSet& observables);
 void CreateDirsIfNecessary(const std::string file);
 RooLinkedList VecToCmdList(std::vector<RooCmdArg>& commands);
 TH2* ArrangeCorrelationMatrix(const TH2* matrix, std::vector<std::string> ordered_labels);

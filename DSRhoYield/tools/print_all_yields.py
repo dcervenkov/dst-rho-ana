@@ -307,9 +307,9 @@ def process_data(channels):
         bkg_fractions.append(bkg_fraction)
 
         data = {
-            "cr_scf_f": cr_crscf_fraction,
-            "cr_f": cr_fraction,
-            "scf_f": scf_fraction,
+            "cr_scf_f": round(cr_crscf_fraction, 4),
+            "cr_f": round(cr_fraction, 4),
+            "scf_f": round(scf_fraction, 4),
         }
 
         save_to_json(data, os.path.join("results", channel + "_data_fractions.json"))
@@ -329,9 +329,9 @@ def process_data(channels):
     table.print()
 
     data = {
-        "cr_scf_f": weighted_mean(cr_crscf_fractions, yields),
-        "cr_f": weighted_mean(cr_fractions, yields),
-        "scf_f": weighted_mean(scf_fractions, yields)
+        "cr_scf_f": round(weighted_mean(cr_crscf_fractions, yields), 4),
+        "cr_f": round(weighted_mean(cr_fractions, yields), 4),
+        "scf_f": round(weighted_mean(scf_fractions, yields), 4)
     }
 
     save_to_json(data, os.path.join("results", "avg_data_fractions.json"))

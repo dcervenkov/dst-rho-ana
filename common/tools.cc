@@ -852,11 +852,9 @@ void ChangeModelParameters(RooAbsPdf* pdf, const nlohmann::json& model_parameter
  *
  * @return std::string JSON formatted string
  */
-std::string FormatResultsJSON(std::string name, std::vector<const RooAbsPdf*> models,
+std::string FormatResultsJSON(std::vector<const RooAbsPdf*> models,
                               const RooArgSet& observables) {
-    std::string formatted_result = "=== ";
-    formatted_result += name;
-    formatted_result += " ===\n";
+    std::string formatted_result = "{\n";
     const std::size_t buf_size = 1024;
     char buffer[buf_size];
     for (auto& model : models) {
@@ -864,11 +862,14 @@ std::string FormatResultsJSON(std::string name, std::vector<const RooAbsPdf*> mo
         vars->remove(observables);
         std::vector<RooRealVar*> vector_of_vars = ToVector<RooRealVar*>(*vars);
         for (auto& var : vector_of_vars) {
-            int ret = snprintf(buffer, buf_size, "\"%s\": %f,\n", var->GetName(), var->getVal());
+            int ret = snprintf(buffer, buf_size, "  \"%s\": %.4f,\n", var->GetName(), var->getVal());
             assert(ret >= 0);
             formatted_result.append(buffer);
         }
     }
+    formatted_result.pop_back();
+    formatted_result.pop_back();
+    formatted_result += "\n}\n";
     return formatted_result;
 }
 
@@ -881,10 +882,9 @@ std::string FormatResultsJSON(std::string name, std::vector<const RooAbsPdf*> mo
  *
  * @return std::string JSON formatted string
  */
-std::string FormatResultsJSON(std::string name, const RooAbsPdf* model,
-                              const RooArgSet& observables) {
+std::string FormatResultsJSON(const RooAbsPdf* model, const RooArgSet& observables) {
     std::vector<const RooAbsPdf*> models = {model};
-    return FormatResultsJSON(name, models, observables);
+    return FormatResultsJSON(models, observables);
 }
 
 /**

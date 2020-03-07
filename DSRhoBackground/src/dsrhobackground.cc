@@ -91,8 +91,9 @@ int main(int argc, char* argv[]) {
             fitter.SetNoTailPDF();
         }
         fitter.Fit(fitter.bkg_physics_dt_model_, fitter.dataset_);
+        JSON_formatted_results += "Physics-based dt Parameters\n";
         JSON_formatted_results += tools::FormatResultsJSON(
-            "Physics-based dt Parameters", fitter.bkg_physics_dt_model_, observables);
+            fitter.bkg_physics_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, *fitter.bkg_physics_dt_model_);
         }
@@ -112,37 +113,43 @@ int main(int argc, char* argv[]) {
         std::vector<const RooAbsPdf*> angular_pdfs = {
             &fitter.bkg_thetab_model_, &fitter.bkg_thetat_model_, &fitter.bkg_phit_model_};
         fitter.Fit(&fitter.bkg_thetab_model_, fitter.dataset_);
-        JSON_formatted_results += tools::FormatResultsJSON("Angular PDFs' Parameters", angular_pdfs, observables);
+        JSON_formatted_results += "Angular PDFs' Parameters\n";
+        JSON_formatted_results += tools::FormatResultsJSON(angular_pdfs, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.thetab_, *fitter.dataset_, fitter.bkg_thetab_model_);
         }
 
         fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_);
-        JSON_formatted_results += tools::FormatResultsJSON("dt Parameters", &fitter.bkg_dt_model_, observables);
+        JSON_formatted_results += "dt Parameters\n";
+        JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, fitter.bkg_dt_model_);
         }
 
         fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_a_);
-        JSON_formatted_results += tools::FormatResultsJSON("dt a Parameters", &fitter.bkg_dt_model_, observables);
+        JSON_formatted_results += "dt a Parameters\n";
+        JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_a_, fitter.bkg_dt_model_);
         }
 
         fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_ab_);
-        JSON_formatted_results += tools::FormatResultsJSON("dt ab Parameters", &fitter.bkg_dt_model_, observables);
+        JSON_formatted_results += "dt ab Parameters\n";
+        JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_ab_, fitter.bkg_dt_model_);
         }
 
         fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_b_);
-        JSON_formatted_results += tools::FormatResultsJSON("dt b Parameters", &fitter.bkg_dt_model_, observables);
+        JSON_formatted_results += "dt b Parameters\n";
+        JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_b_, fitter.bkg_dt_model_);
         }
 
         fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_bb_);
-        JSON_formatted_results += tools::FormatResultsJSON("dt bb Parameters", &fitter.bkg_dt_model_, observables);
+        JSON_formatted_results += "dt bb Parameters\n";
+        JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_bb_, fitter.bkg_dt_model_);
         }
@@ -152,7 +159,8 @@ int main(int argc, char* argv[]) {
         dataset_cf->append(*fitter.dataset_a_);
         dataset_cf->append(*fitter.dataset_ab_);
         fitter.Fit(&fitter.bkg_dt_model_, dataset_cf);
-        JSON_formatted_results += tools::FormatResultsJSON("dt cf Parameters", &fitter.bkg_dt_model_, observables);
+        JSON_formatted_results += "dt cf Parameters\n";
+        JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *dataset_cf, fitter.bkg_dt_model_);
         }
@@ -162,7 +170,8 @@ int main(int argc, char* argv[]) {
         dataset_dcs->append(*fitter.dataset_b_);
         dataset_dcs->append(*fitter.dataset_bb_);
         fitter.Fit(&fitter.bkg_dt_model_, dataset_dcs);
-        JSON_formatted_results += tools::FormatResultsJSON("dt dcs Parameters", &fitter.bkg_dt_model_, observables);
+        JSON_formatted_results += "dt dcs Parameters\n";
+        JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *dataset_dcs, fitter.bkg_dt_model_);
         }

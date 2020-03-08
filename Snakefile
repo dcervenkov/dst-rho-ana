@@ -229,7 +229,7 @@ rule lifetime_plots_data:
             "DSRhoLifetime/configs/config_data_all.json" if wildcards.channel == "together" else
             "DSRhoLifetime/configs/config_data.json",
         data = lambda wildcards:
-            glob.glob(f"data/{wildcards.channel}/data/*.root")
+            glob.glob(f"data/{wildcards.channel}/*.root")
     output:
         plotdir = directory("DSRhoLifetime/plots/{channel}_{type}_data"),
         result = "DSRhoLifetime/results/{channel}_{type}_data"

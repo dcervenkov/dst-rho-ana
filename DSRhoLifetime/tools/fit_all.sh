@@ -35,12 +35,12 @@ mkdir -p logs/together
 for TYPE in lifetime mixing; do
     for COMPONENT in CR CRSCF; do
         for STREAM in $(seq -w 00 98); do
-            echo "./DSRhoLifetime -c 1 --physics --components=${COMPONENT} --config=configs/config_mc_all.json --channel=Kpi --${TYPE} results/together/${COMPONENT}_${TYPE}_${STREAM} ../data/*/signal_mc/DSRho-mdst_*_basf2_${STREAM}_svd?.root &> logs/together/${COMPONENT}_${TYPE}_${STREAM}" >> ${CMD_FILE}
+            echo "./DSRhoLifetime -c 1 --physics --components=${COMPONENT} --config=configs/config_mc_all.json --channel=Kpi --${TYPE} results/together/${COMPONENT}_${TYPE}_${STREAM} ../data/K*/signal_mc/DSRho-mdst_*_basf2_${STREAM}_svd?.root &> logs/together/${COMPONENT}_${TYPE}_${STREAM}" >> ${CMD_FILE}
         done
     done
     for COMPONENT in all; do
         for STREAM in $(seq -w 0 5); do
-            echo "./DSRhoLifetime -c 1 --physics --components=${COMPONENT} --config=configs/config_mc_all.json --channel=Kpi --${TYPE} results/together/${COMPONENT}_${TYPE}_${STREAM} ../data/*/realistic_mc/stream${STREAM}/*.root &> logs/together/${COMPONENT}_${TYPE}_${STREAM}" >> ${CMD_FILE}
+            echo "./DSRhoLifetime -c 1 --physics --components=${COMPONENT} --config=configs/config_mc_all.json --channel=Kpi --${TYPE} results/together/${COMPONENT}_${TYPE}_${STREAM} ../data/K*/realistic_mc/stream${STREAM}/*.root &> logs/together/${COMPONENT}_${TYPE}_${STREAM}" >> ${CMD_FILE}
         done
     done
 done

@@ -54,7 +54,17 @@
             "--config=tests/config.json",
             "--channel=Kpi",
             "--components=all",
+            "--physics",
             "--lifetime",
+            "tests/current_result",
+            "tests/data/Kpi.root"
+        ],
+        "physpdf_mixing_all": [
+            "--config=tests/config.json",
+            "--channel=Kpi",
+            "--components=all",
+            "--physics",
+            "--mixing",
             "tests/current_result",
             "tests/data/Kpi.root"
         ]

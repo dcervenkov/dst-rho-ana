@@ -83,7 +83,10 @@ rule all:
                    stream=range(6)),
             expand("DSRhoLifetime/plots/{channel}_{component}_{type}_{stream}",
                    channel=CHANNELS, component=["all"], type=["lifetime", "mixing"],
-                   stream=range(6))
+                   stream=range(6)),
+
+            expand("DSRhoLifetime/results/{channel}_{type}_data",
+                   channel=CHANNELS_AND_TOGETHER, component=["all"], type=["lifetime", "mixing"])
             )
 
 rule yield_jobs:
@@ -173,9 +176,11 @@ rule lifetime_configs:
     shell:
         "./tools/config_from_template.py {input.template} > {output}"
 
-rule lifetime_no_plots_channel:
+rule lifetime_no_plots_mc:
     input:
-        config = "DSRhoLifetime/configs/config_mc.json",
+        config = lambda wildcards:
+            "DSRhoLifetime/configs/config_mc_all.json" if wildcards.channel == "together" else
+            "DSRhoLifetime/configs/config_mc.json",
         data = lambda wildcards:
             glob.glob(f"data/{wildcards.channel}/realistic_mc/stream{wildcards.stream}/*.root") if wildcards.component == "all" else
             glob.glob(f"data/{wildcards.channel}/signal_mc/*_{wildcards.stream}_svd?.root")
@@ -184,44 +189,20 @@ rule lifetime_no_plots_channel:
         "DSRhoLifetime/results/{channel}/{component}_{type}_{stream}"
     log:
         "DSRhoLifetime/logs/{channel}/{component}_{type}_{stream}"
-    wildcard_constraints:
-        channel = "Kpi|Kpipi0|K3pi"
     params:
         "--cpus=1 ",
         "--components={component} ",
-        # "--config={input.config}",
-        "--config=DSRhoLifetime/configs/config_mc.json",
         "--channel={channel}",
         "--physics",
         "--{type}"
     shell:
-        "./DSRhoLifetime/DSRhoLifetime {params} {output} {input.data} &> {log}"
+        "./DSRhoLifetime/DSRhoLifetime {params} --config={input.config} {output} {input.data} &> {log}"
 
-rule lifetime_no_plots_together:
+rule lifetime_plots_mc:
     input:
-        config = "DSRhoLifetime/configs/config_mc_all.json",
-        data = lambda wildcards:
-            glob.glob(f"data/K*/realistic_mc/stream{wildcards.stream}/*.root") if wildcards.component == "all" else
-            glob.glob(f"data/K*/signal_mc/*_{wildcards.stream}_svd?.root")
-
-    output:
-        "DSRhoLifetime/results/together/{component}_{type}_{stream}"
-    log:
-        "DSRhoLifetime/logs/together/{component}_{type}_{stream}"
-    params:
-        "--cpus=1 ",
-        "--components={component} ",
-        # "--config={input.config}",
-        "--config=DSRhoLifetime/configs/config_mc_all.json",
-        "--channel=Kpi",
-        "--physics",
-        "--{type}"
-    shell:
-        "./DSRhoLifetime/DSRhoLifetime {params} {output} {input.data} &> {log}"
-
-rule lifetime_plots_channel:
-    input:
-        config = "DSRhoLifetime/configs/config_mc.json",
+        config = lambda wildcards:
+            "DSRhoLifetime/configs/config_mc_all.json" if wildcards.channel == "together" else
+            "DSRhoLifetime/configs/config_mc.json",
         data = lambda wildcards:
             glob.glob(f"data/{wildcards.channel}/realistic_mc/stream{wildcards.stream}/*.root") if wildcards.component == "all" else
             glob.glob(f"data/{wildcards.channel}/signal_mc/*_{wildcards.stream}_svd?.root")
@@ -242,22 +223,22 @@ rule lifetime_plots_channel:
         "--plot-dir={output.plotdir} "
         "{output.result} {input.data} &> {log}"
 
-rule lifetime_plots_together:
+rule lifetime_plots_data:
     input:
-        config = "DSRhoLifetime/configs/config_mc_all.json",
+        config = lambda wildcards:
+            "DSRhoLifetime/configs/config_data_all.json" if wildcards.channel == "together" else
+            "DSRhoLifetime/configs/config_data.json",
         data = lambda wildcards:
-            glob.glob(f"data/K*/realistic_mc/stream{wildcards.stream}/*.root") if wildcards.component == "all" else
-            glob.glob(f"data/K*/signal_mc/*_{wildcards.stream}_svd?.root")
-
+            glob.glob(f"data/{wildcards.channel}/data/*.root")
     output:
-        plotdir = directory("DSRhoLifetime/plots/together_{component}_{type}_{stream}"),
-        result = "DSRhoLifetime/results/together_{component}_{type}_{stream}"
+        plotdir = directory("DSRhoLifetime/plots/{channel}_{type}_data"),
+        result = "DSRhoLifetime/results/{channel}_{type}_data"
     log:
-        "DSRhoLifetime/logs/together_{component}_{type}_{stream}"
+        "DSRhoLifetime/logs/{channel}_{type}_data"
     params:
         "--cpus=1 ",
-        "--components={component} ",
-        "--channel=Kpi",
+        "--components=all ",
+        "--channel={channel}",
         "--physics",
         "--{type}"
     shell:
@@ -265,4 +246,3 @@ rule lifetime_plots_together:
         "--plot-dir={output.plotdir} "
         "{output.result} {input.data} &> {log}"
 
-# add data channel + together

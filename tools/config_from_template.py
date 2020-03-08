@@ -34,16 +34,10 @@ def read_in_json(file):
             config = json.load(f)
         return config
     except json.decoder.JSONDecodeError:
-        stripped_file = '{'
         with open(file, 'r') as f:
             raw_file = f.readlines()
-            for line in raw_file:
-                if not line.startswith('===') and not line.isspace():
-                    stripped_file += line
 
-        stripped_file = stripped_file.strip('\n,')
-        stripped_file += '}'
-        return json.loads(stripped_file)
+        return json.loads("".join(raw_file[1:]))
 
 
 def remove_extra_keys(dictionary):

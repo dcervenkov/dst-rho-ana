@@ -14,13 +14,13 @@
     }
   },
   "modelParameters": {
-    "bkg_dt_S_main": 96.1697,
+    "bkg_dt_S_main": 97.8497,
     "bkg_dt_S_tail": 0.0,
-    "bkg_dt_f_delta": 0.2296,
+    "bkg_dt_f_delta": 0.1139,
     "bkg_dt_f_tail": 0.0,
-    "bkg_dt_mu_delta": 0.0233,
-    "bkg_dt_mu_lifetime": -0.1682,
-    "bkg_dt_tau": 1.5753,
+    "bkg_dt_mu_delta": 0.0377,
+    "bkg_dt_mu_lifetime": -0.1369,
+    "bkg_dt_tau": 1.5721,
     "cr_f": 0.7099,
     "cr_scf_f": 0.864,
     "scf_dt_S_main": 97.1267,

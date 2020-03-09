@@ -20,7 +20,7 @@
                 "replace": ["bkg", "scf"]
             },
             {
-                "file": "../../../DSRhoBackground/results/together_mc_bkg.json"
+                "file": "../../../DSRhoBackground/results/together_data_sidebands.json"
             },
             {
                 "file": "../../../DSRhoYield/results/avg_data_fractions.json"

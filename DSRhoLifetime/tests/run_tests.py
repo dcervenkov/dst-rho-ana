@@ -1,1 +1,1 @@
-../../common/run_tests.py
+../../tools/run_tests.py

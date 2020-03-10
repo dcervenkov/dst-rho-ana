@@ -2,6 +2,7 @@
 
 DIRS="../DSRhoBackground ../DSRhoCPFit ../DSRhoEfficiency ../DSRhoLifetime ../DSRhoPeek ../DSRhoYield"
 
+RED=$(tput setaf 1)
 BOLD=$(tput bold)
 NORMAL=$(tput sgr0)
 RETURN_CODE=0
@@ -19,14 +20,14 @@ for DIR in ${DIRS}; do
             ./run_tests.py 2>/dev/null | grep --after-context=100 -e "^Summary$"
 
             if [ $? -ne 0 ]; then
-                echo "ERROR: $(basename ${DIR}) tests failed!"
+                echo "${RED}ERROR${NORMAL}: $(basename ${DIR}) tests failed!"
                 RETURN_CODE=1
             fi
 
             cd ..
         fi
     else
-        echo "ERROR while building $(basename ${DIR}), skipping..."
+        echo "${RED}ERROR${NORMAL}: Building $(basename ${DIR}) failed, skipping..."
         RETURN_CODE=1
     fi
     echo

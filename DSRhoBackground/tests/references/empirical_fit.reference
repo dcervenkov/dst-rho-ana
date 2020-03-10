@@ -18,63 +18,63 @@ Angular PDFs' Parameters
 dt Parameters
 {
   "bkg_dt_f": 0.3171,
-  "bkg_dt_gaus_mu": -0.2593,
-  "bkg_dt_gaus_sigma_": 1.4960,
-  "bkg_dt_voigt_mu": 0.8692,
-  "bkg_dt_voigt_sigma_": 2.6769,
-  "bkg_dt_voigt_width_": 3.4299
+  "bkg_dt_gaus_mu": -0.2591,
+  "bkg_dt_gaus_sigma_": 1.4959,
+  "bkg_dt_voigt_mu": 0.8679,
+  "bkg_dt_voigt_sigma_": 2.6796,
+  "bkg_dt_voigt_width_": 3.4233
 }
 dt a Parameters
 {
-  "bkg_dt_f": 0.6545,
-  "bkg_dt_gaus_mu": -0.8013,
-  "bkg_dt_gaus_sigma_": 0.6148,
-  "bkg_dt_voigt_mu": 0.9997,
-  "bkg_dt_voigt_sigma_": 2.6888,
-  "bkg_dt_voigt_width_": 0.0000
+  "bkg_dt_f": 0.6555,
+  "bkg_dt_gaus_mu": -0.7962,
+  "bkg_dt_gaus_sigma_": 0.6096,
+  "bkg_dt_voigt_mu": 1.0000,
+  "bkg_dt_voigt_sigma_": 2.6924,
+  "bkg_dt_voigt_width_": 0.0002
 }
 dt ab Parameters
 {
-  "bkg_dt_f": 0.6838,
-  "bkg_dt_gaus_mu": -0.5277,
-  "bkg_dt_gaus_sigma_": 0.5463,
-  "bkg_dt_voigt_mu": -0.5137,
-  "bkg_dt_voigt_sigma_": 2.1389,
+  "bkg_dt_f": 0.6843,
+  "bkg_dt_gaus_mu": -0.5293,
+  "bkg_dt_gaus_sigma_": 0.5458,
+  "bkg_dt_voigt_mu": -0.5098,
+  "bkg_dt_voigt_sigma_": 2.1382,
   "bkg_dt_voigt_width_": 0.0000
 }
 dt b Parameters
 {
-  "bkg_dt_f": 0.7428,
-  "bkg_dt_gaus_mu": 1.0000,
-  "bkg_dt_gaus_sigma_": 0.6921,
-  "bkg_dt_voigt_mu": -1.0000,
-  "bkg_dt_voigt_sigma_": 1.3211,
-  "bkg_dt_voigt_width_": 2.3841
+  "bkg_dt_f": 0.7446,
+  "bkg_dt_gaus_mu": 0.9694,
+  "bkg_dt_gaus_sigma_": 0.6998,
+  "bkg_dt_voigt_mu": -0.9973,
+  "bkg_dt_voigt_sigma_": 1.3607,
+  "bkg_dt_voigt_width_": 2.2866
 }
 dt bb Parameters
 {
-  "bkg_dt_f": 0.7760,
-  "bkg_dt_gaus_mu": 1.0000,
-  "bkg_dt_gaus_sigma_": 0.9002,
-  "bkg_dt_voigt_mu": 0.2005,
-  "bkg_dt_voigt_sigma_": 0.6799,
-  "bkg_dt_voigt_width_": 3.1217
+  "bkg_dt_f": 0.7731,
+  "bkg_dt_gaus_mu": 0.9999,
+  "bkg_dt_gaus_sigma_": 0.9036,
+  "bkg_dt_voigt_mu": 0.1939,
+  "bkg_dt_voigt_sigma_": 0.6683,
+  "bkg_dt_voigt_width_": 3.1327
 }
 dt cf Parameters
 {
-  "bkg_dt_f": 0.7730,
-  "bkg_dt_gaus_mu": -0.8284,
-  "bkg_dt_gaus_sigma_": 0.2461,
-  "bkg_dt_voigt_mu": 0.3842,
-  "bkg_dt_voigt_sigma_": 2.4675,
-  "bkg_dt_voigt_width_": 0.0002
+  "bkg_dt_f": 0.7735,
+  "bkg_dt_gaus_mu": -0.8287,
+  "bkg_dt_gaus_sigma_": 0.2458,
+  "bkg_dt_voigt_mu": 0.3827,
+  "bkg_dt_voigt_sigma_": 2.4678,
+  "bkg_dt_voigt_width_": 0.0001
 }
 dt dcs Parameters
 {
-  "bkg_dt_f": 0.9391,
-  "bkg_dt_gaus_mu": -0.6375,
-  "bkg_dt_gaus_sigma_": 0.0061,
-  "bkg_dt_voigt_mu": 0.3519,
-  "bkg_dt_voigt_sigma_": 0.5658,
-  "bkg_dt_voigt_width_": 3.0441
+  "bkg_dt_f": 0.9395,
+  "bkg_dt_gaus_mu": -0.6374,
+  "bkg_dt_gaus_sigma_": 0.0060,
+  "bkg_dt_voigt_mu": 0.3453,
+  "bkg_dt_voigt_sigma_": 0.6033,
+  "bkg_dt_voigt_width_": 3.0178
 }

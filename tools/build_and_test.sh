@@ -10,13 +10,15 @@ RETURN_CODE=0
 for DIR in ${DIRS}; do
     cd ${DIR}
     echo "${BOLD}$(basename ${DIR})${NORMAL}"
+    echo "Cleaning..."
+    make clean > /dev/null
     echo "Building..."
-    make -j4 &> /dev/null
+    make -j4 > /dev/null
 
     if [ $? -eq 0 ]; then
         if [[ -f tests/run_tests.py ]]; then
             cd tests
-            echo "Running tests..."
+            echo "Testing..."
             ./run_tests.py 2>/dev/null | grep --after-context=100 -e "^Summary$"
 
             if [ $? -ne 0 ]; then

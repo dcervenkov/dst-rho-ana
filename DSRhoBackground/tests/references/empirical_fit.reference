@@ -74,7 +74,7 @@ dt dcs Parameters
   "bkg_dt_f": 0.9391,
   "bkg_dt_gaus_mu": -0.6375,
   "bkg_dt_gaus_sigma_": 0.0061,
-  "bkg_dt_voigt_mu": 0.3516,
-  "bkg_dt_voigt_sigma_": 0.5667,
-  "bkg_dt_voigt_width_": 3.0439
+  "bkg_dt_voigt_mu": 0.3519,
+  "bkg_dt_voigt_sigma_": 0.5658,
+  "bkg_dt_voigt_width_": 3.0441
 }

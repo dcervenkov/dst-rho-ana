@@ -17,7 +17,7 @@ BELLE_INCS := -isystem $(BELLE_LIB_DIR)/belle/b20091203_2126/include
 BELLE_LIBS := -L$(BELLE_LIB_DIR)/belle/b20091203_2126/x86_64-unknown-linux-gnu/opt/lib -ltatami -lbelleutil
 CERN_LIBS := -L$(BELLE_LIB_DIR)/cern/2006/lib64 -lmathlib
 
-.PHONY: all clean
+.PHONY: all clean tests
 
 all:: $(TARGET)
 
@@ -34,6 +34,9 @@ obj:
 
 src/gitversion.cc: ../.git/HEAD ../.git/index $(filter-out src/gitversion.cc, $(CXX_FILES))
 	echo "const char* gitversion = \"$(shell git rev-parse HEAD)$(shell git diff --quiet || echo '-dirty')\";" > $@
+
+tests:: $(TARGET)
+	cd tests && ./run_tests.py
 
 tidy: $(CXX_FILES)
 

@@ -13,7 +13,7 @@ ROOT_LIBS := $(shell root-config --libs) -lRooFitCore -lRooFit -lRooStats
 LD_LIBS := -lboost_system -lboost_filesystem
 INCS := -Isrc
 
-.PHONY: all clean
+.PHONY: all clean tests
 
 all:: $(TARGET)
 
@@ -30,6 +30,9 @@ obj:
 
 src/gitversion.cc: ../.git/HEAD ../.git/index $(filter-out src/gitversion.cc, $(CXX_FILES))
 	echo "const char* gitversion = \"$(shell git rev-parse HEAD)$(shell git diff --quiet || echo '-dirty')\";" > $@
+
+tests:: $(TARGET)
+	cd tests && ./run_tests.py
 
 clean::
 	rm -f $(OBJ_FILES) $(DEP_FILES) $(TARGET) src/gitversion.cc

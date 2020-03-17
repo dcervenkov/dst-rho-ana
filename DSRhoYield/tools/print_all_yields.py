@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Module to extract, average, and pretty-print DSRhoYield results."""
 
 from __future__ import print_function
 from math import sqrt
@@ -10,18 +11,38 @@ from contextlib import contextmanager
 
 
 class MarkdownTable:
+    """Class representing a Markdown table with support for pretty printing."""
+
     def __init__(self, header):
+        """Initialize table with supplied column titles.
+
+        Args:
+            header: A list containing column titles.
+        """
         assert type(header) == list or type(header) == tuple
         self.header = header
         self.rows = []
         self.precision = [3 for _ in header]
 
     def set_precision(self, precisions):
+        """Set columns' decimal precisions.
+
+        Applies only to numeric cells.
+
+        Args:
+            precisions: A list of integers representing number of decimals in
+                each column.
+        """
         assert len(precisions) == len(self.header)
         assert type(precisions) == list or type(precisions) == tuple
         self.precision = precisions
 
     def add_row(self, row):
+        """Add a single row.
+
+        The row must be the same length as the header used to initialize the
+        table.
+        """
         assert len(self.header) == len(row)
         self.rows.append(row)
 
@@ -29,10 +50,12 @@ class MarkdownTable:
     #     self.rows.append(["" for _ in range(len(header))])
 
     def get_length_of_number(self, number, precision):
+        """Return the length of a number written with a specified precision."""
         number_format = "{:." + str(precision) + "f}"
         return len(number_format.format(number))
 
     def get_column_widths(self):
+        """Return the maximum width of content in all columns."""
         columns = []
         for col in range(len(self.header)):
             cells = []
@@ -48,6 +71,7 @@ class MarkdownTable:
         return columns
 
     def print(self):
+        """Print the table."""
         self.columns_widths = self.get_column_widths()
         self.print_row(self.header)
         self.print_separator()
@@ -55,6 +79,15 @@ class MarkdownTable:
             self.print_row(row)
 
     def get_format_string(self, width, precision=None):
+        """Get a formatting string.
+
+        You normally write these yourself, but here we want all the rows in a
+        column to have the same width, regardless of content.
+
+        Args:
+            width: Total requested width of the string.
+            precision: Optional precision for numeric cells.
+        """
         format_string = "{:" + str(width)
         if precision is not None:
             format_string += "." + str(precision) + "f} | "
@@ -63,6 +96,7 @@ class MarkdownTable:
         return format_string
 
     def print_row(self, row):
+        """Print a single row."""
         row_text = ""
         for col, cell in enumerate(row):
             format_string = self.get_format_string(
@@ -74,6 +108,7 @@ class MarkdownTable:
         print(row_text.rstrip(" |"))
 
     def print_separator(self):
+        """Print a separator row (midrule)."""
         print("|".rjust(self.columns_widths[0] + 2, "-"), end="")
         for col, _ in enumerate(self.header[1:-1]):
             print("|".rjust(self.columns_widths[col + 1] + 3, "-"), end="")
@@ -81,12 +116,18 @@ class MarkdownTable:
 
 
 def print_line_bold(string):
+    """Print a line in bold using terminal ANSI codes."""
     print(u"\u001b[1m", end="")
     print(string)
     print(u"\u001b[0m", end="")
 
 
 def recover_yield(filename):
+    """Extract yield results from a file.
+
+    A total of 6 numbers are returned the fit value and uncertainty of CR,
+    SCF, and BKG.
+    """
     file = ROOT.TFile(filename)
     sig_plus_cf = float(
         str(file.Get("all;1").GetLineWith("n_signal_plus_cross_model")).split()[1]
@@ -111,6 +152,10 @@ def recover_yield(filename):
 
 
 def recover_count(dir):
+    """Extract the MC truth based number of signal events from a directory.
+
+    All ROOT files in the directory are read and summed.
+    """
     chain = ROOT.TChain("h2000")
     chain.Add(dir + "/*.root")
     count = chain.Draw(
@@ -120,6 +165,7 @@ def recover_count(dir):
 
 
 def common_cuts():
+    """Get common cuts string (should be same as in the C++ programs)."""
     return (
         "vrusable == 1 &&"
         "vtusable==1&&"
@@ -135,6 +181,7 @@ def common_cuts():
 
 
 def weighted_mean(number_list, weights):
+    """Calculate a weighted mean of a list of values."""
     total = 0
     assert len(number_list) == len(weights)
     for i in range(len(number_list)):
@@ -143,6 +190,7 @@ def weighted_mean(number_list, weights):
 
 
 def error_of_sum(errors):
+    """Calculate the uncertainty of a sum, given uncertainty of each term."""
     total = 0
     for error in errors:
         total += error ** 2
@@ -150,6 +198,16 @@ def error_of_sum(errors):
 
 
 def calculate_fractions(sig_yield, scf_yield, bkg_yield):
+    """Translate yield numbers into fractions.
+
+    Returns:
+        A list of the following values:
+            CR/(CR + SCF),
+            CR/(CR + SCF + BKG),
+            SCF/(CR + SCF + BKG),
+            BKG/(CR + SCF + BKG)
+
+    """
     cr_crscf = float(sig_yield) / (sig_yield + scf_yield)
     cr = float(sig_yield) / (sig_yield + scf_yield + bkg_yield)
     scf = float(scf_yield) / (sig_yield + scf_yield + bkg_yield)
@@ -158,6 +216,7 @@ def calculate_fractions(sig_yield, scf_yield, bkg_yield):
 
 
 def process_MC(channels, streams):
+    """Read, process, and pretty-print MC."""
     for channel in channels:
         print_line_bold(channel)
         header = [
@@ -254,6 +313,7 @@ def process_MC(channels, streams):
 
 
 def process_data(channels):
+    """Read, process, and pretty-print data."""
     print_line_bold("Data")
     header = ["Channel", "Yield", "Err", "CR/CR+SCF", "CR/all", "SCF/all", "BKG/all"]
     precision = [None, 0, 0, 3, 3, 3, 3]
@@ -338,18 +398,28 @@ def process_data(channels):
 
 
 def save_to_json(data, filename):
+    """Save dictionary as a prettified JSON."""
     with open(filename, "w") as f:
         json.dump(data, f, indent=2, sort_keys=True)
 
 
 @contextmanager
 def stdout_redirected(to=os.devnull):
-    """
-    import os
+    """Redirect stdout.
 
-    with stdout_redirected(to=filename):
-        print("from Python")
-        os.system("echo non-Python applications are also supported")
+    This can be used to silence unwanted print statements from polluting the
+    output, or for redirecting the output into a log file.
+
+    Args:
+        to: An optional argument for specifying the redirection destination.
+            If none is supplied, the default is os.devnull.
+
+    Usage:
+        import os
+
+        with stdout_redirected(to=filename):
+            print("from Python")
+            os.system("echo non-Python applications are also supported")
     """
     fd = sys.stdout.fileno()
 

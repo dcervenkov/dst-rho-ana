@@ -36,6 +36,9 @@
 */.cproject
 */.settings
 
+# Python compiled files
+*.pyc
+
 # Jupyter files
 .ipynb_checkpoints
 

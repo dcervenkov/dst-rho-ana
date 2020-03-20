@@ -199,9 +199,9 @@ def process_MC(channels, streams):
         print()
 
         data = {
-            "cr_scf_f": sum(cr_crscf_fractions) / len(cr_crscf_fractions),
-            "cr_f": sum(cr_fractions) / len(cr_fractions),
-            "scf_f": sum(scf_fractions) / len(scf_fractions),
+            "cr_scf_f": round(sum(cr_crscf_fractions) / len(cr_crscf_fractions), 4),
+            "cr_f": round(sum(cr_fractions) / len(cr_fractions), 4),
+            "scf_f": round(sum(scf_fractions) / len(scf_fractions), 4),
         }
 
         save_to_json(data, os.path.join("results", channel + "_mc_fractions.json"))

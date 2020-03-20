@@ -54,9 +54,9 @@ def get_data_for_background(wildcards):
 rule all:
     input:
         yield_jobs = (
-            expand("DSRhoYield/plots/{channel}_stream{stream}",
+            expand("DSRhoYield/plots/{channel}_stream{stream}/fit_results.root",
                    channel=CHANNELS, stream=STREAMS),
-            expand("DSRhoYield/plots/{channel}", channel=CHANNELS)
+            expand("DSRhoYield/plots/{channel}/fit_results.root", channel=CHANNELS)
             ),
 
         background_jobs = (
@@ -106,27 +106,33 @@ rule yield_mc:
         "data/{channel}/realistic_mc",
         "data/{channel}/realistic_mc/stream{stream}"
     output:
-        directory("DSRhoYield/plots/{channel}_stream{stream}")
+        "DSRhoYield/plots/{channel}_stream{stream}/fit_results.root"
     log:
         "DSRhoYield/log/{channel}_stream{stream}"
-    shell:
-        "./DSRhoYield/DSRhoYield --MC {input} {output} &> {log}"
+    wildcard_constraints:
+        stream = "\d+"
+    run:
+        shell("./DSRhoYield/DSRhoYield --MC {input} " + os.path.dirname(output[0]) + " &> {log}")
 
 rule yield_data:
     input:
         "data/{channel}/realistic_mc",
         "data/{channel}"
     output:
-        directory("DSRhoYield/plots/{channel}")
+        "DSRhoYield/plots/{channel}/fit_results.root"
     log:
         "DSRhoYield/log/{channel}"
-    shell:
-        "./DSRhoYield/DSRhoYield {input} {output} &> {log}"
+    wildcard_constraints:
+        channel = "Kpi|Kpipi0|K3pi|together"
+    run:
+        shell("./DSRhoYield/DSRhoYield {input} " + os.path.dirname(output[0]) + " &> {log}")
 
 rule yield_summary:
     input:
         expand("DSRhoYield/plots/{channel}_stream{stream}/fit_results.root",
-               channel=CHANNELS, stream=STREAMS)
+               channel=CHANNELS, stream=STREAMS),
+        expand("DSRhoYield/plots/{channel}/fit_results.root",
+               channel=CHANNELS)
     output:
         expand("DSRhoYield/results/{channel}_{type}_fractions.json", channel=CHANNELS, type=["mc", "data"]),
         "DSRhoYield/results/avg_data_fractions.json"
@@ -167,8 +173,8 @@ rule background_nonphys:
 
 rule lifetime_configs:
     input:
-        expand(rules.background.output, channel=CHANNELS, mc="mc", bkg_type=BKG_TYPES),
-        expand(rules.background.output, channel=CHANNELS, mc="data", bkg_type="sidebands"),
+        expand(rules.background.output, channel=CHANNELS_AND_TOGETHER, mc="mc", bkg_type=BKG_TYPES),
+        expand(rules.background.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
         rules.yield_summary.output,
         template = "DSRhoLifetime/configs/templates/{config}.template.json"
     output:

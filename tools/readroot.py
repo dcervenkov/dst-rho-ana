@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This script prints a TNamed's Title field.
 
 It's intended use is to easily print strings stored in ROOT files in TNamed
@@ -6,7 +6,6 @@ objects. (The recommended way to store text in ROOT files is to create a TNamed
 object and store the text in its title member.)
 """
 
-from __future__ import print_function
 import argparse
 import os
 from rootpy.io import root_open

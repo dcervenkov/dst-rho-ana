@@ -1,7 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Module to extract, average, and pretty-print DSRhoYield results."""
 
-from __future__ import print_function
 from math import sqrt
 import json
 import os

@@ -1,9 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """This script generates publication quality plots from ROOT files with
 TTrees.
 """
 
-from __future__ import print_function
 import argparse
 import glob
 import json

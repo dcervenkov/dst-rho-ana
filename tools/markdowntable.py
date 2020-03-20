@@ -9,7 +9,6 @@ Usage:
     table.print()
 """
 
-from __future__ import print_function
 
 class MarkdownTable:
     """Class representing a Markdown table with support for pretty printing."""

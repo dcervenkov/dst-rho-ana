@@ -108,7 +108,7 @@ rule yield_mc:
     output:
         "DSRhoYield/plots/{channel}_stream{stream}/fit_results.root"
     log:
-        "DSRhoYield/log/{channel}_stream{stream}"
+        "DSRhoYield/logs/{channel}_stream{stream}"
     wildcard_constraints:
         stream = "\d+"
     run:
@@ -121,7 +121,7 @@ rule yield_data:
     output:
         "DSRhoYield/plots/{channel}/fit_results.root"
     log:
-        "DSRhoYield/log/{channel}"
+        "DSRhoYield/logs/{channel}"
     wildcard_constraints:
         channel = "Kpi|Kpipi0|K3pi|together"
     run:

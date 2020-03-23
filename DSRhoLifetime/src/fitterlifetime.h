@@ -26,6 +26,8 @@ class FitterLifetime {
     virtual ~FitterLifetime();
 
     void Test();
+    void ProcessLifetime();
+    void ProcessMixing();
 
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
     int GetNumCPUs() { return num_CPUs_; };

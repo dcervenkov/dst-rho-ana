@@ -176,14 +176,9 @@ FitterLifetime::~FitterLifetime() {
 }
 
 /**
- * Currently a function that does everything - creating PDFs, fitting, plotting
+ * Create PDFs, fit and plot lifetime
  */
- // TODO: Separate into smaller, better named functions
-void FitterLifetime::Test() {
-    // tau_->setConstant(true);
-    //	dm_->setConstant(true);
-
-    if (do_lifetime_fit_) {
+void FitterLifetime::ProcessLifetime() {
         Log::print(Log::info, "Fitting %i events\n", dataset_->numEntries());
         std::vector<RooAbsPdf*> components;
         RooAbsPdf* lifetime_pdf = CreateLifetimePDF(components, scf_, bkg_, use_physical_pdf_);
@@ -193,132 +188,148 @@ void FitterLifetime::Test() {
         if (make_plots_) {
             tools::PlotWithPull(*dt_, conditional_argset_, *dataset_, *lifetime_pdf, result_, components);
         }
+}
+
+/**
+ * Create PDFs, fit and plot mixing
+ */
+// TODO: Separate into smaller, better named functions
+void FitterLifetime::ProcessMixing() {
+    // Small pars (r = 0.01)
+    //	RooRealVar S("S", "S", 0.0144908);
+    //	RooRealVar A("A", "A", -0.999801);
+
+    // Large pars (r = 0.1)
+    RooRealVar S("S", "S", 0.154719, -1, +1);
+    RooRealVar A("A", "A", -0.980200, -1, +1);
+    RooRealVar bS("bS", "bS", -0.0912793, -1, +1);
+    RooRealVar bA("bA", "bA", -0.980200, -1, +1);
+
+    S.setConstant(true);
+    A.setConstant(true);
+    bS.setConstant(true);
+    bA.setConstant(true);
+
+    DtPDF* cr_mixing_pdf_FB = new DtPDF("cr_mixing_pdf_FB", "cr_mixing_pdf_FB", true, perfect_tagging_, S, A, *tagwtag_,
+                    *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                    *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
+                    *vtistagl_);
+
+    DtPDF* cr_mixing_pdf_FA = new DtPDF("cr_mixing_pdf_FA", "cr_mixing_pdf_FA", true, perfect_tagging_, bS, bA, *tagwtag_,
+                        *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                        *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
+                        *vtistagl_);
+
+    DtPDF* cr_mixing_pdf_SB = new DtPDF("cr_mixing_pdf_SB", "cr_mixing_pdf_SB", false, perfect_tagging_, S, A, *tagwtag_,
+                    *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                    *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
+                    *vtistagl_);
+
+    DtPDF* cr_mixing_pdf_SA = new DtPDF("cr_mixing_pdf_SA", "cr_mixing_pdf_SA", false, perfect_tagging_, bS, bA,
+                        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_,
+                        *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_,
+                        *vtndf_, *vtistagl_);
+
+    RooArgList mixing_pdfs_FB;
+    RooArgList mixing_pdfs_FA;
+    RooArgList mixing_pdfs_SB;
+    RooArgList mixing_pdfs_SA;
+    mixing_pdfs_FB.add(*cr_mixing_pdf_FB);
+    mixing_pdfs_FA.add(*cr_mixing_pdf_FA);
+    mixing_pdfs_SB.add(*cr_mixing_pdf_SB);
+    mixing_pdfs_SA.add(*cr_mixing_pdf_SA);
+
+    if (scf_) {
+        RooAbsPdf* scf_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_cf") : CreateVoigtGaussDtPdf("scf_dt_cf"));
+        RooAbsPdf* scf_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_dcs") : CreateVoigtGaussDtPdf("scf_dt_dcs"));
+        mixing_pdfs_FB.add(*scf_dt_pdf_F);
+        mixing_pdfs_FA.add(*scf_dt_pdf_F);
+        mixing_pdfs_SB.add(*scf_dt_pdf_S);
+        mixing_pdfs_SA.add(*scf_dt_pdf_S);
+    }
+
+    if (bkg_) {
+        RooAbsPdf* bkg_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dt_cf") : CreateVoigtGaussDtPdf("bkg_dt_cf"));
+        RooAbsPdf* bkg_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dt_dcs") : CreateVoigtGaussDtPdf("bkg_dt_dcs"));
+        mixing_pdfs_FB.add(*bkg_dt_pdf_F);
+        mixing_pdfs_FA.add(*bkg_dt_pdf_F);
+        mixing_pdfs_SB.add(*bkg_dt_pdf_S);
+        mixing_pdfs_SA.add(*bkg_dt_pdf_S);
+    }
+
+    TString prefix = "";
+    RooArgList fractions;
+    if (scf_ && !bkg_) {
+        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
+        cr_scf_f_->setConstant();
+        fractions.add(*cr_scf_f_);
+    } else if (scf_ && bkg_) {
+        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+        cr_f_->setConstant();
+        scf_f_->setConstant();
+        fractions.add(*cr_f_);
+        fractions.add(*scf_f_);
+    }
+
+    RooAddPdf* mixing_pdf_FB = new RooAddPdf(prefix + "mixing_pdf_FB", prefix + "mixing_pdf_FB", mixing_pdfs_FB, fractions);
+    RooAddPdf* mixing_pdf_FA = new RooAddPdf(prefix + "mixing_pdf_FA", prefix + "mixing_pdf_FA", mixing_pdfs_FA, fractions);
+    RooAddPdf* mixing_pdf_SB = new RooAddPdf(prefix + "mixing_pdf_SB", prefix + "mixing_pdf_SB", mixing_pdfs_SB, fractions);
+    RooAddPdf* mixing_pdf_SA = new RooAddPdf(prefix + "mixing_pdf_SA", prefix + "mixing_pdf_SA", mixing_pdfs_SA, fractions);
+
+    RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
+    sim_pdf.addPdf(*mixing_pdf_FB, "FB");
+    sim_pdf.addPdf(*mixing_pdf_FA, "FA");
+    sim_pdf.addPdf(*mixing_pdf_SB, "SB");
+    sim_pdf.addPdf(*mixing_pdf_SA, "SA");
+
+    if (config_.contains("modelParameters")) {
+        Log::LogLine(Log::debug) << "Global parameters:";
+        tools::ChangeModelParameters(&sim_pdf, config_["modelParameters"]);
+    }
+    if (config_.contains("channels")) {
+        Log::LogLine(Log::debug) << "Channel parameters:";
+        tools::ChangeModelParameters(&sim_pdf, config_["channels"][channel_]["modelParameters"]);
+    }
+
+    Log::print(Log::info, "Fitting %i events\n", dataset_->numEntries());
+    result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
+                            RooFit::Minimizer("Minuit2"),
+                            RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+
+    if (make_plots_) {
+        RooDataSet* dataset_FB =
+            static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::FB"));
+        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_FB, *mixing_pdf_FB, result_,
+                            tools::ToVector<RooAbsPdf*>(mixing_pdfs_FB));
+
+        RooDataSet* dataset_FA =
+            static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::FA"));
+        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_FA, *mixing_pdf_FA, result_,
+                            tools::ToVector<RooAbsPdf*>(mixing_pdfs_FA));
+
+        RooDataSet* dataset_SB =
+            static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::SB"));
+        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_SB, *mixing_pdf_SB, result_,
+                            tools::ToVector<RooAbsPdf*>(mixing_pdfs_SB));
+
+        RooDataSet* dataset_SA =
+            static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::SA"));
+        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_SA, *mixing_pdf_SA, result_,
+                            tools::ToVector<RooAbsPdf*>(mixing_pdfs_SA));
+    }
+}
+
+/**
+ * Currently a function that does everything - creating PDFs, fitting, plotting
+ */
+void FitterLifetime::Test() {
+    if (do_lifetime_fit_) {
+        ProcessLifetime();
     }
 
     if (do_mixing_fit_) {
-        // Small pars (r = 0.01)
-        //	RooRealVar S("S", "S", 0.0144908);
-        //	RooRealVar A("A", "A", -0.999801);
-
-        // Large pars (r = 0.1)
-        RooRealVar S("S", "S", 0.154719, -1, +1);
-        RooRealVar A("A", "A", -0.980200, -1, +1);
-        RooRealVar bS("bS", "bS", -0.0912793, -1, +1);
-        RooRealVar bA("bA", "bA", -0.980200, -1, +1);
-
-        S.setConstant(true);
-        A.setConstant(true);
-        bS.setConstant(true);
-        bA.setConstant(true);
-
-        DtPDF* cr_mixing_pdf_FB = new DtPDF("cr_mixing_pdf_FB", "cr_mixing_pdf_FB", true, perfect_tagging_, S, A, *tagwtag_,
-                        *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-                        *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
-                        *vtistagl_);
-
-        DtPDF* cr_mixing_pdf_FA = new DtPDF("cr_mixing_pdf_FA", "cr_mixing_pdf_FA", true, perfect_tagging_, bS, bA, *tagwtag_,
-                            *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-                            *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
-                            *vtistagl_);
-
-        DtPDF* cr_mixing_pdf_SB = new DtPDF("cr_mixing_pdf_SB", "cr_mixing_pdf_SB", false, perfect_tagging_, S, A, *tagwtag_,
-                        *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-                        *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
-                        *vtistagl_);
-
-        DtPDF* cr_mixing_pdf_SA = new DtPDF("cr_mixing_pdf_SA", "cr_mixing_pdf_SA", false, perfect_tagging_, bS, bA,
-                            *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_,
-                            *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_,
-                            *vtndf_, *vtistagl_);
-
-        RooArgList mixing_pdfs_FB;
-        RooArgList mixing_pdfs_FA;
-        RooArgList mixing_pdfs_SB;
-        RooArgList mixing_pdfs_SA;
-        mixing_pdfs_FB.add(*cr_mixing_pdf_FB);
-        mixing_pdfs_FA.add(*cr_mixing_pdf_FA);
-        mixing_pdfs_SB.add(*cr_mixing_pdf_SB);
-        mixing_pdfs_SA.add(*cr_mixing_pdf_SA);
-
-        if (scf_) {
-            RooAbsPdf* scf_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_cf") : CreateVoigtGaussDtPdf("scf_dt_cf"));
-            RooAbsPdf* scf_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_dcs") : CreateVoigtGaussDtPdf("scf_dt_dcs"));
-            mixing_pdfs_FB.add(*scf_dt_pdf_F);
-            mixing_pdfs_FA.add(*scf_dt_pdf_F);
-            mixing_pdfs_SB.add(*scf_dt_pdf_S);
-            mixing_pdfs_SA.add(*scf_dt_pdf_S);
-        }
-
-        if (bkg_) {
-            RooAbsPdf* bkg_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dt_cf") : CreateVoigtGaussDtPdf("bkg_dt_cf"));
-            RooAbsPdf* bkg_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dt_dcs") : CreateVoigtGaussDtPdf("bkg_dt_dcs"));
-            mixing_pdfs_FB.add(*bkg_dt_pdf_F);
-            mixing_pdfs_FA.add(*bkg_dt_pdf_F);
-            mixing_pdfs_SB.add(*bkg_dt_pdf_S);
-            mixing_pdfs_SA.add(*bkg_dt_pdf_S);
-        }
-
-        TString prefix = "";
-        RooArgList fractions;
-        if (scf_ && !bkg_) {
-            RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
-            cr_scf_f_->setConstant();
-            fractions.add(*cr_scf_f_);
-        } else if (scf_ && bkg_) {
-            RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
-            RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
-            cr_f_->setConstant();
-            scf_f_->setConstant();
-            fractions.add(*cr_f_);
-            fractions.add(*scf_f_);
-        }
-
-        RooAddPdf* mixing_pdf_FB = new RooAddPdf(prefix + "mixing_pdf_FB", prefix + "mixing_pdf_FB", mixing_pdfs_FB, fractions);
-        RooAddPdf* mixing_pdf_FA = new RooAddPdf(prefix + "mixing_pdf_FA", prefix + "mixing_pdf_FA", mixing_pdfs_FA, fractions);
-        RooAddPdf* mixing_pdf_SB = new RooAddPdf(prefix + "mixing_pdf_SB", prefix + "mixing_pdf_SB", mixing_pdfs_SB, fractions);
-        RooAddPdf* mixing_pdf_SA = new RooAddPdf(prefix + "mixing_pdf_SA", prefix + "mixing_pdf_SA", mixing_pdfs_SA, fractions);
-
-        RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
-        sim_pdf.addPdf(*mixing_pdf_FB, "FB");
-        sim_pdf.addPdf(*mixing_pdf_FA, "FA");
-        sim_pdf.addPdf(*mixing_pdf_SB, "SB");
-        sim_pdf.addPdf(*mixing_pdf_SA, "SA");
-
-        if (config_.contains("modelParameters")) {
-            Log::LogLine(Log::debug) << "Global parameters:";
-            tools::ChangeModelParameters(&sim_pdf, config_["modelParameters"]);
-        }
-        if (config_.contains("channels")) {
-            Log::LogLine(Log::debug) << "Channel parameters:";
-            tools::ChangeModelParameters(&sim_pdf, config_["channels"][channel_]["modelParameters"]);
-        }
-
-        Log::print(Log::info, "Fitting %i events\n", dataset_->numEntries());
-        result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
-                                RooFit::Minimizer("Minuit2"),
-                                RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-
-        if (make_plots_) {
-            RooDataSet* dataset_FB =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::FB"));
-            tools::PlotWithPull(*dt_, conditional_argset_, *dataset_FB, *mixing_pdf_FB, result_,
-                                tools::ToVector<RooAbsPdf*>(mixing_pdfs_FB));
-
-            RooDataSet* dataset_FA =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::FA"));
-            tools::PlotWithPull(*dt_, conditional_argset_, *dataset_FA, *mixing_pdf_FA, result_,
-                                tools::ToVector<RooAbsPdf*>(mixing_pdfs_FA));
-
-            RooDataSet* dataset_SB =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::SB"));
-            tools::PlotWithPull(*dt_, conditional_argset_, *dataset_SB, *mixing_pdf_SB, result_,
-                                tools::ToVector<RooAbsPdf*>(mixing_pdfs_SB));
-
-            RooDataSet* dataset_SA =
-                static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::SA"));
-            tools::PlotWithPull(*dt_, conditional_argset_, *dataset_SA, *mixing_pdf_SA, result_,
-                                tools::ToVector<RooAbsPdf*>(mixing_pdfs_SA));
-        }
+        ProcessMixing();
     }
 }
 

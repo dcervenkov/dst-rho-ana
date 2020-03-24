@@ -45,6 +45,9 @@
 # Snakemake directory
 .snakemake
 
+# ccls cache directories
+.ccls-cache
+
 # VS Code files
 */.vscode
 compile_commands.json

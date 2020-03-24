@@ -51,7 +51,7 @@ class FitterLifetime {
     int GetPerfectTagging() const { return perfect_tagging_; };
 
     void SetComponents(const std::string components);
-	void ReadInFile(const std::vector<const char*> file_names, const int& num_events = 0);
+    void ReadInFile(const std::vector<const char*> file_names, const int& num_events = 0);
     void SaveTXTResults(const char* results_file) const;
 
     RooRealVar* expno_;
@@ -102,7 +102,8 @@ class FitterLifetime {
                              const bool position_left) const;
     RooAddPdf* CreateVoigtGaussDtPdf(const std::string prefix) const;
     RooAbsPdf* CreatePhysicsBkgDtPdf(const std::string prefix) const;
-    RooAbsPdf* CreateLifetimePDF(std::vector<RooAbsPdf*>& components, const bool scf, const bool bkg, const bool physical_pdf) const;
+    RooAbsPdf* CreateLifetimePDF(std::vector<RooAbsPdf*>& components, const bool scf,
+                                 const bool bkg, const bool physical_pdf) const;
     nlohmann::json ReadInJSONFile(const char* filename) const;
 
     std::vector<RooRealVar**> conditional_vars_;

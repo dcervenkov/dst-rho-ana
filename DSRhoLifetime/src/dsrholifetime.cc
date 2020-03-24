@@ -41,10 +41,8 @@ int main(int argc, char* argv[]) {
         file_names.push_back(optionless_argv[i]);
     }
 
-
     tools::SetupPlotStyle();
     colors::setColors();
-
 
     Config config;
     config.ReadInJSONFile(options.config);

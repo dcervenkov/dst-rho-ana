@@ -57,10 +57,12 @@ FitterLifetime::FitterLifetime(const nlohmann::json config) {
     config_ = config;
 
     dt_ = new RooRealVar("dt", "#Deltat [ps]", constants::cuts::dt_low, constants::cuts::dt_high);
-    thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", constants::cuts::thetat_low, constants::cuts::thetat_high);
+    thetat_ = new RooRealVar("thetat", "#theta_{t} [rad]", constants::cuts::thetat_low,
+                             constants::cuts::thetat_high);
     thetab_ = new RooRealVar("thetab", "#theta_{b} [rad]", constants::cuts::thetab_low,
                              constants::cuts::thetab_high);
-    phit_ = new RooRealVar("phit", "#phi_{t} [rad]", constants::cuts::phit_low, constants::cuts::phit_high);
+    phit_ = new RooRealVar("phit", "#phi_{t} [rad]", constants::cuts::phit_low,
+                           constants::cuts::phit_high);
 
     vrusable_ = new RooRealVar("vrusable", "vrusable", 0, 1);
     vrvtxz_ = new RooRealVar("vrvtxz", "vrvtxz", -10, 10);
@@ -179,15 +181,16 @@ FitterLifetime::~FitterLifetime() {
  * Create PDFs, fit and plot lifetime
  */
 void FitterLifetime::ProcessLifetime() {
-        Log::print(Log::info, "Fitting %i events\n", dataset_->numEntries());
-        std::vector<RooAbsPdf*> components;
-        RooAbsPdf* lifetime_pdf = CreateLifetimePDF(components, scf_, bkg_, use_physical_pdf_);
-        result_ = lifetime_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
-                                     RooFit::Minimizer("Minuit2"),
-                                     RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
-        if (make_plots_) {
-            tools::PlotWithPull(*dt_, conditional_argset_, *dataset_, *lifetime_pdf, result_, components);
-        }
+    Log::print(Log::info, "Fitting %i events\n", dataset_->numEntries());
+    std::vector<RooAbsPdf*> components;
+    RooAbsPdf* lifetime_pdf = CreateLifetimePDF(components, scf_, bkg_, use_physical_pdf_);
+    result_ = lifetime_pdf->fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
+                                  RooFit::Minimizer("Minuit2"), RooFit::Save(true),
+                                  RooFit::NumCPU(num_CPUs_));
+    if (make_plots_) {
+        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_, *lifetime_pdf, result_,
+                            components);
+    }
 }
 
 /**
@@ -210,25 +213,25 @@ void FitterLifetime::ProcessMixing() {
     bS.setConstant(true);
     bA.setConstant(true);
 
-    DtPDF* cr_mixing_pdf_FB = new DtPDF("cr_mixing_pdf_FB", "cr_mixing_pdf_FB", true, perfect_tagging_, S, A, *tagwtag_,
-                    *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-                    *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
-                    *vtistagl_);
+    DtPDF* cr_mixing_pdf_FB =
+        new DtPDF("cr_mixing_pdf_FB", "cr_mixing_pdf_FB", true, perfect_tagging_, S, A, *tagwtag_,
+                  *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                  *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtPDF* cr_mixing_pdf_FA = new DtPDF("cr_mixing_pdf_FA", "cr_mixing_pdf_FA", true, perfect_tagging_, bS, bA, *tagwtag_,
-                        *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-                        *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
-                        *vtistagl_);
+    DtPDF* cr_mixing_pdf_FA =
+        new DtPDF("cr_mixing_pdf_FA", "cr_mixing_pdf_FA", true, perfect_tagging_, bS, bA, *tagwtag_,
+                  *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                  *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtPDF* cr_mixing_pdf_SB = new DtPDF("cr_mixing_pdf_SB", "cr_mixing_pdf_SB", false, perfect_tagging_, S, A, *tagwtag_,
-                    *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-                    *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_,
-                    *vtistagl_);
+    DtPDF* cr_mixing_pdf_SB =
+        new DtPDF("cr_mixing_pdf_SB", "cr_mixing_pdf_SB", false, perfect_tagging_, S, A, *tagwtag_,
+                  *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                  *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtPDF* cr_mixing_pdf_SA = new DtPDF("cr_mixing_pdf_SA", "cr_mixing_pdf_SA", false, perfect_tagging_, bS, bA,
-                        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_,
-                        *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_,
-                        *vtndf_, *vtistagl_);
+    DtPDF* cr_mixing_pdf_SA = new DtPDF(
+        "cr_mixing_pdf_SA", "cr_mixing_pdf_SA", false, perfect_tagging_, bS, bA, *tagwtag_, *dt_,
+        *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_,
+        *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
 
     RooArgList mixing_pdfs_FB;
     RooArgList mixing_pdfs_FA;
@@ -240,8 +243,10 @@ void FitterLifetime::ProcessMixing() {
     mixing_pdfs_SA.add(*cr_mixing_pdf_SA);
 
     if (scf_) {
-        RooAbsPdf* scf_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_cf") : CreateVoigtGaussDtPdf("scf_dt_cf"));
-        RooAbsPdf* scf_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_dcs") : CreateVoigtGaussDtPdf("scf_dt_dcs"));
+        RooAbsPdf* scf_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_cf")
+                                                     : CreateVoigtGaussDtPdf("scf_dt_cf"));
+        RooAbsPdf* scf_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_dcs")
+                                                     : CreateVoigtGaussDtPdf("scf_dt_dcs"));
         mixing_pdfs_FB.add(*scf_dt_pdf_F);
         mixing_pdfs_FA.add(*scf_dt_pdf_F);
         mixing_pdfs_SB.add(*scf_dt_pdf_S);
@@ -249,8 +254,10 @@ void FitterLifetime::ProcessMixing() {
     }
 
     if (bkg_) {
-        RooAbsPdf* bkg_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dt_cf") : CreateVoigtGaussDtPdf("bkg_dt_cf"));
-        RooAbsPdf* bkg_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dt_dcs") : CreateVoigtGaussDtPdf("bkg_dt_dcs"));
+        RooAbsPdf* bkg_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dt_cf")
+                                                     : CreateVoigtGaussDtPdf("bkg_dt_cf"));
+        RooAbsPdf* bkg_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dt_dcs")
+                                                     : CreateVoigtGaussDtPdf("bkg_dt_dcs"));
         mixing_pdfs_FB.add(*bkg_dt_pdf_F);
         mixing_pdfs_FA.add(*bkg_dt_pdf_F);
         mixing_pdfs_SB.add(*bkg_dt_pdf_S);
@@ -260,22 +267,29 @@ void FitterLifetime::ProcessMixing() {
     TString prefix = "";
     RooArgList fractions;
     if (scf_ && !bkg_) {
-        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
+        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}",
+                                               constants::fraction_cr_of_crscf, 0.80, 0.99);
         cr_scf_f_->setConstant();
         fractions.add(*cr_scf_f_);
     } else if (scf_ && bkg_) {
-        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
-        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}",
+                                           constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}",
+                                            constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
         cr_f_->setConstant();
         scf_f_->setConstant();
         fractions.add(*cr_f_);
         fractions.add(*scf_f_);
     }
 
-    RooAddPdf* mixing_pdf_FB = new RooAddPdf(prefix + "mixing_pdf_FB", prefix + "mixing_pdf_FB", mixing_pdfs_FB, fractions);
-    RooAddPdf* mixing_pdf_FA = new RooAddPdf(prefix + "mixing_pdf_FA", prefix + "mixing_pdf_FA", mixing_pdfs_FA, fractions);
-    RooAddPdf* mixing_pdf_SB = new RooAddPdf(prefix + "mixing_pdf_SB", prefix + "mixing_pdf_SB", mixing_pdfs_SB, fractions);
-    RooAddPdf* mixing_pdf_SA = new RooAddPdf(prefix + "mixing_pdf_SA", prefix + "mixing_pdf_SA", mixing_pdfs_SA, fractions);
+    RooAddPdf* mixing_pdf_FB = new RooAddPdf(prefix + "mixing_pdf_FB", prefix + "mixing_pdf_FB",
+                                             mixing_pdfs_FB, fractions);
+    RooAddPdf* mixing_pdf_FA = new RooAddPdf(prefix + "mixing_pdf_FA", prefix + "mixing_pdf_FA",
+                                             mixing_pdfs_FA, fractions);
+    RooAddPdf* mixing_pdf_SB = new RooAddPdf(prefix + "mixing_pdf_SB", prefix + "mixing_pdf_SB",
+                                             mixing_pdfs_SB, fractions);
+    RooAddPdf* mixing_pdf_SA = new RooAddPdf(prefix + "mixing_pdf_SA", prefix + "mixing_pdf_SA",
+                                             mixing_pdfs_SA, fractions);
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
     sim_pdf.addPdf(*mixing_pdf_FB, "FB");
@@ -293,9 +307,9 @@ void FitterLifetime::ProcessMixing() {
     }
 
     Log::print(Log::info, "Fitting %i events\n", dataset_->numEntries());
-    result_ = sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
-                            RooFit::Minimizer("Minuit2"),
-                            RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
+    result_ =
+        sim_pdf.fitTo(*dataset_, RooFit::ConditionalObservables(conditional_argset_),
+                      RooFit::Minimizer("Minuit2"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
     if (make_plots_) {
         RooDataSet* dataset_FB =
@@ -345,19 +359,19 @@ void FitterLifetime::Test() {
 void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const int& num_events) {
     TChain* chain = new TChain("h2000");
     int num_files = 0;
-	for (auto& file_name : file_names) {
-		if (!chain->Add(file_name, 0)) {
-			Log::LogLine(Log::error) << "File " << file_name << " not found!";
-			exit(9);
-		}
-		num_files++;
-	}
+    for (auto& file_name : file_names) {
+        if (!chain->Add(file_name, 0)) {
+            Log::LogLine(Log::error) << "File " << file_name << " not found!";
+            exit(9);
+        }
+        num_files++;
+    }
 
     Log::print(Log::info, "Reading %i input files\n", num_files);
 
     TTree* tree = nullptr;
     if (num_events) {
-        double fraction_events = (double) num_events / chain->GetEntries();
+        double fraction_events = (double)num_events / chain->GetEntries();
         std::string fraction_string = "LocalEntry$<LocalEntries$*";
         fraction_string += std::to_string(fraction_events);
         Log::print(
@@ -391,8 +405,8 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
 
     // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
     // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
-    RooDataSet* temp_dataset =
-        new RooDataSet("dataset", "dataset", tree == nullptr ? chain : tree, dataset_argset_, common_cuts);
+    RooDataSet* temp_dataset = new RooDataSet("dataset", "dataset", tree == nullptr ? chain : tree,
+                                              dataset_argset_, common_cuts);
 
     // We add an identifying label to each of the 4 categories and then combine it into a single
     // dataset for RooSimultaneous fitting
@@ -480,8 +494,8 @@ RooAbsPdf* FitterLifetime::CreatePhysicsBkgDtPdf(const std::string prefix) const
     RooRealVar* S_main = new RooRealVar(pre + "_S_main", "S_{m}", 1);
     RooRealVar* S_tail = new RooRealVar(pre + "_S_tail", "S_{t}", 1);
 
-    DtBKG* model = new DtBKG(pre + "model", pre + "model", *dt_, *vrerr6_, *vterr6_, *tau,
-                              *f_delta, *mu_delta, *mu_lifetime, *f_tail, *S_main, *S_tail);
+    DtBKG* model = new DtBKG(pre + "model", pre + "model", *dt_, *vrerr6_, *vterr6_, *tau, *f_delta,
+                             *mu_delta, *mu_lifetime, *f_tail, *S_main, *S_tail);
 
     return model;
 }
@@ -513,9 +527,10 @@ nlohmann::json FitterLifetime::ReadInJSONFile(const char* filename) const {
  */
 RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components, const bool scf,
                                              const bool bkg, const bool physical_pdf) const {
-    DtPDF* lifetime_cp_pdf = new DtPDF("lifetime_cp_pdf", "lifetime_cp_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
-                       *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_,
-                       *vtchi2_, *vtndf_, *vtistagl_);
+    DtPDF* lifetime_cp_pdf =
+        new DtPDF("lifetime_cp_pdf", "lifetime_cp_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
+                  *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_,
+                  *vtchi2_, *vtndf_, *vtistagl_);
 
     RooArgList lifetime_pdfs;
     lifetime_pdfs.add(*lifetime_cp_pdf);
@@ -535,19 +550,23 @@ RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components
     TString prefix = "";
     RooArgList fractions;
     if (scf && !bkg) {
-        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}", constants::fraction_cr_of_crscf, 0.80, 0.99);
+        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}",
+                                               constants::fraction_cr_of_crscf, 0.80, 0.99);
         cr_scf_f_->setConstant();
         fractions.add(*cr_scf_f_);
     } else if (scf && bkg) {
-        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}", constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
-        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}", constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}",
+                                           constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}",
+                                            constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
         cr_f_->setConstant();
         scf_f_->setConstant();
         fractions.add(*cr_f_);
         fractions.add(*scf_f_);
     }
 
-    RooAddPdf* lifetime_pdf = new RooAddPdf(prefix + "lifetime_pdf", prefix + "lifetime_pdf", lifetime_pdfs, fractions);
+    RooAddPdf* lifetime_pdf =
+        new RooAddPdf(prefix + "lifetime_pdf", prefix + "lifetime_pdf", lifetime_pdfs, fractions);
 
     if (config_.contains("modelParameters")) {
         Log::LogLine(Log::debug) << "Global parameters:";
@@ -555,7 +574,8 @@ RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components
     }
     if (config_.contains("channels")) {
         Log::LogLine(Log::debug) << "Channel parameters:";
-        tools::ChangeModelParameters(lifetime_pdf, config_["channels"][channel_]["modelParameters"]);
+        tools::ChangeModelParameters(lifetime_pdf,
+                                     config_["channels"][channel_]["modelParameters"]);
     }
 
     components = tools::ToVector<RooAbsPdf*>(lifetime_pdfs);

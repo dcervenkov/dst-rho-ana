@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import glob
-import sys
 from uncertainties import ufloat
 
 
@@ -102,7 +101,7 @@ def main():
                 print(f"{component:6}", end=" ")
                 helper = "" if component == "all" else "0"
                 for values_w_errors in load_values(
-                        glob.glob(f"../results/{channel}/{component}_{type}_{helper}[0-6]")):
+                        glob.glob(f"../results/{channel}/{component}_{type}_{helper}[0-5]")):
                     average = calc_averages(values_w_errors)
                     averages[channel][component].append(average)
                     print(f"{average[0]:.3f} +- {average[1]:.3f}", end="\t")

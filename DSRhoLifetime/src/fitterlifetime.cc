@@ -337,7 +337,8 @@ void FitterLifetime::ProcessMixing() {
 /**
  * Currently a function that does everything - creating PDFs, fitting, plotting
  */
-void FitterLifetime::Test() {
+// TODO: Refactor this method
+void FitterLifetime::Process() {
     if (do_lifetime_fit_) {
         ProcessLifetime();
     }

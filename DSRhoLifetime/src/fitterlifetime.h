@@ -25,7 +25,7 @@ class FitterLifetime {
     FitterLifetime(const nlohmann::json config);
     virtual ~FitterLifetime();
 
-    void Test();
+    void Process();
     void ProcessLifetime();
     void ProcessMixing();
 

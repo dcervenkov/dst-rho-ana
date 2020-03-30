@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
         fitter.ReadInFile(file_names);
     }
 
-    fitter.Test();
+    fitter.Process();
 
     fitter.SaveTXTResults(results_file);
 

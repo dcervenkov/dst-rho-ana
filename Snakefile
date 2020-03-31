@@ -86,6 +86,8 @@ rule all:
                    stream=range(6)),
 
             expand("DSRhoLifetime/results/{channel}_{type}_data",
+                   channel=CHANNELS_AND_TOGETHER, component=["all"], type=["lifetime", "mixing"]),
+            expand("DSRhoLifetime/plots/{channel}_{type}_data",
                    channel=CHANNELS_AND_TOGETHER, component=["all"], type=["lifetime", "mixing"])
             )
 

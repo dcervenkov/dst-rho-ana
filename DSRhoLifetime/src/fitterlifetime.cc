@@ -103,10 +103,8 @@ FitterLifetime::FitterLifetime(const nlohmann::json config) {
     dm_ = new RooRealVar("dm", "#Deltam", constants::dm - 1, constants::dm + 1);
 
     decaytype_ = new RooCategory("decaytype", "decaytype");
-    decaytype_->defineType("FB", 1);
-    decaytype_->defineType("FA", 2);
-    decaytype_->defineType("SB", 3);
-    decaytype_->defineType("SA", 4);
+    decaytype_->defineType("F", 1);
+    decaytype_->defineType("S", 2);
 
     // All the variables present in the ntuple are added to a vector so we can later
     // iterate through them for convenience
@@ -198,59 +196,29 @@ void FitterLifetime::ProcessLifetime() {
  */
 // TODO: Separate into smaller, better named functions
 void FitterLifetime::ProcessMixing() {
-    // Small pars (r = 0.01)
-    //	RooRealVar S("S", "S", 0.0144908);
-    //	RooRealVar A("A", "A", -0.999801);
 
-    // Large pars (r = 0.1)
-    RooRealVar S("S", "S", 0.154719, -1, +1);
-    RooRealVar A("A", "A", -0.980200, -1, +1);
-    RooRealVar bS("bS", "bS", -0.0912793, -1, +1);
-    RooRealVar bA("bA", "bA", -0.980200, -1, +1);
-
-    S.setConstant(true);
-    A.setConstant(true);
-    bS.setConstant(true);
-    bA.setConstant(true);
-
-    DtPDF* cr_mixing_pdf_FB =
-        new DtPDF("cr_mixing_pdf_FB", "cr_mixing_pdf_FB", true, perfect_tagging_, S, A, *tagwtag_,
+    DtPDF* cr_mixing_pdf_F =
+        new DtPDF("cr_mixing_pdf_F", "cr_mixing_pdf_F", true, perfect_tagging_, *tagwtag_,
                   *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
                   *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtPDF* cr_mixing_pdf_FA =
-        new DtPDF("cr_mixing_pdf_FA", "cr_mixing_pdf_FA", true, perfect_tagging_, bS, bA, *tagwtag_,
+    DtPDF* cr_mixing_pdf_S =
+        new DtPDF("cr_mixing_pdf_S", "cr_mixing_pdf_S", false, perfect_tagging_, *tagwtag_,
                   *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
                   *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    DtPDF* cr_mixing_pdf_SB =
-        new DtPDF("cr_mixing_pdf_SB", "cr_mixing_pdf_SB", false, perfect_tagging_, S, A, *tagwtag_,
-                  *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-                  *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
-
-    DtPDF* cr_mixing_pdf_SA = new DtPDF(
-        "cr_mixing_pdf_SA", "cr_mixing_pdf_SA", false, perfect_tagging_, bS, bA, *tagwtag_, *dt_,
-        *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_,
-        *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
-
-    RooArgList mixing_pdfs_FB;
-    RooArgList mixing_pdfs_FA;
-    RooArgList mixing_pdfs_SB;
-    RooArgList mixing_pdfs_SA;
-    mixing_pdfs_FB.add(*cr_mixing_pdf_FB);
-    mixing_pdfs_FA.add(*cr_mixing_pdf_FA);
-    mixing_pdfs_SB.add(*cr_mixing_pdf_SB);
-    mixing_pdfs_SA.add(*cr_mixing_pdf_SA);
+    RooArgList mixing_pdfs_F;
+    RooArgList mixing_pdfs_S;
+    mixing_pdfs_F.add(*cr_mixing_pdf_F);
+    mixing_pdfs_S.add(*cr_mixing_pdf_S);
 
     if (scf_) {
         RooAbsPdf* scf_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_cf")
                                                      : CreateVoigtGaussDtPdf("scf_dt_cf"));
         RooAbsPdf* scf_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_dcs")
                                                      : CreateVoigtGaussDtPdf("scf_dt_dcs"));
-        mixing_pdfs_FB.add(*scf_dt_pdf_F);
-        mixing_pdfs_FA.add(*scf_dt_pdf_F);
-        mixing_pdfs_SB.add(*scf_dt_pdf_S);
-        mixing_pdfs_SA.add(*scf_dt_pdf_S);
+        mixing_pdfs_F.add(*scf_dt_pdf_F);
+        mixing_pdfs_S.add(*scf_dt_pdf_S);
     }
 
     if (bkg_) {
@@ -258,10 +226,8 @@ void FitterLifetime::ProcessMixing() {
                                                      : CreateVoigtGaussDtPdf("bkg_dt_cf"));
         RooAbsPdf* bkg_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dt_dcs")
                                                      : CreateVoigtGaussDtPdf("bkg_dt_dcs"));
-        mixing_pdfs_FB.add(*bkg_dt_pdf_F);
-        mixing_pdfs_FA.add(*bkg_dt_pdf_F);
-        mixing_pdfs_SB.add(*bkg_dt_pdf_S);
-        mixing_pdfs_SA.add(*bkg_dt_pdf_S);
+        mixing_pdfs_F.add(*bkg_dt_pdf_F);
+        mixing_pdfs_S.add(*bkg_dt_pdf_S);
     }
 
     TString prefix = "";
@@ -282,20 +248,14 @@ void FitterLifetime::ProcessMixing() {
         fractions.add(*scf_f_);
     }
 
-    RooAddPdf* mixing_pdf_FB = new RooAddPdf(prefix + "mixing_pdf_FB", prefix + "mixing_pdf_FB",
-                                             mixing_pdfs_FB, fractions);
-    RooAddPdf* mixing_pdf_FA = new RooAddPdf(prefix + "mixing_pdf_FA", prefix + "mixing_pdf_FA",
-                                             mixing_pdfs_FA, fractions);
-    RooAddPdf* mixing_pdf_SB = new RooAddPdf(prefix + "mixing_pdf_SB", prefix + "mixing_pdf_SB",
-                                             mixing_pdfs_SB, fractions);
-    RooAddPdf* mixing_pdf_SA = new RooAddPdf(prefix + "mixing_pdf_SA", prefix + "mixing_pdf_SA",
-                                             mixing_pdfs_SA, fractions);
+    RooAddPdf* mixing_pdf_F = new RooAddPdf(prefix + "mixing_pdf_F", prefix + "mixing_pdf_F",
+                                            mixing_pdfs_F, fractions);
+    RooAddPdf* mixing_pdf_S = new RooAddPdf(prefix + "mixing_pdf_S", prefix + "mixing_pdf_S",
+                                            mixing_pdfs_S, fractions);
 
     RooSimultaneous sim_pdf("sim_pdf", "sim_pdf", *decaytype_);
-    sim_pdf.addPdf(*mixing_pdf_FB, "FB");
-    sim_pdf.addPdf(*mixing_pdf_FA, "FA");
-    sim_pdf.addPdf(*mixing_pdf_SB, "SB");
-    sim_pdf.addPdf(*mixing_pdf_SA, "SA");
+    sim_pdf.addPdf(*mixing_pdf_F, "F");
+    sim_pdf.addPdf(*mixing_pdf_S, "S");
 
     if (config_.contains("modelParameters")) {
         Log::LogLine(Log::debug) << "Global parameters:";
@@ -312,25 +272,15 @@ void FitterLifetime::ProcessMixing() {
                       RooFit::Minimizer("Minuit2"), RooFit::Save(true), RooFit::NumCPU(num_CPUs_));
 
     if (make_plots_) {
-        RooDataSet* dataset_FB =
-            static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::FB"));
-        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_FB, *mixing_pdf_FB, result_,
-                            tools::ToVector<RooAbsPdf*>(mixing_pdfs_FB));
+        RooDataSet* dataset_F =
+            static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::F"));
+        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_F, *mixing_pdf_F, result_,
+                            tools::ToVector<RooAbsPdf*>(mixing_pdfs_F));
 
-        RooDataSet* dataset_FA =
-            static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::FA"));
-        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_FA, *mixing_pdf_FA, result_,
-                            tools::ToVector<RooAbsPdf*>(mixing_pdfs_FA));
-
-        RooDataSet* dataset_SB =
-            static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::SB"));
-        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_SB, *mixing_pdf_SB, result_,
-                            tools::ToVector<RooAbsPdf*>(mixing_pdfs_SB));
-
-        RooDataSet* dataset_SA =
-            static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::SA"));
-        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_SA, *mixing_pdf_SA, result_,
-                            tools::ToVector<RooAbsPdf*>(mixing_pdfs_SA));
+        RooDataSet* dataset_S =
+            static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::S"));
+        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_S, *mixing_pdf_S, result_,
+                            tools::ToVector<RooAbsPdf*>(mixing_pdfs_S));
     }
 }
 
@@ -404,6 +354,9 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
         SA_cuts = "brecflav==-1&&tagqr<0";
     }
 
+    TString F_cuts = "((" + FB_cuts + ")||(" + FA_cuts + "))";
+    TString S_cuts = "((" + SB_cuts + ")||(" + SA_cuts + "))";
+
     // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
     // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
     RooDataSet* temp_dataset = new RooDataSet("dataset", "dataset", tree == nullptr ? chain : tree,
@@ -411,32 +364,20 @@ void FitterLifetime::ReadInFile(const std::vector<const char*> file_names, const
 
     // We add an identifying label to each of the 4 categories and then combine it into a single
     // dataset for RooSimultaneous fitting
-    RooDataSet* dataset_FB = static_cast<RooDataSet*>(temp_dataset->reduce(FB_cuts));
-    decaytype_->setLabel("FB");
-    dataset_FB->addColumn(*decaytype_);
+    RooDataSet* dataset_F = static_cast<RooDataSet*>(temp_dataset->reduce(F_cuts));
+    decaytype_->setLabel("F");
+    dataset_F->addColumn(*decaytype_);
 
-    RooDataSet* dataset_FA = static_cast<RooDataSet*>(temp_dataset->reduce(FA_cuts));
-    decaytype_->setLabel("FA");
-    dataset_FA->addColumn(*decaytype_);
-
-    RooDataSet* dataset_SB = static_cast<RooDataSet*>(temp_dataset->reduce(SB_cuts));
-    decaytype_->setLabel("SB");
-    dataset_SB->addColumn(*decaytype_);
-
-    RooDataSet* dataset_SA = static_cast<RooDataSet*>(temp_dataset->reduce(SA_cuts));
-    decaytype_->setLabel("SA");
-    dataset_SA->addColumn(*decaytype_);
+    RooDataSet* dataset_S = static_cast<RooDataSet*>(temp_dataset->reduce(S_cuts));
+    decaytype_->setLabel("S");
+    dataset_S->addColumn(*decaytype_);
 
     delete temp_dataset;
 
-    dataset_ = static_cast<RooDataSet*>(dataset_FB->Clone());
-    delete dataset_FB;
-    dataset_->append(*dataset_FA);
-    delete dataset_FA;
-    dataset_->append(*dataset_SB);
-    delete dataset_SB;
-    dataset_->append(*dataset_SA);
-    delete dataset_SA;
+    dataset_ = static_cast<RooDataSet*>(dataset_F->Clone());
+    delete dataset_F;
+    dataset_->append(*dataset_S);
+    delete dataset_S;
 
     dataset_argset_.add(*decaytype_);
     conditional_argset_.add(*decaytype_);

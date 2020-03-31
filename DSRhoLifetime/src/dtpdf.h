@@ -40,8 +40,6 @@ public:
             RooAbsReal& _vtistagl);
 
     DtPDF(const char *name, const char *title, bool CKM_favored, bool perfect_tagging,
-            RooAbsReal& _S,
-            RooAbsReal& _A,
             RooAbsReal& _wtag,
             RooAbsReal& _dt,
             RooAbsReal& _tau,

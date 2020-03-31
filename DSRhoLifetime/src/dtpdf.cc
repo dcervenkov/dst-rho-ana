@@ -19,8 +19,6 @@
 //ClassImp(DSRhoPDF)
 
 DtPDF::DtPDF(const char *name, const char *title, bool _CKM_favored, bool _perfect_tagging,
-        RooAbsReal& _S,
-        RooAbsReal& _A,
         RooAbsReal& _wtag,
         RooAbsReal& _dt,
         RooAbsReal& _tau,
@@ -40,8 +38,6 @@ DtPDF::DtPDF(const char *name, const char *title, bool _CKM_favored, bool _perfe
         RooAbsReal& _vtndf,
         RooAbsReal& _vtistagl) :
         RooAbsPdf(name,title),
-        S("S","S",this,_S),
-        A("A","A",this,_A),
         wtag("wtag","wtag",this,_wtag),
         dt("dt","dt",this,_dt),
         tau("tau","tau",this,_tau),
@@ -109,8 +105,6 @@ DtPDF::DtPDF(const char *name, const char *title,
 
 DtPDF::DtPDF(const DtPDF& other, const char* name) :
             RooAbsPdf(other,name),
-            S("S",this,other.S),
-            A("A",this,other.A),
             wtag("wtag",this,other.wtag),
             dt("dt",this,other.dt),
             tau("tau",this,other.tau),
@@ -162,11 +156,6 @@ Double_t DtPDF::evaluate() const {
                 vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
                 vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
                 vtistagl, dtres_param );
-        pdf_sin = AfRkRdetRnp_fullrec( dt, constants::btype,
-                tau, dm, ak, ck,
-                vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
-                vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
-                vtistagl, dtres_param ) * 0.5/tau;
         pdf_cos = MfRkRdetRnp_fullrec( dt, constants::btype,
                 tau, dm, ak, ck,
                 vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
@@ -178,11 +167,6 @@ Double_t DtPDF::evaluate() const {
                 vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
                 vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
                 vtistagl, dtres_param );
-        norm_sin = norm_AfRkRdetRnp_fullrec(constants::cuts::dt_low, constants::cuts::dt_high, constants::btype,
-                tau, dm, ak, ck,
-                vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
-                vtntrk, sqrt(vtzerr),	vtchi2, vtndf,
-                vtistagl, dtres_param ) * 0.5/tau;
         norm_cos = norm_MfRkRdetRnp_fullrec(constants::cuts::dt_low, constants::cuts::dt_high, constants::btype,
                 tau, dm, ak, ck,
                 vrntrk, sqrt(vrzerr),	vrchi2, vrndf,
@@ -192,17 +176,15 @@ Double_t DtPDF::evaluate() const {
         double r = 1 - 2 * wtag;
         int r_bin = GetRBin(r);
         double wtag_binned = GetWTag(expno, r_bin, mc);
-        double delta_wtag_binned = GetDeltaWTag(expno, r_bin, mc);
         double r_binned = 1 - 2 * wtag_binned;
         double sign = -1 + 2*CKM_favored;
 
         if (perfect_tagging) {
-            delta_wtag_binned = 0;
             r_binned = 1;
         }
 
-        pdf = pdf_const * (1 + sign * delta_wtag_binned) - sign * r_binned * (S * pdf_sin + A * pdf_cos);
-        norm = norm_const * (1 + sign * delta_wtag_binned) - sign * r_binned * (S * norm_sin + A * norm_cos);
+        pdf  = pdf_const  + sign * r_binned * pdf_cos;
+        norm = norm_const + sign * r_binned * norm_cos;
 
     } else {
         pdf = EfRkRdetRnp_fullrec( dt, constants::btype,
@@ -220,11 +202,11 @@ Double_t DtPDF::evaluate() const {
 
     double alpha = 1;
 
-	// return Belle::AddOutlier(expno, dt, pdf, vrntrk, vtntrk, dtres_param,
-	// 		norm, constants::cuts::dt_low, constants::cuts::dt_high, alpha);
+    return Belle::AddOutlier(expno, dt, pdf, vrntrk, vtntrk, dtres_param, norm,
+                             constants::cuts::dt_low, constants::cuts::dt_high, alpha);
 
-    return Belle::AddOutlierWithBkg((int) expno, dt, 1, pdf, pdf, (int) vrntrk, (int) vtntrk, dtres_param,
-            norm / alpha, norm / alpha, constants::cuts::dt_low, constants::cuts::dt_high, alpha, 1);
+    // return Belle::AddOutlierWithBkg((int) expno, dt, 1, pdf, pdf, (int) vrntrk, (int) vtntrk, dtres_param,
+    //         norm / alpha, norm / alpha, constants::cuts::dt_low, constants::cuts::dt_high, alpha, 1);
 
 }
 
@@ -300,5 +282,3 @@ double DtPDF::GetDeltaWTag(int expno, int rbin, bool mc) const {
         }
     }
 }
-
-

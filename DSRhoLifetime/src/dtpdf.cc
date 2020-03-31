@@ -140,12 +140,10 @@ Double_t DtPDF::evaluate() const {
 
     double pdf = 0;
     double pdf_const = 0;
-    double pdf_sin = 0;
     double pdf_cos = 0;
 
     double norm = 0;
     double norm_const = 0;
-    double norm_sin = 0;
     double norm_cos = 0;
 
     if (mixing) {

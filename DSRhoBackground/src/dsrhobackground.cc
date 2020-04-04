@@ -97,6 +97,35 @@ int main(int argc, char* argv[]) {
         if (options.plot_dir_set) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, *fitter.bkg_physics_dt_model_);
         }
+
+        {
+            RooDataSet* dataset_cf =
+                static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_cf", "dataset_cf"));
+            dataset_cf->append(*fitter.dataset_FB_);
+            dataset_cf->append(*fitter.dataset_FA_);
+            fitter.Fit(fitter.bkg_physics_dt_model_, dataset_cf);
+            JSON_formatted_results += "Physics-based dt CF Parameters\n";
+            JSON_formatted_results +=
+                tools::FormatResultsJSON(fitter.bkg_physics_dt_model_, observables);
+            if (options.plot_dir_set) {
+                fitter.PlotWithPull(fitter.dt_, *dataset_cf, *fitter.bkg_physics_dt_model_);
+            }
+        }
+
+        {
+            RooDataSet* dataset_dcs =
+                static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_dcs", "dataset_dcs"));
+            dataset_dcs->append(*fitter.dataset_SB_);
+            dataset_dcs->append(*fitter.dataset_SA_);
+            fitter.Fit(fitter.bkg_physics_dt_model_, dataset_dcs);
+            JSON_formatted_results += "Physics-based dt DCS Parameters\n";
+            JSON_formatted_results +=
+                tools::FormatResultsJSON(fitter.bkg_physics_dt_model_, observables);
+            if (options.plot_dir_set) {
+                fitter.PlotWithPull(fitter.dt_, *dataset_dcs, *fitter.bkg_physics_dt_model_);
+            }
+        }
+
     } else {
         // We must plot after each fit otherwise the results printed on the plot
         // would be of the last fit
@@ -154,26 +183,30 @@ int main(int argc, char* argv[]) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_SA_, fitter.bkg_dt_model_);
         }
 
-        RooDataSet* dataset_cf = static_cast<RooDataSet*>(
-                fitter.dataset_->emptyClone("dataset_cf", "dataset_cf"));
-        dataset_cf->append(*fitter.dataset_FB_);
-        dataset_cf->append(*fitter.dataset_FA_);
-        fitter.Fit(&fitter.bkg_dt_model_, dataset_cf);
-        JSON_formatted_results += "dt cf Parameters\n";
-        JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
-        if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.dt_, *dataset_cf, fitter.bkg_dt_model_);
+        {
+            RooDataSet* dataset_cf =
+                static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_cf", "dataset_cf"));
+            dataset_cf->append(*fitter.dataset_FB_);
+            dataset_cf->append(*fitter.dataset_FA_);
+            fitter.Fit(&fitter.bkg_dt_model_, dataset_cf);
+            JSON_formatted_results += "dt cf Parameters\n";
+            JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
+            if (options.plot_dir_set) {
+                fitter.PlotWithPull(fitter.dt_, *dataset_cf, fitter.bkg_dt_model_);
+            }
         }
 
-        RooDataSet* dataset_dcs = static_cast<RooDataSet*>(
-                fitter.dataset_->emptyClone("dataset_dcs", "dataset_dcs"));
-        dataset_dcs->append(*fitter.dataset_SB_);
-        dataset_dcs->append(*fitter.dataset_SA_);
-        fitter.Fit(&fitter.bkg_dt_model_, dataset_dcs);
-        JSON_formatted_results += "dt dcs Parameters\n";
-        JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
-        if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.dt_, *dataset_dcs, fitter.bkg_dt_model_);
+        {
+            RooDataSet* dataset_dcs =
+                static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_dcs", "dataset_dcs"));
+            dataset_dcs->append(*fitter.dataset_SB_);
+            dataset_dcs->append(*fitter.dataset_SA_);
+            fitter.Fit(&fitter.bkg_dt_model_, dataset_dcs);
+            JSON_formatted_results += "dt dcs Parameters\n";
+            JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
+            if (options.plot_dir_set) {
+                fitter.PlotWithPull(fitter.dt_, *dataset_dcs, fitter.bkg_dt_model_);
+            }
         }
 
         if (options.plot_dir_set) {

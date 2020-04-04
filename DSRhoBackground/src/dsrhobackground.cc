@@ -126,38 +126,38 @@ int main(int argc, char* argv[]) {
             fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, fitter.bkg_dt_model_);
         }
 
-        fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_a_);
-        JSON_formatted_results += "dt a Parameters\n";
+        fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_FB_);
+        JSON_formatted_results += "dt FB Parameters\n";
         JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_a_, fitter.bkg_dt_model_);
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_FB_, fitter.bkg_dt_model_);
         }
 
-        fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_ab_);
-        JSON_formatted_results += "dt ab Parameters\n";
+        fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_FA_);
+        JSON_formatted_results += "dt FA Parameters\n";
         JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_ab_, fitter.bkg_dt_model_);
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_FA_, fitter.bkg_dt_model_);
         }
 
-        fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_b_);
-        JSON_formatted_results += "dt b Parameters\n";
+        fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_SB_);
+        JSON_formatted_results += "dt SB Parameters\n";
         JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_b_, fitter.bkg_dt_model_);
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_SB_, fitter.bkg_dt_model_);
         }
 
-        fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_bb_);
-        JSON_formatted_results += "dt bb Parameters\n";
+        fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_SA_);
+        JSON_formatted_results += "dt SA Parameters\n";
         JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
         if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_bb_, fitter.bkg_dt_model_);
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_SA_, fitter.bkg_dt_model_);
         }
 
         RooDataSet* dataset_cf = static_cast<RooDataSet*>(
                 fitter.dataset_->emptyClone("dataset_cf", "dataset_cf"));
-        dataset_cf->append(*fitter.dataset_a_);
-        dataset_cf->append(*fitter.dataset_ab_);
+        dataset_cf->append(*fitter.dataset_FB_);
+        dataset_cf->append(*fitter.dataset_FA_);
         fitter.Fit(&fitter.bkg_dt_model_, dataset_cf);
         JSON_formatted_results += "dt cf Parameters\n";
         JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);
@@ -167,8 +167,8 @@ int main(int argc, char* argv[]) {
 
         RooDataSet* dataset_dcs = static_cast<RooDataSet*>(
                 fitter.dataset_->emptyClone("dataset_dcs", "dataset_dcs"));
-        dataset_dcs->append(*fitter.dataset_b_);
-        dataset_dcs->append(*fitter.dataset_bb_);
+        dataset_dcs->append(*fitter.dataset_SB_);
+        dataset_dcs->append(*fitter.dataset_SA_);
         fitter.Fit(&fitter.bkg_dt_model_, dataset_dcs);
         JSON_formatted_results += "dt dcs Parameters\n";
         JSON_formatted_results += tools::FormatResultsJSON(&fitter.bkg_dt_model_, observables);

@@ -102,10 +102,10 @@ class FitterBKG {
     RooCategory* decaytype_;
 
     RooDataSet* dataset_ = nullptr;
-    RooDataSet* dataset_a_ = nullptr;
-    RooDataSet* dataset_ab_ = nullptr;
-    RooDataSet* dataset_b_ = nullptr;
-    RooDataSet* dataset_bb_ = nullptr;
+    RooDataSet* dataset_FB_ = nullptr;
+    RooDataSet* dataset_FA_ = nullptr;
+    RooDataSet* dataset_SB_ = nullptr;
+    RooDataSet* dataset_SA_ = nullptr;
 
    private:
     TH3F* ConvertDensityToHisto(AdaptiveKernelDensity pdf) const;

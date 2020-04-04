@@ -93,10 +93,10 @@ FitterBKG::FitterBKG() {
     shcosthb_ = new RooRealVar("shcosthb", "shcosthb", -1, 1);
 
     decaytype_ = new RooCategory("decaytype", "decaytype");
-    decaytype_->defineType("a", 1);
-    decaytype_->defineType("ab", 2);
-    decaytype_->defineType("b", 3);
-    decaytype_->defineType("bb", 4);
+    decaytype_->defineType("FB", 1);
+    decaytype_->defineType("FA", 2);
+    decaytype_->defineType("SB", 3);
+    decaytype_->defineType("SA", 4);
 
     // All the variables present in the ntuple are added to a vector so we can later
     // iterate through them for convenience
@@ -239,40 +239,40 @@ void FitterBKG::ReadInFile(std::vector<const char*> file_names, const int& num_e
     TString common_cuts = tools::GetCommonCutsString();
     common_cuts += "&&evmcflag!=1";
 
-    TString a_cuts;
-    TString ab_cuts;
-    TString b_cuts;
-    TString bb_cuts;
-    a_cuts = "brecflav==1&&tagqr<0";
-    ab_cuts = "brecflav==-1&&tagqr>0";
-    b_cuts = "brecflav==1&&tagqr>0";
-    bb_cuts = "brecflav==-1&&tagqr<0";
+    TString FB_cuts;
+    TString FA_cuts;
+    TString SB_cuts;
+    TString SA_cuts;
+    FB_cuts = "brecflav==1&&tagqr<0";
+    FA_cuts = "brecflav==-1&&tagqr>0";
+    SB_cuts = "brecflav==1&&tagqr>0";
+    SA_cuts = "brecflav==-1&&tagqr<0";
 
     Log::print(Log::info, "Reading %i input files...\n", file_names.size());
     dataset_ = new RooDataSet("dataset", "dataset", input_tree, dataset_vars_argset_, common_cuts);
 
-    Log::print(Log::info, "Creating a, ab, b, bb labels...\n");
+    Log::print(Log::info, "Creating FB, FA, SB, SA labels...\n");
     // We add an identifying label to each of the 4 categories and then combine it into a single
     // dataset for RooSimultaneous fitting
-    dataset_a_ = static_cast<RooDataSet*>(dataset_->reduce(a_cuts));
-    decaytype_->setLabel("a");
-    dataset_a_->addColumn(*decaytype_);
-    dataset_a_->SetName("dataset_a");
+    dataset_FB_ = static_cast<RooDataSet*>(dataset_->reduce(FB_cuts));
+    decaytype_->setLabel("FB");
+    dataset_FB_->addColumn(*decaytype_);
+    dataset_FB_->SetName("dataset_FB");
 
-    dataset_ab_ = static_cast<RooDataSet*>(dataset_->reduce(ab_cuts));
-    decaytype_->setLabel("ab");
-    dataset_ab_->addColumn(*decaytype_);
-    dataset_ab_->SetName("dataset_ab");
+    dataset_FA_ = static_cast<RooDataSet*>(dataset_->reduce(FA_cuts));
+    decaytype_->setLabel("FA");
+    dataset_FA_->addColumn(*decaytype_);
+    dataset_FA_->SetName("dataset_FA");
 
-    dataset_b_ = static_cast<RooDataSet*>(dataset_->reduce(b_cuts));
-    decaytype_->setLabel("b");
-    dataset_b_->addColumn(*decaytype_);
-    dataset_b_->SetName("dataset_b");
+    dataset_SB_ = static_cast<RooDataSet*>(dataset_->reduce(SB_cuts));
+    decaytype_->setLabel("SB");
+    dataset_SB_->addColumn(*decaytype_);
+    dataset_SB_->SetName("dataset_SB");
 
-    dataset_bb_ = static_cast<RooDataSet*>(dataset_->reduce(bb_cuts));
-    decaytype_->setLabel("bb");
-    dataset_bb_->addColumn(*decaytype_);
-    dataset_bb_->SetName("dataset_bb");
+    dataset_SA_ = static_cast<RooDataSet*>(dataset_->reduce(SA_cuts));
+    decaytype_->setLabel("SA");
+    dataset_SA_->addColumn(*decaytype_);
+    dataset_SA_->SetName("dataset_SA");
 
     data_tree = input_tree->CopyTree(common_cuts);
     delete input_tree;

@@ -61,10 +61,15 @@ void ChangeModelParameters(RooAbsPdf* pdf, const nlohmann::json& config,
                            const std::string prefix = "");
 std::string FormatResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables);
 std::string FormatResultsJSON(const RooAbsPdf* model, const RooArgSet& observables);
+nlohmann::json GetResultsJSON(const RooAbsPdf* model, const RooArgSet& observables);
+nlohmann::json GetResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables);
 void CreateDirsIfNecessary(const std::string file);
 RooLinkedList VecToCmdList(std::vector<RooCmdArg>& commands);
 TH2* ArrangeCorrelationMatrix(const TH2* matrix, std::vector<std::string> ordered_labels);
 void PlotCorrelationMatrix(const RooFitResult& result, std::vector<std::string> ordered_labels);
+
+nlohmann::json merge_json (const nlohmann::json& json1, const nlohmann::json& json2);
+double round_to_decimals(double number, int decimals);
 
 /**
  * Return a concatenation of two std::vectors

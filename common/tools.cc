@@ -10,6 +10,7 @@
 
 // Standard includes
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -876,6 +877,66 @@ std::string FormatResultsJSON(std::vector<const RooAbsPdf*> models,
 std::string FormatResultsJSON(const RooAbsPdf* model, const RooArgSet& observables) {
     std::vector<const RooAbsPdf*> models = {model};
     return FormatResultsJSON(models, observables);
+}
+
+/**
+ * Round a double to a requested number of decimals
+ */
+double round_to_decimals(double number, int decimals) {
+    const double factor = std::pow(10, decimals);
+    return std::round(number * factor)/factor;
+}
+
+/**
+ * Extract model parameters and return them as a JSON object
+ *
+ * @param model Model whose parameters are to be extracted
+ * @param observables Vars that are observables and should not be extracted as pars
+ *
+ * @return nlohmann::json The resultant JSON object
+ */
+nlohmann::json GetResultsJSON(const RooAbsPdf* model, const RooArgSet& observables) {
+    nlohmann::json json;
+
+    RooArgSet* vars = model->getVariables();
+    vars->remove(observables);
+    std::vector<RooRealVar*> vector_of_vars = ToVector<RooRealVar*>(*vars);
+    for (auto& var : vector_of_vars) {
+        json[var->GetName()] = round_to_decimals(var->getVal(), 4);
+    }
+
+    return json;
+}
+
+/**
+ * Extract parameters from multiple models and return them as a JSON object
+ *
+ * @param models Models whose parameters are to be extracted
+ * @param observables Vars that are observables and should not be extracted as pars
+ *
+ * @return nlohmann::json The resultant JSON object
+ */
+nlohmann::json GetResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables) {
+    nlohmann::json json;
+    for (auto& model : models) {
+        nlohmann::json model_json = GetResultsJSON(model, observables);
+        json = merge_json(json, model_json);
+    }
+    return json;
+}
+
+/**
+ * Merge two JSON arrays and return the result
+ */
+nlohmann::json merge_json (const nlohmann::json& json1, const nlohmann::json& json2) {
+    nlohmann::json result = json1.flatten();
+    nlohmann::json tmp = json2.flatten();
+
+    for (nlohmann::json::iterator it = tmp.begin(); it != tmp.end(); ++it) {
+        result[it.key()] = it.value();
+    }
+
+    return result.unflatten();
 }
 
 /**

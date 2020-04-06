@@ -423,17 +423,8 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
 
     data.plotOn(plot);
 
-    // Renormalization required for certain plots, when using multiple CPUs but
-    // not with a single CPU; possible RooFit bug
-    // TODO: Figure out if this is indeed a bug
-    double norm = 1;
-    if (!name.Contains("hist") && numCPUs > 1) {
-        norm = 1.0 / data.numEntries();
-    }
-
     options.push_back(RooFit::ProjWData(projection_vars, data, kFALSE));
     options.push_back(RooFit::NumCPU(numCPUs));
-    options.push_back(RooFit::Normalization(norm));
 
     if (components.size() > 1) {
         // Plot components before the total PDF as the pull plots are made from the

@@ -16,10 +16,12 @@
     "modelParameters": {
         "substitute": [
             {
-                "file": "../../../DSRhoBackground/results/together_data_sidebands.json"
+                "file": "../../../DSRhoBackground/results/together_data_sidebands.json",
+                "include": ["phys_dt_model", "phys_dt_cf_model", "phys_dt_dcs_model"]
             },
             {
                 "file": "../../../DSRhoBackground/results/together_mc_scf.json",
+                "include": ["phys_dt_model", "phys_dt_cf_model", "phys_dt_dcs_model"],
                 "replace": ["bkg", "scf"]
             }
         ],

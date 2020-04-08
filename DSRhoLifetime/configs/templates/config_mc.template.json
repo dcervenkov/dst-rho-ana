@@ -16,7 +16,8 @@
     "modelParameters": {
         "substitute": [
             {
-                "file": "../../../DSRhoBackground/results/together_mc_bkg.json"
+                "file": "../../../DSRhoBackground/results/together_mc_bkg.json",
+                "include": ["phys_dt_model", "phys_dt_cf_model", "phys_dt_dcs_model"]
             }
         ]
     },
@@ -26,6 +27,7 @@
                 "substitute": [
                     {
                         "file": "../../../DSRhoBackground/results/Kpi_mc_scf.json",
+                        "include": ["phys_dt_model", "phys_dt_cf_model", "phys_dt_dcs_model"],
                         "replace": ["bkg", "scf"]
                     },
                     {
@@ -39,6 +41,7 @@
                 "substitute": [
                     {
                         "file": "../../../DSRhoBackground/results/Kpipi0_mc_scf.json",
+                        "include": ["phys_dt_model", "phys_dt_cf_model", "phys_dt_dcs_model"],
                         "replace": ["bkg", "scf"]
                     },
                     {
@@ -52,6 +55,7 @@
                 "substitute": [
                     {
                         "file": "../../../DSRhoBackground/results/K3pi_mc_scf.json",
+                        "include": ["phys_dt_model", "phys_dt_cf_model", "phys_dt_dcs_model"],
                         "replace": ["bkg", "scf"]
                     },
                     {

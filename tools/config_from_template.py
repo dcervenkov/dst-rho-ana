@@ -54,7 +54,7 @@ def replace_key_substring(dictionary, old, new):
             dictionary[key.replace(old, new)] = dictionary.pop(key)
             if type(dictionary[key.replace(old, new)]) is dict:
                 dictionary[key.replace(old, new)] = replace_key_substring(
-                    dictionary, old, new)
+                    dictionary[key.replace(old, new)], old, new)
 
     return dictionary
 
@@ -67,7 +67,7 @@ def substitute_files(dictionary, from_dir):
     """
     for key, value in dictionary.copy().items():
         if isinstance(value, dict):
-            substitute_files(value, from_dir)
+            value = substitute_files(value, from_dir)
         if key == 'substitute':
             del dictionary[key]
             for substitution in value:

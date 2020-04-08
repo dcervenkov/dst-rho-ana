@@ -882,7 +882,7 @@ std::string FormatResultsJSON(const RooAbsPdf* model, const RooArgSet& observabl
 /**
  * Round a double to a requested number of decimals
  */
-double round_to_decimals(double number, int decimals) {
+double RoundToDecimals(double number, int decimals) {
     const double factor = std::pow(10, decimals);
     return std::round(number * factor)/factor;
 }
@@ -895,14 +895,16 @@ double round_to_decimals(double number, int decimals) {
  *
  * @return nlohmann::json The resultant JSON object
  */
-nlohmann::json GetResultsJSON(const RooAbsPdf* model, const RooArgSet& observables) {
+nlohmann::json GetResultsJSON(const RooAbsPdf* model, const RooArgSet& observables,
+                              std::string prefix) {
     nlohmann::json json;
 
     RooArgSet* vars = model->getVariables();
     vars->remove(observables);
     std::vector<RooRealVar*> vector_of_vars = ToVector<RooRealVar*>(*vars);
     for (auto& var : vector_of_vars) {
-        json[var->GetName()] = round_to_decimals(var->getVal(), 4);
+        std::string name = prefix + var->GetName();
+        json[name] = RoundToDecimals(var->getVal(), 4);
     }
 
     return json;
@@ -916,11 +918,12 @@ nlohmann::json GetResultsJSON(const RooAbsPdf* model, const RooArgSet& observabl
  *
  * @return nlohmann::json The resultant JSON object
  */
-nlohmann::json GetResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables) {
+nlohmann::json GetResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables,
+                              std::string prefix) {
     nlohmann::json json;
     for (auto& model : models) {
-        nlohmann::json model_json = GetResultsJSON(model, observables);
-        json = merge_json(json, model_json);
+        nlohmann::json model_json = GetResultsJSON(model, observables, prefix);
+        json = MergeJSON(json, model_json);
     }
     return json;
 }
@@ -928,7 +931,7 @@ nlohmann::json GetResultsJSON(std::vector<const RooAbsPdf*> models, const RooArg
 /**
  * Merge two JSON arrays and return the result
  */
-nlohmann::json merge_json (const nlohmann::json& json1, const nlohmann::json& json2) {
+nlohmann::json MergeJSON (const nlohmann::json& json1, const nlohmann::json& json2) {
     nlohmann::json result = json1.flatten();
     nlohmann::json tmp = json2.flatten();
 

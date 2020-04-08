@@ -156,31 +156,10 @@ FitterBKG::FitterBKG() {
 
     num_CPUs_ = 1;
 
-    model_parameters_.push_back(&bkg_dt_voigt_mu_);
-    model_parameters_.push_back(&bkg_dt_voigt_sigma_);
-    model_parameters_.push_back(&bkg_dt_voigt_width_);
-    model_parameters_.push_back(&bkg_dt_gaus_mu_);
-    model_parameters_.push_back(&bkg_dt_gaus_sigma_);
-    model_parameters_.push_back(&bkg_dt_f_);
-
-    model_parameters_.push_back(&bkg_phit_poly_p2_);
-    model_parameters_.push_back(&bkg_phit_f_);
-    model_parameters_.push_back(&bkg_phit_offset_);
-
-    model_parameters_.push_back(&bkg_thetat_p2_);
-    model_parameters_.push_back(&bkg_thetat_p4_);
-    model_parameters_.push_back(&bkg_thetat_p6_);
-
-    model_parameters_.push_back(&bkg_thetab_gaus_mu_);
-    model_parameters_.push_back(&bkg_thetab_gaus_sigma_l_);
-    model_parameters_.push_back(&bkg_thetab_gaus_sigma_r_);
-    model_parameters_.push_back(&bkg_thetab_exp_alpha_);
-    model_parameters_.push_back(&bkg_thetab_f_);
-
-    bkg_physics_dt_model_ =
-        new DtBKG("bkg_physics_dt_model", "bkg_physics_dt_model", dt_, *vrerr6_, *vterr6_,
-                  bkg_dt_tau_, bkg_dt_f_delta_, bkg_dt_mu_delta_, bkg_dt_mu_lifetime_,
-                  bkg_dt_f_tail_, bkg_dt_S_main_, bkg_dt_S_tail_);
+    physics_dt_model_ =
+        new DtBKG("physics_dt_model", "physics_dt_model", dt_, *vrerr6_, *vterr6_,
+                  dt_tau_, dt_f_delta_, dt_mu_delta_, dt_mu_lifetime_,
+                  dt_f_tail_, dt_S_main_, dt_S_tail_);
 }
 
 FitterBKG::~FitterBKG() {
@@ -514,10 +493,10 @@ void FitterBKG::PlotKDE(AdaptiveKernelDensity kde) const {
  * Disable certain parts of the physics-based PDF
  */
 void FitterBKG::SetNoDeltaPDF() {
-    bkg_dt_f_delta_ = 0;
-    bkg_dt_f_delta_.setConstant();
-    bkg_dt_mu_delta_ = 0;
-    bkg_dt_mu_delta_.setConstant();
+    dt_f_delta_ = 0;
+    dt_f_delta_.setConstant();
+    dt_mu_delta_ = 0;
+    dt_mu_delta_.setConstant();
 }
 
 
@@ -525,8 +504,8 @@ void FitterBKG::SetNoDeltaPDF() {
  * Disable certain parts of the physics-based PDF
  */
 void FitterBKG::SetNoTailPDF() {
-    bkg_dt_f_tail_ = 0;
-    bkg_dt_f_tail_.setConstant();
-    bkg_dt_S_tail_ = 0;
-    bkg_dt_S_tail_.setConstant();
+    dt_f_tail_ = 0;
+    dt_f_tail_.setConstant();
+    dt_S_tail_ = 0;
+    dt_S_tail_.setConstant();
 }

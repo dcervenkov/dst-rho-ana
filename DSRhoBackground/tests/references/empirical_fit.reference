@@ -16,27 +16,27 @@
     "bkg_thetat_p6": -1.0
   },
   "emp_dt_cf_model": {
-    "bkg_dt_f": 0.6656,
-    "bkg_dt_gaus_mu": -0.6656,
-    "bkg_dt_gaus_sigma_": 0.5431,
-    "bkg_dt_voigt_mu": 0.4982,
-    "bkg_dt_voigt_sigma_": 2.6269,
-    "bkg_dt_voigt_width_": 0.0
+    "bkg_cf_dt_f": 0.6656,
+    "bkg_cf_dt_gaus_mu": -0.6656,
+    "bkg_cf_dt_gaus_sigma": 0.5431,
+    "bkg_cf_dt_voigt_mu": 0.4982,
+    "bkg_cf_dt_voigt_sigma": 2.6269,
+    "bkg_cf_dt_voigt_width": 0.0
   },
   "emp_dt_dcs_model": {
-    "bkg_dt_f": 0.6399,
-    "bkg_dt_gaus_mu": 0.9999,
-    "bkg_dt_gaus_sigma_": 0.8319,
-    "bkg_dt_voigt_mu": -0.8938,
-    "bkg_dt_voigt_sigma_": 0.084,
-    "bkg_dt_voigt_width_": 4.0451
+    "bkg_dcs_dt_f": 0.6399,
+    "bkg_dcs_dt_gaus_mu": 0.9999,
+    "bkg_dcs_dt_gaus_sigma": 0.8319,
+    "bkg_dcs_dt_voigt_mu": -0.8938,
+    "bkg_dcs_dt_voigt_sigma": 0.084,
+    "bkg_dcs_dt_voigt_width": 4.0451
   },
   "emp_dt_model": {
     "bkg_dt_f": 0.3171,
     "bkg_dt_gaus_mu": -0.2591,
-    "bkg_dt_gaus_sigma_": 1.4959,
+    "bkg_dt_gaus_sigma": 1.4959,
     "bkg_dt_voigt_mu": 0.8679,
-    "bkg_dt_voigt_sigma_": 2.6796,
-    "bkg_dt_voigt_width_": 3.4233
+    "bkg_dt_voigt_sigma": 2.6796,
+    "bkg_dt_voigt_width": 3.4233
   }
 }

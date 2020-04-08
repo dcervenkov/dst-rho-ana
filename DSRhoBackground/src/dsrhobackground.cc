@@ -91,10 +91,11 @@ int main(int argc, char* argv[]) {
             fitter.SetNoTailPDF();
         }
 
-        fitter.Fit(fitter.bkg_physics_dt_model_, fitter.dataset_);
-        json_results["phys_dt_model"] = tools::GetResultsJSON(fitter.bkg_physics_dt_model_, observables);
+        fitter.Fit(fitter.physics_dt_model_, fitter.dataset_);
+        json_results["phys_dt_model"] =
+            tools::GetResultsJSON(fitter.physics_dt_model_, observables, "bkg_");
         if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, *fitter.bkg_physics_dt_model_);
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, *fitter.physics_dt_model_);
         }
 
         {
@@ -102,10 +103,11 @@ int main(int argc, char* argv[]) {
                 static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_cf", "dataset_cf"));
             dataset_cf->append(*fitter.dataset_FB_);
             dataset_cf->append(*fitter.dataset_FA_);
-            fitter.Fit(fitter.bkg_physics_dt_model_, dataset_cf);
-            json_results["phys_dt_cf_model"] = tools::GetResultsJSON(fitter.bkg_physics_dt_model_, observables);
+            fitter.Fit(fitter.physics_dt_model_, dataset_cf);
+            json_results["phys_dt_cf_model"] =
+                tools::GetResultsJSON(fitter.physics_dt_model_, observables, "bkg_cf_");
             if (options.plot_dir_set) {
-                fitter.PlotWithPull(fitter.dt_, *dataset_cf, *fitter.bkg_physics_dt_model_);
+                fitter.PlotWithPull(fitter.dt_, *dataset_cf, *fitter.physics_dt_model_);
             }
         }
 
@@ -114,38 +116,39 @@ int main(int argc, char* argv[]) {
                 static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_dcs", "dataset_dcs"));
             dataset_dcs->append(*fitter.dataset_SB_);
             dataset_dcs->append(*fitter.dataset_SA_);
-            fitter.Fit(fitter.bkg_physics_dt_model_, dataset_dcs);
-            json_results["phys_dt_dcs_model"] = tools::GetResultsJSON(fitter.bkg_physics_dt_model_, observables);
+            fitter.Fit(fitter.physics_dt_model_, dataset_dcs);
+            json_results["phys_dt_dcs_model"] =
+                tools::GetResultsJSON(fitter.physics_dt_model_, observables, "bkg_dcs_");
             if (options.plot_dir_set) {
-                fitter.PlotWithPull(fitter.dt_, *dataset_dcs, *fitter.bkg_physics_dt_model_);
+                fitter.PlotWithPull(fitter.dt_, *dataset_dcs, *fitter.physics_dt_model_);
             }
         }
 
     } else {
         // We must plot after each fit otherwise the results printed on the plot
         // would be of the last fit
-        fitter.Fit(&fitter.bkg_phit_model_, fitter.dataset_);
+        fitter.Fit(&fitter.phit_model_, fitter.dataset_);
         if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.phit_, *fitter.dataset_, fitter.bkg_phit_model_);
+            fitter.PlotWithPull(fitter.phit_, *fitter.dataset_, fitter.phit_model_);
         }
 
-        fitter.Fit(&fitter.bkg_thetat_model_, fitter.dataset_);
+        fitter.Fit(&fitter.thetat_model_, fitter.dataset_);
         if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.thetat_, *fitter.dataset_, fitter.bkg_thetat_model_);
+            fitter.PlotWithPull(fitter.thetat_, *fitter.dataset_, fitter.thetat_model_);
         }
 
         std::vector<const RooAbsPdf*> angular_pdfs = {
-            &fitter.bkg_thetab_model_, &fitter.bkg_thetat_model_, &fitter.bkg_phit_model_};
-        fitter.Fit(&fitter.bkg_thetab_model_, fitter.dataset_);
-        json_results["angular_pdf"] = tools::GetResultsJSON(angular_pdfs, observables);
+            &fitter.thetab_model_, &fitter.thetat_model_, &fitter.phit_model_};
+        fitter.Fit(&fitter.thetab_model_, fitter.dataset_);
+        json_results["angular_pdf"] = tools::GetResultsJSON(angular_pdfs, observables, "bkg_");
         if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.thetab_, *fitter.dataset_, fitter.bkg_thetab_model_);
+            fitter.PlotWithPull(fitter.thetab_, *fitter.dataset_, fitter.thetab_model_);
         }
 
-        fitter.Fit(&fitter.bkg_dt_model_, fitter.dataset_);
-        json_results["emp_dt_model"] = tools::GetResultsJSON(&fitter.bkg_dt_model_, observables);
+        fitter.Fit(&fitter.dt_model_, fitter.dataset_);
+        json_results["emp_dt_model"] = tools::GetResultsJSON(&fitter.dt_model_, observables, "bkg_");
         if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, fitter.bkg_dt_model_);
+            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, fitter.dt_model_);
         }
 
         {
@@ -153,10 +156,10 @@ int main(int argc, char* argv[]) {
                 static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_cf", "dataset_cf"));
             dataset_cf->append(*fitter.dataset_FB_);
             dataset_cf->append(*fitter.dataset_FA_);
-            fitter.Fit(&fitter.bkg_dt_model_, dataset_cf);
-            json_results["emp_dt_cf_model"] = tools::GetResultsJSON(&fitter.bkg_dt_model_, observables);
+            fitter.Fit(&fitter.dt_model_, dataset_cf);
+            json_results["emp_dt_cf_model"] = tools::GetResultsJSON(&fitter.dt_model_, observables, "bkg_cf_");
             if (options.plot_dir_set) {
-                fitter.PlotWithPull(fitter.dt_, *dataset_cf, fitter.bkg_dt_model_);
+                fitter.PlotWithPull(fitter.dt_, *dataset_cf, fitter.dt_model_);
             }
         }
 
@@ -165,10 +168,10 @@ int main(int argc, char* argv[]) {
                 static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_dcs", "dataset_dcs"));
             dataset_dcs->append(*fitter.dataset_SB_);
             dataset_dcs->append(*fitter.dataset_SA_);
-            fitter.Fit(&fitter.bkg_dt_model_, dataset_dcs);
-            json_results["emp_dt_dcs_model"] = tools::GetResultsJSON(&fitter.bkg_dt_model_, observables);
+            fitter.Fit(&fitter.dt_model_, dataset_dcs);
+            json_results["emp_dt_dcs_model"] = tools::GetResultsJSON(&fitter.dt_model_, observables, "bkg_dcs_");
             if (options.plot_dir_set) {
-                fitter.PlotWithPull(fitter.dt_, *dataset_dcs, fitter.bkg_dt_model_);
+                fitter.PlotWithPull(fitter.dt_, *dataset_dcs, fitter.dt_model_);
             }
         }
 
@@ -179,8 +182,8 @@ int main(int argc, char* argv[]) {
 
             RooProdPdf* bkg_pdf =
                 new RooProdPdf("bkg_pdf", "bkg_pdf",
-                                RooArgList(fitter.bkg_thetat_model_, fitter.bkg_thetab_model_,
-                                            fitter.bkg_phit_model_));
+                                RooArgList(fitter.thetat_model_, fitter.thetab_model_,
+                                           fitter.phit_model_));
 
             RooDataHist* pdf_hist = bkg_pdf->generateBinned(RooArgSet(fitter.thetat_,
             fitter.thetab_, fitter.phit_), fitter.dataset_->numEntries(), true);

@@ -213,19 +213,19 @@ void FitterLifetime::ProcessMixing() {
     mixing_pdfs_S.add(*cr_mixing_pdf_S);
 
     if (scf_) {
-        RooAbsPdf* scf_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_cf")
-                                                     : CreateVoigtGaussDtPdf("scf_dt_cf"));
-        RooAbsPdf* scf_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dt_dcs")
-                                                     : CreateVoigtGaussDtPdf("scf_dt_dcs"));
+        RooAbsPdf* scf_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_cf_dt")
+                                                     : CreateVoigtGaussDtPdf("scf_cf_dt"));
+        RooAbsPdf* scf_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dcs_dt")
+                                                     : CreateVoigtGaussDtPdf("scf_dcs_dt"));
         mixing_pdfs_F.add(*scf_dt_pdf_F);
         mixing_pdfs_S.add(*scf_dt_pdf_S);
     }
 
     if (bkg_) {
-        RooAbsPdf* bkg_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dt_cf")
-                                                     : CreateVoigtGaussDtPdf("bkg_dt_cf"));
-        RooAbsPdf* bkg_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dt_dcs")
-                                                     : CreateVoigtGaussDtPdf("bkg_dt_dcs"));
+        RooAbsPdf* bkg_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_cf_dt")
+                                                     : CreateVoigtGaussDtPdf("bkg_cf_dt"));
+        RooAbsPdf* bkg_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("bkg_dcs_dt")
+                                                     : CreateVoigtGaussDtPdf("bkg_dcs_dt"));
         mixing_pdfs_F.add(*bkg_dt_pdf_F);
         mixing_pdfs_S.add(*bkg_dt_pdf_S);
     }

@@ -198,12 +198,12 @@ void FitterLifetime::ProcessLifetime() {
 void FitterLifetime::ProcessMixing() {
 
     DtPDF* cr_mixing_pdf_F =
-        new DtPDF("cr_mixing_pdf_F", "cr_mixing_pdf_F", true, perfect_tagging_, *tagwtag_,
+        new DtPDF("cr_mixing_pdf_F", "CR", true, perfect_tagging_, *tagwtag_,
                   *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
                   *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
 
     DtPDF* cr_mixing_pdf_S =
-        new DtPDF("cr_mixing_pdf_S", "cr_mixing_pdf_S", false, perfect_tagging_, *tagwtag_,
+        new DtPDF("cr_mixing_pdf_S", "CR", false, perfect_tagging_, *tagwtag_,
                   *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
                   *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
 
@@ -436,7 +436,16 @@ RooAbsPdf* FitterLifetime::CreatePhysicsBkgDtPdf(const std::string prefix) const
     RooRealVar* S_main = new RooRealVar(pre + "_S_main", "S_{m}", 1);
     RooRealVar* S_tail = new RooRealVar(pre + "_S_tail", "S_{t}", 1);
 
-    DtBKG* model = new DtBKG(pre + "model", pre + "model", *dt_, *vrerr6_, *vterr6_, *tau, *f_delta,
+    TString title;
+    if (prefix.find("scf") != std::string::npos) {
+        title = "SCF";
+    } else if (prefix.find("bkg") != std::string::npos) {
+        title = "BKG";
+    } else {
+        title = pre + "model";
+    }
+
+    DtBKG* model = new DtBKG(pre + "model", title, *dt_, *vrerr6_, *vterr6_, *tau, *f_delta,
                              *mu_delta, *mu_lifetime, *f_tail, *S_main, *S_tail);
 
     return model;
@@ -470,7 +479,7 @@ nlohmann::json FitterLifetime::ReadInJSONFile(const char* filename) const {
 RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components, const bool scf,
                                              const bool bkg, const bool physical_pdf) const {
     DtPDF* lifetime_cp_pdf =
-        new DtPDF("lifetime_cp_pdf", "lifetime_cp_pdf", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
+        new DtPDF("lifetime_cp_pdf", "CR", *dt_, *tau_, *expmc_, *expno_, *shcosthb_,
                   *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_,
                   *vtchi2_, *vtndf_, *vtistagl_);
 

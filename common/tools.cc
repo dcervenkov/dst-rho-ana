@@ -184,6 +184,34 @@ TPaveText* CreateStatBox(double chi2, int ndof, const RooArgList& results, bool 
 }
 
 /**
+ * Create a Legend Box object from supplied component PDFs.
+ *
+ * @param components A vector of components that were plotted.
+ * @return TLegend* The legend that can be Draw() on the canvas.
+ */
+TLegend* CreateLegendBox(const std::vector<RooAbsPdf*> components) {
+    double x_left, x_right, y_bottom, y_top;
+    const double line_height = 0.08;
+
+    y_top = 0.9;
+    y_bottom = y_top - components.size() * line_height;
+
+    x_left = 0.76;
+    x_right = 0.99;
+
+    TLegend* legend = new TLegend(x_left, y_bottom, x_right, y_top);
+    legend->SetFillStyle(0);
+    legend->SetLineStyle(0);
+    legend->SetBorderSize(0);
+    legend->SetTextFont(43);
+    legend->SetTextSize(16);
+    for (auto component : components) {
+        legend->AddEntry(component->GetTitle(), component->GetTitle(), "F");
+    }
+    return legend;
+}
+
+/**
  * Make a simple plot of a variable and save it to a file.
  *
  * NOTE: @var can't be const (without const_cast) because of dumb RooFit design
@@ -442,6 +470,7 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
             component_options.push_back(RooFit::VLines());
             RooArgSet set(*component);
             component_options.push_back(RooFit::Components(set));
+            component_options.push_back(RooFit::Name(component->GetTitle()));
 
             std::vector<RooCmdArg> all_options = AddVectors(options, component_options);
             RooLinkedList roo_options = VecToCmdList(all_options);
@@ -463,6 +492,12 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     plot->GetYaxis()->SetTitle(title.c_str());
     plot->GetYaxis()->SetTitleOffset(1.60);
     plot->Draw();
+
+    TLegend* legend = nullptr;
+    if (components.size() > 1) {
+        legend = CreateLegendBox(components);
+        legend->Draw();
+    }
 
     // This is not an OK way of calculating ndof - e.g., in a case where the PDF
     // is defined only on a subset of the var range, or there are empty bins,

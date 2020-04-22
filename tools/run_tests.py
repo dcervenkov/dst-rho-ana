@@ -82,11 +82,16 @@ def run_test(config):
     reference_result = ""
     current_result = ""
 
+    if not os.path.exists(config['comparison_file']):
+        print(RED_CODE + "Test failed to create comparison file!" + RESET_CODE)
+        delete_files(config['temporary_files'])
+        return 3, name, elapsed
+
     if os.path.exists("references/" + name + ".reference"):
         with open("references/" + name + ".reference", "r") as f:
             reference_result = f.read()
     else:
-        print(YELLOW_CODE + "The result does NOT have a reference result!" + RESET_CODE)
+        print(YELLOW_CODE + "Test does NOT have a reference result!" + RESET_CODE)
         os.rename(config['comparison_file'], name + ".result")
         delete_files(config['temporary_files'])
         return 2, name, elapsed
@@ -95,7 +100,7 @@ def run_test(config):
         current_result = f.read()
 
     if return_code == 0 and reference_result == current_result:
-        print(GREEN_CODE + "The result matches the reference result." + RESET_CODE)
+        print(GREEN_CODE + "Result matches reference result." + RESET_CODE)
         os.remove(config['comparison_file'])
         # Delete results from previous failed runs if it now works
         if os.path.exists(name + ".result"):
@@ -103,7 +108,7 @@ def run_test(config):
         delete_files(config['temporary_files'])
         return 0, name, elapsed
     else:
-        print(RED_CODE + "The result does NOT match the reference result!" + RESET_CODE)
+        print(RED_CODE + "Result does NOT match reference result!" + RESET_CODE)
         os.rename(config['comparison_file'], name + ".result")
         delete_files(config['temporary_files'])
         return 1, name, elapsed
@@ -128,8 +133,11 @@ def print_results_table(results):
         elif result[0] == 2:
             result_str = YELLOW_CODE + "N/A" + RESET_CODE
             num_failed += 1
-        else:
+        elif result[0] == 1:
             result_str = RED_CODE + "FAIL" + RESET_CODE
+            num_failed += 1
+        else:
+            result_str = RED_CODE + "ERR " + RESET_CODE
             num_failed += 1
 
         # The padding is 13 because python counts the ANSI escape sequences as chars

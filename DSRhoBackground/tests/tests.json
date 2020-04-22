@@ -2,11 +2,23 @@
     "command": "./DSRhoBackground",
     "comparison_file": "current_result",
     "tests": {
+        "angular_fit": [
+            "--angular",
+            "tests/current_result",
+            "tests/data/signalMC.root"
+        ],
         "empirical_fit": [
+            "--empirical",
             "tests/current_result",
             "tests/data/signalMC.root"
         ],
         "physics_fit": [
+            "--physics",
+            "tests/current_result",
+            "tests/data/signalMC.root"
+        ],
+        "angular_physics_fit": [
+            "--angular",
             "--physics",
             "tests/current_result",
             "tests/data/signalMC.root"

@@ -81,130 +81,31 @@ int main(int argc, char* argv[]) {
         fitter.phit_.setBins(50);
         AdaptiveKernelDensity kde = fitter.CreateKDEPDF(fitter.dataset_, results_file);
         fitter.PlotKDE(kde);
-    } else if (options.histo) {
+    }
+    if (options.histo) {
         fitter.CreateHistoPDF(fitter.dataset_, results_file);
-    } else if (options.physics) {
-        if (options.nodelta) {
-            fitter.SetNoDeltaPDF();
-        }
+    }
+    if (options.physics) {
         if (options.notail) {
             fitter.SetNoTailPDF();
         }
-
-        fitter.Fit(fitter.physics_dt_model_, fitter.dataset_);
-        json_results["phys_dt_model"] =
-            tools::GetResultsJSON(fitter.physics_dt_model_, observables, "bkg_");
-        if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, *fitter.physics_dt_model_);
+        if (options.nodelta) {
+            fitter.SetNoDeltaPDF();
         }
-
-        {
-            RooDataSet* dataset_cf =
-                static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_cf", "dataset_cf"));
-            dataset_cf->append(*fitter.dataset_FB_);
-            dataset_cf->append(*fitter.dataset_FA_);
-            fitter.Fit(fitter.physics_dt_model_, dataset_cf);
-            json_results["phys_dt_cf_model"] =
-                tools::GetResultsJSON(fitter.physics_dt_model_, observables, "bkg_cf_");
-            if (options.plot_dir_set) {
-                fitter.PlotWithPull(fitter.dt_, *dataset_cf, *fitter.physics_dt_model_);
-            }
-        }
-
-        {
-            RooDataSet* dataset_dcs =
-                static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_dcs", "dataset_dcs"));
-            dataset_dcs->append(*fitter.dataset_SB_);
-            dataset_dcs->append(*fitter.dataset_SA_);
-            fitter.Fit(fitter.physics_dt_model_, dataset_dcs);
-            json_results["phys_dt_dcs_model"] =
-                tools::GetResultsJSON(fitter.physics_dt_model_, observables, "bkg_dcs_");
-            if (options.plot_dir_set) {
-                fitter.PlotWithPull(fitter.dt_, *dataset_dcs, *fitter.physics_dt_model_);
-            }
-        }
-
-    } else {
-        // We must plot after each fit otherwise the results printed on the plot
-        // would be of the last fit
-        fitter.Fit(&fitter.phit_model_, fitter.dataset_);
-        if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.phit_, *fitter.dataset_, fitter.phit_model_);
-        }
-
-        fitter.Fit(&fitter.thetat_model_, fitter.dataset_);
-        if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.thetat_, *fitter.dataset_, fitter.thetat_model_);
-        }
-
-        std::vector<const RooAbsPdf*> angular_pdfs = {
-            &fitter.thetab_model_, &fitter.thetat_model_, &fitter.phit_model_};
-        fitter.Fit(&fitter.thetab_model_, fitter.dataset_);
-        json_results["angular_pdf"] = tools::GetResultsJSON(angular_pdfs, observables, "bkg_");
-        if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.thetab_, *fitter.dataset_, fitter.thetab_model_);
-        }
-
-        fitter.Fit(&fitter.dt_model_, fitter.dataset_);
-        json_results["emp_dt_model"] = tools::GetResultsJSON(&fitter.dt_model_, observables, "bkg_");
-        if (options.plot_dir_set) {
-            fitter.PlotWithPull(fitter.dt_, *fitter.dataset_, fitter.dt_model_);
-        }
-
-        {
-            RooDataSet* dataset_cf =
-                static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_cf", "dataset_cf"));
-            dataset_cf->append(*fitter.dataset_FB_);
-            dataset_cf->append(*fitter.dataset_FA_);
-            fitter.Fit(&fitter.dt_model_, dataset_cf);
-            json_results["emp_dt_cf_model"] = tools::GetResultsJSON(&fitter.dt_model_, observables, "bkg_cf_");
-            if (options.plot_dir_set) {
-                fitter.PlotWithPull(fitter.dt_, *dataset_cf, fitter.dt_model_);
-            }
-        }
-
-        {
-            RooDataSet* dataset_dcs =
-                static_cast<RooDataSet*>(fitter.dataset_->emptyClone("dataset_dcs", "dataset_dcs"));
-            dataset_dcs->append(*fitter.dataset_SB_);
-            dataset_dcs->append(*fitter.dataset_SA_);
-            fitter.Fit(&fitter.dt_model_, dataset_dcs);
-            json_results["emp_dt_dcs_model"] = tools::GetResultsJSON(&fitter.dt_model_, observables, "bkg_dcs_");
-            if (options.plot_dir_set) {
-                fitter.PlotWithPull(fitter.dt_, *dataset_dcs, fitter.dt_model_);
-            }
-        }
-
-        if (options.plot_dir_set) {
-            fitter.thetat_.setBins(50);
-            fitter.thetab_.setBins(50);
-            fitter.phit_.setBins(50);
-
-            RooProdPdf* bkg_pdf =
-                new RooProdPdf("bkg_pdf", "bkg_pdf",
-                                RooArgList(fitter.thetat_model_, fitter.thetab_model_,
-                                           fitter.phit_model_));
-
-            RooDataHist* pdf_hist = bkg_pdf->generateBinned(RooArgSet(fitter.thetat_,
-            fitter.thetab_, fitter.phit_), fitter.dataset_->numEntries(), true);
-
-            RooDataHist data_hist("data_hist", "data_hist",
-                            RooArgSet(fitter.thetat_, fitter.thetab_, fitter.phit_),
-                            *fitter.dataset_);
-
-            tools::PlotVars2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, "",
-            constants::format); tools::PlotVars2D(fitter.thetat_, fitter.phit_, data_hist,
-            *pdf_hist, "", constants::format); tools::PlotVars2D(fitter.thetab_,
-            fitter.phit_, data_hist, *pdf_hist, "", constants::format);
-
-            tools::PlotPull2D(fitter.thetat_, fitter.thetab_, data_hist, *pdf_hist, "",
-            constants::format, true); tools::PlotPull2D(fitter.thetat_, fitter.phit_,
-            data_hist, *pdf_hist, "", constants::format, true);
-            tools::PlotPull2D(fitter.thetab_, fitter.phit_, data_hist, *pdf_hist, "",
-            constants::format, true);
-        }
-
+        nlohmann::json local_results =
+            fitter.FitDt(fitter.physics_dt_model_, "phys_", options.plot_dir_set);
+        json_results = tools::MergeJSON(json_results, local_results);
     }
+    if (options.empirical) {
+        nlohmann::json local_results =
+            fitter.FitDt(&fitter.dt_model_, "emp_", options.plot_dir_set);
+        json_results = tools::MergeJSON(json_results, local_results);
+    }
+    if (options.angular) {
+        nlohmann::json local_results = fitter.FitAngular(options.plot_dir_set);
+        json_results = tools::MergeJSON(json_results, local_results);
+    }
+
     // Save formatted results to file
     if (json_results.size()) {
         std::cout << json_results.dump(2) << std::endl;
@@ -236,6 +137,8 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
                                     {"kde", no_argument, 0, 'k'},
                                     {"histo", no_argument, 0, 's'},
+                                    {"angular", no_argument, 0, 'a'},
+                                    {"empirical", no_argument, 0, 'e'},
                                     {"plot-dir", required_argument, 0, 'p'},
                                     {"physics", no_argument, 0, 'y'},
                                     {"nodelta", no_argument, 0, 'd'},
@@ -244,7 +147,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:p:ksydtvh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:p:kaesydtvh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -265,6 +168,12 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 options.plot_dir = optarg;
                 options.plot_dir_set = true;
                 break;
+            case 'a':
+                options.angular = true;
+                break;
+            case 'e':
+                options.empirical = true;
+                break;
             case 'y':
                 options.physics = true;
                 break;
@@ -284,6 +193,8 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-c, --cpus=NUM_CPUS       number of CPU cores to use for fitting and plotting\n");
                 printf("-k, --kde                 use kernel density estimation\n");
                 printf("-s, --histo               create a histogram PDF\n");
+                printf("-a, --angular             fit angular PDFs\n");
+                printf("-e, --empirical           fit empirical dt PDFs\n");
                 printf("-y, --physics             fit physics-based dt PDF\n");
                 printf("-d, --nodelta             disable certain parts of physics-based PDF\n");
                 printf("-t, --notail              disable certain parts of physics-based PDF\n");

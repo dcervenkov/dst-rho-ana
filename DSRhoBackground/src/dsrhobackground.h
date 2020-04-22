@@ -13,6 +13,8 @@
 struct fitter_options {
     bool KDE;
     bool histo;
+    bool angular;
+    bool empirical;
     bool physics;
     bool nodelta;
     bool notail;

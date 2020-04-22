@@ -499,7 +499,6 @@ void FitterBKG::SetNoDeltaPDF() {
     dt_mu_delta_.setConstant();
 }
 
-
 /**
  * Disable certain parts of the physics-based PDF
  */
@@ -508,4 +507,118 @@ void FitterBKG::SetNoTailPDF() {
     dt_f_tail_.setConstant();
     dt_S_tail_ = 0;
     dt_S_tail_.setConstant();
+}
+
+/**
+ * Fit (and plot) a Delta t model
+ *
+ * @param nodelta Don't include delta function term in PDF
+ * @param notail Don't include resolution tail term in PDF
+ * @param plot Create plots
+ *
+ * @return nlohmann::json Fitted parameters and values
+ */
+nlohmann::json FitterBKG::FitDt(RooAbsPdf* model, std::string prefix, bool plot) {
+    Fit(model, dataset_);
+
+    nlohmann::json json_results;
+    json_results[prefix + "dt_model"] =
+        tools::GetResultsJSON(model, RooArgSet(dt_), "bkg_");
+    if (plot) {
+        PlotWithPull(dt_, *dataset_, *model);
+    }
+
+    {
+        RooDataSet* dataset_cf =
+            static_cast<RooDataSet*>(dataset_->emptyClone("dataset_cf", "dataset_cf"));
+        dataset_cf->append(*dataset_FB_);
+        dataset_cf->append(*dataset_FA_);
+        Fit(model, dataset_cf);
+        json_results[prefix + "dt_cf_model"] =
+            tools::GetResultsJSON(model, RooArgSet(dt_), "bkg_cf_");
+        if (plot) {
+            PlotWithPull(dt_, *dataset_cf, *model);
+        }
+        delete dataset_cf;
+    }
+
+    {
+        RooDataSet* dataset_dcs =
+            static_cast<RooDataSet*>(dataset_->emptyClone("dataset_dcs", "dataset_dcs"));
+        dataset_dcs->append(*dataset_SB_);
+        dataset_dcs->append(*dataset_SA_);
+        Fit(model, dataset_dcs);
+        json_results[prefix + "dt_dcs_model"] =
+            tools::GetResultsJSON(model, RooArgSet(dt_), "bkg_dcs_");
+        if (plot) {
+            PlotWithPull(dt_, *dataset_dcs, *model);
+        }
+        delete dataset_dcs;
+    }
+    return json_results;
+}
+
+/**
+ * Fit (and plot) angular distributions
+ *
+ * @param plot Create plots
+ *
+ * @return nlohmann::json Fitted parameters and values
+ */
+nlohmann::json FitterBKG::FitAngular(bool plot) {
+    // We must plot after each fit otherwise the results printed on the plot
+    // would be of the last fit
+    Fit(&phit_model_, dataset_);
+    if (plot) {
+        PlotWithPull(phit_, *dataset_, phit_model_);
+    }
+
+    Fit(&thetat_model_, dataset_);
+    if (plot) {
+        PlotWithPull(thetat_, *dataset_, thetat_model_);
+    }
+
+    Fit(&thetab_model_, dataset_);
+    if (plot) {
+        PlotWithPull(thetab_, *dataset_, thetab_model_);
+    }
+
+    std::vector<const RooAbsPdf*> angular_pdfs = {&thetab_model_, &thetat_model_,
+                                                  &phit_model_};
+    nlohmann::json json_results;
+    json_results["angular_pdf"] =
+        tools::GetResultsJSON(angular_pdfs, RooArgSet(thetat_, thetab_, phit_), "bkg_");
+
+    if (plot) {
+        thetat_.setBins(50);
+        thetab_.setBins(50);
+        phit_.setBins(50);
+
+        RooProdPdf* bkg_pdf = new RooProdPdf(
+            "bkg_pdf", "bkg_pdf",
+            RooArgList(thetat_model_, thetab_model_, phit_model_));
+
+        RooDataHist* pdf_hist =
+            bkg_pdf->generateBinned(RooArgSet(thetat_, thetab_, phit_),
+                                    dataset_->numEntries(), true);
+
+        RooDataHist data_hist("data_hist", "data_hist",
+                              RooArgSet(thetat_, thetab_, phit_),
+                              *dataset_);
+
+        tools::PlotVars2D(thetat_, thetab_, data_hist, *pdf_hist, "",
+                          constants::format);
+        tools::PlotVars2D(thetat_, phit_, data_hist, *pdf_hist, "",
+                          constants::format);
+        tools::PlotVars2D(thetab_, phit_, data_hist, *pdf_hist, "",
+                          constants::format);
+
+        tools::PlotPull2D(thetat_, thetab_, data_hist, *pdf_hist, "",
+                          constants::format, true);
+        tools::PlotPull2D(thetat_, phit_, data_hist, *pdf_hist, "", constants::format,
+                          true);
+        tools::PlotPull2D(thetab_, phit_, data_hist, *pdf_hist, "", constants::format,
+                          true);
+    }
+    return json_results;
 }

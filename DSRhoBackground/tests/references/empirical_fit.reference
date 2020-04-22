@@ -1,20 +1,4 @@
 {
-  "angular_pdf": {
-    "bkg_phit_f": 0.1,
-    "bkg_phit_offset": -0.0189,
-    "bkg_phit_poly_p2": -0.1,
-    "bkg_thetab_exp_alpha": -4.0322,
-    "bkg_thetab_f": 0.6751,
-    "bkg_thetab_gaus_mu": 2.9304,
-    "bkg_thetab_gaus_sigma_l": 0.4092,
-    "bkg_thetab_gaus_sigma_r": 0.0,
-    "bkg_thetat_p1": 0.0,
-    "bkg_thetat_p2": -5.9878,
-    "bkg_thetat_p3": 0.0,
-    "bkg_thetat_p4": -1.0,
-    "bkg_thetat_p5": 0.0,
-    "bkg_thetat_p6": -1.0
-  },
   "emp_dt_cf_model": {
     "bkg_cf_dt_f": 0.6656,
     "bkg_cf_dt_gaus_mu": -0.6656,

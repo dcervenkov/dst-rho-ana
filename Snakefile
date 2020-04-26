@@ -50,6 +50,26 @@ def get_data_for_background(wildcards):
         else:
             return DATA_SIDEBANDS[channel]
 
+def get_excluded_channels(wildcards):
+    if wildcards.channel == "together":
+        return ""
+    else:
+        excluded_channels = set(CHANNELS) - set(wildcards.channel.split("-"))
+        if excluded_channels:
+            return "--exclude-channels=" + ",".join(excluded_channels)
+        else:
+            return ""
+
+def create_stream_config(old_stream, old_file, new_stream, new_file):
+    new_config = ""
+    with open(old_file, "r") as f:
+        for line in f:
+            new_config += line.replace(
+                f"stream{old_stream}", f"stream{new_stream}"
+            ).replace(f"_{int(old_stream):02}_", f"_{int(new_stream):02}_"
+                    ).replace(f"{old_stream}.root", f"{new_stream}.root")
+    with open(new_file, "w") as f:
+        f.write(new_config)
 
 rule all:
     input:
@@ -89,7 +109,15 @@ rule all:
                    channel=CHANNELS_AND_TOGETHER, component=["all"], type=["lifetime", "mixing"]),
             expand("DSRhoLifetime/plots/{channel}_{type}_data",
                    channel=CHANNELS_AND_TOGETHER, component=["all"], type=["lifetime", "mixing"])
-            )
+            ),
+        cpfit_jobs = (
+            expand("DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["CR", "CRSCF"],
+                stream=range(6)),
+            expand("DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["all"],
+                stream=range(6))
+        )
 
 rule yield_jobs:
     input:
@@ -102,6 +130,10 @@ rule background_jobs:
 rule lifetime_jobs:
     input:
         rules.all.input.lifetime_jobs
+
+rule cpfit_jobs:
+    input:
+        rules.all.input.cpfit_jobs
 
 rule yield_mc:
     input:
@@ -254,3 +286,45 @@ rule lifetime_plots_data:
         "--plot-dir={output.plotdir} "
         "{output.result} {input.data} &> {log}"
 
+rule cpfit_configs:
+    input:
+        expand(rules.background.output, channel=CHANNELS_AND_TOGETHER, mc="mc", bkg_type=BKG_TYPES),
+        expand(rules.background_nonphys.output, channel=CHANNELS_AND_TOGETHER, mc="mc", bkg_type=BKG_TYPES),
+        expand(rules.background.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
+        expand(rules.background_nonphys.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
+        rules.yield_summary.output,
+        template = "DSRhoCPFit/configs/templates/{config}.template.json"
+    output:
+        "DSRhoCPFit/configs/{config}.json"
+    shell:
+        "./tools/config_from_template.py {input.template} > {output}"
+
+rule cpfit_stream_configs:
+    input:
+        "DSRhoCPFit/configs/config_mc.json"
+    output:
+        temp("DSRhoCPFit/configs/config_mc_{stream}.json")
+    wildcard_constraints:
+        stream = "\d+"
+    run:
+        create_stream_config(0, input[0], int(wildcards.stream), output[0])
+
+
+rule cpfit_mc:
+    input:
+        config = "DSRhoCPFit/configs/config_mc_{stream}.json",
+    output:
+        result = "DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}"
+    log:
+        "DSRhoCPFit/logs/{channel}_{type}_{components}/stream{stream}.log"
+    params:
+        "--MC=1",
+        "--cpus=1",
+        "--log",
+        "--components={components}",
+        lambda wildcards:
+            "--time-independent" if wildcards.type == "ti" else "",
+        lambda wildcards:
+            get_excluded_channels(wildcards)
+    shell:
+        "./DSRhoCPFit/DSRhoCPFit {params} --config={input.config} --output={output.result} &> {log}"

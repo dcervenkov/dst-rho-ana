@@ -1,0 +1,229 @@
+{
+    "initialPars": {
+        "ap": 0.269,
+        "apa": 0.56,
+        "a0": 0.941,
+        "ata": 3.11,
+        "xp": 0.00817,
+        "x0": 0.00533,
+        "xt": 0.00826,
+        "yp": -0.00661,
+        "y0": -0.00846,
+        "yt": 0.00372,
+        "xpb": -0.01022,
+        "x0b": -0.00846,
+        "xtb": -0.00584,
+        "ypb": 0.00244,
+        "y0b": 0.00533,
+        "ytb": -0.00692
+    },
+    "fitRanges": {
+        "dt": {
+            "min": -10,
+            "max": 10
+        },
+        "thetat": {
+            "min": 0,
+            "max": 3.1415
+        },
+        "thetab": {
+            "min": 0.5,
+            "max": 2.95
+        }
+    },
+    "modelParameters": {
+        "substitute": [
+            {
+                "file": "../../../DSRhoBackground/results/nonphys_together_mc_scf.json",
+                "include": ["emp_dt_cf_model", "emp_dt_dcs_model"],
+                "replace": ["bkg", "scf"]
+            },
+            {
+                "file": "../../../DSRhoBackground/results/nonphys_together_mc_bkg.json",
+                "include": ["emp_dt_cf_model", "emp_dt_dcs_model"]
+            }
+        ]
+    },
+    "channels": {
+        "Kpi": {
+            "modelParameters": {
+                "substitute": [
+                    {
+                        "file": "../../../DSRhoBackground/results/nonphys_Kpi_mc_bkg.json",
+                        "include": ["angular_pdf"]
+                    },
+                    {
+                        "file": "../../../DSRhoYield/results/Kpi_mc_fractions.json"
+                    }
+                ]
+            },
+            "efficiencyModel": 6,
+            "efficiencyFile": "DSRhoCPFit/eff_Kpi_190531.root",
+            "scfHisto": "DSRhoCPFit/scf_Kpi_190531.root",
+            "inputFiles": {
+                "signalMC": [
+                    "data/Kpi/realistic_mc/stream0/DSRho-mdst_Kpi_basf2_00_svd1.root",
+                    "data/Kpi/realistic_mc/stream0/DSRho-mdst_Kpi_basf2_00_svd2.root"
+                ],
+                "genericMC": [
+                    "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+                    "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+                    "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+                    "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+                    "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+                    "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+                    "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+                    "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                ],
+                "data": [
+                    "data/Kpi/DSRhoSkim_svd1_exp07_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd1_exp09_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd1_exp11_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd1_exp13_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd1_exp15_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd1_exp17_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd1_exp19_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd1_exp21_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd1_exp23_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd1_exp25_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd1_exp27_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp31_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp33_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp35_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp37_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp39_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp41_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp43_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp45_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp47_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp49_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp51_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp55_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp61_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp63_on_resonance_HadronBorJ.root",
+                    "data/Kpi/DSRhoSkim_svd2_exp65_on_resonance_HadronBorJ.root"
+                ]
+            }
+        },
+        "Kpipi0": {
+            "modelParameters": {
+                "substitute": [
+                    {
+                        "file": "../../../DSRhoBackground/results/nonphys_Kpipi0_mc_bkg.json",
+                        "include": ["angular_pdf"]
+                    },
+                    {
+                        "file": "../../../DSRhoYield/results/Kpipi0_mc_fractions.json"
+                    }
+                ]
+            },
+            "efficiencyModel": 6,
+            "efficiencyFile": "DSRhoCPFit/eff_Kpipi0_190603.root",
+            "scfHisto": "DSRhoCPFit/scf_Kpipi0_190603.root",
+            "inputFiles": {
+                "signalMC": [
+                    "data/Kpipi0/realistic_mc/stream0/DSRho-mdst_Kpipi0_basf2_00_svd1.root",
+                    "data/Kpipi0/realistic_mc/stream0/DSRho-mdst_Kpipi0_basf2_00_svd2.root"
+                ],
+                "genericMC": [
+                    "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+                    "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+                    "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+                    "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+                    "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+                    "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+                    "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+                    "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                ],
+                "data": [
+                    "data/Kpipi0/DSRhoSkim_svd1_exp07_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd1_exp09_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd1_exp11_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd1_exp13_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd1_exp15_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd1_exp17_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd1_exp19_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd1_exp21_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd1_exp23_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd1_exp25_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd1_exp27_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp31_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp33_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp35_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp37_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp39_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp41_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp43_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp45_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp47_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp49_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp51_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp55_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp61_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp63_on_resonance_HadronBorJ.root",
+                    "data/Kpipi0/DSRhoSkim_svd2_exp65_on_resonance_HadronBorJ.root"
+                ]
+            }
+        },
+        "K3pi": {
+            "modelParameters": {
+                "substitute": [
+                    {
+                        "file": "../../../DSRhoBackground/results/nonphys_K3pi_mc_bkg.json",
+                        "include": ["angular_pdf"]
+                    },
+                    {
+                        "file": "../../../DSRhoYield/results/K3pi_mc_fractions.json"
+                    }
+                ]
+            },
+            "efficiencyModel": 6,
+            "efficiencyFile": "DSRhoCPFit/eff_K3pi_190603.root",
+            "scfHisto": "DSRhoCPFit/scf_K3pi_190603.root",
+            "inputFiles": {
+                "signalMC": [
+                    "data/K3pi/realistic_mc/stream0/DSRho-mdst_K3pi_basf2_00_svd1.root",
+                    "data/K3pi/realistic_mc/stream0/DSRho-mdst_K3pi_basf2_00_svd2.root"
+                ],
+                "genericMC": [
+                    "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+                    "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+                    "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+                    "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+                    "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+                    "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+                    "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+                    "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+                ],
+                "data": [
+                    "data/K3pi/DSRhoSkim_svd1_exp07_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd1_exp09_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd1_exp11_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd1_exp13_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd1_exp15_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd1_exp17_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd1_exp19_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd1_exp21_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd1_exp23_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd1_exp25_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd1_exp27_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp31_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp33_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp35_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp37_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp39_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp41_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp43_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp45_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp47_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp49_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp51_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp55_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp61_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp63_on_resonance_HadronBorJ.root",
+                    "data/K3pi/DSRhoSkim_svd2_exp65_on_resonance_HadronBorJ.root"
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,10 @@
+SRhoBackground/logs/**
+DSRhoBackground/plots/**
+DSRhoBackground/results/**
+DSRhoYield/logs/**
+DSRhoYield/plots/**
+DSRhoYield/results/**
+DSRhoLifetime/configs/**
+DSRhoLifetime/logs/**
+DSRhoLifetime/plots/**
+DSRhoLifetime/results/**

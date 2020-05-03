@@ -116,7 +116,14 @@ rule all:
                 stream=range(6)),
             expand("DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["all"],
-                stream=range(6))
+                stream=range(6)),
+
+            expand("DSRhoCPFit/results/{channel}_{type}_{components}_plot/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["CR", "CRSCF"],
+                stream=range(1)),
+            expand("DSRhoCPFit/results/{channel}_{type}_{components}_plot/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["all"],
+                stream=range(1))
         )
 
 rule yield_jobs:
@@ -317,6 +324,8 @@ rule cpfit_mc:
         result = "DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}"
     log:
         "DSRhoCPFit/logs/{channel}_{type}_{components}/stream{stream}.log"
+    wildcard_constraints:
+        components = "CR|CRSCF|all"
     params:
         "--MC=1",
         "--cpus=1",
@@ -328,3 +337,26 @@ rule cpfit_mc:
             get_excluded_channels(wildcards)
     shell:
         "./DSRhoCPFit/DSRhoCPFit {params} --config={input.config} --output={output.result} &> {log}"
+
+rule cpfit_mc_plot:
+    input:
+        config = "DSRhoCPFit/configs/config_mc_{stream}.json",
+    output:
+        result = "DSRhoCPFit/results/{channel}_{type}_{components}_plot/stream{stream}",
+        plotdir = directory("DSRhoCPFit/plots/{channel}_{type}_{components}/stream{stream}")
+    log:
+        "DSRhoCPFit/logs/{channel}_{type}_{components}_plot/stream{stream}.log"
+    wildcard_constraints:
+        components = "CR|CRSCF|all"
+    params:
+        "--MC=1",
+        "--cpus=1",
+        "--log",
+        "--components={components}",
+        lambda wildcards:
+            "--time-independent" if wildcards.type == "ti" else "",
+        lambda wildcards:
+            get_excluded_channels(wildcards)
+    shell:
+        "./DSRhoCPFit/DSRhoCPFit {params} --config={input.config} --plot-dir={output.plotdir} "
+        "--output={output.result} &> {log}"

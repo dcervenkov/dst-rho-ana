@@ -466,7 +466,7 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
             component_options.push_back(RooFit::LineColor(colors[i]));
             component_options.push_back(RooFit::FillColor(colors[i]));
             component_options.push_back(RooFit::FillStyle(styles[i]));
-            component_options.push_back(RooFit::DrawOption("FL"));
+            component_options.push_back(RooFit::DrawOption("FLC"));
             component_options.push_back(RooFit::VLines());
             RooArgSet set(*component);
             component_options.push_back(RooFit::Components(set));

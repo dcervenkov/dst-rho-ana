@@ -648,6 +648,10 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
                             const std::string channel_name) const {
     Log::LogLine(Log::info) << "Creating plots for channel " << channel_name;
 
+    thetat_->setBins(100);
+    thetab_->setBins(100);
+    phit_->setBins(100);
+
     std::vector<RooAbsPdf*> components;
     RooAbsPdf* all_histpdf = CreateHistPdf(common_config, channel_name, components);
 

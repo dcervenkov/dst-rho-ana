@@ -758,7 +758,7 @@ RooAbsPdf* FitterCPV::CreateHistPdf(const nlohmann::json common_config,
     // Add histos from both particle and anti-particle PDFs to create the
     // final RooHistPdf.
     cr_hist->add(*cr_hist_B_bar);
-    RooHistPdf* cr_histpdf = new RooHistPdf("cr_histpdf", "cr_histpdf", *observables, *cr_hist);
+    RooHistPdf* cr_histpdf = new RooHistPdf("cr_histpdf", "CR", *observables, *cr_hist);
 
     RooHistPdf* scf_histpdf;
     if (scf) {
@@ -766,7 +766,7 @@ RooAbsPdf* FitterCPV::CreateHistPdf(const nlohmann::json common_config,
         scf_pdf = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().at(scf_pdf_FB_index));
         RooDataHist* scf_hist =
             scf_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
-        scf_histpdf = new RooHistPdf("scf_histpdf", "scf_histpdf", *observables, *scf_hist);
+        scf_histpdf = new RooHistPdf("scf_histpdf", "SCF", *observables, *scf_hist);
     }
 
     RooHistPdf* bkg_histpdf;
@@ -775,7 +775,7 @@ RooAbsPdf* FitterCPV::CreateHistPdf(const nlohmann::json common_config,
         bkg_pdf = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().at(bkg_pdf_FB_index));
         RooDataHist* bkg_hist =
             bkg_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
-        bkg_histpdf = new RooHistPdf("bkg_histpdf", "bkg_histpdf", *observables, *bkg_hist);
+        bkg_histpdf = new RooHistPdf("bkg_histpdf", "BKG", *observables, *bkg_hist);
     }
 
     RooAbsArg* cr_scf_f = pdf_->getVariables()->find(chan_name + "_cr_scf_f");

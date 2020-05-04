@@ -310,7 +310,7 @@ rule cpfit_stream_configs:
     input:
         "DSRhoCPFit/configs/config_mc.json"
     output:
-        temp("DSRhoCPFit/configs/config_mc_{stream}.json")
+        "DSRhoCPFit/configs/streams/config_mc_{stream}.json"
     wildcard_constraints:
         stream = "\d+"
     run:
@@ -319,7 +319,7 @@ rule cpfit_stream_configs:
 
 rule cpfit_mc:
     input:
-        config = "DSRhoCPFit/configs/config_mc_{stream}.json",
+        config = "DSRhoCPFit/configs/streams/config_mc_{stream}.json",
     output:
         result = "DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}"
     log:
@@ -340,7 +340,7 @@ rule cpfit_mc:
 
 rule cpfit_mc_plot:
     input:
-        config = "DSRhoCPFit/configs/config_mc_{stream}.json",
+        config = "DSRhoCPFit/configs/streams/config_mc_{stream}.json",
     output:
         result = "DSRhoCPFit/results/{channel}_{type}_{components}_plot/stream{stream}",
         plotdir = directory("DSRhoCPFit/plots/{channel}_{type}_{components}/stream{stream}")

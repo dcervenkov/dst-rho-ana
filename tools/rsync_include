@@ -1,4 +1,4 @@
-SRhoBackground/logs/**
+DSRhoBackground/logs/**
 DSRhoBackground/plots/**
 DSRhoBackground/results/**
 DSRhoYield/logs/**
@@ -8,3 +8,7 @@ DSRhoLifetime/configs/**
 DSRhoLifetime/logs/**
 DSRhoLifetime/plots/**
 DSRhoLifetime/results/**
+DSRhoCPFit/configs/**
+DSRhoCPFit/logs/**
+DSRhoCPFit/plots/**
+DSRhoCPFit/results/**

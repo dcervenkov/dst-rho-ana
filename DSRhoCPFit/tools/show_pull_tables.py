@@ -4,7 +4,7 @@
 
 import argparse
 from rootpy.io import root_open
-import sys
+
 
 def decode_arguments():
     """Decode CLI arguments"""
@@ -16,6 +16,7 @@ def decode_arguments():
 
     return args.latex, args.files
 
+
 def main():
     latex, files = decode_arguments()
 
@@ -23,12 +24,13 @@ def main():
         with root_open(path, 'r') as f:
             print(path)
             print
-            
+
             if latex:
                 print(f.latex_pull_table.GetTitle())
             else:
                 print(f.pull_table.GetTitle())
 
             print
+
 
 main()

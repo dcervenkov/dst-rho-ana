@@ -102,6 +102,8 @@ def print_table(df, latex):
         print(":--:|:-----:|:--------:")
 
     for i, var in enumerate(VAR_NAMES):
+        if pd.isna(df[var + "_pull"].mean()):
+            continue
         if latex:
             print(
                 "    ${:19s}$ & {:+5.2f} & {:+5.2f} \\\\".format(

@@ -43,8 +43,8 @@
           "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
         ],
         "signalMC": [
-          "data/K3pi/realistic_mc/stream0/DSRho-mdst_K3pi_basf2_00_svd1.root",
-          "data/K3pi/realistic_mc/stream0/DSRho-mdst_K3pi_basf2_00_svd2.root"
+          "data/K3pi/signal_mc/DSRho-mdst_K3pi_basf2_00_svd1.root",
+          "data/K3pi/signal_mc/DSRho-mdst_K3pi_basf2_00_svd2.root"
         ]
       },
       "modelParameters": {
@@ -111,8 +111,8 @@
           "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
         ],
         "signalMC": [
-          "data/Kpi/realistic_mc/stream0/DSRho-mdst_Kpi_basf2_00_svd1.root",
-          "data/Kpi/realistic_mc/stream0/DSRho-mdst_Kpi_basf2_00_svd2.root"
+          "data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd1.root",
+          "data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd2.root"
         ]
       },
       "modelParameters": {
@@ -179,8 +179,8 @@
           "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
         ],
         "signalMC": [
-          "data/Kpipi0/realistic_mc/stream0/DSRho-mdst_Kpipi0_basf2_00_svd1.root",
-          "data/Kpipi0/realistic_mc/stream0/DSRho-mdst_Kpipi0_basf2_00_svd2.root"
+          "data/Kpipi0/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd1.root",
+          "data/Kpipi0/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd2.root"
         ]
       },
       "modelParameters": {

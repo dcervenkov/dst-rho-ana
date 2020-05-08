@@ -113,7 +113,7 @@ rule all:
         cpfit_jobs = (
             expand("DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["CR", "CRSCF"],
-                stream=range(6)),
+                stream=range(99)),
             expand("DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["all"],
                 stream=range(6)),

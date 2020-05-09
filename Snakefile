@@ -112,10 +112,10 @@ rule all:
             ),
         cpfit_jobs = (
             expand("DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["CR", "CRSCF"],
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
                 stream=range(99)),
             expand("DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["all"],
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
                 stream=range(6)),
 
             expand("DSRhoCPFit/results/{channel}_{type}_{components}_plot/stream{stream}",

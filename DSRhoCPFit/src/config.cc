@@ -68,7 +68,7 @@ void Config::FillMissingDefaults() {
  * Remove channels that were excluded by 'excludedChannels' key from the JSON
  */
 void Config::RemoveExcludedChannels() {
-        if (json.contains("excludeChannels")) {
+    if (json.contains("excludeChannels")) {
         std::vector<std::string> excluded_channels =
             tools::SplitString(json["excludeChannels"], ',');
         for (auto excluded_channel : excluded_channels) {
@@ -82,29 +82,30 @@ void Config::RemoveExcludedChannels() {
  * Check whether the current config is valid.
  */
 bool Config::IsValid() const {
+    bool is_valid = true;
     // output check
     if (!json.contains("output")) {
         Log::LogLine(Log::error) << "No output file specified";
-        return false;
+        is_valid = false;
     }
 
     // components check
     auto components = json.find("components");
     if (components == json.end()) {
         Log::LogLine(Log::error) << "Fit components not specified";
-        return false;
+        is_valid = false;
     } else {
         if (components.value() != "CR" && components.value() != "CRSCF" &&
             components.value() != "all") {
             Log::LogLine(Log::error) << "Invalid fit components " << components.value();
-            return false;
+            is_valid = false;
         }
     }
 
     // MC check
     if (!json.contains("MC")) {
         Log::LogLine(Log::error) << "Not specified whether to fit MC or data";
-        return false;
+        is_valid = false;
     }
 
     if (json.contains("excludeChannels")) {
@@ -114,7 +115,7 @@ bool Config::IsValid() const {
             if (!json["channels"].contains(excluded_channel)) {
                 Log::LogLine(Log::error) << "Channel '" << excluded_channel
                                          << "' which is to be excluded is not present in config";
-                return false;
+                is_valid = false;
             }
         }
     }
@@ -128,51 +129,51 @@ bool Config::IsValid() const {
         if (efficiency_model == channel.end()) {
             Log::LogLine(Log::error)
                 << "No efficiency model specified for channel " << channel_name;
-            return false;
+            is_valid = false;
         } else {
             if (efficiency_model.value() < 0 ||
                 efficiency_model.value() > constants::max_efficiency_model_number) {
                 Log::LogLine(Log::error)
                     << "Efficiency model " << efficiency_model.value() << " does not exist";
-                return false;
+                is_valid = false;
             }
         }
 
         // efficiencyFile check
         if (efficiency_model.value() > 4 && !channel.contains("efficiencyFile")) {
             Log::LogLine(Log::error) << "Efficiency file not specified";
-            return false;
+            is_valid = false;
         }
 
         // scfHisto vs scfKDE
         if (channel.contains("scfHisto") && channel.contains("scfKDE")) {
             Log::LogLine(Log::error) << "Both SCF histo and KDE specified";
-            return false;
+            is_valid = false;
         }
 
         // inputFiles check
         auto input_files = channel.find("inputFiles");
         if (input_files == channel.end()) {
             Log::LogLine(Log::error) << "Input files not specified for channel " << channel_name;
-            return false;
+            is_valid = false;
         } else {
             if (json["MC"] == true) {
                 if (!input_files.value().contains("signalMC")) {
                     Log::LogLine(Log::error) << "Signal MC input files not specified";
-                    return false;
+                    is_valid = false;
                 }
                 if (!input_files.value().contains("genericMC") && components.value() == "all") {
                     Log::LogLine(Log::error) << "Generic MC input files not specified";
-                    return false;
+                    is_valid = false;
                 }
             } else {
                 if (!input_files.value().contains("data")) {
                     Log::LogLine(Log::error) << "Data input files not specified";
-                    return false;
+                    is_valid = false;
                 }
             }
         }
     }
 
-    return true;
+    return is_valid;
 }

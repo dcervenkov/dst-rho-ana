@@ -186,16 +186,17 @@ class FitterCPV {
                                             const nlohmann::json common_config,
                                             const nlohmann::json channel_config);
 
-    RooAddPdf* CreateVoigtGaussDtPdf(const std::string prefix);
+    RooAddPdf* CreateVoigtGaussDtPdf(const std::string prefix) const;
+    RooAbsPdf* CreatePhysicsBkgDtPdf(const std::string prefix) const;
     void CreateDtCPPDFs(DtCPPDF*& cr_pdf_FB, DtCPPDF*& cr_pdf_FA, DtCPPDF*& cr_pdf_SB,
                         DtCPPDF*& cr_pdf_SA, const std::string channel_name,
                         const nlohmann::json common_config,
                         const nlohmann::json channel_config) const;
     void CreateDtSCFPDFs(DtSCFPDF*& scf_pdf_FB, DtSCFPDF*& scf_pdf_FA, DtSCFPDF*& scf_pdf_SB,
                          DtSCFPDF*& scf_pdf_SA, const std::string channel_name) const;
-    void CreateFunctionalDtSCFBKGPDFs(RooProdPdf*& pdf_FB, RooProdPdf*& pdf_FA, RooProdPdf*& pdf_SB,
-                                      RooProdPdf*& pdf_SA, const std::string channel_name,
-                                      const nlohmann::json channel_config, const bool scf);
+    void CreateTDSCForBKGPDFs(RooProdPdf*& pdf_FB, RooProdPdf*& pdf_FA, RooProdPdf*& pdf_SB,
+                              RooProdPdf*& pdf_SA, const std::string channel_name,
+                              const nlohmann::json channel_config, bool scf, bool physics_dt);
 
     void PlotChannel(const nlohmann::json common_config, const nlohmann::json channel_config,
                      const std::string channel_name) const;

@@ -120,6 +120,13 @@ bool Config::IsValid() const {
         }
     }
 
+    // physicsDtSCFBKG check
+    if (!json.contains("physicsDtSCFBKG") || !json["physicsDtSCFBKG"].is_boolean()) {
+        Log::LogLine(Log::error)
+            << "Missing/non-bool value of key 'physicsDtSCFBKG'";
+        is_valid = false;
+    }
+
     for (auto& chan : json["channels"].items()) {
         const char* channel_name = chan.key().c_str();
         nlohmann::json channel = chan.value();

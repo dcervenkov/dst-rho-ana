@@ -262,5 +262,6 @@
     "scf_dcs_dt_voigt_mu": -0.2841,
     "scf_dcs_dt_voigt_sigma": 2.8401,
     "scf_dcs_dt_voigt_width": 0.6152
-  }
+  },
+  "physicsDtSCFBKG": false
 }

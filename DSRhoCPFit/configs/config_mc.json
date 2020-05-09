@@ -266,5 +266,6 @@
     "scf_dcs_dt_mu_delta": 0.0,
     "scf_dcs_dt_mu_lifetime": -0.2401,
     "scf_dcs_dt_tau": 1.9837
-  }
+  },
+  "physicsDtSCFBKG": true
 }

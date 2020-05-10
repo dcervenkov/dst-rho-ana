@@ -1280,6 +1280,66 @@
             ]
         },
         {
+            "fileName": "bkg_dt_thetat",
+            "formula": "thetat:dt",
+            "xAxisTitle": "#Deltat [ps]",
+            "yAxisTitle": "#theta_{t} [rad]",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "xmin": -10,
+            "xmax": 10,
+            "files": [
+                "../data/Kpi/mc/*.root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "BKG",
+                    "color": 7,
+                    "cut": "evmcflag!=1&&candsel<2&&thetab>0.5"
+                }
+            ]
+        },
+        {
+            "fileName": "bkg_dt_thetab",
+            "formula": "thetab:dt",
+            "xAxisTitle": "#Deltat [ps]",
+            "yAxisTitle": "#thetab_{b} [rad]",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "xmin": -10,
+            "xmax": 10,
+            "files": [
+                "../data/Kpi/mc/*.root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "BKG",
+                    "color": 7,
+                    "cut": "evmcflag!=1&&candsel<2&&thetab>0.5"
+                }
+            ]
+        },
+        {
+            "fileName": "bkg_dt_phit",
+            "formula": "phit:dt",
+            "xAxisTitle": "#Deltat [ps]",
+            "yAxisTitle": "#phi_{t} [rad]",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "xmin": -10,
+            "xmax": 10,
+            "files": [
+                "../data/Kpi/mc/*.root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "BKG",
+                    "color": 7,
+                    "cut": "evmcflag!=1&&candsel<2&&thetab>0.5"
+                }
+            ]
+        },
+        {
             "fileName": "bkg_thetat_thetab",
             "formula": "thetat:thetab",
             "xAxisTitle": "#theta_{b} [rad]",

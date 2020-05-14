@@ -33,6 +33,7 @@ public:
 	Efficiency(const char* filename);
 	virtual ~Efficiency();
 	double GetEfficiency(double thetat, double thetab, double phit, int efficiency_model) const;
+	TH3F* GetBinnedEfficiency(int efficiency_model, int nbins, double limits[6]);
 	double EfficiencyInterface(double* x, double* p) const;
 	void ReadInFile(const char* filename);
 

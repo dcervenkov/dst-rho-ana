@@ -43,12 +43,14 @@ AngularPDF::AngularPDF(const char *name, const char *title, bool _B_bar, int _ef
     // The rest of this constructor computes angular integration
     // of certain terms of the PDF. This is used to speed up
     // computation of normalization; see AngularPDF::analyticalIntegral
-    ROOT::Math::Functor wf1(this, &AngularPDF::f1, 3);
-    ROOT::Math::Functor wf2(this, &AngularPDF::f2, 3);
-    ROOT::Math::Functor wf3(this, &AngularPDF::f3, 3);
-    ROOT::Math::Functor wf4(this, &AngularPDF::f4, 3);
-    ROOT::Math::Functor wf5(this, &AngularPDF::f5, 3);
-    ROOT::Math::Functor wf6(this, &AngularPDF::f6, 3);
+    CalculateBinnedIntegralFunctors();
+
+    ROOT::Math::Functor wf1(this, &AngularPDF::f1e, 3);
+    ROOT::Math::Functor wf2(this, &AngularPDF::f2e, 3);
+    ROOT::Math::Functor wf3(this, &AngularPDF::f3e, 3);
+    ROOT::Math::Functor wf4(this, &AngularPDF::f4e, 3);
+    ROOT::Math::Functor wf5(this, &AngularPDF::f5e, 3);
+    ROOT::Math::Functor wf6(this, &AngularPDF::f6e, 3);
 
     double a[] = {tht.min(), thb.min(), phit.min()};
     double b[] = {tht.max(), thb.max(), phit.max()};
@@ -85,6 +87,9 @@ AngularPDF::AngularPDF(const AngularPDF& other, const char* name) :
 {
     for (int i = 0; i < 6; i++) {
         int_tht_thb_phit[i] = other.int_tht_thb_phit[i];
+        fxeff_tht[i] = other.fxeff_tht[i];
+        fxeff_thb[i] = other.fxeff_thb[i];
+        fxeff_phit[i] = other.fxeff_phit[i];
     }
 }
 
@@ -127,13 +132,13 @@ Int_t AngularPDF::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars,
 
     // if (matchArgs(allVars,analVars,x)) return 1 ;
 
-    if(matchArgs(allVars,analVars,tht,thb,phit)) return 1;
-//    if(matchArgs(allVars,analVars,tht,thb)) return 2;
-//    if(matchArgs(allVars,analVars,tht,phit)) return 3;
-//    if(matchArgs(allVars,analVars,thb,phit)) return 4;
-//    if(matchArgs(allVars,analVars,tht)) return 5;
-//    if(matchArgs(allVars,analVars,thb)) return 6;
-//    if(matchArgs(allVars,analVars,phit)) return 7;
+    if (matchArgs(allVars, analVars, tht, thb, phit)) return 1;
+    if (matchArgs(allVars, analVars, tht, thb)) return 2;
+    if (matchArgs(allVars, analVars, tht, phit)) return 3;
+    if (matchArgs(allVars, analVars, thb, phit)) return 4;
+    //    if(matchArgs(allVars,analVars,tht)) return 5;
+    //    if(matchArgs(allVars,analVars,thb)) return 6;
+    //    if(matchArgs(allVars,analVars,phit)) return 7;
 
     return 0 ;
 }
@@ -158,17 +163,9 @@ Double_t AngularPDF::analyticalIntegral(Int_t code, const char* rangeName) const
 //    Double_t aptr = ap*at*cos(-apa+ata);
     Double_t apti = ap*at*sin(-apa+ata);
 
-
     switch(code) {
     case 1: // Int[g,{tht,thb,phit}]
-//        return 32.*TMath::Pi()/9;
-        // Log::print(Log::debug, "int: %f\n", ap*ap * int_tht_thb_phit[0] +
-        //        at*at * int_tht_thb_phit[1] +
-        //        a0*a0 * int_tht_thb_phit[2] +
-        //        ap0r * int_tht_thb_phit[3] -
-        //        a0ti * int_tht_thb_phit[4] -
-        //        apti * int_tht_thb_phit[5]);
-
+        // return 32.*TMath::Pi()/9;
         return ap*ap * int_tht_thb_phit[0] +
                at*at * int_tht_thb_phit[1] +
                a0*a0 * int_tht_thb_phit[2] +
@@ -177,13 +174,31 @@ Double_t AngularPDF::analyticalIntegral(Int_t code, const char* rangeName) const
                apti * int_tht_thb_phit[5];
 
     case 2: // Int[g,{tht,thb}]
-        return 16./9.*(at*at + 2*a0*a0*cos(phit)*cos(phit) + 2*ap*ap*sin(phit)*sin(phit));
+        // return 16./9.*(at*at + 2*a0*a0*cos(phit)*cos(phit) + 2*ap*ap*sin(phit)*sin(phit));
+        return ap*ap * fxeff_phit[0]->Interpolate(phit) +
+               at*at * fxeff_phit[1]->Interpolate(phit) +
+               a0*a0 * fxeff_phit[2]->Interpolate(phit) +
+               ap0r  * fxeff_phit[3]->Interpolate(phit) -
+               a0ti  * fxeff_phit[4]->Interpolate(phit) -
+               apti  * fxeff_phit[5]->Interpolate(phit);
 
     case 3: // Int[g,{tht,phit}]
-        return 8.*TMath::Pi()/3*((ap*ap+at*at)*sin(thb)*sin(thb) + 2*a0*a0*cos(thb)*cos(thb))*sin(thb);
+        // return 8.*TMath::Pi()/3*((ap*ap+at*at)*sin(thb)*sin(thb) + 2*a0*a0*cos(thb)*cos(thb))*sin(thb);
+        return ap*ap * fxeff_thb[0]->Interpolate(thb) +
+               at*at * fxeff_thb[1]->Interpolate(thb) +
+               a0*a0 * fxeff_thb[2]->Interpolate(thb) +
+               ap0r  * fxeff_thb[3]->Interpolate(thb) -
+               a0ti  * fxeff_thb[4]->Interpolate(thb) -
+               apti  * fxeff_thb[5]->Interpolate(thb);
 
     case 4: // Int[g,{thb,phit}]
-        return 8.*TMath::Pi()/3*((ap*ap+a0*a0)*sin(tht)*sin(tht) + 2*at*at*cos(tht)*cos(tht))*sin(tht);
+        // return 8.*TMath::Pi()/3*((ap*ap+a0*a0)*sin(tht)*sin(tht) + 2*at*at*cos(tht)*cos(tht))*sin(tht);
+        return ap*ap * fxeff_tht[0]->Interpolate(tht) +
+               at*at * fxeff_tht[1]->Interpolate(tht) +
+               a0*a0 * fxeff_tht[2]->Interpolate(tht) +
+               ap0r  * fxeff_tht[3]->Interpolate(tht) -
+               a0ti  * fxeff_tht[4]->Interpolate(tht) -
+               apti  * fxeff_tht[5]->Interpolate(tht);
 
     case 5: // Int[g,{tht}]
         return 4./3.*(4*a0*a0*cos(phit)*cos(phit)*cos(thb)*cos(thb) + \
@@ -204,31 +219,103 @@ Double_t AngularPDF::analyticalIntegral(Int_t code, const char* rangeName) const
 }
 
 Double_t AngularPDF::f1(const double * vars) {
-    Double_t val = 2 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]) * sin(vars[2]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+    return 2 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]) * sin(vars[2]);
 }
 
 Double_t AngularPDF::f2(const double * vars) {
-    Double_t val = 2 * cos(vars[0]) * cos(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+    return 2 * cos(vars[0]) * cos(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]);
 }
 
 Double_t AngularPDF::f3(const double * vars) {
-    Double_t val = 4 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * cos(vars[1]) * cos(vars[1]) * sin(vars[1]) * cos(vars[2]) * cos(vars[2]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+    return 4 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * cos(vars[1]) * cos(vars[1]) * sin(vars[1]) * cos(vars[2]) * cos(vars[2]);
 }
 
 Double_t AngularPDF::f4(const double * vars) {
-    Double_t val = sqrt(2) * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * sin(2 * vars[2]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+    return sqrt(2) * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * sin(2 * vars[2]);
 }
 
 Double_t AngularPDF::f5(const double * vars) {
-    Double_t val = sqrt(2) * sin(2 * vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * cos(vars[2]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+    return sqrt(2) * sin(2 * vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * cos(vars[2]);
 }
 
 Double_t AngularPDF::f6(const double * vars) {
-    Double_t val = 2 * sin(2 * vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]);
-    return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+    return 2 * sin(2 * vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]);
+}
+
+
+Double_t AngularPDF::f1e(const double * vars) {
+    return f1(vars) * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+}
+
+Double_t AngularPDF::f2e(const double * vars) {
+    return f2(vars) * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+}
+
+Double_t AngularPDF::f3e(const double * vars) {
+    return f3(vars) * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+}
+
+Double_t AngularPDF::f4e(const double * vars) {
+    return f4(vars) * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+}
+
+Double_t AngularPDF::f5e(const double * vars) {
+    return f5(vars) * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+}
+
+Double_t AngularPDF::f6e(const double * vars) {
+    return f6(vars) * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
+}
+// Double_t AngularPDF::
+
+TH3F* AngularPDF::GetBinnedTrigXEfficiency(Double_t (*trig)(const double * vars), int model, int nbins, double limits[6]) {
+    TH3F* binned = new TH3F("binned_eff", "binned_eff", nbins, limits[0], limits[1], nbins,
+                            limits[2], limits[3], nbins, limits[4], limits[5]);
+
+    // double thetat, thetab, phit;
+    double vars[3];
+    for (int x = 1; x <= nbins; x++) {
+        for (int y = 1; y <= nbins; y++) {
+            for (int z = 1; z <= nbins; z++) {
+                vars[0] = binned->GetXaxis()->GetBinCenter(x);
+                vars[1] = binned->GetYaxis()->GetBinCenter(y);
+                vars[2] = binned->GetZaxis()->GetBinCenter(z);
+                binned->SetBinContent(binned->GetBin(x, y, z),
+                                      trig(vars) * eff.GetEfficiency(vars[0], vars[1], vars[2], model));
+            }
+        }
+    }
+    return binned;
+}
+
+void AngularPDF::CalculateBinnedIntegralFunctors() {
+    double limits[6] = {tht.min(), tht.max(), thb.min(), thb.max(), phit.min(), phit.max()};
+
+    Double_t (* func [6])(const double*);
+    func[0] = f1;
+    func[1] = f2;
+    func[2] = f3;
+    func[3] = f4;
+    func[4] = f5;
+    func[5] = f6;
+
+    const int nbins = 100;
+    double tht_bin_width = (tht.max() - tht.min())/nbins;
+    double thb_bin_width = (thb.max() - thb.min())/nbins;
+    double phit_bin_width = (phit.max() - phit.min())/nbins;
+
+    Log::LogLine(Log::info) << "Computing binned numerical integral functors...";
+    for (int i = 0; i < 6; i++) {
+        TH3F* fxeff = GetBinnedTrigXEfficiency(func[i], efficiency_model, nbins, limits);
+        TString name_base = "f" + i;
+        fxeff_tht[i] = fxeff->ProjectionX(name_base + "_tht");
+        fxeff_thb[i] = fxeff->ProjectionY(name_base + "_thb");
+        fxeff_phit[i] = fxeff->ProjectionZ(name_base + "_phit");
+
+        const double swiss_constant = 5.52;
+        fxeff_tht[i]->Scale(swiss_constant * thb_bin_width * phit_bin_width);
+        fxeff_thb[i]->Scale(swiss_constant * tht_bin_width * phit_bin_width);
+        fxeff_phit[i]->Scale(swiss_constant * tht_bin_width * thb_bin_width);
+        delete fxeff;
+    }
 }

@@ -108,12 +108,12 @@ DtCPPDF::DtCPPDF(const char *name, const char *title, bool _B_bar, bool _CKM_fav
     // of certain terms of the PDF. This is used to speed up
     // computation of normalization; see DtCPPDF::analyticalIntegral
     if (efficiency_integrals_ready == false) {
-        ROOT::Math::Functor wf1(this, &DtCPPDF::f1, 3);
-        ROOT::Math::Functor wf2(this, &DtCPPDF::f2, 3);
-        ROOT::Math::Functor wf3(this, &DtCPPDF::f3, 3);
-        ROOT::Math::Functor wf4(this, &DtCPPDF::f4, 3);
-        ROOT::Math::Functor wf5(this, &DtCPPDF::f5, 3);
-        ROOT::Math::Functor wf6(this, &DtCPPDF::f6, 3);
+        ROOT::Math::Functor wf1(this, &DtCPPDF::f1e, 3);
+        ROOT::Math::Functor wf2(this, &DtCPPDF::f2e, 3);
+        ROOT::Math::Functor wf3(this, &DtCPPDF::f3e, 3);
+        ROOT::Math::Functor wf4(this, &DtCPPDF::f4e, 3);
+        ROOT::Math::Functor wf5(this, &DtCPPDF::f5e, 3);
+        ROOT::Math::Functor wf6(this, &DtCPPDF::f6e, 3);
 
         double a[] = {tht.min(), thb.min(), phit.min()};
         double b[] = {tht.max(), thb.max(), phit.max()};
@@ -304,7 +304,7 @@ Double_t DtCPPDF::evaluate() const {
 
 //  return Belle::AddOutlierWithBkg((int) expno, dt, 1, pdf, pdf, (int) vrntrk, (int) vtntrk, dtres_param,
 //          nnorm / alpha, nnorm / alpha, constants::cut_dt_low, constants::cut_dt_high, alpha, 1);
-// 
+//
 //  return pdf;
 
 }
@@ -565,39 +565,39 @@ double DtCPPDF::GetDeltaWTag(int expno, int rbin, bool mc) const {
     }
 }
 
-Double_t DtCPPDF::f1(const double * vars) {
+Double_t DtCPPDF::f1e(const double * vars) {
     Double_t val = 2 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]) * sin(vars[2]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
-Double_t DtCPPDF::f2(const double * vars) {
+Double_t DtCPPDF::f2e(const double * vars) {
     Double_t val = 2 * cos(vars[0]) * cos(vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
-Double_t DtCPPDF::f3(const double * vars) {
+Double_t DtCPPDF::f3e(const double * vars) {
     Double_t val = 4 * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * cos(vars[1]) * cos(vars[1]) * sin(vars[1]) * cos(vars[2]) * cos(vars[2]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
-Double_t DtCPPDF::f4(const double * vars) {
+Double_t DtCPPDF::f4e(const double * vars) {
     Double_t val = sqrt(2) * sin(vars[0]) * sin(vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * sin(2 * vars[2]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
-Double_t DtCPPDF::f5(const double * vars) {
+Double_t DtCPPDF::f5e(const double * vars) {
     Double_t val = sqrt(2) * sin(2 * vars[0]) * sin(vars[0]) * sin(2 * vars[1]) * sin(vars[1]) * cos(vars[2]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
-Double_t DtCPPDF::f6(const double * vars) {
+Double_t DtCPPDF::f6e(const double * vars) {
     Double_t val = 2 * sin(2 * vars[0]) * sin(vars[0]) * sin(vars[1]) * sin(vars[1]) * sin(vars[1]) * sin(vars[2]);
     return val * eff.GetEfficiency(vars[0], vars[1], vars[2], efficiency_model);
 }
 
 void DtCPPDF::CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
                                       double& Ap0r, double& A0ti, double& Apti,
-                                      const double& constant, const double& cosine, 
+                                      const double& constant, const double& cosine,
                                       const double& sine) const {
 
         const bool mc = (expmc == 2) ? 1 : 0;
@@ -644,6 +644,5 @@ void DtCPPDF::CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
 
 		Apti = apti*((1 + xp*xt + yp*yt)*constant*(1 - delta_wtag_binned) + (1 - xp*xt - yp*yt)*sign*cosine*r_binned + (yp + yt)*sign*sine*r_binned) +\
 			   aptr*((xt*yp - xp*yt)*(constant*(1 - delta_wtag_binned) - sign*cosine*r_binned) + (xt - xp)*sign*sine*r_binned);
-    
+
 }
-    

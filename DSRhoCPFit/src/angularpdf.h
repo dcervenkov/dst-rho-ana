@@ -47,16 +47,33 @@ class AngularPDF : public RooAbsPdf {
     int efficiency_model;
     Efficiency eff;
 
+    // Angular terms from PDF
+    static Double_t f1(const double* vars);
+    static Double_t f2(const double* vars);
+    static Double_t f3(const double* vars);
+    static Double_t f4(const double* vars);
+    static Double_t f5(const double* vars);
+    static Double_t f6(const double* vars);
+
+    // Integrals over two vars of PDF x Efficiency
+    TH1D* fxeff_tht[6] = {nullptr};
+    TH1D* fxeff_thb[6] = {nullptr};
+    TH1D* fxeff_phit[6] = {nullptr};
+
     // Angular terms from PDF x Efficiency
-    Double_t f1(const double* vars);
-    Double_t f2(const double* vars);
-    Double_t f3(const double* vars);
-    Double_t f4(const double* vars);
-    Double_t f5(const double* vars);
-    Double_t f6(const double* vars);
+    Double_t f1e(const double* vars);
+    Double_t f2e(const double* vars);
+    Double_t f3e(const double* vars);
+    Double_t f4e(const double* vars);
+    Double_t f5e(const double* vars);
+    Double_t f6e(const double* vars);
 
     // Numerical integrals of the above
     Double_t int_tht_thb_phit[6];
+
+    TH3F* GetBinnedTrigXEfficiency(Double_t (*trig)(const double* vars), int model, int nbins,
+                                   double limits[6]);
+    void CalculateBinnedIntegralFunctors();
 
     Double_t evaluate() const;
 

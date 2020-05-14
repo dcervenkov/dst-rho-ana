@@ -133,7 +133,7 @@ protected:
     double GetDeltaWTag(int expno, int rbin, bool mc) const;
     void CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
                                  double& Ap0r, double& A0ti, double& Apti,
-                                 const double& constant, const double& cos, 
+                                 const double& constant, const double& cos,
                                  const double& sin) const;
 
     int efficiency_model;
@@ -145,12 +145,12 @@ protected:
 
 
     // Angular terms from PDF x Efficiency
-    Double_t f1 (const double * vars);
-    Double_t f2 (const double * vars);
-    Double_t f3 (const double * vars);
-    Double_t f4 (const double * vars);
-    Double_t f5 (const double * vars);
-    Double_t f6 (const double * vars);
+    Double_t f1e (const double * vars);
+    Double_t f2e (const double * vars);
+    Double_t f3e (const double * vars);
+    Double_t f4e (const double * vars);
+    Double_t f5e (const double * vars);
+    Double_t f6e (const double * vars);
 
 private:
     //ClassDef(DSRhoPDF,1) // Your description goes here...

@@ -227,3 +227,22 @@ double Efficiency::GetNormalization() {
 
     return kde_efficiency->GetSumOfWeights() / histo_efficiency->GetSumOfWeights();
 }
+
+TH3F* Efficiency::GetBinnedEfficiency(int model, int nbins, double limits[6]) {
+    TH3F* binned = new TH3F("binned_eff", "binned_eff", nbins, limits[0], limits[1], nbins,
+                            limits[2], limits[3], nbins, limits[4], limits[5]);
+
+    double thetat, thetab, phit;
+    for (int x = 0; x < nbins; x++) {
+        for (int y = 0; y < nbins; y++) {
+            for (int z = 0; z < nbins; z++) {
+                thetat = binned->GetXaxis()->GetBinCenter(x);
+                thetab = binned->GetYaxis()->GetBinCenter(y);
+                phit = binned->GetZaxis()->GetBinCenter(z);
+                binned->SetBinContent(binned->GetBin(x, y, z),
+                                      GetEfficiency(thetat, thetab, phit, model));
+            }
+        }
+    }
+    return binned;
+}

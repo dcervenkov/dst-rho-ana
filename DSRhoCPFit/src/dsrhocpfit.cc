@@ -218,11 +218,12 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("Version: %s\n", gitversion);
                 exit(0);
             case 'h':
-                printf("Usage: %s [OPTION]... RESULTS-FILE INPUT-FILES\n\n", argv[0]);
+                printf("Usage: %s [OPTION]... INPUT-FILES\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
                 printf("-e, --components=CR|CRSCF|all    do a specified fit type\n");
                 printf("-a, --correlation-plot           create a plot of the correlation matrix\n");
+                printf("-n, --events=NUM                 limit the number of read-in events\n");
                 printf("-f, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit;\n");
                 printf("                                 additional short-hand ARGs are: all, xy, trans and nota0\n");
                 printf("-g, --config=CONFIG-FILE         read in configuration from the specified file\n");
@@ -230,12 +231,13 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-i, --time-independent           make a time-independent fit\n");
                 printf("-l, --log                        save copy of log to results file\n");
                 printf("-m, --MC=0|1                     whether to fit MC or data\n");
-                printf("-o, --output                     basename of the output files\n");
+                printf("-o, --output=BASENAME            basename of the output files\n");
                 printf("-p, --plot-dir=PLOT-DIR          create lifetime/mixing plots\n");
+                printf("-b, --plot-bins=NUM              number of bins in plots\n");
                 printf("-r, --generator-level            do a generator level fit\n");
                 printf("-t, --perfect-tag                use MC info to get perfect tagging\n");
                 printf("-v, --version                	 display version and exit\n");
-                printf("-x, --exclude-channels         	 exclude channels from fit\n");
+                printf("-x, --exclude-channels=CHANNELs  exclude channels from fit\n");
                 exit(0);
                 break;
             default:

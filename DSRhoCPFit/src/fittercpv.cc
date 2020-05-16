@@ -469,14 +469,17 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
     B_pdfs.add(*cr_pdf_B);
     B_bar_pdfs.add(*cr_pdf_B_bar);
 
+    RooAbsPdf* scf_angular_pdf;
+    RooAbsPdf* bkg_angular_pdf;
+
     if (scf) {
-        RooAbsPdf* scf_angular_pdf = CreateSCFPDF(name_prefix, channel_config);
+        scf_angular_pdf = CreateSCFPDF(name_prefix, channel_config);
         B_pdfs.add(*scf_angular_pdf);
         B_bar_pdfs.add(*scf_angular_pdf);
     }
 
     if (bkg) {
-        RooAbsPdf* bkg_angular_pdf = CreateAngularSCFBKGPDF(name_prefix + "_bkg_");
+        bkg_angular_pdf = CreateAngularSCFBKGPDF(name_prefix + "_bkg_");
         B_pdfs.add(*bkg_angular_pdf);
         B_bar_pdfs.add(*bkg_angular_pdf);
     }
@@ -503,12 +506,29 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
     RooAddPdf* pdf_B_bar = new RooAddPdf(prefix + "angular_pdf_B_bar", prefix + "angular_pdf_B_bar",
                                          B_bar_pdfs, fractions);
 
+    TCanvas canvas("test", "test", 500, 500);
+    RooPlot* plot = thetab_->frame(20);
+    data_->plotOn(plot);
+    scf_angular_pdf->plotOn(plot);
+    plot->Draw();
+    canvas.SaveAs("test.png");
+
     RooSimultaneous* sim_pdf =
         new RooSimultaneous(prefix + "angular_pdf", prefix + "angular_pdf", *decaytype_);
     sim_pdf->addPdf(*pdf_B, "FB");
     sim_pdf->addPdf(*pdf_B_bar, "FA");
     sim_pdf->addPdf(*pdf_B, "SB");
     sim_pdf->addPdf(*pdf_B_bar, "SA");
+
+    RooAddPdf* pdf_FB = dynamic_cast<RooAddPdf*>(sim_pdf->getPdf("FB"));
+    RooAbsPdf* scf_pdf = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().find("Kpi_scf_pdf"));
+
+    TCanvas canvas2("test2", "test2", 500, 500);
+    RooPlot* plot2 = thetab_->frame(20);
+    // data_->plotOn(plot);
+    scf_pdf->plotOn(plot2);
+    plot2->Draw();
+    canvas2.SaveAs("test_sim.png");
 
     return sim_pdf;
 }
@@ -673,66 +693,82 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     phit_->setBins(100);
 
     std::vector<RooAbsPdf*> components;
-    RooAbsPdf* all_histpdf = CreateHistPdf(common_config, channel_name, components);
+    // RooAbsPdf* all_histpdf = CreateHistPdf(common_config, channel_name, components);
 
     std::string channel_cut = "channel_cat==channel_cat::" + channel_name;
     RooDataSet* channel_data = dynamic_cast<RooDataSet*>(data_->reduce(channel_cut.c_str()));
 
+    TString chan_name(channel_name.c_str());
+    pdf_->printMultiline(std::cout, 1);
+    // RooAddPdf* pdf_FB = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";SA}"));
+    RooAddPdf* pdf_FB = dynamic_cast<RooAddPdf*>(pdf_->getPdf("FB"));
+    pdf_FB->printMultiline(std::cout, 1);
+
+    pdf_FB->pdfList().Print();
+    RooAbsPdf* cr_pdf_B = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().find(chan_name + "_cr_angular_pdf_B"));
+    // RooAbsPdf* scf_pdf = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().find(chan_name + "_scf_pdf"));
+    RooAbsPdf* scf_pdf = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().find(chan_name + "_scf_pdf"));
+    RooAbsPdf* bkg_pdf = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().find(chan_name + "_bkg_pdf"));
+
+    components.push_back(cr_pdf_B);
+    components.push_back(scf_pdf);
+    components.push_back(bkg_pdf);
+
     std::vector<RooCmdArg> plot_options = {RooFit::Slice(*channel_cat_, channel_name.c_str())};
     RooArgSet* observables = pdf_->getObservables(data_);
     for (auto observable : tools::ToVector<RooRealVar*>(*observables)) {
-        tools::PlotWithPull(*observable, conditional_vars_argset_, *channel_data, *all_histpdf,
+        tools::PlotWithPull(*observable, conditional_vars_argset_, *channel_data, *pdf_,
                             result_, components, common_config["numCPUs"], channel_name, "",
                             plot_options);
     }
 
-    thetat_->setBins(40);
-    thetab_->setBins(40);
-    phit_->setBins(40);
+    // thetat_->setBins(40);
+    // thetab_->setBins(40);
+    // phit_->setBins(40);
 
-    RooDataHist hist("hist", "hist", *observables, *data_);
-    tools::PlotVars2D(*thetat_, *thetab_, hist, channel_name);
-    tools::PlotVars2D(*thetat_, *phit_, hist, channel_name);
-    tools::PlotVars2D(*thetab_, *phit_, hist, channel_name);
+    // RooDataHist hist("hist", "hist", *observables, *data_);
+    // tools::PlotVars2D(*thetat_, *thetab_, hist, channel_name);
+    // tools::PlotVars2D(*thetat_, *phit_, hist, channel_name);
+    // tools::PlotVars2D(*thetab_, *phit_, hist, channel_name);
 
-    // We change the binning for 2D plots, so we have to generate new binned
-    // dataset, to avoid dealing with rebinning.
+    // // We change the binning for 2D plots, so we have to generate new binned
+    // // dataset, to avoid dealing with rebinning.
 
-    // We need this to get the exact number of events to be generated for
-    // the PDF distribution. This is unnecessary for the above, because we
-    // create a RooHistPdf from it and that is normalized to the data when
-    // plotted.
-    RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
-        channel_data->reduce("decaytype==decaytype::FB||decaytype==decaytype::SB"));
-    RooDataSet* dataset_A = dynamic_cast<RooDataSet*>(
-        channel_data->reduce("decaytype==decaytype::FA||decaytype==decaytype::SA"));
+    // // We need this to get the exact number of events to be generated for
+    // // the PDF distribution. This is unnecessary for the above, because we
+    // // create a RooHistPdf from it and that is normalized to the data when
+    // // plotted.
+    // RooDataSet* dataset_B = dynamic_cast<RooDataSet*>(
+    //     channel_data->reduce("decaytype==decaytype::FB||decaytype==decaytype::SB"));
+    // RooDataSet* dataset_A = dynamic_cast<RooDataSet*>(
+    //     channel_data->reduce("decaytype==decaytype::FA||decaytype==decaytype::SA"));
 
-    TString chan_name = channel_name;
-    RooAddPdf* pdf_FB = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FB}"));
-    RooAddPdf* pdf_FA = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FA}"));
-    RooDataHist* all_hist =
-        pdf_FB->generateBinned(*observables, dataset_B->sumEntries(), RooFit::ExpectedData(true));
-    RooDataHist* all_hist_FA =
-        pdf_FA->generateBinned(*observables, dataset_A->sumEntries(), RooFit::ExpectedData(true));
-    all_hist->add(*all_hist_FA);
+    // TString chan_name = channel_name;
+    // RooAddPdf* pdf_FB = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FB}"));
+    // RooAddPdf* pdf_FA = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FA}"));
+    // RooDataHist* all_hist =
+    //     pdf_FB->generateBinned(*observables, dataset_B->sumEntries(), RooFit::ExpectedData(true));
+    // RooDataHist* all_hist_FA =
+    //     pdf_FA->generateBinned(*observables, dataset_A->sumEntries(), RooFit::ExpectedData(true));
+    // all_hist->add(*all_hist_FA);
 
-    // // Set the current directory back to the one for plots (ugly ROOT stuff)
-    // if (output_file_) {
-    //     output_file_->cd();
-    // }
-    tools::PlotPull2D(*thetat_, *thetab_, hist, *all_hist, channel_name);
-    tools::PlotPull2D(*thetat_, *phit_, hist, *all_hist, channel_name);
-    tools::PlotPull2D(*thetab_, *phit_, hist, *all_hist, channel_name);
-    // const double chi2 = Calculate3DChi2(hist, *all_hist);
-    // std::cout << "Chi2 = " << chi2 << std::endl;
+    // // // Set the current directory back to the one for plots (ugly ROOT stuff)
+    // // if (output_file_) {
+    // //     output_file_->cd();
+    // // }
+    // tools::PlotPull2D(*thetat_, *thetab_, hist, *all_hist, channel_name);
+    // tools::PlotPull2D(*thetat_, *phit_, hist, *all_hist, channel_name);
+    // tools::PlotPull2D(*thetab_, *phit_, hist, *all_hist, channel_name);
+    // // const double chi2 = Calculate3DChi2(hist, *all_hist);
+    // // std::cout << "Chi2 = " << chi2 << std::endl;
 
-    // // SaveChi2Scan(sim_pdf, ap_, margin_apa);
-    // // SaveChi2Scan(sim_pdf, apa_, margin_apa);
-    // // SaveChi2Scan(sim_pdf, a0_, margin_a0);
-    // // SaveChi2Scan(sim_pdf, ata_, margin_ata);
+    // // // SaveChi2Scan(sim_pdf, ap_, margin_apa);
+    // // // SaveChi2Scan(sim_pdf, apa_, margin_apa);
+    // // // SaveChi2Scan(sim_pdf, a0_, margin_a0);
+    // // // SaveChi2Scan(sim_pdf, ata_, margin_ata);
 
-    delete dataset_B;
-    delete dataset_A;
+    // delete dataset_B;
+    // delete dataset_A;
 }
 
 RooAbsPdf* FitterCPV::CreateHistPdf(const nlohmann::json common_config,
@@ -1823,75 +1859,77 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix) const {
  *
  * @param file File holding a Meerkat KDE model
  */
-void FitterCPV::SetSCFKDE(const char* file) {
-    Log::print(Log::info, "Setting up KDE SCF model from file '%s'\n", file);
-    OneDimPhaseSpace phasespace_thetat{"phasespace_thetat", thetat_->getMin(), thetat_->getMax()};
-    OneDimPhaseSpace phasespace_thetab{"phasespace_thetab", thetab_->getMin(), thetab_->getMax()};
-    OneDimPhaseSpace phasespace_phit{"phasespace_phit", phit_->getMin(), phit_->getMax()};
-    CombinedPhaseSpace phasespace{"phasespace", &phasespace_thetat, &phasespace_thetab,
-                                  &phasespace_phit};
-    BinnedDensity binned_scf_kde("binned_scf_kde", &phasespace, file);
+RooAbsPdf* FitterCPV::GetSCFKDE(const std::string file) const {
+    Log::print(Log::info, "Setting up KDE SCF model from file '%s'\n", file.c_str());
+    OneDimPhaseSpace* phasespace_thetat = new OneDimPhaseSpace("phasespace_thetat", thetat_->getMin(), thetat_->getMax());
+    OneDimPhaseSpace* phasespace_thetab = new OneDimPhaseSpace("phasespace_thetab", thetab_->getMin(), thetab_->getMax());
+    OneDimPhaseSpace* phasespace_phit = new OneDimPhaseSpace("phasespace_phit", phit_->getMin(), phit_->getMax());
+    CombinedPhaseSpace* phasespace = new CombinedPhaseSpace("phasespace", phasespace_thetat, phasespace_thetab,
+                                  phasespace_phit);
+    BinnedDensity* binned_scf_kde = new BinnedDensity("binned_scf_kde", phasespace, file.c_str());
 
-    TH3D* histo =
-        new TH3D("histo", "histo", 100, thetat_->getMin(), thetat_->getMax(), 100,
-                 thetab_->getMin(), thetab_->getMax(), 100, phit_->getMin(), phit_->getMax());
+    // TH3D* histo =
+    //     new TH3D("histo", "histo", 100, thetat_->getMin(), thetat_->getMax(), 100,
+    //              thetab_->getMin(), thetab_->getMax(), 100, phit_->getMin(), phit_->getMax());
 
-    double thetat, thetab, phit;
-    int num_replaced = 0;
-    int num_checked = 0;
-    for (int x = 1; x <= histo->GetXaxis()->GetNbins(); x++) {
-        for (int y = 1; y <= histo->GetYaxis()->GetNbins(); y++) {
-            for (int z = 1; z <= histo->GetZaxis()->GetNbins(); z++) {
-                thetat = histo->GetXaxis()->GetBinCenter(x);
-                thetab = histo->GetYaxis()->GetBinCenter(y);
-                phit = histo->GetZaxis()->GetBinCenter(z);
-                std::vector<Double_t> coords(3);
-                coords[0] = thetat;
-                coords[1] = thetab;
-                coords[2] = phit;
-                num_checked++;
-                if (CloseToEdge(coords, 0.0)) {
-                    thetat_->setVal(thetat);
-                    thetab_->setVal(thetab);
-                    phit_->setVal(phit);
-                    RooArgSet set(*thetat_, *thetab_, *phit_);
-                    // scf_angular_pdf_->getObservables();
-                    // Log::print(Log::debug, "Close to edge, %f replaced by %f at [%f, %f, %f]\n",
-                    //            binned_scf_kde.density(coords), scf_angular_pdf_->getVal(),
-                    //            thetat_->getVal(), thetab_->getVal(), phit_->getVal());
-                    // histo->SetBinContent(histo->GetBin(x, y, z), scf_angular_pdf_->getVal());
-                    histo->SetBinContent(histo->GetBin(x, y, z),
-                                         binned_scf_kde.density(coords) * 1.5);
-                    num_replaced++;
-                } else {
-                    histo->SetBinContent(histo->GetBin(x, y, z), binned_scf_kde.density(coords));
-                }
-            }
-        }
-    }
-    Log::print(Log::info, "Replaced %i/%i (%.1f%%) SCF bins\n", num_replaced, num_checked,
-               (double)num_replaced / num_checked * 100);
+    // double thetat, thetab, phit;
+    // int num_replaced = 0;
+    // int num_checked = 0;
+    // for (int x = 1; x <= histo->GetXaxis()->GetNbins(); x++) {
+    //     for (int y = 1; y <= histo->GetYaxis()->GetNbins(); y++) {
+    //         for (int z = 1; z <= histo->GetZaxis()->GetNbins(); z++) {
+    //             thetat = histo->GetXaxis()->GetBinCenter(x);
+    //             thetab = histo->GetYaxis()->GetBinCenter(y);
+    //             phit = histo->GetZaxis()->GetBinCenter(z);
+    //             std::vector<Double_t> coords(3);
+    //             coords[0] = thetat;
+    //             coords[1] = thetab;
+    //             coords[2] = phit;
+    //             num_checked++;
+    //             if (CloseToEdge(coords, 0.0)) {
+    //                 thetat_->setVal(thetat);
+    //                 thetab_->setVal(thetab);
+    //                 phit_->setVal(phit);
+    //                 RooArgSet set(*thetat_, *thetab_, *phit_);
+    //                 // scf_angular_pdf_->getObservables();
+    //                 // Log::print(Log::debug, "Close to edge, %f replaced by %f at [%f, %f, %f]\n",
+    //                 //            binned_scf_kde.density(coords), scf_angular_pdf_->getVal(),
+    //                 //            thetat_->getVal(), thetab_->getVal(), phit_->getVal());
+    //                 // histo->SetBinContent(histo->GetBin(x, y, z), scf_angular_pdf_->getVal());
+    //                 histo->SetBinContent(histo->GetBin(x, y, z),
+    //                                      binned_scf_kde.density(coords) * 1.5);
+    //                 num_replaced++;
+    //             } else {
+    //                 histo->SetBinContent(histo->GetBin(x, y, z), binned_scf_kde.density(coords));
+    //             }
+    //         }
+    //     }
+    // }
+    // Log::print(Log::info, "Replaced %i/%i (%.1f%%) SCF bins\n", num_replaced, num_checked,
+    //            (double)num_replaced / num_checked * 100);
 
-    scf_angular_kde_hist_ = new RooDataHist("scf_angular_kde_hist_", "scf_angular_kde_hist_",
-                                            RooArgList(*thetat_, *thetab_, *phit_), histo);
-    scf_angular_kde_ =
-        new RooHistPdf("scf_angular_kde", "scf_angular_kde", RooArgSet(*thetat_, *thetab_, *phit_),
-                       *scf_angular_kde_hist_);
+    // scf_angular_kde_hist_ = new RooDataHist("scf_angular_kde_hist_", "scf_angular_kde_hist_",
+    //                                         RooArgList(*thetat_, *thetab_, *phit_), histo);
+    // scf_angular_kde_ =
+    //     new RooHistPdf("scf_angular_kde", "scf_angular_kde", RooArgSet(*thetat_, *thetab_, *phit_),
+    //                    *scf_angular_kde_hist_);
 
     // scf_angular_pdf_ = scf_angular_kde_;
 
-    // OneDimPhaseSpace* phasespace_thetat = new OneDimPhaseSpace{"phasespace_thetat",
-    // thetat_->getMin(), thetat_->getMax()}; OneDimPhaseSpace* phasespace_thetab = new
-    // OneDimPhaseSpace{"phasespace_thetab", thetab_->getMin(), thetab_->getMax()};
-    // OneDimPhaseSpace* phasespace_phit = new OneDimPhaseSpace{"phasespace_phit", phit_->getMin(),
-    // phit_->getMax()}; CombinedPhaseSpace* phasespace = new CombinedPhaseSpace{"phasespace",
-    // phasespace_thetat, phasespace_thetab,
-    //                               phasespace_phit};
-    // BinnedDensity* binned_scf_kde = new BinnedDensity("binned_scf_kde", phasespace, file);
-    // RooArgList list(*thetat_, *thetab_, *phit_);
-    // RooMeerkatPdf* meerkat_pdf =
-    //     new RooMeerkatPdf("meerkat_pdf", "meerkat_pdf", list, binned_scf_kde);
+    // OneDimPhaseSpace* phasespace_thetat =
+    //     new OneDimPhaseSpace{"phasespace_thetat", thetat_->getMin(), thetat_->getMax()};
+    // OneDimPhaseSpace* phasespace_thetab =
+    //     new OneDimPhaseSpace{"phasespace_thetab", thetab_->getMin(), thetab_->getMax()};
+    // OneDimPhaseSpace* phasespace_phit =
+    //     new OneDimPhaseSpace{"phasespace_phit", phit_->getMin(), phit_->getMax()};
+    // CombinedPhaseSpace* phasespace =
+    //     new CombinedPhaseSpace{"phasespace", &phasespace_thetat, &phasespace_thetab, &phasespace_phit};
+    // BinnedDensity* binned_scf_kde = new BinnedDensity("binned_scf_kde", &phasespace, file);
+    RooArgList list(*thetat_, *thetab_, *phit_);
+    RooMeerkatPdf* meerkat_pdf =
+        new RooMeerkatPdf("scf_pdf", "meerkat_pdf", list, binned_scf_kde);
     // scf_angular_pdf_ = meerkat_pdf;
+    return meerkat_pdf;
 }
 
 /**
@@ -1904,11 +1942,39 @@ RooAbsPdf* FitterCPV::GetHistoSCF(const std::string filename) const {
     TFile f(filename.c_str(), "READ");
     RooHistPdf* temp_pdf = dynamic_cast<RooHistPdf*>(f.Get("scf_hist_pdf"));
 
+    RooDataHist data_hist = temp_pdf->dataHist();
+    RooDataHist* new_data_hist = new RooDataHist("new_data_hist", "new_data_hist",
+                                                 RooArgSet(*thetat_, *thetab_, *phit_), data_hist);
+
+    // thetat_->setBins(20);
+    // thetab_->setBins(20);
+    // phit_->setBins(20);
+    RooHistPdfFast* temp_pdf_fast = new RooHistPdfFast(
+        "scf_pdf", "scf_pdf", RooArgSet(*thetat_, *thetab_, *phit_), *new_data_hist, 2);
+
+    // RooHistPdf* temp_pdf_slow = new RooHistPdf(
+    //     "scf_pdf", "scf_pdf", RooArgSet(*thetat_, *thetab_, *phit_), *new_data_hist);
+    // RooHistPdfFast* temp_pdf_fast = new RooHistPdfFast(
+    //     "scf_pdf_fast", "scf_pdf", RooArgSet(*thetat_, *thetab_, *phit_), temp_pdf->dataHist());
+
+    // RooHistPdf* temp_pdf_slow = new RooHistPdf(
+    //     "scf_pdf_slow", "scf_pdf", RooArgSet(*thetat_, *thetab_, *phit_), temp_pdf->dataHist());
+
+    TCanvas canvas("test", "test", 500, 500);
+    RooPlot* plot = thetab_->frame(20);
+    temp_pdf->plotOn(plot);
+    temp_pdf_fast->plotOn(plot, RooFit::LineColor(kRed));
+    // temp_pdf_slow->plotOn(plot, RooFit::LineColor(kGreen), RooFit::LineStyle(kDashed));
+    plot->Draw();
+    canvas.SaveAs("test_histpdf.png");
+
+    // return temp_pdf;
     // We create a RooHistPdfFast (our version of RooHistPdf that implements
     // caching of its "analytical integral") from the original RooHistPdf to
     // avoid the huge performance hit due to a RooFit bug.
-    return new RooHistPdfFast("scf_pdf", "scf_pdf", RooArgSet(*thetat_, *thetab_, *phit_),
-                              temp_pdf->dataHist());
+    // return new RooHistPdfFast("scf_pdf", "scf_pdf", RooArgSet(*thetat_, *thetab_, *phit_),
+    //                           temp_pdf->dataHist());
+    return temp_pdf_fast;
 }
 /**
  * Determine whether angular coordinates are close to (any) edge of the phasespace.
@@ -1949,6 +2015,7 @@ RooSimultaneous* FitterCPV::CreatePDF(const nlohmann::json config) {
         RooSimultaneous* channel_pdf =
             CreateChannelPDF(channel_name, channel_config, common_config);
         pdf_map[channel_name] = channel_pdf;
+        return channel_pdf;
     }
 
     RooSimultaneous* pdf = new RooSimultaneous("pdf", "pdf", pdf_map, *channel_cat_);
@@ -2164,13 +2231,22 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
 RooAbsPdf* FitterCPV::CreateSCFPDF(const std::string channel_name,
                                    const nlohmann::json channel_config) const {
     if (channel_config.contains("scfHisto")) {
+    // if (false) {
         RooAbsPdf* histo_pdf = GetHistoSCF(channel_config["scfHisto"]);
         std::string name = channel_name;
         name += "_";
         name += histo_pdf->GetName();
         histo_pdf->SetName(name.c_str());
         return histo_pdf;
+    } else if (channel_config.contains("scfKDE")) {
+        RooAbsPdf* histo_pdf = GetSCFKDE(channel_config["scfKDE"]);
+        std::string name = channel_name;
+        name += "_";
+        name += histo_pdf->GetName();
+        histo_pdf->SetName(name.c_str());
+        return histo_pdf;
     } else {
+        Log::LogLine(Log::error) << "Setting up functional SCF";
         std::string name = channel_name;
         name += "_scf_";
         return CreateAngularSCFBKGPDF(name);

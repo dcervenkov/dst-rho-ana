@@ -67,7 +67,7 @@ class FitterCPV {
     bool ResultExists() const { return result_ ? true : false; };
 
     void SetPlotDir(const char* output_dir);
-    void SetSCFKDE(const char* file);
+    RooAbsPdf* GetSCFKDE(const std::string file) const;
     void SetSCFHisto(const char* file);
     bool FixParameters(const char* pars);
     const std::string CreateResultsString() const;

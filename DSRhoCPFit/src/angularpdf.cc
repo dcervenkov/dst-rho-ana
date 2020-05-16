@@ -312,10 +312,9 @@ void AngularPDF::CalculateBinnedIntegralFunctors() {
         fxeff_thb[i] = fxeff->ProjectionY(name_base + "_thb");
         fxeff_phit[i] = fxeff->ProjectionZ(name_base + "_phit");
 
-        const double swiss_constant = 5.52;
-        fxeff_tht[i]->Scale(swiss_constant * thb_bin_width * phit_bin_width);
-        fxeff_thb[i]->Scale(swiss_constant * tht_bin_width * phit_bin_width);
-        fxeff_phit[i]->Scale(swiss_constant * tht_bin_width * thb_bin_width);
+        fxeff_tht[i]->Scale(thb_bin_width * phit_bin_width);
+        fxeff_thb[i]->Scale(tht_bin_width * phit_bin_width);
+        fxeff_phit[i]->Scale(tht_bin_width * thb_bin_width);
         delete fxeff;
     }
 }

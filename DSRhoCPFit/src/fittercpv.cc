@@ -2231,7 +2231,6 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
 RooAbsPdf* FitterCPV::CreateSCFPDF(const std::string channel_name,
                                    const nlohmann::json channel_config) const {
     if (channel_config.contains("scfHisto")) {
-    // if (false) {
         RooAbsPdf* histo_pdf = GetHistoSCF(channel_config["scfHisto"]);
         std::string name = channel_name;
         name += "_";

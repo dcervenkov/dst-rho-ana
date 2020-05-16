@@ -48,4 +48,12 @@ Double_t RooHistPdfFast::analyticalIntegral(Int_t code, const char* rangeName) c
     // rlv->Print();
     // return cached_integral;
     return new_integral;
+
+    /**
+     * Turns out the code and range name not changing is not enough to make sure
+     * no recalculation is necessary. The analytical integral takes some ranges
+     * of the variables internally, so when doing projections, it doesn't work.
+     * It, however, does work when fitting or generating a full 3D
+     * distribution.
+     **/
 }

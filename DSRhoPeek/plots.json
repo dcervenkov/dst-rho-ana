@@ -491,7 +491,7 @@
             "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
             "min": -0.5,
             "max": 0.5,
-            "files": ["../data/DSRho-mdst_basf2_mod_real_unmod_1.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -507,7 +507,7 @@
             "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
             "min": -0.15,
             "max": 0.15,
-            "files": ["../data/DSRho-mdst_basf2_mod_real_unmod_1.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -523,7 +523,55 @@
             "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
             "min": -0.5,
             "max": 0.5,
-            "files": ["../data/DSRho-mdst_basf2_mod_real_unmod_1.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 1,
+                    "cut": "evmcflag==1"
+                }
+            ]
+        },
+        {
+            "fileName": "resolution_thetat_Kpipi0",
+            "formula": "thetat-thetatg",
+            "xAxisTitle": "#Delta#theta_{t} [rad]",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "min": -0.5,
+            "max": 0.5,
+            "files": ["../data/Kpipi0/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 1,
+                    "cut": "evmcflag==1"
+                }
+            ]
+        },
+        {
+            "fileName": "resolution_thetab_Kpipi0",
+            "formula": "thetab-thetabg",
+            "xAxisTitle": "#Delta#theta_{b} [rad]",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "min": -0.15,
+            "max": 0.15,
+            "files": ["../data/Kpipi0/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 1,
+                    "cut": "evmcflag==1"
+                }
+            ]
+        },
+        {
+            "fileName": "resolution_phit_Kpipi0",
+            "formula": "phit-phitg",
+            "xAxisTitle": "#Delta#phi_{t} [rad]",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "min": -0.5,
+            "max": 0.5,
+            "files": ["../data/Kpipi0/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {

@@ -674,8 +674,41 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     thetab_->setBins(100);
     phit_->setBins(100);
 
-    std::vector<RooAbsPdf*> components;
-    RooAbsPdf* all_histpdf = CreateHistPdf(common_config, channel_name, components);
+
+
+    std::vector<RooDataHist*> cr_hists;
+    std::vector<RooDataHist*> scf_hists;
+    std::vector<RooDataHist*> bkg_hists;
+    RooArgList fractions;
+
+    RooDataHist* cr_hist = GeneratePDFHisto(channel_name, FB, CR);
+    RooDataHist* cr_hist_B_bar = GeneratePDFHisto(channel_name, FA, CR);
+    cr_hists.push_back(cr_hist);
+    cr_hists.push_back(cr_hist_B_bar);
+
+    TString chan_name(channel_name);
+    RooDataHist* scf_hist;
+    RooDataHist* bkg_hist;
+    bool scf = false;
+    bool bkg = false;
+    if (common_config["components"] == "CRSCF") {
+        scf = true;
+        fractions.add(*pdf_->getVariables()->find(chan_name + "_cr_scf_f"));
+    } else if (common_config["components"] == "all") {
+        scf = true;
+        bkg = true;
+        fractions.add(*pdf_->getVariables()->find(chan_name + "_cr_f"));
+        fractions.add(*pdf_->getVariables()->find(chan_name + "_scf_f"));
+    }
+
+    if (scf) {
+        scf_hist = GeneratePDFHisto(channel_name, FB, SCF);
+        scf_hists.push_back(scf_hist);
+    }
+    if (bkg) {
+        bkg_hist = GeneratePDFHisto(channel_name, FB, BKG);
+        bkg_hists.push_back(bkg_hist);
+    }
 
     std::string channel_cut = "channel_cat==channel_cat::" + channel_name;
     RooDataSet* channel_data = dynamic_cast<RooDataSet*>(data_->reduce(channel_cut.c_str()));
@@ -683,9 +716,13 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     std::vector<RooCmdArg> plot_options = {RooFit::Slice(*channel_cat_, channel_name.c_str())};
     RooArgSet* observables = pdf_->getObservables(data_);
     for (auto observable : tools::ToVector<RooRealVar*>(*observables)) {
+        std::vector<RooAbsPdf*> components;
+        RooAbsPdf* all_histpdf =
+            CreateHistPdf(cr_hists, scf_hists, bkg_hists, fractions, *observable, components);
         tools::PlotWithPull(*observable, conditional_vars_argset_, *channel_data, *all_histpdf,
                             result_, components, common_config["numCPUs"], channel_name, "",
                             plot_options);
+        delete all_histpdf;
     }
 
     thetat_->setBins(40);
@@ -709,7 +746,6 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     RooDataSet* dataset_A = dynamic_cast<RooDataSet*>(
         channel_data->reduce("decaytype==decaytype::FA||decaytype==decaytype::SA"));
 
-    TString chan_name = channel_name;
     RooAddPdf* pdf_FB = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FB}"));
     RooAddPdf* pdf_FA = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FA}"));
     RooDataHist* all_hist =
@@ -775,83 +811,37 @@ RooDataHist* FitterCPV::GeneratePDFHisto(const std::string channel_name, DecayTy
     return hist;
 }
 
-RooAbsPdf* FitterCPV::CreateHistPdf(const nlohmann::json common_config,
-                                    const std::string channel_name,
+RooAbsPdf* FitterCPV::CreateHistPdf(const std::vector<RooDataHist*> cr_hists,
+                                    const std::vector<RooDataHist*> scf_hists,
+                                    const std::vector<RooDataHist*> bkg_hists,
+                                    const RooArgList fractions,
+                                    const RooArgSet observables,
                                     std::vector<RooAbsPdf*>& components) const {
-    TString chan_name = channel_name;
-    bool scf = false;
-    bool bkg = false;
-    if (common_config["components"] == "CRSCF") {
-        scf = true;
-    } else if (common_config["components"] == "all") {
-        scf = true;
-        bkg = true;
-    }
-
-    RooArgSet* observables = pdf_->getObservables(data_);
-
-    RooDataHist* cr_hist = GeneratePDFHisto(channel_name, FB, CR);
-    RooDataHist* cr_hist_B_bar = GeneratePDFHisto(channel_name, FA, CR);
     // Add histos from both particle and anti-particle PDFs to create the
     // final RooHistPdf.
-    cr_hist->add(*cr_hist_B_bar);
-    RooHistPdf* cr_histpdf = new RooHistPdf("cr_histpdf", "CR", *observables, *cr_hist);
+    RooArgList pdfs;
+    RooHistPdf* cr_histpdf;
+    if (cr_hists.size()) {
+        cr_histpdf = tools::CreatePdfFromHistos("cr_histpdf", "CR", cr_hists, observables);
+        pdfs.add(*cr_histpdf);
+        components.push_back(cr_histpdf);
+    }
 
     RooHistPdf* scf_histpdf;
-    if (scf) {
-        RooDataHist* scf_hist = GeneratePDFHisto(channel_name, FB, SCF);
-        scf_histpdf = new RooHistPdf("scf_histpdf", "SCF", *observables, *scf_hist);
+    if (scf_hists.size()) {
+        scf_histpdf = tools::CreatePdfFromHistos("scf_histpdf", "SCF", scf_hists, observables);
+        pdfs.add(*scf_histpdf);
+        components.push_back(scf_histpdf);
     }
 
     RooHistPdf* bkg_histpdf;
-    if (bkg) {
-        RooDataHist* bkg_hist = GeneratePDFHisto(channel_name, FB, BKG);
-        bkg_histpdf = new RooHistPdf("bkg_histpdf", "BKG", *observables, *bkg_hist);
-    }
-
-    RooAbsArg* cr_scf_f = pdf_->getVariables()->find(chan_name + "_cr_scf_f");
-    RooAbsArg* cr_f = pdf_->getVariables()->find(chan_name + "_cr_f");
-    RooAbsArg* scf_f = pdf_->getVariables()->find(chan_name + "_scf_f");
-    RooAbsPdf* all_histpdf;
-    if ((!scf) && (!bkg)) {
-        all_histpdf = cr_histpdf;
-    } else if (scf && (!bkg)) {
-        all_histpdf = new RooAddPdf("crscf_histpdf", "crscf_histpdf",
-                                    RooArgList(*cr_histpdf, *scf_histpdf), *cr_scf_f);
-    } else if (scf && bkg) {
-        all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf",
-                                    RooArgList(*cr_histpdf, *scf_histpdf, *bkg_histpdf),
-                                    RooArgList(*cr_f, *scf_f));
-    }
-
-    // // Set the current directory back to the one for plots (ugly ROOT stuff)
-    // if (output_file_) {
-    //     output_file_->cd();
-    // }
-
-    // // const double margin_ap = 0.005;
-    // // const double margin_apa = 0.25;
-    // // const double margin_a0 = 0.0015;
-    // // const double margin_ata = 0.3;
-    // // SaveLikelihoodScan(sim_pdf, ap_, margin_ap);
-    // // SaveLikelihoodScan(sim_pdf, apa_, margin_apa);
-    // // SaveLikelihoodScan(sim_pdf, a0_, margin_a0);
-    // // SaveLikelihoodScan(sim_pdf, ata_, margin_ata);
-    // // SaveLikelihoodScan(sim_pdf, ap_, apa_, margin_ap, margin_apa);
-    // // SaveLikelihoodScan(sim_pdf, ap_, a0_, margin_ap, margin_a0);
-    // // SaveLikelihoodScan(sim_pdf, ap_, ata_, margin_ap, margin_ata);
-    // // SaveLikelihoodScan(sim_pdf, apa_, a0_, margin_apa, margin_a0);
-    // // SaveLikelihoodScan(sim_pdf, apa_, ata_, margin_ap, margin_ata);
-    // // SaveLikelihoodScan(sim_pdf, a0_, ata_, margin_a0, margin_ata);
-
-    components.push_back(cr_histpdf);
-    if (scf) {
-        components.push_back(scf_histpdf);
-    }
-    if (bkg) {
+    if (bkg_hists.size()) {
+        bkg_histpdf = tools::CreatePdfFromHistos("bkg_histpdf", "BKG", bkg_hists, observables);
+        pdfs.add(*bkg_histpdf);
         components.push_back(bkg_histpdf);
     }
 
+    RooAbsPdf* all_histpdf = new RooAddPdf("all_histpdf", "all_histpdf", pdfs, fractions);
     return all_histpdf;
 }
 

@@ -13,6 +13,7 @@
 #include "RooAbsData.h"
 #include "RooArgList.h"
 #include "RooArgSet.h"
+#include "RooHistPdf.h"
 #include "RooRealVar.h"
 #include "TChain.h"
 #include "TH2.h"
@@ -72,6 +73,8 @@ void PlotCorrelationMatrix(const RooFitResult& result, std::vector<std::string> 
 
 nlohmann::json MergeJSON (const nlohmann::json& json1, const nlohmann::json& json2);
 double RoundToDecimals(double number, int decimals);
+RooHistPdf* CreatePdfFromHistos(const char* name, const char* title,
+                                std::vector<RooDataHist*> histos, RooArgSet observables);
 
 /**
  * Return a concatenation of two std::vectors

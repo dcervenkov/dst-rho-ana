@@ -25,6 +25,7 @@
 #include "RooDataSet.h"
 #include "RooFitResult.h"
 #include "RooHist.h"
+#include "RooHistPdf.h"
 #include "RooPlot.h"
 #include "RooRealVar.h"
 #include "TCanvas.h"
@@ -1066,6 +1067,16 @@ void PlotCorrelationMatrix(const RooFitResult& result, std::vector<std::string> 
     corr_histo->Draw("col text");
     correlation_plot.SaveAs(constants::format);
     gStyle->SetPalette(kViridis);
+}
+
+RooHistPdf* CreatePdfFromHistos(const char* name, const char* title,
+                                std::vector<RooDataHist*> histos, RooArgSet observables) {
+    RooDataHist* hist = new RooDataHist("hist", "hist", observables);
+    for (auto hist_single : histos) {
+        hist->add(*hist_single);
+    }
+    RooHistPdf* histpdf = new RooHistPdf(name, title, observables, *hist, 1);
+    return histpdf;
 }
 
 }  // namespace tools

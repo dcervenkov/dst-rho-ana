@@ -203,8 +203,12 @@ class FitterCPV {
 
     void PlotChannel(const nlohmann::json common_config, const nlohmann::json channel_config,
                      const std::string channel_name) const;
-    RooAbsPdf* CreateHistPdf(const nlohmann::json common_config, const std::string channel_name,
-                             std::vector<RooAbsPdf*>& components) const;
+    RooAbsPdf* CreateHistPdf(const std::vector<RooDataHist*> cr_hists,
+                                        const std::vector<RooDataHist*> scf_hists,
+                                        const std::vector<RooDataHist*> bkg_hists,
+                                        const RooArgList fractions, const RooArgSet observables,
+                                        std::vector<RooAbsPdf*>& components) const;
+
     bool IsTimeDependent() const;
     RooDataHist* GeneratePDFHisto(const std::string channel_name, DecayType type,
                                   Component component) const;

@@ -70,6 +70,8 @@
 #include "log.h"
 #include "tools.h"
 
+const char* dec_types_str[] = {"FB", "FA", "SB", "SA"};
+
 FitterCPV::FitterCPV(nlohmann::json config) {
     do_lifetime_fit_ = false;
     make_plots_ = false;
@@ -735,37 +737,48 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     delete dataset_A;
 }
 
+RooDataHist* FitterCPV::GeneratePDFHisto(const std::string channel_name, DecayType type,
+                                         Component component) const {
+    TString chan_name(channel_name);
+
+    RooAddPdf* top_pdf =
+        dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";" + dec_types_str[type] + "}"));
+    assert(top_pdf != nullptr);
+
+    TString pdf_name = chan_name;
+    switch (component)
+    {
+    case CR:
+        pdf_name += "_cr_angular_pdf";
+        if (type == FB || type == SB) {
+            pdf_name += "_B";
+        } else {
+            pdf_name += "_B_bar";
+        }
+        break;
+    case SCF:
+        pdf_name += "_scf_pdf";
+        break;
+    case BKG:
+        pdf_name += "_bkg_pdf";
+        break;
+    default:
+        break;
+    }
+
+    RooAbsPdf* component_pdf =
+        dynamic_cast<RooAbsPdf*>(top_pdf->pdfList().find(pdf_name));
+    assert(component_pdf != nullptr);
+
+    RooArgSet* observables = pdf_->getObservables(data_);
+    RooDataHist* hist = component_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
+    return hist;
+}
+
 RooAbsPdf* FitterCPV::CreateHistPdf(const nlohmann::json common_config,
                                     const std::string channel_name,
                                     std::vector<RooAbsPdf*>& components) const {
-    // PDF for B_bar differs, so we have to generate them separately. (One
-    // could also use *extended* RooSimultaneous or 'ProtoData' for
-    // RooSimultaneous.)
-    RooAbsPdf* cr_pdf_B;
-    RooAbsPdf* cr_pdf_B_bar;
-    RooAbsPdf* scf_pdf;
-    RooAbsPdf* bkg_pdf;
-
     TString chan_name = channel_name;
-    RooAddPdf* pdf_FB = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FB}"));
-    RooAddPdf* pdf_FA = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";FA}"));
-    RooAddPdf* pdf_SB = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";SB}"));
-    RooAddPdf* pdf_SA = dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";SA}"));
-    // pdf_FB->Print();
-    // pdf_FA->Print();
-    // pdf_SB->Print();
-    // pdf_SA->Print();
-
-    // TODO: Make this work for TD PDFs as well
-    cr_pdf_B = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().find(chan_name + "_cr_angular_pdf_B"));
-    assert(cr_pdf_B != nullptr);
-    // cr_pdf_B->Print();
-
-    cr_pdf_B_bar =
-        dynamic_cast<RooAbsPdf*>(pdf_FA->pdfList().find(chan_name + "_cr_angular_pdf_B_bar"));
-    assert(cr_pdf_B_bar != nullptr);
-    // cr_pdf_B_bar->Print();
-
     bool scf = false;
     bool bkg = false;
     if (common_config["components"] == "CRSCF") {
@@ -777,10 +790,8 @@ RooAbsPdf* FitterCPV::CreateHistPdf(const nlohmann::json common_config,
 
     RooArgSet* observables = pdf_->getObservables(data_);
 
-    RooDataHist* cr_hist = cr_pdf_B->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
-    RooDataHist* cr_hist_B_bar =
-        cr_pdf_B_bar->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
-
+    RooDataHist* cr_hist = GeneratePDFHisto(channel_name, FB, CR);
+    RooDataHist* cr_hist_B_bar = GeneratePDFHisto(channel_name, FA, CR);
     // Add histos from both particle and anti-particle PDFs to create the
     // final RooHistPdf.
     cr_hist->add(*cr_hist_B_bar);
@@ -788,19 +799,13 @@ RooAbsPdf* FitterCPV::CreateHistPdf(const nlohmann::json common_config,
 
     RooHistPdf* scf_histpdf;
     if (scf) {
-        const int scf_pdf_FB_index = pdf_FB->pdfList().index(chan_name + "_scf_pdf");
-        scf_pdf = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().at(scf_pdf_FB_index));
-        RooDataHist* scf_hist =
-            scf_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
+        RooDataHist* scf_hist = GeneratePDFHisto(channel_name, FB, SCF);
         scf_histpdf = new RooHistPdf("scf_histpdf", "SCF", *observables, *scf_hist);
     }
 
     RooHistPdf* bkg_histpdf;
     if (bkg) {
-        const int bkg_pdf_FB_index = pdf_FB->pdfList().index(chan_name + "_bkg_pdf");
-        bkg_pdf = dynamic_cast<RooAbsPdf*>(pdf_FB->pdfList().at(bkg_pdf_FB_index));
-        RooDataHist* bkg_hist =
-            bkg_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
+        RooDataHist* bkg_hist = GeneratePDFHisto(channel_name, FB, BKG);
         bkg_histpdf = new RooHistPdf("bkg_histpdf", "BKG", *observables, *bkg_hist);
     }
 

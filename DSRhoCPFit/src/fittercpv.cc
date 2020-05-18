@@ -670,12 +670,6 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
                             const std::string channel_name) const {
     Log::LogLine(Log::info) << "Creating plots for channel " << channel_name;
 
-    thetat_->setBins(100);
-    thetab_->setBins(100);
-    phit_->setBins(100);
-
-
-
     std::vector<RooDataHist*> cr_hists;
     std::vector<RooDataHist*> scf_hists;
     std::vector<RooDataHist*> bkg_hists;
@@ -725,6 +719,10 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
         delete all_histpdf;
     }
 
+    int thetat_bins_orig = thetat_->getBins();
+    int thetab_bins_orig = thetab_->getBins();
+    int phit_bins_orig = phit_->getBins();
+
     thetat_->setBins(40);
     thetab_->setBins(40);
     phit_->setBins(40);
@@ -768,6 +766,10 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     // // SaveChi2Scan(sim_pdf, apa_, margin_apa);
     // // SaveChi2Scan(sim_pdf, a0_, margin_a0);
     // // SaveChi2Scan(sim_pdf, ata_, margin_ata);
+
+    thetat_->setBins(thetat_bins_orig);
+    thetab_->setBins(thetab_bins_orig);
+    phit_->setBins(phit_bins_orig);
 
     delete dataset_B;
     delete dataset_A;

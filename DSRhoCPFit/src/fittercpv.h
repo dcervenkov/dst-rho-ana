@@ -210,8 +210,8 @@ class FitterCPV {
                                         std::vector<RooAbsPdf*>& components) const;
 
     bool IsTimeDependent() const;
-    RooDataHist* GeneratePDFHisto(const std::string channel_name, DecayType type,
-                                  Component component) const;
+    RooDataHist* GenerateAsimovHisto(const std::string channel_name, DecayType type,
+                                     Component component) const;
 
     RooDataHist* scf_angular_kde_hist_ = nullptr;
     RooHistPdf* scf_angular_kde_ = nullptr;

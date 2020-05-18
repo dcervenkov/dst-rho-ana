@@ -675,8 +675,18 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     std::vector<RooDataHist*> bkg_hists;
     RooArgList fractions;
 
-    RooDataHist* cr_hist = GeneratePDFHisto(channel_name, FB, CR);
-    RooDataHist* cr_hist_B_bar = GeneratePDFHisto(channel_name, FA, CR);
+    const int thetat_bins_orig = thetat_->getBins();
+    const int thetab_bins_orig = thetab_->getBins();
+    const int phit_bins_orig = phit_->getBins();
+
+    // Increase binning for Asimov histo generation to make the resulting histo
+    // PDF smooth regardles of plot bins.
+    thetat_->setBins(100);
+    thetab_->setBins(100);
+    phit_->setBins(100);
+
+    RooDataHist* cr_hist = GenerateAsimovHisto(channel_name, FB, CR);
+    RooDataHist* cr_hist_B_bar = GenerateAsimovHisto(channel_name, FA, CR);
     cr_hists.push_back(cr_hist);
     cr_hists.push_back(cr_hist_B_bar);
 
@@ -696,11 +706,11 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     }
 
     if (scf) {
-        scf_hist = GeneratePDFHisto(channel_name, FB, SCF);
+        scf_hist = GenerateAsimovHisto(channel_name, FB, SCF);
         scf_hists.push_back(scf_hist);
     }
     if (bkg) {
-        bkg_hist = GeneratePDFHisto(channel_name, FB, BKG);
+        bkg_hist = GenerateAsimovHisto(channel_name, FB, BKG);
         bkg_hists.push_back(bkg_hist);
     }
 
@@ -711,17 +721,25 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     RooArgSet* observables = pdf_->getObservables(data_);
     for (auto observable : tools::ToVector<RooRealVar*>(*observables)) {
         std::vector<RooAbsPdf*> components;
+
+        // Increase binning for histo PDF generation to make it smooth regardles of
+        // plot bins.
+        thetat_->setBins(100);
+        thetab_->setBins(100);
+        phit_->setBins(100);
+
         RooAbsPdf* all_histpdf =
             CreateHistPdf(cr_hists, scf_hists, bkg_hists, fractions, *observable, components);
+
+        thetat_->setBins(thetat_bins_orig);
+        thetab_->setBins(thetab_bins_orig);
+        phit_->setBins(phit_bins_orig);
+
         tools::PlotWithPull(*observable, conditional_vars_argset_, *channel_data, *all_histpdf,
                             result_, components, common_config["numCPUs"], channel_name, "",
                             plot_options);
         delete all_histpdf;
     }
-
-    int thetat_bins_orig = thetat_->getBins();
-    int thetab_bins_orig = thetab_->getBins();
-    int phit_bins_orig = phit_->getBins();
 
     thetat_->setBins(40);
     thetab_->setBins(40);
@@ -775,8 +793,8 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     delete dataset_A;
 }
 
-RooDataHist* FitterCPV::GeneratePDFHisto(const std::string channel_name, DecayType type,
-                                         Component component) const {
+RooDataHist* FitterCPV::GenerateAsimovHisto(const std::string channel_name, DecayType type,
+                                            Component component) const {
     TString chan_name(channel_name);
 
     RooAddPdf* top_pdf =

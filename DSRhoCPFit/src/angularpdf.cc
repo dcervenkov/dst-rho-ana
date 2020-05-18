@@ -104,12 +104,26 @@ Double_t AngularPDF::evaluate() const {
         apti = -apti;
     }
 
-    Double_t value = ap*ap*2*sin(tht)*sin(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)*sin(phit)+\
-                     at*at*2*cos(tht)*cos(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)+\
-                     a0*a0*4*sin(tht)*sin(tht)*sin(tht)*cos(thb)*cos(thb)*sin(thb)*cos(phit)*cos(phit)+\
-                     sqrt(2)*ap0r*sin(tht)*sin(tht)*sin(tht)*sin(2*thb)*sin(thb)*sin(2*phit)-\
-                     sqrt(2)*a0ti*sin(2*tht)*sin(tht)*sin(2*thb)*sin(thb)*cos(phit)-\
-                     2*apti*sin(2*tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit);
+    Double_t sintht = sin(tht);
+    Double_t sinthb = sin(thb);
+    Double_t sinphit = sin(phit);
+
+    Double_t costht = cos(tht);
+    Double_t costhb = cos(thb);
+    Double_t cosphit = cos(phit);
+
+    Double_t sin2tht = sin(2 * tht);
+    Double_t sin2thb = sin(2 * thb);
+    Double_t sin2phit = sin(2 * phit);
+
+    Double_t sqrt2 = sqrt(2);
+
+    Double_t value = ap * ap * 2 * sintht * sintht * sintht * sinthb * sinthb * sinthb * sinphit * sinphit+\
+                     at * at * 2 * costht * costht * sintht * sinthb * sinthb * sinthb+\
+                     a0 * a0 * 4 * sintht * sintht * sintht * costhb * costhb * sinthb * cosphit * cosphit+\
+                     sqrt2 * ap0r * sintht * sintht * sintht * sin2thb * sinthb * sin2phit-\
+                     sqrt2 * a0ti * sin2tht * sintht * sin2thb * sinthb * cosphit-\
+                     2 * apti * sin2tht * sintht * sinthb * sinthb * sinthb * sinphit;
 
     // Log::print(Log::debug, "eval: %f\n", value * eff.GetEfficiency(tht, thb, phit, efficiency_model));
 

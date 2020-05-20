@@ -504,10 +504,12 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     // is defined only on a subset of the var range, or there are empty bins,
     // etc. it will be wrong. However, RooFit doesn't give access to anything
     // like ndof itself, so this will have to do for now.
-    const int num_floating_pars = result ? result->floatParsFinal().getSize() : 0;
+    RooArgList floating_pars = result ? result->floatParsFinal() : RooArgList();
+    const int num_floating_pars = floating_pars.getSize();
     const int ndof = var.getBinning().numBins() - num_floating_pars;
     const double chi2 = plot->chiSquare(num_floating_pars) * ndof;
-    TPaveText* stat_box = CreateStatBox(chi2, ndof, result->floatParsFinal(), true, true);
+    TPaveText* stat_box =
+        CreateStatBox(chi2, ndof, floating_pars, true, true);
     if (stat_box) {
         stat_box->Draw();
     }

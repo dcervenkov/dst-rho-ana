@@ -283,11 +283,14 @@ void FitterCPV::PrepareVarArgsets() {
         conditional_vars_argset_.add(**var);
     }
 
-    // TODO: Comments
+    // These are all the variables that are in the dataset. We use the
+    // RooArgSet, e.g., when we create the initial RooDataSet from the input
+    // TChain.
     for (auto var : dataset_vars_) {
         dataset_vars_argset_.add(**var);
     }
 
+    // This RooArgSet holds all the parameters that we fit - trans + x,y.
     for (auto par : parameters_) {
         parameters_argset_.add(**par);
     }
@@ -1677,7 +1680,6 @@ void FitterCPV::PlotEfficiency() {
  * @return const double
  */
 const double FitterCPV::Calculate3DChi2(const RooDataHist& data, const RooDataHist& pdf) {
-    // TODO: Remove the commented histogram lines
     // TH1I h_bin_content("h_bin_content", "Bin Content", 100, 0, 99);
     double chi2 = 0;
     int bins_used = 0;
@@ -2114,15 +2116,13 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
     TString FA_cuts;
     TString SB_cuts;
     TString SA_cuts;
-    // TODO: Treat case that key exists but is false
-    if (common_config.contains("perfectTagging")) {
+    if (common_config.contains("perfectTagging") && common_config["perfectTagging"] == true) {
         FB_cuts = "brecflav==1&&btagmcli<0";
         FA_cuts = "brecflav==-1&&btagmcli>=0";
         SB_cuts = "brecflav==1&&btagmcli>=0";
         SA_cuts = "brecflav==-1&&btagmcli<0";
     } else {
-        // TODO: Treat case that key exists but is false
-        if (common_config.contains("generatorLevel")) {
+        if (common_config.contains("generatorLevel") && common_config["generatorLevel"] == true) {
             Log::print(Log::warning,
                        "Attempting to use realistic tagging with generator level fit. This will "
                        "probably end badly. Consider using the '--perfect-tag' switch.\n");

@@ -269,6 +269,7 @@ Double_t DtCPPDF::evaluate() const {
                                 pdf_cos, pdf_sin);
 
 
+        // TODO: Make this faster by precomputing sin() and cos() like in angularpdf.cc
         Double_t value = Ap2*2*sin(tht)*sin(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)*sin(phit)+\
                          At2*2*cos(tht)*cos(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)+\
                          A02*4*sin(tht)*sin(tht)*sin(tht)*cos(thb)*cos(thb)*sin(thb)*cos(phit)*cos(phit)+\
@@ -304,7 +305,7 @@ Double_t DtCPPDF::evaluate() const {
 
 //  return Belle::AddOutlierWithBkg((int) expno, dt, 1, pdf, pdf, (int) vrntrk, (int) vtntrk, dtres_param,
 //          nnorm / alpha, nnorm / alpha, constants::cut_dt_low, constants::cut_dt_high, alpha, 1);
-// 
+//
 //  return pdf;
 
 }
@@ -597,7 +598,7 @@ Double_t DtCPPDF::f6(const double * vars) {
 
 void DtCPPDF::CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
                                       double& Ap0r, double& A0ti, double& Apti,
-                                      const double& constant, const double& cosine, 
+                                      const double& constant, const double& cosine,
                                       const double& sine) const {
 
         const bool mc = (expmc == 2) ? 1 : 0;
@@ -644,6 +645,5 @@ void DtCPPDF::CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
 
 		Apti = apti*((1 + xp*xt + yp*yt)*constant*(1 - delta_wtag_binned) + (1 - xp*xt - yp*yt)*sign*cosine*r_binned + (yp + yt)*sign*sine*r_binned) +\
 			   aptr*((xt*yp - xp*yt)*(constant*(1 - delta_wtag_binned) - sign*cosine*r_binned) + (xt - xp)*sign*sine*r_binned);
-    
+
 }
-    

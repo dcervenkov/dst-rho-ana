@@ -177,10 +177,8 @@ rule yield_summary:
     output:
         expand("DSRhoYield/results/{channel}_{type}_fractions.json", channel=CHANNELS, type=["mc", "data"]),
         "DSRhoYield/results/avg_data_fractions.json"
-    log:
-        "yield.log"
     shell:
-        "cd DSRhoYield && ./tools/print_all_yields.py &> {log}"
+        "cd DSRhoYield && ./tools/print_all_yields.py &> yield.log"
 
 rule background:
     input:

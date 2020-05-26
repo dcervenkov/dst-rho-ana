@@ -196,7 +196,7 @@ rule background:
         channel = "Kpi|Kpipi0|K3pi|together"
     shell:
         "./DSRhoBackground/DSRhoBackground"
-        " {params} --plot-dir={output.plotdir} {output.result} {input} &> {log}"
+        " {params} --angular --plot-dir={output.plotdir} {output.result} {input} &> {log}"
 
 rule background_nonphys:
     input:
@@ -208,7 +208,7 @@ rule background_nonphys:
         "DSRhoBackground/logs/nonphys_{channel}_{mc}_{bkg_type}"
     shell:
         "./DSRhoBackground/DSRhoBackground"
-        " --plot-dir={output.plotdir} {output.result} {input} &> {log}"
+        " --plot-dir={output.plotdir} --angular --empirical {output.result} {input} &> {log}"
 
 rule lifetime_configs:
     input:

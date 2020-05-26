@@ -188,7 +188,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 exit(0);
                 break;
             case 'h':
-                printf("Usage: %s [OPTION]... INPUT-FILES\n\n", argv[0]);
+                printf("Usage: %s [OPTION]... RESULTS-FILE INPUT-FILES\n\n", argv[0]);
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS       number of CPU cores to use for fitting and plotting\n");
                 printf("-k, --kde                 use kernel density estimation\n");

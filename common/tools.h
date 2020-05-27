@@ -35,7 +35,7 @@ void PlotVar(const RooRealVar& var, const RooAbsPdf&);
 void PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist& data2,
              bool draw_pull, bool draw_residual);
 void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const RooDataSet& data,
-                  const RooAbsPdf& pdf, const RooFitResult* const result,
+                  const RooAbsPdf& pdf, const RooArgList& results,
                   const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
                   int numCPUs = 1, std::string prefix = "", std::string title = "",
                   std::vector<RooCmdArg> options = std::vector<RooCmdArg>());
@@ -49,6 +49,7 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
                 const bool residual = false);
 TString GetCommonCutsString();
 void SaveTextToFile(const std::string filename, const std::string text);
+RooArgList BlindResults(const RooArgList& orig_results, double range);
 
 
 void LogEnvironmentMetadata(TFile* file);

@@ -720,6 +720,12 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     std::string channel_cut = "channel_cat==channel_cat::" + channel_name;
     RooDataSet* channel_data = dynamic_cast<RooDataSet*>(data_->reduce(channel_cut.c_str()));
 
+    RooArgList results = result_ ? result_->floatParsFinal() : RooArgList();
+    if (common_config.contains("blind") && common_config["blind"] == true) {
+        Log::print(Log::info, "Blinding results\n");
+        results = tools::BlindResults(results, 3);
+    }
+
     std::vector<RooCmdArg> plot_options = {RooFit::Slice(*channel_cat_, channel_name.c_str())};
     RooArgSet* observables = pdf_->getObservables(data_);
     for (auto observable : tools::ToVector<RooRealVar*>(*observables)) {
@@ -739,7 +745,7 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
         phit_->setBins(phit_bins_orig);
 
         tools::PlotWithPull(*observable, conditional_vars_argset_, *channel_data, *all_histpdf,
-                            result_, components, common_config["numCPUs"], channel_name, "",
+                            results, components, common_config["numCPUs"], channel_name, "",
                             plot_options);
         delete all_histpdf;
     }

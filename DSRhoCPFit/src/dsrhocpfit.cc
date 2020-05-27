@@ -146,6 +146,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"config", required_argument, 0, 'g'},
                                     {"components", required_argument, 0, 'e'},
                                     {"correlation-plot", no_argument, 0, 'a'},
+                                    {"blind", no_argument, 0, 'd'},
                                     {"events", required_argument, 0, 'n'},
                                     {"exclude-channels", required_argument, 0, 'x'},
                                     {"MC", required_argument, 0, 'm'},
@@ -161,7 +162,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:e:n:x:m:f:b:p:o:litrvh", long_options,
+    while ((c = getopt_long(argc, argv, "c:g:e:n:x:m:f:b:p:o:litrvhad", long_options,
                             &option_index)) != -1) {
         switch (c) {
             case 0:
@@ -180,6 +181,9 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 break;
             case 'a':
                 config["correlation-plot"] = true;
+                break;
+            case 'd':
+                config["blind"] = true;
                 break;
             case 'n':
                 config["events"] = atoi(optarg);
@@ -223,6 +227,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
                 printf("-e, --components=CR|CRSCF|all    do a specified fit type\n");
                 printf("-a, --correlation-plot           create a plot of the correlation matrix\n");
+                printf("-d, --blind                      blind results in plots by adding deterministic random numbers\n");
                 printf("-n, --events=NUM                 limit the number of read-in events\n");
                 printf("-f, --fix=ARG1,ARG2,...          fix specified argument(s) to input values in the fit;\n");
                 printf("                                 additional short-hand ARGs are: all, xy, trans and nota0\n");

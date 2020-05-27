@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <random>
 #include <sstream>
 #include <vector>
 
@@ -424,7 +425,7 @@ void PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist&
  * @param title [optional] Title for the y-axis
  */
 void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const RooDataSet& data,
-                  const RooAbsPdf& pdf, const RooFitResult* const result,
+                  const RooAbsPdf& pdf, const RooArgList& results,
                   const std::vector<RooAbsPdf*> components, int numCPUs, std::string prefix,
                   std::string title, std::vector<RooCmdArg> options) {
     TString name;
@@ -504,12 +505,11 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     // is defined only on a subset of the var range, or there are empty bins,
     // etc. it will be wrong. However, RooFit doesn't give access to anything
     // like ndof itself, so this will have to do for now.
-    RooArgList floating_pars = result ? result->floatParsFinal() : RooArgList();
-    const int num_floating_pars = floating_pars.getSize();
+    const int num_floating_pars = results.getSize();
     const int ndof = var.getBinning().numBins() - num_floating_pars;
     const double chi2 = plot->chiSquare(num_floating_pars) * ndof;
     TPaveText* stat_box =
-        CreateStatBox(chi2, ndof, floating_pars, true, true);
+        CreateStatBox(chi2, ndof, results, true, true);
     if (stat_box) {
         stat_box->Draw();
     }
@@ -1071,6 +1071,14 @@ void PlotCorrelationMatrix(const RooFitResult& result, std::vector<std::string> 
     gStyle->SetPalette(kViridis);
 }
 
+/**
+ * @brief Create a single RooHistPdf from multiple RooDataHists
+ *
+ * @param name Name of the PDF
+ * @param title Title of the PDF
+ * @param histos Source histograms from which to create the PDF
+ * @param observables observables to include in the PDF
+ */
 RooHistPdf* CreatePdfFromHistos(const char* name, const char* title,
                                 std::vector<RooDataHist*> histos, RooArgSet observables) {
     RooDataHist* hist = new RooDataHist("hist", "hist", observables);
@@ -1079,6 +1087,32 @@ RooHistPdf* CreatePdfFromHistos(const char* name, const char* title,
     }
     RooHistPdf* histpdf = new RooHistPdf(name, title, observables, *hist, 1);
     return histpdf;
+}
+
+/**
+ * @brief Add a deterministic random value to each var in the list
+ *
+ * @param orig_results Original list of results
+ * @param range Random values are chosen uniformly from (-range, +range)
+ *
+ * @return RooArgList New blinded results list
+ */
+RooArgList BlindResults(const RooArgList& orig_results, double range) {
+    std::mt19937 rnd_generator(3);
+    assert(range > 0);
+    std::uniform_real_distribution<double> uniform(-range, range);
+
+    RooArgList blind_results(orig_results);
+    for (size_t i = 0; i < orig_results.size(); i++) {
+        const double orig_val = static_cast<RooRealVar*>(orig_results.at(i))->getVal();
+        const double min = static_cast<RooRealVar*>(orig_results.at(i))->getMin();
+        const double max = static_cast<RooRealVar*>(orig_results.at(i))->getMax();
+
+        static_cast<RooRealVar*>(blind_results.at(i))->setMin(min - range);
+        static_cast<RooRealVar*>(blind_results.at(i))->setMax(max + range);
+        static_cast<RooRealVar*>(blind_results.at(i))->setVal(orig_val + uniform(rnd_generator));
+    }
+    return blind_results;
 }
 
 }  // namespace tools

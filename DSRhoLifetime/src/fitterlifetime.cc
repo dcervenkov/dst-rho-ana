@@ -186,8 +186,8 @@ void FitterLifetime::ProcessLifetime() {
                                   RooFit::Minimizer("Minuit2"), RooFit::Save(true),
                                   RooFit::NumCPU(num_CPUs_));
     if (make_plots_) {
-        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_, *lifetime_pdf, result_,
-                            components);
+        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_, *lifetime_pdf,
+                            result_ ? result_->floatParsFinal() : RooArgList(), components);
     }
 }
 
@@ -274,12 +274,14 @@ void FitterLifetime::ProcessMixing() {
     if (make_plots_) {
         RooDataSet* dataset_F =
             static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::F"));
-        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_F, *mixing_pdf_F, result_,
+        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_F, *mixing_pdf_F,
+                            result_ ? result_->floatParsFinal() : RooArgList(),
                             tools::ToVector<RooAbsPdf*>(mixing_pdfs_F));
 
         RooDataSet* dataset_S =
             static_cast<RooDataSet*>(dataset_->reduce("decaytype==decaytype::S"));
-        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_S, *mixing_pdf_S, result_,
+        tools::PlotWithPull(*dt_, conditional_argset_, *dataset_S, *mixing_pdf_S,
+                            result_ ? result_->floatParsFinal() : RooArgList(),
                             tools::ToVector<RooAbsPdf*>(mixing_pdfs_S));
     }
 }

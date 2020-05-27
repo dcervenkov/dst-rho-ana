@@ -193,7 +193,9 @@ void FitterBKG::PlotVar(RooRealVar& var, const RooDataSet* data) const {
 }
 
 void FitterBKG::PlotWithPull(RooRealVar& var, const RooDataSet& data, const RooAbsPdf& pdf) const {
-    tools::PlotWithPull(var, conditional_vars_argset_, data, pdf, result_, std::vector<RooAbsPdf*>(), num_CPUs_);
+    tools::PlotWithPull(var, conditional_vars_argset_, data, pdf,
+                        result_ ? result_->floatParsFinal() : RooArgList(),
+                        std::vector<RooAbsPdf*>(), num_CPUs_);
 }
 
 /**
@@ -476,7 +478,8 @@ void FitterBKG::PlotKDE(AdaptiveKernelDensity kde) const {
     RooHistPdf meerkat_histpdf("meerkat_histpdf", "meerkat_histpdf", RooArgSet(thetat_, thetab_, phit_), roo_model);
     for (auto var : vars) {
         // PlotWithPull(var, *dataset_, meerkat_pdf);
-        tools::PlotWithPull(var, conditional_vars_argset_, *dataset_, meerkat_histpdf, result_);
+        tools::PlotWithPull(var, conditional_vars_argset_, *dataset_, meerkat_histpdf,
+                            result_ ? result_->floatParsFinal() : RooArgList());
     }
 
     for (int i = 0; i < 3; i++) {

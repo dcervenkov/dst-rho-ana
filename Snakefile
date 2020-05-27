@@ -123,7 +123,10 @@ rule all:
                 stream=range(1)),
             expand("DSRhoCPFit/results/{channel}_{type}_{components}_plot/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["all"],
-                stream=range(1))
+                stream=range(1)),
+
+            expand("DSRhoCPFit/results/{channel}_{type}_data",
+                channel=CHANNELS_AND_TOGETHER, type=["ti"])
         )
 
 rule yield_jobs:
@@ -351,6 +354,27 @@ rule cpfit_mc_plot:
         "--cpus=1",
         "--log",
         "--components={components}",
+        lambda wildcards:
+            "--time-independent" if wildcards.type == "ti" else "",
+        lambda wildcards:
+            get_excluded_channels(wildcards)
+    shell:
+        "./DSRhoCPFit/DSRhoCPFit {params} --config={input.config} --plot-dir={output.plotdir} "
+        "--output={output.result} &> {log}"
+
+rule cpfit_data_plot:
+    input:
+        config = "DSRhoCPFit/configs/config_data.json",
+    output:
+        result = "DSRhoCPFit/results/{channel}_{type}_data",
+        plotdir = directory("DSRhoCPFit/plots/{channel}_{type}_data")
+    log:
+        "DSRhoCPFit/logs/{channel}_{type}_data.log"
+    params:
+        "--MC=0",
+        "--cpus=1",
+        "--log",
+        "--components=all",
         lambda wildcards:
             "--time-independent" if wildcards.type == "ti" else "",
         lambda wildcards:

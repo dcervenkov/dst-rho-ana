@@ -209,6 +209,10 @@ void DSRhoModule::event(BelleEvent*, int *status) {
 	// Used for skimming; default to 0, change to 1 if we find a candidate
 	*status = 0;
 
+	if (ipUsable != 1) {
+		printf("ERROR: IP not usable skipping event!\n");
+		return;
+	}
 	if (numPrintedEvents > 10) return;
 
 	// Obtain the ExpnNo, runNo and evtNo

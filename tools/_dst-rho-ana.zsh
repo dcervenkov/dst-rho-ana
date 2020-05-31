@@ -101,8 +101,21 @@ _dsrhoyield_complete()
 	'--plot-dir=[create lifetime/mixing plots]:directory:_files'
 }
 
+_dsrhosidebands_complete()
+{
+	_arguments \
+	'--cpus=[number of CPU cores to use for fitting and plotting]' \
+	'--config=[read in configuration from the specified file]:filename:_files' \
+	'--version[show version]' \
+	'--help[display help]' \
+	'--log[save copy of log to results file]' \
+	'--plot-dir=[create lifetime/mixing plots]:directory:_files' \
+	'--output=[output filename]:filename:_files'
+}
+
 compdef _dsrhocpfit_complete DSRhoCPFit
 compdef _dsrhobackground_complete DSRhoBackground
 compdef _dsrholifetime_complete DSRhoLifetime
 compdef _dsrhoyield_complete DSRhoYield
+compdef _dsrhosidebands_complete DSRhoSidebands
 

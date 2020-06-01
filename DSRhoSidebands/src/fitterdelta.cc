@@ -16,7 +16,6 @@
 #include <string>
 
 // ROOT includes
-#include "RooHistPdf.h"
 #include "RooArgSet.h"
 #include "RooCategory.h"
 #include "RooDataHist.h"
@@ -24,6 +23,7 @@
 #include "RooFitResult.h"
 #include "RooGenericPdf.h"
 #include "RooHist.h"
+#include "RooHistPdf.h"
 #include "RooPlot.h"
 #include "RooRealVar.h"
 #include "RooTreeDataStore.h"
@@ -31,11 +31,12 @@
 #include "TCanvas.h"
 #include "TChain.h"
 #include "TEnv.h"
+#include "TF1.h"
 #include "TFile.h"
-#include "TMath.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3F.h"
+#include "TMath.h"
 #include "TPaveText.h"
 #include "TStyle.h"
 #include "TTree.h"
@@ -48,8 +49,19 @@
 FitterDelta::FitterDelta(nlohmann::json config) {
     TTree* signal_data = ReadInFile(config["inputFiles"]["signal"]);
     TTree* sidebands_data = ReadInFile(config["inputFiles"]["sidebands"]);
-    signal_data->Print();
-    sidebands_data->Print();
+
+    const double min = config["fitRanges"]["thetab"]["min"].get<double>();
+    const double max = config["fitRanges"]["thetab"]["max"].get<double>();
+    TH1D* histo = new TH1D("histo", "histo", 20, min, max);
+
+    FillSubtractionHisto(histo, "thetab", signal_data, sidebands_data);
+
+    histo->Fit("chebyshev3");
+    fit_function_ = histo->GetFunction("chebyshev3");
+
+    TCanvas canvas("canvas", "canvas", 500, 500);
+    histo->Draw("e1");
+    canvas.SaveAs("test.png");
 }
 
 FitterDelta::~FitterDelta() {
@@ -91,3 +103,34 @@ TTree* FitterDelta::ReadInFile(const nlohmann::json data_files) const {
     Log::print(Log::info, "Input dataset ready\n");
     return tree;
 }
+
+/**
+ * @brief Fill the supplied histo with tree1 - tree2
+ *
+ * Stupid ROOT doesn't permit the TTrees to be const as Draw() is not a const function.
+ *
+ * @param histo Histo to be filled
+ * @param branch Name of the tree branch to be used
+ * @param tree1 First tree
+ * @param tree2 Second tree
+ */
+void FitterDelta::FillSubtractionHisto(TH1D* histo, TString branch, TTree* tree1, TTree* tree2) const {
+    TString name = histo->GetName();
+    tree1->Draw(branch + ">>" + name, "", "goff");
+    TH1D* temp_histo = static_cast<TH1D*>(histo->Clone("temp_histo"));
+    temp_histo->Reset();
+    tree2->Draw(branch + ">>temp_histo", "", "goff");
+    TCanvas canvas("canvas", "canvas", 500, 500);
+    temp_histo->SetLineColor(kRed);
+    temp_histo->Draw();
+    histo->Draw("same");
+    canvas.SaveAs("sig_vs_side.png");
+    histo->Add(temp_histo, -1);
+}
+
+nlohmann::json FitterDelta::GetJSONResults() const {
+    nlohmann::json results = tools::GetResultsJSON(*fit_function_, "thetab_corr_");
+    // RooFit's Chebyshev doesn't use the constant term
+    results.erase("thetab_corr_p0");
+    return results;
+};

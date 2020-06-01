@@ -13,25 +13,15 @@
 #include <array>
 
 // ROOT includes
-#include "RooAddPdf.h"
-#include "RooBreitWigner.h"
-#include "RooBifurGauss.h"
-#include "RooChebychev.h"
-#include "RooExponential.h"
-#include "RooFormulaVar.h"
-#include "RooGaussian.h"
-#include "RooGenericPdf.h"
-#include "RooPolynomial.h"
-#include "RooProdPdf.h"
-#include "RooVoigtian.h"
-#include "RooRealVar.h"
 #include "TCanvas.h"
 #include "TChain.h"
-#include "TPaveText.h"
+#include "TH1D.h"
+#include "TString.h"
 
 // Local includes
 #include "constants.h"
 #include "nlohmann/json.hpp"
+#include "tools.h"
 
 class FitterDelta {
    public:
@@ -40,9 +30,13 @@ class FitterDelta {
 
     TTree* ReadInFile(const nlohmann::json data_files) const;
     void SetPlotDir(const char* output_dir);
-    void Fit(RooAbsPdf* pdf, RooDataSet* data);
     void PrintResultsJSON() const;
+    void SetOutputFile(TFile* file) { output_file_ = file; };
+    nlohmann::json GetJSONResults() const;
 
    private:
+    void FillSubtractionHisto(TH1D* histo, TString branch, TTree* tree1, TTree* tree2) const;
+
     TFile* output_file_ = nullptr;
+    TF1* fit_function_ = nullptr;
 };

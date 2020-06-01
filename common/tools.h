@@ -68,6 +68,7 @@ nlohmann::json GetResultsJSON(const RooAbsPdf* model, const RooArgSet& observabl
 nlohmann::json GetResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables,
                               std::string prefix, bool randomize = false);
 nlohmann::json GetResultsJSON(const RooFitResult* result, std::string prefix, bool randomize);
+nlohmann::json GetResultsJSON(const TF1& func, std::string prefix);
 void CreateDirsIfNecessary(const std::string file);
 RooLinkedList VecToCmdList(std::vector<RooCmdArg>& commands);
 TH2* ArrangeCorrelationMatrix(const TH2* matrix, std::vector<std::string> ordered_labels);

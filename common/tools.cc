@@ -33,6 +33,7 @@
 #include "TCanvas.h"
 #include "TChain.h"
 #include "TEnv.h"
+#include "TF1.h"
 #include "TFile.h"
 #include "TH2D.h"
 #include "TLegend.h"
@@ -1026,6 +1027,22 @@ nlohmann::json GetResultsJSON(const RooFitResult* result, std::string prefix, bo
         double value = var->getVal();
         json[name] = RoundToDecimals(value, 4);
     }
+
+/*
+ * Extract function parameters and return them as a JSON object
+ *
+ * @param func Function from which parameters are to be extracted
+ *
+ * @return nlohmann::json The resultant JSON object
+ */
+nlohmann::json GetResultsJSON(const TF1& func, std::string prefix) {
+    nlohmann::json json;
+    for (int i = 0; i < func.GetNumberFreeParameters(); i++) {
+        std::string name = prefix + func.GetParName(i);
+        Log::LogLine(Log::debug) << name << " = " << func.GetParameter(i);
+        json[name] = RoundToDecimals(func.GetParameter(i), 4);
+    }
+
     return json;
 }
 

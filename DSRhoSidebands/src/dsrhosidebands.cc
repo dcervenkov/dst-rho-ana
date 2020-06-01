@@ -20,6 +20,7 @@
 #include <boost/filesystem.hpp>
 
 // ROOT includes
+#include "TFile.h"
 
 // Local includes
 #include "colors.h"
@@ -58,10 +59,8 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    if (config.ShouldSaveLog()) {
-        Log::print(Log::debug, "Manipulating cout buffer to save copy of stdout\n");
-        std::cout.rdbuf(out.rdbuf());
-    }
+    FitterDelta fitter(config.json);
+
 
     if (boost::algorithm::ends_with(gitversion, "-dirty")) {
         Log::print(Log::warning, "Using version from dirty Git worktree\n");
@@ -70,15 +69,27 @@ int main(int argc, char* argv[]) {
     tools::SetupPlotStyle();
     colors::setColors();
 
-    FitterDelta fitter(config.json);
+    std::string output_filename = config.GetOutputFilename();
+    // output_filename += ".root";
+    tools::CreateDirsIfNecessary(output_filename);
+    // TFile* output_file = new TFile(output_filename.c_str(), "RECREATE");
+    // fitter.SetOutputFile(output_file);
 
-    nlohmann::json json_results;
+    nlohmann::json json_results = fitter.GetJSONResults();
 
-    // // Save formatted results to file
-    // if (json_results.size()) {
-    //     std::cout << json_results.dump(2) << std::endl;
-    //     std::ofstream ofs(results_file);
-    //     ofs << std::setw(2) << json_results << std::endl;
+    // Save formatted results to file
+    if (json_results.size()) {
+        std::cout << json_results.dump(2) << std::endl;
+        std::ofstream ofs(output_filename);
+        ofs << std::setw(2) << json_results << std::endl;
+    }
+
+    // if (config.ShouldSaveLog()) {
+    //     // We have to restore cout's buffer to the original, otherwise we would
+    //     // get a segfault as our object goes out of scope sooner than cout
+    //     std::cout.rdbuf(orig_cout_streambuf);
+    //     Log::print(Log::info, "Saving log to ROOT file\n");
+    //     tools::LogText(output_file, "log", sout.str().c_str());
     // }
 
     return 0;

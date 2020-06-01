@@ -33,13 +33,13 @@
 #include "tools.h"
 
 int main(int argc, char* argv[]) {
-    // This block sets up an alternative ostream that can be used to duplicate
-    // cout to both the screen and a stringstream. We use this to save a copy of
-    // the log to the resulting ROOT file.
-    std::ostringstream sout;
-    teebuf sbuf(sout.rdbuf(), std::cout.rdbuf());
-    std::ostream out(&sbuf);
-    std::streambuf* orig_cout_streambuf = std::cout.rdbuf();
+    // // This block sets up an alternative ostream that can be used to duplicate
+    // // cout to both the screen and a stringstream. We use this to save a copy of
+    // // the log to the resulting ROOT file.
+    // std::ostringstream sout;
+    // teebuf sbuf(sout.rdbuf(), std::cout.rdbuf());
+    // std::ostream out(&sbuf);
+    // std::streambuf* orig_cout_streambuf = std::cout.rdbuf();
 
     Log::setLogLevel(Log::debug);
 

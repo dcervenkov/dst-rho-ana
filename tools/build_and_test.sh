@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIRS="../DSRhoBackground ../DSRhoCPFit ../DSRhoEfficiency ../DSRhoLifetime ../DSRhoPeek ../DSRhoYield"
+DIRS="../DSRhoBackground ../DSRhoCPFit ../DSRhoEfficiency ../DSRhoLifetime ../DSRhoPeek ../DSRhoSidebands ../DSRhoYield"
 
 RED=$(tput setaf 1)
 BOLD=$(tput bold)

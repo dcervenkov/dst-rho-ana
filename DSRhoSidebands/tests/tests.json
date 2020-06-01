@@ -1,0 +1,10 @@
+{
+    "command": "./DSRhoSidebands",
+    "comparison_file": "current_result",
+    "tests": {
+        "sidebands": [
+            "--config=tests/config_test.json",
+            "--output=tests/current_result"
+        ]
+    }
+}

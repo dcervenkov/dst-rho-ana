@@ -89,6 +89,11 @@ script:
   - cd ${TRAVIS_BUILD_DIR}/DSRhoPeek && make
   - echo -en 'travis_fold:end:DSRhoPeek\\r'
 
+  - echo 'Make and test DSRhoSidebands' && echo -en 'travis_fold:start:DSRhoSidebands\\r'
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoSidebands && make
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoSidebands/tests && ./run_tests.py
+  - echo -en 'travis_fold:end:DSRhoSidebands\\r'
+
   - echo 'Make and test DSRhoYield' && echo -en 'travis_fold:start:DSRhoYield\\r'
   - cd ${TRAVIS_BUILD_DIR}/DSRhoYield && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoYield/tests && ./run_tests.py

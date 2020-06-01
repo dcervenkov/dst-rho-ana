@@ -1,0 +1,20 @@
+{
+    "inputFiles": {
+        "sidebands": [
+            "tests/data/charmMC.root"
+        ],
+        "signal": [
+            "tests/data/chargedMC.root"
+        ]
+    },
+    "fitRanges": {
+        "thetab": {
+            "max": 2.95,
+            "min": 0.5
+        },
+        "thetat": {
+            "max": 3.1415,
+            "min": 0
+        }
+    }
+}

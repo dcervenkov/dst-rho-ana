@@ -125,8 +125,8 @@ rule all:
                 channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["all"],
                 stream=range(1)),
 
-            expand("DSRhoCPFit/results/{channel}_{type}_data",
-                channel=CHANNELS_AND_TOGETHER, type=["ti"])
+            expand("DSRhoCPFit/results/{channel}_{type}_data_{bkg}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti"], bkg=["mcbkg", "sidebkg"])
         )
 
 rule yield_jobs:
@@ -364,12 +364,12 @@ rule cpfit_mc_plot:
 
 rule cpfit_data_plot:
     input:
-        config = "DSRhoCPFit/configs/config_data.json",
+        config = "DSRhoCPFit/configs/config_data_{bkg}.json",
     output:
-        result = "DSRhoCPFit/results/{channel}_{type}_data",
-        plotdir = directory("DSRhoCPFit/plots/{channel}_{type}_data")
+        result = "DSRhoCPFit/results/{channel}_{type}_data_{bkg}",
+        plotdir = directory("DSRhoCPFit/plots/{channel}_{type}_data_{bkg}")
     log:
-        "DSRhoCPFit/logs/{channel}_{type}_data.log"
+        "DSRhoCPFit/logs/{channel}_{type}_data_{bkg}.log"
     params:
         "--MC=0",
         "--cpus=1",

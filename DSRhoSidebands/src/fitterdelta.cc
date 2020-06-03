@@ -56,8 +56,8 @@ FitterDelta::FitterDelta(nlohmann::json config) {
 
     FillSubtractionHisto(histo, "thetab", signal_data, sidebands_data);
 
-    histo->Fit("chebyshev3");
-    fit_function_ = histo->GetFunction("chebyshev3");
+    histo->Fit("pol3");
+    fit_function_ = histo->GetFunction("pol3");
 
     TCanvas canvas("canvas", "canvas", 500, 500);
     histo->Draw("e1");
@@ -131,6 +131,6 @@ void FitterDelta::FillSubtractionHisto(TH1D* histo, TString branch, TTree* tree1
 nlohmann::json FitterDelta::GetJSONResults() const {
     nlohmann::json results = tools::GetResultsJSON(*fit_function_, "thetab_corr_");
     // RooFit's Chebyshev doesn't use the constant term
-    results.erase("thetab_corr_p0");
+    /* results.erase("thetab_corr_p0"); */
     return results;
 };

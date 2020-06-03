@@ -2144,7 +2144,6 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix, const nlo
     RooRealVar* thetab_exp_alpha = new RooRealVar(pfx + "thetab_exp_alpha", "#alpha", -2.182);
     RooExponential* thetab_exp =
         new RooExponential(pfx + "thetab_exp", "thetab_exp", *thetab_, *thetab_exp_alpha);
-    RooRealVar* thetab_f = new RooRealVar(pfx + "thetab_f", "f_(exp)", 0.661);
 
     RooRealVar* thetab_p0 = new RooRealVar(pfx + "thetab_p0", "p_{0}", -2752);
     RooRealVar* thetab_p1 = new RooRealVar(pfx + "thetab_p1", "p_{1}", 5114);
@@ -2159,18 +2158,16 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix, const nlo
     //                   RooArgList(*thetab_f));
 
 
+    // TODO: Add explanation of the normalization tricks necessary because of the RooFit bug
     std::string channel_name(prefix);
     tools::RemoveSubstring(channel_name, "bkg_");
     tools::RemoveSubstring(channel_name, "scf_");
-    Log::print(Log::error, "Changing BKG model pars\n");
+
     tools::ChangeModelParameters(thetab_gaus, config, channel_name);
     tools::ChangeModelParameters(thetab_exp, config, channel_name);
-    Log::print(Log::error, "Done changing BKG model pars\n");
 
     const double thetab_gaus_norm = thetab_gaus->getNorm(*thetab_);
     const double thetab_exp_norm = thetab_exp->getNorm(*thetab_);
-    Log::print(Log::debug, "gaus integral = %f\n", thetab_gaus_norm);
-    Log::print(Log::debug, "expo integral = %f\n", thetab_exp_norm);
     RooConstVar* thetab_gaus_normalizer = new RooConstVar(
         "thetab_gaus_normalizer", "thetab_gaus_normalizer", 1. / thetab_gaus_norm);
     RooProduct* thetab_gaus_scaled =
@@ -2183,19 +2180,15 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix, const nlo
         new RooProduct(pfx + "thetab_exp_scaled", pfx + "thetab_exp_scaled",
                        RooArgList(*thetab_exp, *thetab_exp_normalizer));
 
-    RooRealVar* thetab_f1 = new RooRealVar(pfx + "thetab_f1", "f1", 0.7329);
-    RooRealVar* thetab_f2 = new RooRealVar(pfx + "thetab_f2", "f2", 1.0 - 0.7329);
-    // RooFormulaVar* thetab_f2 =
-    //     new RooFormulaVar(pfx + "thetab_f2", "f2", "1-thetab_f1", RooArgList(*thetab_f1));
-
-    // RooRealVar* thetab_correction_f = new RooRealVar(pfx + "thetab_correction_f", "f_c", 1);
-    // RooFormulaVar* thetab_f1_scaled =
-    //     new RooFormulaVar(pfx + "thetab_f1_scaled", "f1_scaled",
-    //                       "thetab_f1*(1-thetab_correction_f)", RooArgList(*thetab_f1, *thetab_correction_f));
-    // RooFormulaVar* thetab_f2_scaled =
-    //     new RooFormulaVar(pfx + "thetab_f2_scaled", "f2_scaled",
-    //                       "thetab_f2*(1-thetab_correction_f)", RooArgList(*thetab_f2, *thetab_correction_f));
-
+    std::string type_name(prefix);
+    tools::RemoveSubstring(type_name, channel_name);
+    const double thetab_corr_f =
+        config.contains(type_name + "thetab_correction_f")
+            ? config[type_name + "thetab_correction_f"].get<double>()
+            : 0;
+    const double thetab_f = config[type_name + "thetab_f"].get<double>();
+    RooRealVar* thetab_f1 = new RooRealVar(pfx + "thetab_f1", "f1", thetab_f * (1.0 - thetab_corr_f));
+    RooRealVar* thetab_f2 = new RooRealVar(pfx + "thetab_f2", "f2", (1.0 - thetab_f) * (1 - thetab_corr_f));
 
     RooRealSumPdf* thetab_model =
         new RooRealSumPdf(pfx + "thetab_model", "thetab_model",

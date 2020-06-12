@@ -88,7 +88,7 @@ def create_legend(plot_data, canvas):
     return legend
 
 
-def make_publication_plots(json_file, image_format, plot_dir):
+def make_publication_plots(json_file, image_format, plot_dir, plots):
     """Make publication quality plots"""
     with open(json_file, 'r') as f:
         plots_data = json.loads(f.read())['plots']
@@ -102,6 +102,8 @@ def make_publication_plots(json_file, image_format, plot_dir):
             plot_dir, "plots.root"), "RECREATE")
 
         for plot_data in plots_data:
+            if plots and plot_data["fileName"] not in plots:
+                continue
             make_plot(plot_data, image_format, plot_dir, output_file)
 
         output_file.Close()
@@ -274,6 +276,7 @@ def decode_arguments():
                         help="image format to generate (.pdf, .png, ..., defaults to '.png')")
     parser.add_argument("-d", "--dir", type=str,
                         help="directory for generated plots (defaults to 'plots')")
+    parser.add_argument("-p", "--plots", type=str, nargs='+')
     args = parser.parse_args()
 
     if not args.format:
@@ -281,14 +284,14 @@ def decode_arguments():
     if not args.dir:
         args.dir = 'plots'
 
-    return args.json_file, args.format, args.dir
+    return args.json_file, args.format, args.dir, args.plots
 
 
 def main():
     """Main function"""
-    json_file, image_format, plot_dir = decode_arguments()
-    print(json_file, image_format, plot_dir)
-    make_publication_plots(json_file, image_format, plot_dir)
+    json_file, image_format, plot_dir, plots = decode_arguments()
+    print(json_file, image_format, plot_dir, plots)
+    make_publication_plots(json_file, image_format, plot_dir, plots)
 
 
 main()

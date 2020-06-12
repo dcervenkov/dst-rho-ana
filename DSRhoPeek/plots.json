@@ -1723,6 +1723,45 @@
                     ]
                 }
             ]
+        },
+        {
+            "fileName": "nocand",
+            "formula": "nocand",
+            "xAxisTitle": "Num. candidates",
+            "cut": "vrusable==1&&vtusable==1&&vrchi2/vrndf<50&&vtchi2/vtndf<50&&thetab>0.5",
+            "treeName": "h2000",
+            "min": 0,
+            "max": 10,
+            "elements": [
+                {
+                    "label": "MC",
+                    "color": 2,
+                    "files": [
+                        "../data/Kpipi0/realistic_mc/stream0/*.root"
+                    ]
+                },
+                {
+                    "label": "MC sideb.",
+                    "color": 9,
+                    "files": [
+                        "../data/Kpipi0/sidebands/mc/*0.root"
+                    ]
+                },
+                {
+                    "label": "data sideb.",
+                    "color": 5,
+                    "files": [
+                        "../data/Kpipi0/sidebands/*.root"
+                    ]
+                },
+                {
+                    "label": "data",
+                    "color": 4,
+                    "files": [
+                        "../data/Kpipi0/*.root"
+                    ]
+                }
+            ]
         }
     ]
 }

@@ -313,28 +313,32 @@ void FitterCPV::CreateDtCPPDFs(DtCPPDF*& cr_pdf_FB, DtCPPDF*& cr_pdf_FA, DtCPPDF
     efficiency_files.push_back(channel_config["efficiencyFile"]);
 
     cr_pdf_FB = new DtCPPDF(
-        "cr_pdf_FB", "cr_pdf_FB", false, true, perfect_tagging, efficiency_model, efficiency_files,
-        *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+        (channel_name + "_cr_pdf_FB").c_str(), (channel_name + "_cr_pdf_FB").c_str(), false, true,
+        perfect_tagging, efficiency_model, efficiency_files, *thetat_, *thetab_, *phit_, *ap_,
+        *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
+        *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_,
+        *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
-    cr_pdf_FA = new DtCPPDF("cr_pdf_FA", "cr_pdf_FA", true, true, perfect_tagging, efficiency_model,
-                            efficiency_files, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_,
-                            *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_,
-                            *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_,
-                            *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+    cr_pdf_FA = new DtCPPDF(
+        (channel_name + "_cr_pdf_FA").c_str(), (channel_name + "_cr_pdf_FA").c_str(), true, true,
+        perfect_tagging, efficiency_model, efficiency_files, *thetat_, *thetab_, *phit_, *ap_,
+        *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_,
+        *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_,
+        *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     cr_pdf_SB = new DtCPPDF(
-        "cr_pdf_SB", "cr_pdf_SB", false, false, perfect_tagging, efficiency_model, efficiency_files,
-        *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_,
-        *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
-        *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+        (channel_name + "_cr_pdf_SB").c_str(), (channel_name + "_cr_pdf_SB").c_str(), false, false,
+        perfect_tagging, efficiency_model, efficiency_files, *thetat_, *thetab_, *phit_, *ap_,
+        *apa_, *a0_, *ata_, *xp_, *x0_, *xt_, *yp_, *y0_, *yt_, *tagwtag_, *dt_, *tau_, *dm_,
+        *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_,
+        *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 
     cr_pdf_SA = new DtCPPDF(
-        "cr_pdf_SA", "cr_pdf_SA", true, false, perfect_tagging, efficiency_model, efficiency_files,
-        *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_,
-        *ytb_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_,
-        *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_, *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
+        (channel_name + "_cr_pdf_SA").c_str(), (channel_name + "_cr_pdf_SA").c_str(), true, false,
+        perfect_tagging, efficiency_model, efficiency_files, *thetat_, *thetab_, *phit_, *ap_,
+        *apa_, *a0_, *ata_, *xpb_, *x0b_, *xtb_, *ypb_, *y0b_, *ytb_, *tagwtag_, *dt_, *tau_, *dm_,
+        *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrzerr_, *vrchi2_, *vrndf_,
+        *vtntrk_, *vtzerr_, *vtchi2_, *vtndf_, *vtistagl_);
 }
 
 void FitterCPV::CreateDtSCFPDFs(DtSCFPDF*& scf_dt_pdf_FB, DtSCFPDF*& scf_dt_pdf_FA,
@@ -468,10 +472,10 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
     }
 
     AngularPDF* cr_pdf_B = new AngularPDF(
-        (prefix + "cr_angular_pdf_B").Data(), (prefix + "cr_angular_pdf_B").Data(), false,
+        (prefix + "cr_pdf_B").Data(), (prefix + "cr_pdf_B").Data(), false,
         efficiency_model, efficiency_files, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_);
     AngularPDF* cr_pdf_B_bar = new AngularPDF(
-        (prefix + "cr_angular_pdf_B_bar").Data(), (prefix + "cr_angular_pdf_B_bar").Data(), true,
+        (prefix + "cr_pdf_B_bar").Data(), (prefix + "cr_pdf_B_bar").Data(), true,
         efficiency_model, efficiency_files, *thetat_, *thetab_, *phit_, *ap_, *apa_, *a0_, *ata_);
 
     B_pdfs.add(*cr_pdf_B);
@@ -813,15 +817,20 @@ RooDataHist* FitterCPV::GenerateAsimovHisto(const std::string channel_name, Deca
         dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";" + dec_types_str[type] + "}"));
     assert(top_pdf != nullptr);
 
+    RooArgSet* observables = pdf_->getObservables(data_);
+    observables->remove(conditional_vars_argset_, false, true);
+    const bool time_dep = observables->find("dt") ? true : false;
     TString pdf_name = chan_name;
     switch (component)
     {
     case CR:
-        pdf_name += "_cr_angular_pdf";
-        if (type == FB || type == SB) {
-            pdf_name += "_B";
-        } else {
-            pdf_name += "_B_bar";
+        pdf_name += "_cr_pdf";
+        if (!time_dep) {
+            if (type == FB || type == SB) {
+                pdf_name += "_B";
+            } else {
+                pdf_name += "_B_bar";
+            }
         }
         break;
     case SCF:
@@ -834,11 +843,15 @@ RooDataHist* FitterCPV::GenerateAsimovHisto(const std::string channel_name, Deca
         break;
     }
 
+    if (time_dep) {
+        pdf_name += "_";
+        pdf_name += dec_types_str[type];
+    }
+
     RooAbsPdf* component_pdf =
         dynamic_cast<RooAbsPdf*>(top_pdf->pdfList().find(pdf_name));
     assert(component_pdf != nullptr);
 
-    RooArgSet* observables = pdf_->getObservables(data_);
     RooDataHist* hist = component_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
     return hist;
 }

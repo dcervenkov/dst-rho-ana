@@ -197,6 +197,8 @@ void FitterCPV::InitVars(std::array<double, 16> par_input, const int var_bins) {
     tau_ = new RooRealVar("tau", "#tau", constants::tau - 1, constants::tau + 1);
     dm_ = new RooRealVar("dm", "#Deltam", constants::dm - 1, constants::dm + 1);
 
+    nocand_ = new RooRealVar("nocand", "Num. candidates", 1, 6);
+
     decaytype_ = new RooCategory("decaytype", "decaytype");
     decaytype_->defineType("FB", 1);
     decaytype_->defineType("FA", 2);
@@ -259,6 +261,7 @@ void FitterCPV::PrepareVarArgsets() {
     dataset_vars_.push_back(&thetat_);
     dataset_vars_.push_back(&thetab_);
     dataset_vars_.push_back(&phit_);
+    dataset_vars_.push_back(&nocand_);
 
     parameters_.push_back(&ap_);
     parameters_.push_back(&apa_);

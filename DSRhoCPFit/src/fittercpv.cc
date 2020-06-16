@@ -659,7 +659,7 @@ void FitterCPV::CreatePlots(const nlohmann::json config) const {
         auto common_config = config;
         common_config.erase("channels");
 
-        PlotChannel(common_config, channel_config, channel_name);
+        PlotAngularChannel(common_config, channel_config, channel_name);
     }
 }
 
@@ -676,8 +676,9 @@ void FitterCPV::CreatePlots(const nlohmann::json config) const {
  * @param channel_config Part of the config specific for this channel
  * @param channel_name Name of this channel
  */
-void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::json channel_config,
-                            const std::string channel_name) const {
+void FitterCPV::PlotAngularChannel(const nlohmann::json common_config,
+                                   const nlohmann::json channel_config,
+                                   const std::string channel_name) const {
     Log::LogLine(Log::info) << "Creating plots for channel " << channel_name;
 
     std::vector<RooDataHist*> cr_hists;
@@ -695,8 +696,8 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     thetab_->setBins(100);
     phit_->setBins(100);
 
-    RooDataHist* cr_hist = GenerateAsimovHisto(channel_name, FB, CR);
-    RooDataHist* cr_hist_B_bar = GenerateAsimovHisto(channel_name, FA, CR);
+    RooDataHist* cr_hist = GenerateAngularAsimovHisto(channel_name, FB, CR);
+    RooDataHist* cr_hist_B_bar = GenerateAngularAsimovHisto(channel_name, FA, CR);
     cr_hists.push_back(cr_hist);
     cr_hists.push_back(cr_hist_B_bar);
 
@@ -716,11 +717,11 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     }
 
     if (scf) {
-        scf_hist = GenerateAsimovHisto(channel_name, FB, SCF);
+        scf_hist = GenerateAngularAsimovHisto(channel_name, FB, SCF);
         scf_hists.push_back(scf_hist);
     }
     if (bkg) {
-        bkg_hist = GenerateAsimovHisto(channel_name, FB, BKG);
+        bkg_hist = GenerateAngularAsimovHisto(channel_name, FB, BKG);
         bkg_hists.push_back(bkg_hist);
     }
 
@@ -735,6 +736,8 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
 
     std::vector<RooCmdArg> plot_options = {RooFit::Slice(*channel_cat_, channel_name.c_str())};
     RooArgSet* observables = pdf_->getObservables(data_);
+    observables->remove(conditional_vars_argset_, false, true);
+    observables->remove(*dt_, false, true);
     for (auto observable : tools::ToVector<RooRealVar*>(*observables)) {
         std::vector<RooAbsPdf*> components;
 
@@ -805,12 +808,26 @@ void FitterCPV::PlotChannel(const nlohmann::json common_config, const nlohmann::
     thetab_->setBins(thetab_bins_orig);
     phit_->setBins(phit_bins_orig);
 
+
     delete dataset_B;
     delete dataset_A;
+    delete all_hist;
+    delete all_hist_FA;
+
+    delete channel_data;
+    for (auto& hist : cr_hists) {
+        delete hist;
+    }
+    for (auto& hist : scf_hists) {
+        delete hist;
+    }
+    for (auto& hist : bkg_hists) {
+        delete hist;
+    }
 }
 
-RooDataHist* FitterCPV::GenerateAsimovHisto(const std::string channel_name, DecayType type,
-                                            Component component) const {
+RooDataHist* FitterCPV::GenerateAngularAsimovHisto(const std::string channel_name, DecayType type,
+                                                   Component component) const {
     TString chan_name(channel_name);
 
     RooAddPdf* top_pdf =
@@ -820,6 +837,7 @@ RooDataHist* FitterCPV::GenerateAsimovHisto(const std::string channel_name, Deca
     RooArgSet* observables = pdf_->getObservables(data_);
     observables->remove(conditional_vars_argset_, false, true);
     const bool time_dep = observables->find("dt") ? true : false;
+    observables->remove(*dt_, false, true);
     TString pdf_name = chan_name;
     switch (component)
     {
@@ -851,6 +869,8 @@ RooDataHist* FitterCPV::GenerateAsimovHisto(const std::string channel_name, Deca
     RooAbsPdf* component_pdf =
         dynamic_cast<RooAbsPdf*>(top_pdf->pdfList().find(pdf_name));
     assert(component_pdf != nullptr);
+
+    Log::LogLine(Log::debug) << "Generating angular Asimov histo from " << pdf_name;
 
     RooDataHist* hist = component_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
     return hist;

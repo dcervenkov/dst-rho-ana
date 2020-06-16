@@ -203,8 +203,8 @@ class FitterCPV {
                               RooProdPdf*& pdf_SA, const std::string channel_name,
                               const nlohmann::json channel_config, bool scf, bool physics_dt);
 
-    void PlotChannel(const nlohmann::json common_config, const nlohmann::json channel_config,
-                     const std::string channel_name) const;
+    void PlotAngularChannel(const nlohmann::json common_config, const nlohmann::json channel_config,
+                            const std::string channel_name) const;
     RooAbsPdf* CreateHistPdf(const std::vector<RooDataHist*> cr_hists,
                                         const std::vector<RooDataHist*> scf_hists,
                                         const std::vector<RooDataHist*> bkg_hists,
@@ -212,8 +212,8 @@ class FitterCPV {
                                         std::vector<RooAbsPdf*>& components) const;
 
     bool IsTimeDependent() const;
-    RooDataHist* GenerateAsimovHisto(const std::string channel_name, DecayType type,
-                                     Component component) const;
+    RooDataHist* GenerateAngularAsimovHisto(const std::string channel_name, DecayType type,
+                                            Component component) const;
 
     RooDataHist* scf_angular_kde_hist_ = nullptr;
     RooHistPdf* scf_angular_kde_ = nullptr;

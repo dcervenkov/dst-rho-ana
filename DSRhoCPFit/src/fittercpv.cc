@@ -64,6 +64,7 @@
 #include "angularpdf.h"
 #include "config.h"
 #include "constants.h"
+#include "dtpdf.h"
 #include "dtbkg.h"
 #include "dtcppdf.h"
 #include "dtscfpdf.h"
@@ -659,12 +660,15 @@ void FitterCPV::CreatePlots(const nlohmann::json config) const {
         auto common_config = config;
         common_config.erase("channels");
 
+        Log::LogLine(Log::info) << "Creating plots for channel " << channel_name;
+
         PlotAngularChannel(common_config, channel_config, channel_name);
+        PlotDtChannel(common_config, channel_config, channel_name);
     }
 }
 
 /**
- * Plot the PDF and data including all components plotted separately
+ * Plot the angular part of PDF and data including all components plotted separately
  *
  * This function is rather convoluted to get around a RooFit bug which causes
  * problems when trying to plot complicated PDFs with conditional observables;
@@ -679,8 +683,6 @@ void FitterCPV::CreatePlots(const nlohmann::json config) const {
 void FitterCPV::PlotAngularChannel(const nlohmann::json common_config,
                                    const nlohmann::json channel_config,
                                    const std::string channel_name) const {
-    Log::LogLine(Log::info) << "Creating plots for channel " << channel_name;
-
     std::vector<RooDataHist*> cr_hists;
     std::vector<RooDataHist*> scf_hists;
     std::vector<RooDataHist*> bkg_hists;
@@ -824,6 +826,118 @@ void FitterCPV::PlotAngularChannel(const nlohmann::json common_config,
     for (auto& hist : bkg_hists) {
         delete hist;
     }
+}
+
+/**
+ * Plot the dt part of PDF and data including all components plotted separately
+ *
+ * Plotting the true PDF doesn't work because of a RooFit bug. So instead, we
+ * create a dt PDF without the angular part and plot that.
+ *
+ * @param common_config Part of the config common to all channels
+ * @param channel_config Part of the config specific for this channel
+ * @param channel_name Name of this channel
+ */
+void FitterCPV::PlotDtChannel(const nlohmann::json common_config,
+                              const nlohmann::json channel_config,
+                              const std::string channel_name) const {
+    bool scf = false;
+    bool bkg = false;
+    if (common_config["components"] == "CRSCF") {
+        scf = true;
+    } else if (common_config["components"] == "all") {
+        scf = true;
+        bkg = true;
+    }
+    bool physics_dt = common_config["physicsDtSCFBKG"] ? true : false;
+
+    DtPDF* cr_mixing_pdf_F =
+        new DtPDF("cr_mixing_pdf_F", "CR", true, perfect_tagging_, *tagwtag_,
+                  *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                  *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
+
+    DtPDF* cr_mixing_pdf_S =
+        new DtPDF("cr_mixing_pdf_S", "CR", false, perfect_tagging_, *tagwtag_,
+                  *dt_, *tau_, *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_,
+                  *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
+
+    RooArgList mixing_pdfs_F;
+    RooArgList mixing_pdfs_S;
+    mixing_pdfs_F.add(*cr_mixing_pdf_F);
+    mixing_pdfs_S.add(*cr_mixing_pdf_S);
+
+    if (scf) {
+        RooAbsPdf* scf_dt_pdf_F = (physics_dt ? CreatePhysicsBkgDtPdf("scf_cf_dt")
+                                                     : CreateVoigtGaussDtPdf("scf_cf_dt"));
+        RooAbsPdf* scf_dt_pdf_S = (physics_dt ? CreatePhysicsBkgDtPdf("scf_dcs_dt")
+                                                     : CreateVoigtGaussDtPdf("scf_dcs_dt"));
+        mixing_pdfs_F.add(*scf_dt_pdf_F);
+        mixing_pdfs_S.add(*scf_dt_pdf_S);
+    }
+
+    if (bkg) {
+        RooAbsPdf* bkg_dt_pdf_F = (physics_dt ? CreatePhysicsBkgDtPdf("bkg_cf_dt")
+                                                     : CreateVoigtGaussDtPdf("bkg_cf_dt"));
+        RooAbsPdf* bkg_dt_pdf_S = (physics_dt ? CreatePhysicsBkgDtPdf("bkg_dcs_dt")
+                                                     : CreateVoigtGaussDtPdf("bkg_dcs_dt"));
+        mixing_pdfs_F.add(*bkg_dt_pdf_F);
+        mixing_pdfs_S.add(*bkg_dt_pdf_S);
+    }
+
+    TString prefix = "";
+    RooArgList fractions;
+    if (scf && !bkg) {
+        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}",
+                                               constants::fraction_cr_of_crscf, 0.80, 0.99);
+        cr_scf_f_->setConstant();
+        fractions.add(*cr_scf_f_);
+    } else if (scf && bkg) {
+        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}",
+                                           constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}",
+                                            constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+        cr_f_->setConstant();
+        scf_f_->setConstant();
+        fractions.add(*cr_f_);
+        fractions.add(*scf_f_);
+    }
+
+    RooAddPdf* mixing_pdf_F = new RooAddPdf(prefix + "mixing_pdf_F", prefix + "mixing_pdf_F",
+                                            mixing_pdfs_F, fractions);
+    RooAddPdf* mixing_pdf_S = new RooAddPdf(prefix + "mixing_pdf_S", prefix + "mixing_pdf_S",
+                                            mixing_pdfs_S, fractions);
+
+    if (common_config.contains("modelParameters")) {
+        Log::LogLine(Log::debug) << "Global parameters:";
+        tools::ChangeModelParameters(mixing_pdf_F, common_config["modelParameters"]);
+        tools::ChangeModelParameters(mixing_pdf_S, common_config["modelParameters"]);
+    }
+    if (channel_config.contains("modelParameters")) {
+        Log::LogLine(Log::debug) << "Channel parameters:";
+        tools::ChangeModelParameters(mixing_pdf_F, channel_config["modelParameters"]);
+        tools::ChangeModelParameters(mixing_pdf_S, channel_config["modelParameters"]);
+    }
+
+    std::string channel_cut = "channel_cat==channel_cat::" + channel_name;
+    RooDataSet* channel_data = dynamic_cast<RooDataSet*>(data_->reduce(channel_cut.c_str()));
+
+    RooDataSet* dataset_F =
+        static_cast<RooDataSet*>(channel_data->reduce("decaytype==decaytype::FB||decaytype==decaytype::FA"));
+    RooDataSet* dataset_S =
+        static_cast<RooDataSet*>(channel_data->reduce("decaytype==decaytype::SB||decaytype==decaytype::SA"));
+
+    mixing_pdf_F->printMultiline(std::cout, 1);
+    tools::PlotWithPull(*dt_, conditional_vars_argset_, *dataset_F, *mixing_pdf_F,
+                        result_ ? result_->floatParsFinal() : RooArgList(),
+                        tools::ToVector<RooAbsPdf*>(mixing_pdfs_F));
+
+    tools::PlotWithPull(*dt_, conditional_vars_argset_, *dataset_S, *mixing_pdf_S,
+                        result_ ? result_->floatParsFinal() : RooArgList(),
+                        tools::ToVector<RooAbsPdf*>(mixing_pdfs_S));
+
+    delete channel_data;
+    delete dataset_F;
+    delete dataset_S;
 }
 
 RooDataHist* FitterCPV::GenerateAngularAsimovHisto(const std::string channel_name, DecayType type,

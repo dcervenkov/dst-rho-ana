@@ -205,6 +205,8 @@ class FitterCPV {
 
     void PlotAngularChannel(const nlohmann::json common_config, const nlohmann::json channel_config,
                             const std::string channel_name) const;
+    void PlotDtChannel(const nlohmann::json common_config, const nlohmann::json channel_config,
+                       const std::string channel_name) const;
     RooAbsPdf* CreateHistPdf(const std::vector<RooDataHist*> cr_hists,
                                         const std::vector<RooDataHist*> scf_hists,
                                         const std::vector<RooDataHist*> bkg_hists,

@@ -61,10 +61,14 @@ script:
   # - cd ${TRAVIS_BUILD_DIR}/DSRhoSkim && xmkmf && make
   # - cd ${TRAVIS_BUILD_DIR}/panther2TTree && xmkmf && make
 
+  - echo travis_fold:start:printTree
   - cd ${TRAVIS_BUILD_DIR}/printTree && xmkmf && make
+  - echo travis_fold:end:printTree
 
+  - echo travis_fold:start:DSRhoCPFit
   - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit/tests && ./run_tests.py
+  - echo travis_fold:end:DSRhoCPFit
 
   - cd ${TRAVIS_BUILD_DIR}/DSRhoBackground && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoBackground/tests && ./run_tests.py

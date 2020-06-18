@@ -1,6 +1,8 @@
 #!/bin/bash
 
-for CHANNEL in Kpi Kpipi0 K3pi; do
-	./DSRhoEfficiency ../DSRhoSens/DSRhoFit/data/D0${CHANNEL}/dataset_D0${CHANNEL} ../DSRhoPeek/data/signal_1M/DSRho-mdst_D0${CHANNEL}_1M.root plots/${CHANNEL}
-done
+# Requires about 20 GB of RAM for the ~100 x real dataset files
+DATE=$(date +%y%m%d)
 
+./DSRhoEfficiency --efficiency-model=7 --efficiency-file=eff_Kpi_$DATE.root    ../data/basf2_190307_Kpi_evtgen_all    ../data/basf2_190307_Kpi_all.root    plots/eff_Kpi_$DATE
+./DSRhoEfficiency --efficiency-model=7 --efficiency-file=eff_Kpipi0_$DATE.root ../data/basf2_190528_Kpipi0_evtgen_all ../data/basf2_190528_Kpipi0_all.root plots/eff_Kpipi0_$DATE
+./DSRhoEfficiency --efficiency-model=7 --efficiency-file=eff_K3pi_$DATE.root   ../data/basf2_190529_K3pi_evtgen_all   ../data/basf2_190529_K3pi_all.root   plots/eff_K3pi_$DATE

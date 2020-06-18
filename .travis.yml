@@ -61,20 +61,34 @@ script:
   # - cd ${TRAVIS_BUILD_DIR}/DSRhoSkim && xmkmf && make
   # - cd ${TRAVIS_BUILD_DIR}/panther2TTree && xmkmf && make
 
+  - echo 'Make printTree' && echo -en 'travis_fold:start:printTree\\r'
   - cd ${TRAVIS_BUILD_DIR}/printTree && xmkmf && make
+  - echo -en 'travis_fold:end:printTree\\r'
 
+  - echo 'Make and test DSRhoCPFit' && echo -en 'travis_fold:start:DSRhoCPFit\\r'
   - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoCPFit/tests && ./run_tests.py
+  - echo -en 'travis_fold:end:DSRhoCPFit\\r'
 
+  - echo 'Make and test DSRhoBackground' && echo -en 'travis_fold:start:DSRhoBackground\\r'
   - cd ${TRAVIS_BUILD_DIR}/DSRhoBackground && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoBackground/tests && ./run_tests.py
+  - echo -en 'travis_fold:end:DSRhoBackground\\r'
 
+  - echo 'Make DSRhoEfficiency' && echo -en 'travis_fold:start:DSRhoEfficiency\\r'
   - cd ${TRAVIS_BUILD_DIR}/DSRhoEfficiency && make
+  - echo -en 'travis_fold:end:DSRhoEfficiency\\r'
 
+  - echo 'Make and test DSRhoLifetime' && echo -en 'travis_fold:start:DSRhoLifetime\\r'
   - cd ${TRAVIS_BUILD_DIR}/DSRhoLifetime && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoLifetime/tests && ./run_tests.py
+  - echo -en 'travis_fold:end:DSRhoLifetime\\r'
 
+  - echo 'Make DSRhoPeek' && echo -en 'travis_fold:start:DSRhoPeek\\r'
   - cd ${TRAVIS_BUILD_DIR}/DSRhoPeek && make
+  - echo -en 'travis_fold:end:DSRhoPeek\\r'
 
+  - echo 'Make and test DSRhoYield' && echo -en 'travis_fold:start:DSRhoYield\\r'
   - cd ${TRAVIS_BUILD_DIR}/DSRhoYield && make
   - cd ${TRAVIS_BUILD_DIR}/DSRhoYield/tests && ./run_tests.py
+  - echo -en 'travis_fold:end:DSRhoYield\\r'

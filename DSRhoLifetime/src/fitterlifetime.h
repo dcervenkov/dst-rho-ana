@@ -95,6 +95,8 @@ class FitterLifetime {
     RooRealVar* vtntrk_;
     RooRealVar* vtistagl_;
 
+    RooRealVar* nocand_;
+
     RooCategory* decaytype_;
 
    private:

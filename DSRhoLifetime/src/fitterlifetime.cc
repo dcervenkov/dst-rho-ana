@@ -99,6 +99,8 @@ FitterLifetime::FitterLifetime(const nlohmann::json config) {
 
     shcosthb_ = new RooRealVar("shcosthb", "shcosthb", -1, 1);
 
+    nocand_ = new RooRealVar("nocand", "nocand", 1, 6);
+
     tau_ = new RooRealVar("tau", "#tau", constants::tau - 1, constants::tau + 1);
     dm_ = new RooRealVar("dm", "#Deltam", constants::dm - 1, constants::dm + 1);
 
@@ -141,6 +143,8 @@ FitterLifetime::FitterLifetime(const nlohmann::json config) {
     conditional_vars_.push_back(&vtntrk_);
 
     conditional_vars_.push_back(&vtistagl_);
+
+    conditional_vars_.push_back(&nocand_);
 
     dataset_vars_ = conditional_vars_;
     dataset_vars_.push_back(&dt_);

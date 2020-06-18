@@ -62,6 +62,8 @@ Fitter::Fitter(const char* output_dir) {
     dataset_vars_.add(vtndf_);
     dataset_vars_.add(vtntrk_);
 
+    dataset_vars_.add(nocand_);
+
     Setup(Components::all);
     char output_filename[1000];
     snprintf(output_filename, 1000, "%s/fit_results.root", output_dir);

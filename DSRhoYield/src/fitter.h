@@ -86,6 +86,8 @@ class Fitter {
     RooRealVar vtndf_{"vtndf", "vtndf", 0};
     RooRealVar vtntrk_{"vtntrk", "vtntrk", 0};
 
+    RooRealVar nocand_{"nocand", "nocand", 1, 6};
+
     RooRealVar width_factor_{"width_factor", "F_{width}", 1, 0.5, 1.5};
 
     // Signal Gaussian

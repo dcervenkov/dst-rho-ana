@@ -75,8 +75,9 @@ script:
   - cd ${TRAVIS_BUILD_DIR}/DSRhoBackground/tests && ./run_tests.py
   - echo -en 'travis_fold:end:DSRhoBackground\\r'
 
-  - echo 'Make DSRhoEfficiency' && echo -en 'travis_fold:start:DSRhoEfficiency\\r'
+  - echo 'Make and test DSRhoEfficiency' && echo -en 'travis_fold:start:DSRhoEfficiency\\r'
   - cd ${TRAVIS_BUILD_DIR}/DSRhoEfficiency && make
+  - cd ${TRAVIS_BUILD_DIR}/DSRhoEfficiency/tests && ./run_tests.py
   - echo -en 'travis_fold:end:DSRhoEfficiency\\r'
 
   - echo 'Make and test DSRhoLifetime' && echo -en 'travis_fold:start:DSRhoLifetime\\r'

@@ -92,6 +92,8 @@ FitterBKG::FitterBKG() {
 
     shcosthb_ = new RooRealVar("shcosthb", "shcosthb", -1, 1);
 
+    nocand_ = new RooRealVar("nocand", "nocand", 1, 6);
+
     decaytype_ = new RooCategory("decaytype", "decaytype");
     decaytype_->defineType("FB", 1);
     decaytype_->defineType("FA", 2);
@@ -133,6 +135,8 @@ FitterBKG::FitterBKG() {
     conditional_vars_.push_back(&vtntrk_);
 
     conditional_vars_.push_back(&vtistagl_);
+
+    conditional_vars_.push_back(&nocand_);
 
     dataset_vars_ = conditional_vars_;
     // dataset_vars_.push_back(&thetat_);

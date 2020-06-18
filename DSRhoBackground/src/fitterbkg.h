@@ -100,6 +100,8 @@ class FitterBKG {
     RooRealVar* vtntrk_;
     RooRealVar* vtistagl_;
 
+    RooRealVar* nocand_;
+
     RooCategory* decaytype_;
 
     RooDataSet* dataset_ = nullptr;

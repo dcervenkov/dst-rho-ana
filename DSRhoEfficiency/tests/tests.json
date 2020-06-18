@@ -1,0 +1,25 @@
+{
+    "command": "./DSRhoEfficiency",
+    "comparison_file": "current_result",
+    "temporary_paths": [
+        "current_result.root",
+        "plots"
+    ],
+    "post_commands": [
+        [
+            "root",
+            "-q",
+            "-b",
+            "extract_kurtosis.C(\"current_result.root\",\"current_result\")"
+        ]
+    ],
+    "tests": {
+        "efficiency": [
+            "--efficiency-model=7",
+            "--efficiency-file=tests/current_result.root",
+            "tests/data/evtgen_data",
+            "tests/data/signalMC.root",
+            "tests/plots"
+        ]
+    }
+}

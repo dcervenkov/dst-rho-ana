@@ -1,17 +1,15 @@
 {
     "command": "./DSRhoYield",
     "comparison_file": "current_result",
+    "temporary_paths": [
+        "plots"
+    ],
     "post_commands": [
         [
             "root",
             "-q",
             "-b",
             "extract_result.cxx(\"plots\")"
-        ],
-        [
-            "rm",
-            "-r",
-            "plots"
         ]
     ],
     "tests": {

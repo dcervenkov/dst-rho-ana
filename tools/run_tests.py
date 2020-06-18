@@ -10,7 +10,7 @@ following structure:
 {
     "command": "name_of_program_to_test",
     "comparison_file": "file_that_will_be_compared_to_reference",
-    "temporary_files": [
+    "temporary_paths": [
         "files_that_should_be_deleted",
         "after_each_test"
     ],
@@ -31,11 +31,12 @@ following structure:
     }
 }
 
-temporary_files and post_commands are optional.
+temporary_paths and post_commands are optional.
 """
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -76,15 +77,15 @@ def run_test(config):
         for post_command in config['post_commands']:
             subprocess.call(post_command)
 
-    if 'temporary_files' not in config:
-        config['temporary_files'] = []
+    if 'temporary_paths' not in config:
+        config['temporary_paths'] = []
 
     reference_result = ""
     current_result = ""
 
     if not os.path.exists(config['comparison_file']):
         print(RED_CODE + "Test failed to create comparison file!" + RESET_CODE)
-        delete_files(config['temporary_files'])
+        delete_paths(config['temporary_paths'])
         return 3, name, elapsed
 
     if os.path.exists("references/" + name + ".reference"):
@@ -93,7 +94,7 @@ def run_test(config):
     else:
         print(YELLOW_CODE + "Test does NOT have a reference result!" + RESET_CODE)
         os.rename(config['comparison_file'], name + ".result")
-        delete_files(config['temporary_files'])
+        delete_paths(config['temporary_paths'])
         return 2, name, elapsed
 
     with open(config['comparison_file'], "r") as f:
@@ -105,19 +106,23 @@ def run_test(config):
         # Delete results from previous failed runs if it now works
         if os.path.exists(name + ".result"):
             os.remove(name + ".result")
-        delete_files(config['temporary_files'])
+        delete_paths(config['temporary_paths'])
         return 0, name, elapsed
     else:
         print(RED_CODE + "Result does NOT match reference result!" + RESET_CODE)
         os.rename(config['comparison_file'], name + ".result")
-        delete_files(config['temporary_files'])
+        delete_paths(config['temporary_paths'])
         return 1, name, elapsed
 
 
-def delete_files(files):
-    for file in files:
-        if os.path.exists(file):
-            os.remove(file)
+def delete_paths(paths):
+    for path in paths:
+        if os.path.isfile(path):
+            os.remove(path)
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
+        else:
+            print("Can't delete " + path)
 
 
 def print_results_table(results):
@@ -167,8 +172,8 @@ def load_tests_to_run(config_files, tests_to_run):
                 test_entry['command'] = test_configs['command']
                 test_entry['comparison_file'] = test_configs['comparison_file']
                 test_entry['config'] = test_configs['tests'][test]
-                if 'temporary_files' in test_configs:
-                    test_entry['temporary_files'] = test_configs['temporary_files']
+                if 'temporary_paths' in test_configs:
+                    test_entry['temporary_paths'] = test_configs['temporary_paths']
                 if 'post_commands' in test_configs:
                     test_entry['post_commands'] = test_configs['post_commands']
                 all_test_configs.append(test_entry)

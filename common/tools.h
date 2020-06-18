@@ -76,6 +76,7 @@ nlohmann::json MergeJSON (const nlohmann::json& json1, const nlohmann::json& jso
 double RoundToDecimals(double number, int decimals);
 RooHistPdf* CreatePdfFromHistos(const char* name, const char* title,
                                 std::vector<RooDataHist*> histos, RooArgSet observables);
+void RemoveSubstring(std::string& main, const std::string& sub);
 
 /**
  * Return a concatenation of two std::vectors

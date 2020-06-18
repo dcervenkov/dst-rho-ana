@@ -1115,4 +1115,18 @@ RooArgList BlindResults(const RooArgList& orig_results, double range) {
     return blind_results;
 }
 
+/**
+ * Erase first occurrence of given substring from main string
+ *
+ * @param main The string from which to remove the substring
+ * @param sub The substring which to remove
+ */
+void RemoveSubstring(std::string& main, const std::string& sub) {
+    size_t pos = main.find(sub);
+
+    if (pos != std::string::npos) {
+        main.erase(pos, sub.length());
+    }
+}
+
 }  // namespace tools

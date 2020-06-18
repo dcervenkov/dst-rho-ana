@@ -47,6 +47,7 @@ extern const double sig_vtx_multitrack_sigma_z;
 extern const double sig_vtx_singletrack_sigma_z;
 extern const double tag_vtx_multitrack_sigma_z;
 extern const double tag_vtx_singletrack_sigma_z;
+extern const int max_nocand;
 
 } // namespace cuts
 

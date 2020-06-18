@@ -47,7 +47,7 @@ class Fitter {
     void ProcessKDEEfficiency2(const char* efficiency_file, const std::array<double, 6> bin_kde_pars,
                                const std::array<double, 6> ada_kde_pars, const double mirror_margin = 0);
     void ProcessNormalizedEfficiency(const char* efficiency_file);
-    
+
     RooRealVar thetat_{"thetat", "#theta_{t} [rad]", constants::cuts::thetat_low, constants::cuts::thetat_high};
     RooRealVar thetab_{"thetab", "#theta_{b} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high};
     RooRealVar phit_{"phit", "#phi_{t} [rad]", constants::cuts::phit_low, constants::cuts::phit_high};
@@ -90,6 +90,8 @@ class Fitter {
     RooRealVar vtchi2_{"vtchi2", "vtchi2", 0};
     RooRealVar vtndf_{"vtndf", "vtndf", 0};
     RooRealVar vtntrk_{"vtntrk", "vtntrk", 0};
+
+    RooRealVar nocand_{"nocand", "nocand", 0};
 
     RooFormulaVar dt_formula_{"dt", "#Deltat [ps]", "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
                               RooArgSet(vrvtxz_, vtvtxz_)};

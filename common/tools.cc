@@ -750,6 +750,8 @@ TString GetCommonCutsString() {
     common_cuts += constants::cuts::thetat_low;
     common_cuts += "&&thetat<";
     common_cuts += constants::cuts::thetat_high;
+    common_cuts += ")&&(nocand<=";
+    common_cuts += constants::cuts::max_nocand;
     common_cuts += ")";
     return common_cuts;
 }

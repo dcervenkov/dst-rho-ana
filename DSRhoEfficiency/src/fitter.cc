@@ -78,9 +78,6 @@ Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const cha
     }
     Log::print(Log::info, "Read %i Evtgen events\n", evtgen_dataset_->numEntries());
 
-    TString cuts = tools::GetCommonCutsString();
-    cuts += "&&evmcflag==1";
-
     RooArgSet dataset_vars;
     dataset_vars.add(csbdtg_);
     dataset_vars.add(de_);
@@ -104,6 +101,10 @@ Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const cha
     dataset_vars.add(vtndf_);
     dataset_vars.add(vtntrk_);
 
+    dataset_vars.add(nocand_);
+
+    TString cuts = tools::GetCommonCutsString();
+    cuts += "&&evmcflag==1";
     TFile* gsim_file = new TFile(gsim_filepath);
     TTree* gsim_tree = dynamic_cast<TTree*>(gsim_file->Get("h2000"));
     gsim_dataset_ = new RooDataSet("gsim_dataset", "gsim dataset", gsim_tree, dataset_vars, cuts);
@@ -998,7 +999,7 @@ TH3F* Fitter::ConvertTransHisto(TH3F* trans_histo) {
 /**
  * Check whether any of the vars is too close to the histogram edge to use
  * interpolation.
- * 
+ *
  * From the ROOT documentation: The given values (x,y,z) must be between first
  * bin center and last bin center for each coordinate.
  */
@@ -1050,10 +1051,10 @@ TH3F* Fitter::GetKDEHisto(RooDataSet* dataset, const std::array<double, 6> bin_k
     OneDimPhaseSpace phasespace_phit("phasespace_phit", phit_.getMin(), phit_.getMax());
     CombinedPhaseSpace phasespace("phasespace", &phasespace_thetat, &phasespace_thetab,
                                   &phasespace_phit);
-    
+
     // This line needs to be here to make the new dataset have TTree as a storage backend
     RooAbsData::setDefaultStorageType(RooAbsData::Tree);
-    RooDataSet* dataset_with_tree = new RooDataSet("dataset_with_tree", "dataset_with_tree", dataset, *dataset->get()); 
+    RooDataSet* dataset_with_tree = new RooDataSet("dataset_with_tree", "dataset_with_tree", dataset, *dataset->get());
     // TTree* double_tree = (TTree*)((RooTreeDataStore*)dataset_with_tree->store())->tree();
     RooAbsDataStore* ds = dataset_with_tree->store();
     TTree* double_tree = const_cast<TTree*>(ds->tree());

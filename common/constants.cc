@@ -81,6 +81,7 @@ const double sig_vtx_singletrack_sigma_z = 0.05;  // [cm]
 const double tag_vtx_multitrack_sigma_z = 0.02;   // [cm]
 const double tag_vtx_singletrack_sigma_z = 0.05;  // [cm]
 
+const int max_nocand = 2;
 }  // namespace cuts
 
 }  // namespace constants

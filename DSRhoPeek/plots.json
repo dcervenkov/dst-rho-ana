@@ -341,7 +341,7 @@
             "formula": "de",
             "xAxisTitle": "#DeltaE",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
-            "files": ["../data/DSRho-mdst_basf2_mod_real_unmod_1.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -359,28 +359,51 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*0.root"
                     ]
                 },
                 {
                     "label": "charged",
                     "color": 3,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*0.root"
                     ]
                 },
                 {
                     "label": "charm",
                     "color": 9,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*0.root"
                     ]
                 },
                 {
                     "label": "uds",
                     "color": 8,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*0.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "de_low_thetab",
+            "formula": "de",
+            "xAxisTitle": "#DeltaE",
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5&&thetab<0.8",
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "color": 2,
+                    "label": "MC",
+                    "files": [
+                        "../data/Kpi/realistic_mc/stream0/*.root"
+                    ]
+                },
+                {
+                    "color": 3,
+                    "label": "data",
+                    "files": [
+                        "../data/Kpi/*.root"
                     ]
                 }
             ]
@@ -391,7 +414,7 @@
             "xAxisTitle": "BDTG",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "legendPosition": "top left",
-            "files": ["../data/DSRho-mdst_basf2_mod_real_unmod_1.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -409,28 +432,28 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*0.root"
                     ]
                 },
                 {
                     "label": "charged",
                     "color": 3,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*0.root"
                     ]
                 },
                 {
                     "label": "charm",
                     "color": 9,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*0.root"
                     ]
                 },
                 {
                     "label": "uds",
                     "color": 8,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*0.root"
                     ]
                 }
             ]
@@ -440,7 +463,7 @@
             "formula": "mbc",
             "xAxisTitle": "M_{bc}",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
-            "files": ["../data/DSRho-mdst_basf2_mod_real_unmod_1.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -458,28 +481,28 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*0.root"
                     ]
                 },
                 {
                     "label": "charged",
                     "color": 3,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*0.root"
                     ]
                 },
                 {
                     "label": "charm",
                     "color": 9,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*0.root"
                     ]
                 },
                 {
                     "label": "uds",
                     "color": 8,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*0.root"
                     ]
                 }
             ]
@@ -491,7 +514,7 @@
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -0.5,
             "max": 0.5,
-            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -507,7 +530,7 @@
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -0.15,
             "max": 0.15,
-            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -523,7 +546,7 @@
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -0.5,
             "max": 0.5,
-            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -533,13 +556,13 @@
             ]
         },
         {
-            "fileName": "resolution_thetat_Kpipi0",
+            "fileName": "resolution_thetat_Kpi",
             "formula": "thetat-thetatg",
             "xAxisTitle": "#Delta#theta_{t} [rad]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -0.5,
             "max": 0.5,
-            "files": ["../data/Kpipi0/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -549,13 +572,13 @@
             ]
         },
         {
-            "fileName": "resolution_thetab_Kpipi0",
+            "fileName": "resolution_thetab_Kpi",
             "formula": "thetab-thetabg",
             "xAxisTitle": "#Delta#theta_{b} [rad]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -0.15,
             "max": 0.15,
-            "files": ["../data/Kpipi0/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -565,13 +588,13 @@
             ]
         },
         {
-            "fileName": "resolution_phit_Kpipi0",
+            "fileName": "resolution_phit_Kpi",
             "formula": "phit-phitg",
             "xAxisTitle": "#Delta#phi_{t} [rad]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -0.5,
             "max": 0.5,
-            "files": ["../data/Kpipi0/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd?.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -587,7 +610,7 @@
             "cut": "evmcflag==1&&vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -10,
             "max": 10,
-            "files": ["../data/DSRho-mdst_basf2_mod_real_unmod_1.root"],
+            "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"],
             "treeName": "h2000",
             "elements": [
                 {
@@ -614,13 +637,13 @@
         },
         {
             "fileName": "dt_a",
-            "formula": "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
+            "formula": "dt",
             "xAxisTitle": "#Deltat [ps]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -10,
             "max": 10,
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -639,7 +662,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*[0-5].root"
                     ]
                 },
                 {
@@ -647,7 +670,7 @@
                     "color": 3,
                     "cut": "brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*[0-5].root"
                     ]
                 },
                 {
@@ -655,7 +678,7 @@
                     "color": 9,
                     "cut": "brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*[0-5].root"
                     ]
                 },
                 {
@@ -663,20 +686,20 @@
                     "color": 8,
                     "cut": "brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*[0-5].root"
                     ]
                 }
             ]
         },
         {
             "fileName": "dt_b",
-            "formula": "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
+            "formula": "dt",
             "xAxisTitle": "#Deltat [ps]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -10,
             "max": 10,
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -695,7 +718,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*[0-5].root"
                     ]
                 },
                 {
@@ -703,7 +726,7 @@
                     "color": 3,
                     "cut": "brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*[0-5].root"
                     ]
                 },
                 {
@@ -711,7 +734,7 @@
                     "color": 9,
                     "cut": "brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*[0-5].root"
                     ]
                 },
                 {
@@ -719,20 +742,20 @@
                     "color": 8,
                     "cut": "brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*[0-5].root"
                     ]
                 }
             ]
         },
         {
             "fileName": "dt_ab",
-            "formula": "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
+            "formula": "dt",
             "xAxisTitle": "#Deltat [ps]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -10,
             "max": 10,
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -751,7 +774,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*[0-5].root"
                     ]
                 },
                 {
@@ -759,7 +782,7 @@
                     "color": 3,
                     "cut": "brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*[0-5].root"
                     ]
                 },
                 {
@@ -767,7 +790,7 @@
                     "color": 9,
                     "cut": "brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*[0-5].root"
                     ]
                 },
                 {
@@ -775,20 +798,20 @@
                     "color": 8,
                     "cut": "brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*[0-5].root"
                     ]
                 }
             ]
         },
         {
             "fileName": "dt_bb",
-            "formula": "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
+            "formula": "dt",
             "xAxisTitle": "#Deltat [ps]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -10,
             "max": 10,
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -807,7 +830,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*[0-5].root"
                     ]
                 },
                 {
@@ -815,7 +838,7 @@
                     "color": 3,
                     "cut": "brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*[0-5].root"
                     ]
                 },
                 {
@@ -823,7 +846,7 @@
                     "color": 9,
                     "cut": "brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*[0-5].root"
                     ]
                 },
                 {
@@ -831,20 +854,20 @@
                     "color": 8,
                     "cut": "brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*[0-5].root"
                     ]
                 }
             ]
         },
         {
             "fileName": "dt_a_goodtag",
-            "formula": "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
+            "formula": "dt",
             "xAxisTitle": "#Deltat [ps]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -10,
             "max": 10,
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -863,7 +886,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2&&brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*[0-5].root"
                     ]
                 },
                 {
@@ -871,7 +894,7 @@
                     "color": 3,
                     "cut": "brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*[0-5].root"
                     ]
                 },
                 {
@@ -879,7 +902,7 @@
                     "color": 9,
                     "cut": "brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*[0-5].root"
                     ]
                 },
                 {
@@ -887,20 +910,20 @@
                     "color": 8,
                     "cut": "brecflav==1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*[0-5].root"
                     ]
                 }
             ]
         },
         {
             "fileName": "dt_b_goodtag",
-            "formula": "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
+            "formula": "dt",
             "xAxisTitle": "#Deltat [ps]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -10,
             "max": 10,
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -919,7 +942,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2&&brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*[0-5].root"
                     ]
                 },
                 {
@@ -927,7 +950,7 @@
                     "color": 3,
                     "cut": "brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*[0-5].root"
                     ]
                 },
                 {
@@ -935,7 +958,7 @@
                     "color": 9,
                     "cut": "brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*[0-5].root"
                     ]
                 },
                 {
@@ -943,20 +966,20 @@
                     "color": 8,
                     "cut": "brecflav==1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*[0-5].root"
                     ]
                 }
             ]
         },
         {
             "fileName": "dt_ab_goodtag",
-            "formula": "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
+            "formula": "dt",
             "xAxisTitle": "#Deltat [ps]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -10,
             "max": 10,
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -975,7 +998,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2&&brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*[0-5].root"
                     ]
                 },
                 {
@@ -983,7 +1006,7 @@
                     "color": 3,
                     "cut": "brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*[0-5].root"
                     ]
                 },
                 {
@@ -991,7 +1014,7 @@
                     "color": 9,
                     "cut": "brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*[0-5].root"
                     ]
                 },
                 {
@@ -999,20 +1022,20 @@
                     "color": 8,
                     "cut": "brecflav==-1&&tagflavo>0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*[0-5].root"
                     ]
                 }
             ]
         },
         {
             "fileName": "dt_bb_goodtag",
-            "formula": "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
+            "formula": "dt",
             "xAxisTitle": "#Deltat [ps]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "min": -10,
             "max": 10,
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -1031,7 +1054,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2&&brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*[0-5].root"
                     ]
                 },
                 {
@@ -1039,7 +1062,7 @@
                     "color": 3,
                     "cut": "brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*[0-5].root"
                     ]
                 },
                 {
@@ -1047,7 +1070,7 @@
                     "color": 9,
                     "cut": "brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*[0-5].root"
                     ]
                 },
                 {
@@ -1055,7 +1078,7 @@
                     "color": 8,
                     "cut": "brecflav==-1&&tagflavo<0&&abs(tagqr)>0.5",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*[0-5].root"
                     ]
                 }
             ]
@@ -1066,7 +1089,7 @@
             "xAxisTitle": "#Theta_{t} [rad]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -1085,28 +1108,28 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*0.root"
                     ]
                 },
                 {
                     "label": "charged",
                     "color": 3,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*0.root"
                     ]
                 },
                 {
                     "label": "charm",
                     "color": 9,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*0.root"
                     ]
                 },
                 {
                     "label": "uds",
                     "color": 8,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*0.root"
                     ]
                 }
             ]
@@ -1117,7 +1140,7 @@
             "xAxisTitle": "#Theta_{b} [rad]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -1136,28 +1159,28 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*0.root"
                     ]
                 },
                 {
                     "label": "charged",
                     "color": 3,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*0.root"
                     ]
                 },
                 {
                     "label": "charm",
                     "color": 9,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*0.root"
                     ]
                 },
                 {
                     "label": "uds",
                     "color": 8,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*0.root"
                     ]
                 }
             ]
@@ -1168,7 +1191,7 @@
             "xAxisTitle": "#phi_{t} [rad]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_1.root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -1187,28 +1210,28 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2",
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-mixed_s*0.root"
                     ]
                 },
                 {
                     "label": "charged",
                     "color": 3,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charged_s*0.root"
                     ]
                 },
                 {
                     "label": "charm",
                     "color": 9,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-charm_s*0.root"
                     ]
                 },
                 {
                     "label": "uds",
                     "color": 8,
                     "files": [
-                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s0.root"
+                        "../data/Kpi/mc/DSRhoSkim_svd*_on_resonance_evtgen-uds_s*0.root"
                     ]
                 }
             ]
@@ -1222,7 +1245,7 @@
             "xmin": -10,
             "xmax": 10,
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_[1-6].root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -1242,7 +1265,7 @@
             "xmin": -10,
             "xmax": 10,
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_[1-6].root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -1262,7 +1285,7 @@
             "xmin": -10,
             "xmax": 10,
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_[1-6].root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -1280,7 +1303,7 @@
             "yAxisTitle": "#theta_{t} [rad]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_[1-6].root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -1298,7 +1321,7 @@
             "yAxisTitle": "#theta_{t} [rad]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_[1-6].root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -1316,7 +1339,7 @@
             "yAxisTitle": "#theta_{b} [rad]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "files": [
-                "../data/DSRho-mdst_basf2_mod_real_unmod_[1-6].root"
+                "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"
             ],
             "treeName": "h2000",
             "elements": [
@@ -1616,14 +1639,14 @@
                     "label": "MC sideb.",
                     "color": 9,
                     "files": [
-                        "../data/sidebands/D0Kpi/mc/*0.root"
+                        "../data/Kpi/sidebands/mc/*0.root"
                     ]
                 },
                 {
                     "label": "data sideb.",
                     "color": 5,
                     "files": [
-                        "../data/sidebands/D0Kpi/*_on_resonance_HadronBorJ.root"
+                        "../data/Kpi/sidebands/*_on_resonance_HadronBorJ.root"
                     ]
                 }
             ]
@@ -1647,14 +1670,14 @@
                     "label": "MC sideb.",
                     "color": 9,
                     "files": [
-                        "../data/sidebands/D0Kpi/mc/*0.root"
+                        "../data/Kpi/sidebands/mc/*0.root"
                     ]
                 },
                 {
                     "label": "data sideb.",
                     "color": 5,
                     "files": [
-                        "../data/sidebands/D0Kpi/*_on_resonance_HadronBorJ.root"
+                        "../data/Kpi/sidebands/*_on_resonance_HadronBorJ.root"
                     ]
                 }
             ]
@@ -1679,14 +1702,14 @@
                     "label": "MC sideb.",
                     "color": 9,
                     "files": [
-                        "../data/sidebands/D0Kpi/mc/*0.root"
+                        "../data/Kpi/sidebands/mc/*0.root"
                     ]
                 },
                 {
                     "label": "data sideb.",
                     "color": 5,
                     "files": [
-                        "../data/sidebands/D0Kpi/*_on_resonance_HadronBorJ.root"
+                        "../data/Kpi/sidebands/*_on_resonance_HadronBorJ.root"
                     ]
                 }
             ]
@@ -1712,14 +1735,14 @@
                     "label": "MC sideb.",
                     "color": 9,
                     "files": [
-                        "../data/sidebands/D0Kpi/mc/*0.root"
+                        "../data/Kpi/sidebands/mc/*0.root"
                     ]
                 },
                 {
                     "label": "data sideb.",
                     "color": 5,
                     "files": [
-                        "../data/sidebands/D0Kpi/*_on_resonance_HadronBorJ.root"
+                        "../data/Kpi/sidebands/*_on_resonance_HadronBorJ.root"
                     ]
                 }
             ]
@@ -1737,28 +1760,28 @@
                     "label": "MC",
                     "color": 2,
                     "files": [
-                        "../data/Kpipi0/realistic_mc/stream0/*.root"
+                        "../data/Kpi/realistic_mc/stream0/*.root"
                     ]
                 },
                 {
                     "label": "MC sideb.",
                     "color": 9,
                     "files": [
-                        "../data/Kpipi0/sidebands/mc/*0.root"
+                        "../data/Kpi/sidebands/mc/*0.root"
                     ]
                 },
                 {
                     "label": "data sideb.",
                     "color": 5,
                     "files": [
-                        "../data/Kpipi0/sidebands/*.root"
+                        "../data/Kpi/sidebands/*.root"
                     ]
                 },
                 {
                     "label": "data",
                     "color": 4,
                     "files": [
-                        "../data/Kpipi0/*.root"
+                        "../data/Kpi/*.root"
                     ]
                 }
             ]
@@ -1770,7 +1793,7 @@
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "treeName": "h2000",
             "files": [
-                "../data/Kpipi0/signal_mc/*00*.root"
+                "../data/Kpi/signal_mc/*00*.root"
             ],
             "min": 0,
             "max": 6,
@@ -1790,7 +1813,7 @@
                     "color": 5,
                     "cut": "evmcflag!=1&&candsel<2",
                     "files": [
-                        "../data/Kpipi0/mc_wo_signal/*0.root"
+                        "../data/Kpi/mc_wo_signal/*0.root"
                     ]
                 }
             ]

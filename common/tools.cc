@@ -1087,7 +1087,10 @@ RooHistPdf* CreatePdfFromHistos(const char* name, const char* title,
     for (auto hist_single : histos) {
         hist->add(*hist_single);
     }
-    RooHistPdf* histpdf = new RooHistPdf(name, title, observables, *hist, 1);
+    // Disable interpolation for more than 2 dimensions as it is not yet
+    // implemented in RooFit.
+    const int interp_order = observables.size() < 3 ? 1 : 0;
+    RooHistPdf* histpdf = new RooHistPdf(name, title, observables, *hist, interp_order);
     return histpdf;
 }
 

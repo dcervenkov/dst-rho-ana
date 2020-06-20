@@ -663,7 +663,9 @@ void FitterCPV::CreatePlots(const nlohmann::json config) const {
         Log::LogLine(Log::info) << "Creating plots for channel " << channel_name;
 
         PlotAngularChannel(common_config, channel_config, channel_name);
-        PlotDtChannel(common_config, channel_config, channel_name);
+        if (!common_config.contains("timeIndependent")) {
+            PlotDtChannel(common_config, channel_config, channel_name);
+        }
     }
 }
 

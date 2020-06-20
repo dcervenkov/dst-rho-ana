@@ -607,7 +607,7 @@
             "fileName": "dt_cr",
             "formula": "dt",
             "xAxisTitle": "#Deltat [ps]",
-            "cut": "evmcflag==1&&vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5&&evmcflag==1",
             "min": -10,
             "max": 10,
             "files": ["../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-5]_svd?.root"],
@@ -1086,7 +1086,7 @@
         {
             "fileName": "thetat",
             "formula": "thetat",
-            "xAxisTitle": "#Theta_{t} [rad]",
+            "xAxisTitle": "#theta_{t} [rad]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "files": [
                 "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"
@@ -1137,7 +1137,7 @@
         {
             "fileName": "thetab",
             "formula": "thetab",
-            "xAxisTitle": "#Theta_{b} [rad]",
+            "xAxisTitle": "#theta_{b} [rad]",
             "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
             "files": [
                 "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd?.root"
@@ -1815,6 +1815,153 @@
                     "files": [
                         "../data/Kpi/mc_wo_signal/*0.root"
                     ]
+                }
+            ]
+        },
+        {
+            "fileName": "thetab_datamc",
+            "formula": "thetab",
+            "xAxisTitle": "#theta_{b} [rad]",
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "MC",
+                    "color": 2,
+                    "files": [
+                        "../data/Kpi/realistic_mc/stream0/*.root"
+                    ]
+                },
+                {
+                    "label": "data",
+                    "color": 3,
+                    "files": [
+                        "../data/Kpi/*.root"
+                    ]
+                }
+            ]
+        },
+        {
+            "fileName": "de_thetab_mc",
+            "formula": "de:thetab",
+            "xAxisTitle": "#theta_{b} [rad]",
+            "yAxisTitle": "#Delta E [GeV]",
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
+            "files": [
+                "../data/Kpi/mc/*.root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "MC",
+                    "color": 2
+                }
+            ]
+        },
+        {
+            "fileName": "de_thetab_data",
+            "formula": "de:thetab",
+            "xAxisTitle": "#theta_{b} [rad]",
+            "yAxisTitle": "#Delta E [GeV]",
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
+            "files": [
+                "../data/Kpi/*.root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "data",
+                    "color": 3
+                }
+            ]
+        },
+        {
+            "fileName": "de_thetab_cr",
+            "formula": "de:thetab",
+            "xAxisTitle": "#theta_{b} [rad]",
+            "yAxisTitle": "#Delta E [GeV]",
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
+            "files": [
+                "../data/Kpi/signal_mc/*[0-5].root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "cut": "evmcflag==1",
+                    "label": "MC",
+                    "color": 2
+                }
+            ]
+        },
+        {
+            "fileName": "de_thetab_scf",
+            "formula": "de:thetab",
+            "xAxisTitle": "#theta_{b} [rad]",
+            "yAxisTitle": "#Delta E [GeV]",
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
+            "files": [
+                "../data/Kpi/signal_mc/*[0-5].root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "cut": "evmcflag!=1",
+                    "label": "MC",
+                    "color": 2
+                }
+            ]
+        },
+        {
+            "fileName": "de_thetab_bkg",
+            "formula": "de:thetab",
+            "xAxisTitle": "#theta_{b} [rad]",
+            "yAxisTitle": "#Delta E [GeV]",
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
+            "files": [
+                "../data/Kpi/mc_wo_signal/*.root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "label": "MC",
+                    "color": 2
+                }
+            ]
+        },
+        {
+            "fileName": "de_mbc_mc",
+            "formula": "de:mbc",
+            "xAxisTitle": "M_{bc} [GeV/c^{2}]",
+            "yAxisTitle": "#Delta E [GeV]",
+            "xmax": 5.289,
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
+            "files": [
+                "../data/Kpi/mc/*.root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "MC",
+                    "color": 2
+                }
+            ]
+        },
+        {
+            "fileName": "de_mbc_data",
+            "formula": "de:mbc",
+            "xAxisTitle": "M_{bc} [GeV/c^{2}]",
+            "yAxisTitle": "#Delta E [GeV]",
+            "xmax": 5.289,
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
+            "files": [
+                "../data/Kpi/*.root"
+            ],
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "data",
+                    "color": 3
                 }
             ]
         }

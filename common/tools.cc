@@ -488,8 +488,9 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     plot->GetXaxis()->SetTitle("");
     plot->GetXaxis()->SetLabelSize(0);
 
-    // This line makes sure the 0 is not drawn as it would overlap with the lower pad
-    plot->GetYaxis()->SetRangeUser(0.001, plot->GetMaximum());
+    // This line makes sure the 0 is not drawn as it would overlap with the
+    // lower pad; it also makes more space for a legend and stat box
+    plot->GetYaxis()->SetRangeUser(0.001, plot->GetMaximum() * 1.3);
     plot->SetTitle("");
     plot->GetYaxis()->SetTitle(title.c_str());
     plot->GetYaxis()->SetTitleOffset(1.60);

@@ -109,8 +109,6 @@ Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const cha
     TTree* gsim_tree = dynamic_cast<TTree*>(gsim_file->Get("h2000"));
     gsim_dataset_ = new RooDataSet("gsim_dataset", "gsim dataset", gsim_tree, dataset_vars, cuts);
 
-    // Add calculated dt to the dataset
-    // gsim_dataset_->addColumn(dt_formula_);
     delete gsim_tree;
     gsim_file->Close();
     Log::print(Log::info, "Read %i Gsim events\n", gsim_dataset_->numEntries());

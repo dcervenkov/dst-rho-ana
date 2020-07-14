@@ -93,9 +93,6 @@ class Fitter {
 
     RooRealVar nocand_{"nocand", "nocand", 0};
 
-    RooFormulaVar dt_formula_{"dt", "#Deltat [ps]", "(vrvtxz-vtvtxz)/(0.425*0.0299792458)",
-                              RooArgSet(vrvtxz_, vtvtxz_)};
-
     TPaveText* CreateStatBox(double chi2, bool position_top = true, bool position_left = true);
 
     RooDataSet* evtgen_dataset_ = nullptr;

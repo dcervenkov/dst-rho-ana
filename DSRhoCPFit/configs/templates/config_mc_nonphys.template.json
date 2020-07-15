@@ -27,7 +27,7 @@
             "max": 3.1415
         },
         "thetab": {
-            "min": 0.5,
+            "min": 0.65,
             "max": 2.95
         }
     },
@@ -60,7 +60,7 @@
             },
             "efficiencyModel": 6,
             "efficiencyFile": "DSRhoCPFit/eff_Kpi_200618.root",
-            "scfHisto": "DSRhoCPFit/scf_Kpi_200618.root",
+            "scfHisto": "DSRhoCPFit/scf_Kpi_200619.root",
             "inputFiles": {
                 "signalMC": [
                     "data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_00_svd1.root",
@@ -120,7 +120,7 @@
             },
             "efficiencyModel": 6,
             "efficiencyFile": "DSRhoCPFit/eff_Kpipi0_200618.root",
-            "scfHisto": "DSRhoCPFit/scf_Kpipi0_200618.root",
+            "scfHisto": "DSRhoCPFit/scf_Kpipi0_200619.root",
             "inputFiles": {
                 "signalMC": [
                     "data/Kpipi0/signal_mc/DSRho-mdst_Kpipi0_basf2_00_svd1.root",
@@ -180,7 +180,7 @@
             },
             "efficiencyModel": 6,
             "efficiencyFile": "DSRhoCPFit/eff_K3pi_200618.root",
-            "scfHisto": "DSRhoCPFit/scf_K3pi_200618.root",
+            "scfHisto": "DSRhoCPFit/scf_K3pi_200619.root",
             "inputFiles": {
                 "signalMC": [
                     "data/K3pi/signal_mc/DSRho-mdst_K3pi_basf2_00_svd1.root",

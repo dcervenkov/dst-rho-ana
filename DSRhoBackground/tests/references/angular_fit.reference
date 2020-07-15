@@ -1,17 +1,17 @@
 {
   "angular_pdf": {
     "bkg_phit_f": 0.1,
-    "bkg_phit_offset": -0.0064,
-    "bkg_phit_poly_p2": -0.076,
-    "bkg_thetab_exp_alpha": -3.4802,
-    "bkg_thetab_f": 0.6409,
-    "bkg_thetab_gaus_mu": 2.9994,
-    "bkg_thetab_gaus_sigma_l": 0.4445,
-    "bkg_thetab_gaus_sigma_r": 0.0232,
+    "bkg_phit_offset": -0.0513,
+    "bkg_phit_poly_p2": -0.0582,
+    "bkg_thetab_exp_alpha": -4.0153,
+    "bkg_thetab_f": 0.5344,
+    "bkg_thetab_gaus_mu": 2.9996,
+    "bkg_thetab_gaus_sigma_l": 0.4509,
+    "bkg_thetab_gaus_sigma_r": 0.0774,
     "bkg_thetat_p1": 0.0,
-    "bkg_thetat_p2": -5.8718,
+    "bkg_thetat_p2": -5.6892,
     "bkg_thetat_p3": 0.0,
-    "bkg_thetat_p4": -0.9999,
+    "bkg_thetat_p4": -0.9987,
     "bkg_thetat_p5": 0.0,
     "bkg_thetat_p6": -1.0
   }

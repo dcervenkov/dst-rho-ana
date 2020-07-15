@@ -1,26 +1,26 @@
 {
   "emp_dt_cf_model": {
-    "bkg_cf_dt_f": 0.6306,
-    "bkg_cf_dt_gaus_mu": -0.8255,
-    "bkg_cf_dt_gaus_sigma": 0.5772,
-    "bkg_cf_dt_voigt_mu": 0.7061,
-    "bkg_cf_dt_voigt_sigma": 2.7794,
+    "bkg_cf_dt_f": 0.6526,
+    "bkg_cf_dt_gaus_mu": -0.881,
+    "bkg_cf_dt_gaus_sigma": 0.2713,
+    "bkg_cf_dt_voigt_mu": 0.4053,
+    "bkg_cf_dt_voigt_sigma": 2.8294,
     "bkg_cf_dt_voigt_width": 0.0
   },
   "emp_dt_dcs_model": {
-    "bkg_dcs_dt_f": 0.6718,
-    "bkg_dcs_dt_gaus_mu": 1.0,
-    "bkg_dcs_dt_gaus_sigma": 0.8655,
-    "bkg_dcs_dt_voigt_mu": -0.8451,
-    "bkg_dcs_dt_voigt_sigma": 0.0117,
-    "bkg_dcs_dt_voigt_width": 3.9956
+    "bkg_dcs_dt_f": 0.5258,
+    "bkg_dcs_dt_gaus_mu": 0.5523,
+    "bkg_dcs_dt_gaus_sigma": 1.0766,
+    "bkg_dcs_dt_voigt_mu": -0.1946,
+    "bkg_dcs_dt_voigt_sigma": 3.5996,
+    "bkg_dcs_dt_voigt_width": 0.0013
   },
   "emp_dt_model": {
-    "bkg_dt_f": 0.3248,
-    "bkg_dt_gaus_mu": -0.2979,
-    "bkg_dt_gaus_sigma": 1.4927,
-    "bkg_dt_voigt_mu": 0.9161,
-    "bkg_dt_voigt_sigma": 2.8093,
-    "bkg_dt_voigt_width": 4.1609
+    "bkg_dt_f": 0.7917,
+    "bkg_dt_gaus_mu": -0.8332,
+    "bkg_dt_gaus_sigma": 0.26,
+    "bkg_dt_voigt_mu": 0.2809,
+    "bkg_dt_voigt_sigma": 2.7771,
+    "bkg_dt_voigt_width": 0.0019
   }
 }

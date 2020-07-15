@@ -71,7 +71,8 @@ def common_cuts():
         "csbdtg > -0.6 &&"
         "(de>-0.14&&de<0.068)&&"
         "(dt>-10&&dt<10)&&"
-        "thetab>0.5"
+        "(thetab>0.65 && thetab<2.95)&&"
+        "nocand<=2"
     )
 
 

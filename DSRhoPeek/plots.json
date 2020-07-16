@@ -1987,6 +1987,39 @@
                     "color": 3
                 }
             ]
+        },
+        {
+            "fileName": "thetab_scf_nocand",
+            "formula": "thetab",
+            "xAxisTitle": "#theta_{b} [rad]",
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.5",
+            "treeName": "h2000",
+            "elements": [
+                {
+                    "label": "1 Cand.",
+                    "color": 2,
+                    "cut": "evmcflag!=1&&nocand==1",
+                    "files": [
+                        "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_0[0-9]_svd?.root"
+                    ]
+                },
+                {
+                    "label": "2 Cand.",
+                    "color": 3,
+                    "cut": "evmcflag!=1&&nocand==2",
+                    "files": [
+                        "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_[0-1][0-9]_svd?.root"
+                    ]
+                },
+                {
+                    "label": "3-5 Cand.",
+                    "color": 4,
+                    "cut": "evmcflag!=1&&nocand>2",
+                    "files": [
+                        "../data/Kpi/signal_mc/DSRho-mdst_Kpi_basf2_[0-9][0-9]_svd?.root"
+                    ]
+                }
+            ]
         }
     ]
 }

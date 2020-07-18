@@ -1,7 +1,7 @@
 {
   "channels": {
     "K3pi": {
-      "efficiencyFile": "DSRhoCPFit/eff_K3pi_190603.root",
+      "efficiencyFile": "DSRhoCPFit/eff_K3pi_200618.root",
       "efficiencyModel": 6,
       "inputFiles": {
         "data": [
@@ -48,28 +48,28 @@
         ]
       },
       "modelParameters": {
-        "bkg_phit_f": 0.6225,
-        "bkg_phit_offset": -0.0237,
-        "bkg_phit_poly_p2": 0.0464,
-        "bkg_thetab_exp_alpha": -3.017,
-        "bkg_thetab_f": 0.704,
-        "bkg_thetab_gaus_mu": 2.5925,
-        "bkg_thetab_gaus_sigma_l": 0.3835,
-        "bkg_thetab_gaus_sigma_r": 0.2497,
+        "bkg_phit_f": 0.593,
+        "bkg_phit_offset": -0.0303,
+        "bkg_phit_poly_p2": 0.0546,
+        "bkg_thetab_exp_alpha": -3.0816,
+        "bkg_thetab_f": 0.5984,
+        "bkg_thetab_gaus_mu": 2.5938,
+        "bkg_thetab_gaus_sigma_l": 0.3884,
+        "bkg_thetab_gaus_sigma_r": 0.2488,
         "bkg_thetat_p1": 0.0,
-        "bkg_thetat_p2": -1.2731,
+        "bkg_thetat_p2": -1.3032,
         "bkg_thetat_p3": 0.0,
-        "bkg_thetat_p4": 0.271,
+        "bkg_thetat_p4": 0.2969,
         "bkg_thetat_p5": 0.0,
-        "bkg_thetat_p6": -0.1184,
-        "cr_f": 0.7269,
-        "cr_scf_f": 0.8786,
-        "scf_f": 0.1004
+        "bkg_thetat_p6": -0.1202,
+        "cr_f": 0.7748,
+        "cr_scf_f": 0.9,
+        "scf_f": 0.0861
       },
-      "scfHisto": "DSRhoCPFit/scf_K3pi_190603.root"
+      "scfHisto": "DSRhoCPFit/scf_K3pi_200619.root"
     },
     "Kpi": {
-      "efficiencyFile": "DSRhoCPFit/eff_Kpi_190531.root",
+      "efficiencyFile": "DSRhoCPFit/eff_Kpi_200618.root",
       "efficiencyModel": 6,
       "inputFiles": {
         "data": [
@@ -116,28 +116,28 @@
         ]
       },
       "modelParameters": {
-        "bkg_phit_f": 0.5768,
-        "bkg_phit_offset": -0.0029,
-        "bkg_phit_poly_p2": 0.0303,
-        "bkg_thetab_exp_alpha": -3.3474,
-        "bkg_thetab_f": 0.7086,
-        "bkg_thetab_gaus_mu": 2.6077,
-        "bkg_thetab_gaus_sigma_l": 0.382,
-        "bkg_thetab_gaus_sigma_r": 0.225,
+        "bkg_phit_f": 0.5244,
+        "bkg_phit_offset": -0.0071,
+        "bkg_phit_poly_p2": 0.0468,
+        "bkg_thetab_exp_alpha": -3.3841,
+        "bkg_thetab_f": 0.5943,
+        "bkg_thetab_gaus_mu": 2.6069,
+        "bkg_thetab_gaus_sigma_l": 0.3857,
+        "bkg_thetab_gaus_sigma_r": 0.2247,
         "bkg_thetat_p1": 0.0,
-        "bkg_thetat_p2": -1.2663,
+        "bkg_thetat_p2": -1.2956,
         "bkg_thetat_p3": 0.0,
-        "bkg_thetat_p4": 0.3633,
+        "bkg_thetat_p4": 0.3924,
         "bkg_thetat_p5": 0.0,
-        "bkg_thetat_p6": -0.068,
-        "cr_f": 0.7643,
-        "cr_scf_f": 0.89,
-        "scf_f": 0.0945
+        "bkg_thetat_p6": -0.0776,
+        "cr_f": 0.8121,
+        "cr_scf_f": 0.9,
+        "scf_f": 0.0902
       },
-      "scfHisto": "DSRhoCPFit/scf_Kpi_190531.root"
+      "scfHisto": "DSRhoCPFit/scf_Kpi_200619.root"
     },
     "Kpipi0": {
-      "efficiencyFile": "DSRhoCPFit/eff_Kpipi0_190603.root",
+      "efficiencyFile": "DSRhoCPFit/eff_Kpipi0_200618.root",
       "efficiencyModel": 6,
       "inputFiles": {
         "data": [
@@ -184,25 +184,25 @@
         ]
       },
       "modelParameters": {
-        "bkg_phit_f": 0.62,
-        "bkg_phit_offset": 0.0067,
-        "bkg_phit_poly_p2": 0.0567,
-        "bkg_thetab_exp_alpha": -2.9988,
-        "bkg_thetab_f": 0.6814,
-        "bkg_thetab_gaus_mu": 2.567,
-        "bkg_thetab_gaus_sigma_l": 0.4062,
-        "bkg_thetab_gaus_sigma_r": 0.2823,
+        "bkg_phit_f": 0.6061,
+        "bkg_phit_offset": -0.0254,
+        "bkg_phit_poly_p2": 0.0537,
+        "bkg_thetab_exp_alpha": -3.1894,
+        "bkg_thetab_f": 0.5757,
+        "bkg_thetab_gaus_mu": 2.5763,
+        "bkg_thetab_gaus_sigma_l": 0.4331,
+        "bkg_thetab_gaus_sigma_r": 0.2796,
         "bkg_thetat_p1": 0.0,
-        "bkg_thetat_p2": -1.2637,
+        "bkg_thetat_p2": -1.2641,
         "bkg_thetat_p3": 0.0,
-        "bkg_thetat_p4": 0.3194,
+        "bkg_thetat_p4": 0.328,
         "bkg_thetat_p5": 0.0,
-        "bkg_thetat_p6": -0.0768,
-        "cr_f": 0.6527,
-        "cr_scf_f": 0.8319,
-        "scf_f": 0.1319
+        "bkg_thetat_p6": -0.0757,
+        "cr_f": 0.7258,
+        "cr_scf_f": 0.8683,
+        "scf_f": 0.1101
       },
-      "scfHisto": "DSRhoCPFit/scf_Kpipi0_190603.root"
+      "scfHisto": "DSRhoCPFit/scf_Kpipi0_200619.root"
     }
   },
   "fitRanges": {
@@ -212,7 +212,7 @@
     },
     "thetab": {
       "max": 2.95,
-      "min": 0.5
+      "min": 0.65
     },
     "thetat": {
       "max": 3.1415,
@@ -238,34 +238,34 @@
     "ytb": -0.00692
   },
   "modelParameters": {
-    "bkg_cf_dt_S_main": 103.1064,
+    "bkg_cf_dt_S_main": 100.8219,
     "bkg_cf_dt_S_tail": 0.0,
-    "bkg_cf_dt_f_delta": 0.111,
+    "bkg_cf_dt_f_delta": 0.1305,
     "bkg_cf_dt_f_tail": 0.0,
-    "bkg_cf_dt_mu_delta": 0.0113,
-    "bkg_cf_dt_mu_lifetime": -0.1185,
-    "bkg_cf_dt_tau": 1.4228,
-    "bkg_dcs_dt_S_main": 89.9251,
+    "bkg_cf_dt_mu_delta": -0.0238,
+    "bkg_cf_dt_mu_lifetime": -0.1015,
+    "bkg_cf_dt_tau": 1.4185,
+    "bkg_dcs_dt_S_main": 89.4667,
     "bkg_dcs_dt_S_tail": 0.0,
-    "bkg_dcs_dt_f_delta": 0.1025,
+    "bkg_dcs_dt_f_delta": 0.1209,
     "bkg_dcs_dt_f_tail": 0.0,
-    "bkg_dcs_dt_mu_delta": 0.0683,
-    "bkg_dcs_dt_mu_lifetime": -0.1657,
-    "bkg_dcs_dt_tau": 1.8121,
-    "scf_cf_dt_S_main": 108.7889,
+    "bkg_dcs_dt_mu_delta": 0.0789,
+    "bkg_dcs_dt_mu_lifetime": -0.1451,
+    "bkg_dcs_dt_tau": 1.7832,
+    "scf_cf_dt_S_main": 105.9837,
     "scf_cf_dt_S_tail": 0.0,
     "scf_cf_dt_f_delta": 0.0,
     "scf_cf_dt_f_tail": 0.0,
     "scf_cf_dt_mu_delta": 0.0,
-    "scf_cf_dt_mu_lifetime": -0.2273,
-    "scf_cf_dt_tau": 1.3406,
-    "scf_dcs_dt_S_main": 80.7198,
+    "scf_cf_dt_mu_lifetime": -0.2122,
+    "scf_cf_dt_tau": 1.3288,
+    "scf_dcs_dt_S_main": 77.2692,
     "scf_dcs_dt_S_tail": 0.0,
     "scf_dcs_dt_f_delta": 0.0,
     "scf_dcs_dt_f_tail": 0.0,
     "scf_dcs_dt_mu_delta": 0.0,
-    "scf_dcs_dt_mu_lifetime": -0.2401,
-    "scf_dcs_dt_tau": 1.9837
+    "scf_dcs_dt_mu_lifetime": -0.2237,
+    "scf_dcs_dt_tau": 1.9678
   },
   "physicsDtSCFBKG": true
 }

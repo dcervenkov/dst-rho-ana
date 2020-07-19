@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """This script prints pull tables from all supplied ROOT result files."""
 
@@ -23,14 +23,14 @@ def main():
     for path in files:
         with root_open(path, 'r') as f:
             print(path)
-            print
+            print()
 
             if latex:
                 print(f.latex_pull_table.GetTitle())
             else:
                 print(f.pull_table.GetTitle())
 
-            print
+            print()
 
 
 main()

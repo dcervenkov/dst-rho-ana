@@ -14,6 +14,7 @@
 #include "RooAddPdf.h"
 #include "RooRealVar.h"
 #include "TCanvas.h"
+#include "TFile.h"
 #include "TPaveText.h"
 
 // Local includes

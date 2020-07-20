@@ -59,10 +59,12 @@
 #include "tools.h"
 
 Fitter::Fitter(const char* evtgen_filepath, const char* gsim_filepath, const char* output_dir) {
-    dec_type_.defineType("a", 1);
-    dec_type_.defineType("ab", 2);
-    dec_type_.defineType("b", 3);
-    dec_type_.defineType("bb", 4);
+    // Since ROOT 6.22.00, RooDataSet::read expects the find the RooCategory
+    // labels in the text file, rather than numbers as before.
+    dec_type_.defineType("1", 1);
+    dec_type_.defineType("2", 2);
+    dec_type_.defineType("3", 3);
+    dec_type_.defineType("4", 4);
 
     if (strstr(evtgen_filepath, ".root")) {
         TFile* evtgen_file = new TFile(evtgen_filepath);

@@ -34,27 +34,27 @@
     "modelParameters": {
         "substitute": [
             {
-                "file": "../../../DSRhoBackground/results/together_mc_scf.json",
-                "include": ["phys_dt_cf_model", "phys_dt_dcs_model"],
+                "file": "../../../../DSRhoBackground/results/nonphys_together_mc_scf.json",
+                "include": ["emp_dt_cf_model", "emp_dt_dcs_model"],
                 "replace": ["bkg", "scf"]
             },
             {
-                "file": "../../../DSRhoBackground/results/together_mc_bkg.json",
-                "include": ["phys_dt_cf_model", "phys_dt_dcs_model"]
+                "file": "../../../../DSRhoBackground/results/nonphys_together_mc_bkg.json",
+                "include": ["emp_dt_cf_model", "emp_dt_dcs_model"]
             }
         ]
     },
-    "physicsDtSCFBKG": true,
+    "physicsDtSCFBKG": false,
     "channels": {
         "Kpi": {
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../DSRhoBackground/results/nonphys_Kpi_mc_bkg.json",
+                        "file": "../../../../DSRhoBackground/results/nonphys_Kpi_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {
-                        "file": "../../../DSRhoYield/results/Kpi_mc_fractions.json"
+                        "file": "../../../../DSRhoYield/results/Kpi_mc_fractions.json"
                     }
                 ]
             },
@@ -110,11 +110,11 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../DSRhoBackground/results/nonphys_Kpipi0_mc_bkg.json",
+                        "file": "../../../../DSRhoBackground/results/nonphys_Kpipi0_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {
-                        "file": "../../../DSRhoYield/results/Kpipi0_mc_fractions.json"
+                        "file": "../../../../DSRhoYield/results/Kpipi0_mc_fractions.json"
                     }
                 ]
             },
@@ -170,11 +170,11 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../DSRhoBackground/results/nonphys_K3pi_mc_bkg.json",
+                        "file": "../../../../DSRhoBackground/results/nonphys_K3pi_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {
-                        "file": "../../../DSRhoYield/results/K3pi_mc_fractions.json"
+                        "file": "../../../../DSRhoYield/results/K3pi_mc_fractions.json"
                     }
                 ]
             },

@@ -111,23 +111,24 @@ rule all:
                    channel=CHANNELS_AND_TOGETHER, component=["all"], type=["lifetime", "mixing"])
             ),
         cpfit_jobs = (
-            expand("DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}",
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
-                stream=range(99)),
-            expand("DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}",
+                stream=range(99), group=["nominal"]),
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
-                stream=range(6)),
+                stream=range(6), group=["nominal"]),
 
-            expand("DSRhoCPFit/results/{channel}_{type}_{components}_plot/stream{stream}",
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["CR", "CRSCF"],
-                stream=range(1)),
-            expand("DSRhoCPFit/results/{channel}_{type}_{components}_plot/stream{stream}",
+                stream=range(1), group=["nominal"]),
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["all"],
-                stream=range(1)),
+                stream=range(1), group=["nominal"]),
 
-            expand("DSRhoCPFit/results/{channel}_{type}_data_{bkg}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti"], bkg=["mcbkg", "sidebkg"])
-        )
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti"], bkg=["mcbkg", "sidebkg"],
+                group=["nominal"])
+            )
 
 rule yield_jobs:
     input:
@@ -301,17 +302,17 @@ rule cpfit_configs:
         expand(rules.background.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
         expand(rules.background_nonphys.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
         rules.yield_summary.output,
-        template = "DSRhoCPFit/configs/templates/{config}.template.json"
+        template = "DSRhoCPFit/configs/{group}/templates/{config}.template.json"
     output:
-        "DSRhoCPFit/configs/{config}.json"
+        "DSRhoCPFit/configs/{group}/{config}.json"
     shell:
         "./tools/config_from_template.py {input.template} > {output}"
 
 rule cpfit_stream_configs:
     input:
-        "DSRhoCPFit/configs/config_mc.json"
+        "DSRhoCPFit/configs/{group}/config_mc.json"
     output:
-        "DSRhoCPFit/configs/streams/config_mc_{stream}.json"
+        "DSRhoCPFit/configs/{group}/streams/config_mc_{stream}.json"
     wildcard_constraints:
         stream = "\d+"
     run:
@@ -320,11 +321,11 @@ rule cpfit_stream_configs:
 
 rule cpfit_mc:
     input:
-        config = "DSRhoCPFit/configs/streams/config_mc_{stream}.json",
+        config = "DSRhoCPFit/configs/{group}/streams/config_mc_{stream}.json",
     output:
-        result = "DSRhoCPFit/results/{channel}_{type}_{components}/stream{stream}"
+        result = "DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}"
     log:
-        "DSRhoCPFit/logs/{channel}_{type}_{components}/stream{stream}.log"
+        "DSRhoCPFit/logs/{group}/{channel}_{type}_{components}/stream{stream}.log"
     wildcard_constraints:
         components = "CR|CRSCF|all"
     params:
@@ -341,12 +342,12 @@ rule cpfit_mc:
 
 rule cpfit_mc_plot:
     input:
-        config = "DSRhoCPFit/configs/streams/config_mc_{stream}.json",
+        config = "DSRhoCPFit/configs/{group}/streams/config_mc_{stream}.json",
     output:
-        result = "DSRhoCPFit/results/{channel}_{type}_{components}_plot/stream{stream}",
-        plotdir = directory("DSRhoCPFit/plots/{channel}_{type}_{components}/stream{stream}")
+        result = "DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
+        plotdir = directory("DSRhoCPFit/plots/{group}/{channel}_{type}_{components}/stream{stream}")
     log:
-        "DSRhoCPFit/logs/{channel}_{type}_{components}_plot/stream{stream}.log"
+        "DSRhoCPFit/logs/{group}/{channel}_{type}_{components}_plot/stream{stream}.log"
     wildcard_constraints:
         components = "CR|CRSCF|all"
     params:
@@ -364,12 +365,12 @@ rule cpfit_mc_plot:
 
 rule cpfit_data_plot:
     input:
-        config = "DSRhoCPFit/configs/config_data_{bkg}.json",
+        config = "DSRhoCPFit/configs/{group}/config_data_{bkg}.json",
     output:
-        result = "DSRhoCPFit/results/{channel}_{type}_data_{bkg}",
-        plotdir = directory("DSRhoCPFit/plots/{channel}_{type}_data_{bkg}")
+        result = "DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
+        plotdir = directory("DSRhoCPFit/plots/{group}/{channel}_{type}_data_{bkg}")
     log:
-        "DSRhoCPFit/logs/{channel}_{type}_data_{bkg}.log"
+        "DSRhoCPFit/logs/{group}/{channel}_{type}_data_{bkg}.log"
     params:
         "--MC=0",
         "--cpus=1",

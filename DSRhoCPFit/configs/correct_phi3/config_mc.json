@@ -1,0 +1,271 @@
+{
+  "channels": {
+    "K3pi": {
+      "efficiencyFile": "DSRhoCPFit/eff_K3pi_200618.root",
+      "efficiencyModel": 6,
+      "inputFiles": {
+        "data": [
+          "data/K3pi/DSRhoSkim_svd1_exp07_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd1_exp09_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd1_exp11_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd1_exp13_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd1_exp15_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd1_exp17_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd1_exp19_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd1_exp21_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd1_exp23_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd1_exp25_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd1_exp27_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp31_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp33_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp35_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp37_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp39_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp41_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp43_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp45_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp47_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp49_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp51_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp55_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp61_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp63_on_resonance_HadronBorJ.root",
+          "data/K3pi/DSRhoSkim_svd2_exp65_on_resonance_HadronBorJ.root"
+        ],
+        "genericMC": [
+          "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+          "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+          "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+          "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+          "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+          "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+          "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+          "data/K3pi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+        ],
+        "signalMC": [
+          "data/K3pi/signal_mc_correct_phi3/DSRho-mdst_K3pi_basf2_phi3_00_svd1.root",
+          "data/K3pi/signal_mc_correct_phi3/DSRho-mdst_K3pi_basf2_phi3_00_svd2.root"
+        ]
+      },
+      "modelParameters": {
+        "bkg_phit_f": 0.7902,
+        "bkg_phit_offset": 0.0781,
+        "bkg_phit_poly_p2": 0.0198,
+        "bkg_thetab_exp_alpha": -1.7319,
+        "bkg_thetab_f": 0.715,
+        "bkg_thetab_gaus_mu": 2.4581,
+        "bkg_thetab_gaus_sigma_l": 0.5196,
+        "bkg_thetab_gaus_sigma_r": 0.3772,
+        "bkg_thetat_p1": 0.0,
+        "bkg_thetat_p2": -1.2016,
+        "bkg_thetat_p3": 0.0,
+        "bkg_thetat_p4": 0.218,
+        "bkg_thetat_p5": 0.0,
+        "bkg_thetat_p6": -0.0445,
+        "cr_f": 0.7296,
+        "cr_scf_f": 0.9,
+        "scf_f": 0.0811
+      },
+      "scfHisto": "DSRhoCPFit/scf_K3pi_200619.root"
+    },
+    "Kpi": {
+      "efficiencyFile": "DSRhoCPFit/eff_Kpi_200618.root",
+      "efficiencyModel": 6,
+      "inputFiles": {
+        "data": [
+          "data/Kpi/DSRhoSkim_svd1_exp07_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd1_exp09_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd1_exp11_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd1_exp13_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd1_exp15_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd1_exp17_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd1_exp19_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd1_exp21_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd1_exp23_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd1_exp25_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd1_exp27_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp31_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp33_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp35_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp37_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp39_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp41_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp43_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp45_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp47_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp49_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp51_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp55_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp61_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp63_on_resonance_HadronBorJ.root",
+          "data/Kpi/DSRhoSkim_svd2_exp65_on_resonance_HadronBorJ.root"
+        ],
+        "genericMC": [
+          "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+          "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+          "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+          "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+          "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+          "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+          "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+          "data/Kpi/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+        ],
+        "signalMC": [
+          "data/Kpi/signal_mc_correct_phi3/DSRho-mdst_Kpi_basf2_phi3_00_svd1.root",
+          "data/Kpi/signal_mc_correct_phi3/DSRho-mdst_Kpi_basf2_phi3_00_svd2.root"
+        ]
+      },
+      "modelParameters": {
+        "bkg_phit_f": 0.7721,
+        "bkg_phit_offset": 0.1274,
+        "bkg_phit_poly_p2": 0.0184,
+        "bkg_thetab_exp_alpha": -1.9646,
+        "bkg_thetab_f": 0.6939,
+        "bkg_thetab_gaus_mu": 2.4699,
+        "bkg_thetab_gaus_sigma_l": 0.5934,
+        "bkg_thetab_gaus_sigma_r": 0.3639,
+        "bkg_thetat_p1": 0.0,
+        "bkg_thetat_p2": -1.1774,
+        "bkg_thetat_p3": 0.0,
+        "bkg_thetat_p4": 0.2265,
+        "bkg_thetat_p5": 0.0,
+        "bkg_thetat_p6": -0.0485,
+        "cr_f": 0.7634,
+        "cr_scf_f": 0.9,
+        "scf_f": 0.0848
+      },
+      "scfHisto": "DSRhoCPFit/scf_Kpi_200619.root"
+    },
+    "Kpipi0": {
+      "efficiencyFile": "DSRhoCPFit/eff_Kpipi0_200618.root",
+      "efficiencyModel": 6,
+      "inputFiles": {
+        "data": [
+          "data/Kpipi0/DSRhoSkim_svd1_exp07_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd1_exp09_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd1_exp11_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd1_exp13_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd1_exp15_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd1_exp17_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd1_exp19_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd1_exp21_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd1_exp23_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd1_exp25_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd1_exp27_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp31_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp33_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp35_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp37_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp39_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp41_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp43_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp45_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp47_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp49_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp51_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp55_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp61_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp63_on_resonance_HadronBorJ.root",
+          "data/Kpipi0/DSRhoSkim_svd2_exp65_on_resonance_HadronBorJ.root"
+        ],
+        "genericMC": [
+          "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charged_s10.root",
+          "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-charm_s10.root",
+          "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-mixed_s10.root",
+          "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd1_on_resonance_evtgen-uds_s10.root",
+          "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charged_s0.root",
+          "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-charm_s0.root",
+          "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-mixed_s0.root",
+          "data/Kpipi0/realistic_mc/stream0/DSRhoSkim_svd2_on_resonance_evtgen-uds_s0.root"
+        ],
+        "signalMC": [
+          "data/Kpipi0/signal_mc_correct_phi3/DSRho-mdst_Kpipi0_basf2_phi3_00_svd1.root",
+          "data/Kpipi0/signal_mc_correct_phi3/DSRho-mdst_Kpipi0_basf2_phi3_00_svd2.root"
+        ]
+      },
+      "modelParameters": {
+        "bkg_phit_f": 0.7878,
+        "bkg_phit_offset": 0.0827,
+        "bkg_phit_poly_p2": 0.0296,
+        "bkg_thetab_exp_alpha": -1.6327,
+        "bkg_thetab_f": 0.7341,
+        "bkg_thetab_gaus_mu": 2.3656,
+        "bkg_thetab_gaus_sigma_l": 0.3914,
+        "bkg_thetab_gaus_sigma_r": 0.4821,
+        "bkg_thetat_p1": 0.0,
+        "bkg_thetat_p2": -1.1683,
+        "bkg_thetat_p3": 0.0,
+        "bkg_thetat_p4": 0.2062,
+        "bkg_thetat_p5": 0.0,
+        "bkg_thetat_p6": -0.0306,
+        "cr_f": 0.6664,
+        "cr_scf_f": 0.8683,
+        "scf_f": 0.1011
+      },
+      "scfHisto": "DSRhoCPFit/scf_Kpipi0_200619.root"
+    }
+  },
+  "fitRanges": {
+    "dt": {
+      "max": 10,
+      "min": -10
+    },
+    "thetab": {
+      "max": 2.95,
+      "min": 0.65
+    },
+    "thetat": {
+      "max": 3.1415,
+      "min": 0
+    }
+  },
+  "initialPars": {
+    "a0": 0.941,
+    "ap": 0.269,
+    "apa": 0.56,
+    "ata": 3.11,
+    "x0": 0.00533,
+    "x0b": -0.00846,
+    "xp": 0.00817,
+    "xpb": -0.01022,
+    "xt": 0.00826,
+    "xtb": -0.00584,
+    "y0": -0.00846,
+    "y0b": 0.00533,
+    "yp": -0.00661,
+    "ypb": 0.00244,
+    "yt": 0.00372,
+    "ytb": -0.00692
+  },
+  "modelParameters": {
+    "bkg_cf_dt_S_main": 101.8408,
+    "bkg_cf_dt_S_tail": 0.0,
+    "bkg_cf_dt_f_delta": 0.2797,
+    "bkg_cf_dt_f_tail": 0.0,
+    "bkg_cf_dt_mu_delta": 0.028,
+    "bkg_cf_dt_mu_lifetime": -0.1763,
+    "bkg_cf_dt_tau": 1.4035,
+    "bkg_dcs_dt_S_main": 87.9536,
+    "bkg_dcs_dt_S_tail": 0.0,
+    "bkg_dcs_dt_f_delta": 0.2356,
+    "bkg_dcs_dt_f_tail": 0.0,
+    "bkg_dcs_dt_mu_delta": 0.0034,
+    "bkg_dcs_dt_mu_lifetime": -0.1649,
+    "bkg_dcs_dt_tau": 1.8448,
+    "scf_cf_dt_S_main": 105.9837,
+    "scf_cf_dt_S_tail": 0.0,
+    "scf_cf_dt_f_delta": 0.0,
+    "scf_cf_dt_f_tail": 0.0,
+    "scf_cf_dt_mu_delta": 0.0,
+    "scf_cf_dt_mu_lifetime": -0.2122,
+    "scf_cf_dt_tau": 1.3288,
+    "scf_dcs_dt_S_main": 77.2692,
+    "scf_dcs_dt_S_tail": 0.0,
+    "scf_dcs_dt_f_delta": 0.0,
+    "scf_dcs_dt_f_tail": 0.0,
+    "scf_dcs_dt_mu_delta": 0.0,
+    "scf_dcs_dt_mu_lifetime": -0.2237,
+    "scf_dcs_dt_tau": 1.9678
+  },
+  "physicsDtSCFBKG": true
+}

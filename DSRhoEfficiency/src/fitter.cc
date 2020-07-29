@@ -767,13 +767,13 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
 }
 
 void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
-
-
     TH3F* eff_histo = GetBinned3DEfficiency();
 
     TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
     TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
     TH3F* binned_pdf = NormalizePDF(eff_histo, 0, 1);
+
+    SaveEfficiency2TTree(eff_histo, efficiency_file);
 
     TFile f(efficiency_file, "RECREATE");
     binned_pdf->Write();
@@ -847,12 +847,64 @@ TH3F* Fitter::GetBinned3DEfficiency() {
     TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
 
     TH3F* eff_histo = dynamic_cast<TH3F*>(gsim_histo->Clone("eff_histo"));
-    eff_histo->Divide(gsim_histo, evtgen_histo);  //, 1.0, 1.0, "B");
+    eff_histo->Divide(gsim_histo, evtgen_histo, 1.0, 1.0, "B");
 
     delete gsim_histo;
     delete evtgen_histo;
 
     return eff_histo;
+}
+
+void Fitter::SaveEfficiency2TTree(TH3F* histo, std::string path) const {
+    // Creates a TTree and fills it with the coordinates of all
+    // filled bins. The tree will have one branch for each dimension,
+    // and one for the bin content.
+    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
+    TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
+
+    tools::RemoveSubstring(path, ".root");
+    path += "_tree.root";
+    TFile tree_file(path.c_str(), "RECREATE");
+
+    TString name(histo->GetName());
+    name += "_tree";
+    TString title(histo->GetTitle());
+    title += " tree";
+    TTree* tree = new TTree(name, title);
+    float thetat;
+    float thetab;
+    float phit;
+    float eff;
+    float k;
+    float n;
+    float error;
+    tree->Branch("thetat", &thetat, "thetat/F");
+    tree->Branch("thetab", &thetab, "thetab/F");
+    tree->Branch("phit", &phit, "phit/F");
+    tree->Branch("eff", &eff, "eff/F");
+    tree->Branch("k", &k, "k/F");
+    tree->Branch("n", &n, "n/F");
+    tree->Branch("error", &error, "error/F");
+
+    for (int x = 1; x <= histo->GetXaxis()->GetNbins(); x++) {
+        for (int y = 1; y <= histo->GetYaxis()->GetNbins(); y++) {
+            for (int z = 1; z <= histo->GetZaxis()->GetNbins(); z++) {
+                thetat = histo->GetXaxis()->GetBinCenter(x);
+                thetab = histo->GetYaxis()->GetBinCenter(y);
+                phit = histo->GetZaxis()->GetBinCenter(z);
+                eff = histo->GetBinContent(histo->GetBin(x, y, z));
+                k = gsim_histo->GetBinContent(histo->GetBin(x, y, z));
+                n = evtgen_histo->GetBinContent(histo->GetBin(x, y, z));
+                error = histo->GetBinError(histo->GetBin(x, y, z));
+                tree->Fill();
+            }
+        }
+    }
+
+    delete gsim_histo;
+    delete evtgen_histo;
+
+    tree->Write();
 }
 
 TTree* Fitter::Histogram2TTree(TH3F* histo) {

@@ -59,6 +59,7 @@ class Fitter {
 
    private:
     TH3F* GetBinned3DEfficiency();
+    void SaveEfficiency2TTree(TH3F* histo, std::string path) const;
     TTree* Histogram2TTree(TH3F* histo);
     TH3F* Create3DHisto(const RooDataSet* dataset, const char* name = nullptr) const;
     TH3F* ConvertDensityToHisto(AdaptiveKernelDensity pdf) const;

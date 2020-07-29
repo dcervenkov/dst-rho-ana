@@ -126,8 +126,16 @@ rule all:
                 stream=range(1), group=["nominal"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti"], bkg=["mcbkg", "sidebkg"],
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
                 group=["nominal"])
+            ),
+        cpfit_extra_jobs = (
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+                channel=["Kpi"], type=["ti", "td"], components=["CR", "CRSCF"], stream=range(8),
+                group=["correct_phi3"]),
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+                channel=["Kpi"], type=["ti", "td"], components=["all"], stream=range(6),
+                group=["correct_phi3"])
             )
 
 rule yield_jobs:
@@ -144,7 +152,8 @@ rule lifetime_jobs:
 
 rule cpfit_jobs:
     input:
-        rules.all.input.cpfit_jobs
+        rules.all.input.cpfit_jobs,
+        rules.all.input.cpfit_extra_jobs
 
 rule yield_mc:
     input:

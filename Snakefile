@@ -127,6 +127,9 @@ rule all:
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
+                group=["nominal"]),
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
+                channel=["Kpi-K3pi"], type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
                 group=["nominal"])
             ),
         cpfit_extra_jobs = (

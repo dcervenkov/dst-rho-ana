@@ -3,6 +3,7 @@
     "comparison_file": "current_result",
     "temporary_paths": [
         "current_result.root",
+        "current_result_tree.root",
         "plots"
     ],
     "post_commands": [

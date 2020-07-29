@@ -341,7 +341,11 @@ void Fitter::PlotEfficiency2D(RooRealVar& var1, RooRealVar& var2) {
         TString(var1.GetName()) + "_" + TString(var2.GetName()) + "_eff_canvas",
         TString(var1.GetTitle()) + "_" + TString(var2.GetName()) + " eff canvas", 500, 500);
 
-    TH3F* eff_histo_3D = GetBinned3DEfficiency();
+    TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
+    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
+    TH3F* eff_histo_3D = GetBinned3DEfficiency(gsim_histo, evtgen_histo);
+    delete gsim_histo;
+    delete evtgen_histo;
 
     std::string projection_string;
     projection_string += var2.GetName();
@@ -591,7 +595,10 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
     FormulaDensity formula_density("Formula Density", &phasespace,
                                    "(x - 1.57)^2 * (y - 1.57)^2 * (z)^2");
 
-    TH3F* eff_histo = GetBinned3DEfficiency();
+    TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
+    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
+    TH3F* eff_histo = GetBinned3DEfficiency(gsim_histo, evtgen_histo);
+
     TTree* eff_tree = Histogram2TTree(eff_histo);
 
     BinnedKernelDensity bin_kde("BinKernelPDF", &phasespace, eff_tree, "thetat", "thetab", "phit",
@@ -617,7 +624,11 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
         vars_[2]->setMin(constants::cuts::phit_low);
         vars_[2]->setMax(constants::cuts::phit_high);
         delete eff_histo;
-        eff_histo = GetBinned3DEfficiency();
+        TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
+        TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
+        eff_histo = GetBinned3DEfficiency(gsim_histo, evtgen_histo);
+        delete gsim_histo;
+        delete evtgen_histo;
     }
 
     // TFile new_efficiency_file("efficiency.root", "read");
@@ -627,8 +638,6 @@ void Fitter::ProcessKDEEfficiency(const char* efficiency_file,
     // TH3F* binned_pdf = ConvertTransHisto(trans_histo);
 
 
-    TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
-    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
     TH3F* binned_pdf = ConvertDensityToHisto(kde);
     TH3F* simulated_histo = Create3DHisto(evtgen_dataset_);
     simulated_histo->Multiply(binned_pdf);
@@ -766,12 +775,24 @@ void Fitter::ProcessKDEEfficiency2(const char* efficiency_file,
     }
 }
 
-void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
-    TH3F* eff_histo = GetBinned3DEfficiency();
+void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file, int random_models) {
 
     TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
     TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
+    TH3F* eff_histo = GetBinned3DEfficiency(gsim_histo, evtgen_histo);
     TH3F* binned_pdf = NormalizePDF(eff_histo, 0, 1);
+
+    for (int i = 0; i < random_models; i++) {
+        std::string filename = efficiency_file;
+        tools::RemoveSubstring(filename, ".root");
+        filename += "_rnd_";
+        filename += std::to_string(i + 1);
+        filename += ".root";
+        TFile file_rnd(filename.c_str(), "RECREATE");
+        TH3F* eff_rnd = CreateRandomizedEfficiency(eff_histo, evtgen_histo, i);
+        eff_rnd->Write();
+        delete eff_rnd;
+    }
 
     SaveEfficiency2TTree(eff_histo, efficiency_file);
 
@@ -840,25 +861,52 @@ void Fitter::ProcessNormalizedEfficiency(const char* efficiency_file) {
 
 }
 
+TH3F* Fitter::CreateRandomizedEfficiency(const TH3F* eff, const TH3F* total, int seed) const {
+    // TODO: figure out a way to name this histo the same way as the original
+    TH3F* eff_rnd = dynamic_cast<TH3F*>(eff->Clone("eff_histo"));
+
+    Log::print(Log::debug, "Creating randomized eff\n");
+    TRandom3 rnd(seed);
+    for (int x = 1; x <= eff_rnd->GetXaxis()->GetNbins(); x++) {
+        for (int y = 1; y <= eff_rnd->GetYaxis()->GetNbins(); y++) {
+            for (int z = 1; z <= eff_rnd->GetZaxis()->GetNbins(); z++) {
+                int bin = eff_rnd->GetBin(x, y, z);
+                double bin_total = total->GetBinContent(bin);
+                double bin_eff = eff->GetBinContent(bin);
+                double new_bin_eff = bin_total ? rnd.Binomial(bin_total, bin_eff)/bin_total : 0;
+                eff_rnd->SetBinContent(bin, new_bin_eff);
+                if (x == 25 && y == 25 && bin_eff != new_bin_eff) {
+                    printf("Replacing %f by %f\n", bin_eff, new_bin_eff);
+                }
+            }
+        }
+    }
+
+    return eff_rnd;
+}
 
 
-TH3F* Fitter::GetBinned3DEfficiency() {
-    TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
-    TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
-
-    TH3F* eff_histo = dynamic_cast<TH3F*>(gsim_histo->Clone("eff_histo"));
-    eff_histo->Divide(gsim_histo, evtgen_histo, 1.0, 1.0, "B");
-
-    delete gsim_histo;
-    delete evtgen_histo;
+/**
+ * Create an efficiency histo with binomial errors per bin
+ *
+ * @param passing Histogram with events passing selection
+ * @param total Histogram with all events
+ * @return TH3F* Efficiency histogram
+ */
+TH3F* Fitter::GetBinned3DEfficiency(const TH3F* passing, const TH3F* total) const {
+    TH3F* eff_histo = dynamic_cast<TH3F*>(passing->Clone("eff_histo"));
+    eff_histo->Divide(passing, total, 1.0, 1.0, "B");
 
     return eff_histo;
 }
 
+/**
+ * Create a TTree with all bins, eff, errors, k, n and save it to disk
+ *
+ * @param histo Efficiency histo
+ * @param path Path to which "_tree" is appended and the tree saved to
+ */
 void Fitter::SaveEfficiency2TTree(TH3F* histo, std::string path) const {
-    // Creates a TTree and fills it with the coordinates of all
-    // filled bins. The tree will have one branch for each dimension,
-    // and one for the bin content.
     TH3F* evtgen_histo = Create3DHisto(evtgen_dataset_);
     TH3F* gsim_histo = Create3DHisto(gsim_dataset_);
 

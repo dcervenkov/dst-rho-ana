@@ -46,7 +46,7 @@ class Fitter {
                               const std::array<double, 6> ada_kde_pars, const double mirror_margin = 0);
     void ProcessKDEEfficiency2(const char* efficiency_file, const std::array<double, 6> bin_kde_pars,
                                const std::array<double, 6> ada_kde_pars, const double mirror_margin = 0);
-    void ProcessNormalizedEfficiency(const char* efficiency_file);
+    void ProcessNormalizedEfficiency(const char* efficiency_file, int random_models);
 
     RooRealVar thetat_{"thetat", "#theta_{t} [rad]", constants::cuts::thetat_low, constants::cuts::thetat_high};
     RooRealVar thetab_{"thetab", "#theta_{b} [rad]", constants::cuts::thetab_low, constants::cuts::thetab_high};
@@ -58,7 +58,8 @@ class Fitter {
     RooRealVar de_{"de", "de", -1, 1};
 
    private:
-    TH3F* GetBinned3DEfficiency();
+    TH3F* CreateRandomizedEfficiency(const TH3F* eff, const TH3F* total, int seed) const;
+    TH3F* GetBinned3DEfficiency(const TH3F* passing, const TH3F* total) const;
     void SaveEfficiency2TTree(TH3F* histo, std::string path) const;
     TTree* Histogram2TTree(TH3F* histo);
     TH3F* Create3DHisto(const RooDataSet* dataset, const char* name = nullptr) const;

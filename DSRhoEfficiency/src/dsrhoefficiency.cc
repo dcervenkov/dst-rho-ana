@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
         if (!options.efficiency_file) {
             options.efficiency_file = "efficiency.root";
         }
-        fitter.ProcessNormalizedEfficiency(options.efficiency_file);
+        fitter.ProcessNormalizedEfficiency(options.efficiency_file, options.random_models);
 
     } else {
 
@@ -162,11 +162,12 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"efficiency-model", required_argument, 0, 'e'},
                                     {"efficiency-file", required_argument, 0, 'f'},
                                     {"mirror-margin", required_argument, 0, 'm'},
+                                    {"random", required_argument, 0, 'r'},
                                     {"version", no_argument, 0, 'v'},
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "a:b:e:f:m:vh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "a:b:e:f:m:r:vh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -188,27 +189,22 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'm':
                 options.mirror_margin = atof(optarg);
                 break;
+            case 'r':
+                options.random_models = atoi(optarg);
+                break;
             case 'v':
                 printf("Version: %s\n", gitversion);
                 exit(0);
                 break;
             case 'h':
                 printf("Usage: %s [OPTION]... EVTGEN-FILE GSIM-FILE PLOT-DIR\n\n", argv[0]);
-                printf(
-                    "Mandatory arguments to long options are mandatory for short options too.\n");
-                printf(
-                    "-a, --ada-kde-pars=\"BINS_X,BINS_Y,BINS_Z,WIDTH_X,WIDTH_Y,WIDTH_Z\" "
-                    "parameters for adaptive KDE\n");
-                printf(
-                    "-b, --bin-kde-pars=\"BINS_X,BINS_Y,BINS_Z,WIDTH_X,WIDTH_Y,WIDTH_Z\" "
-                    "parameters for binned KDE\n");
-                printf(
-                    "-f, --efficiency-file=FILE_NAME  filename to which to save KDE efficiency "
-                    "map\n");
+                printf("Mandatory arguments to long options are mandatory for short options too.\n");
+                printf("-a, --ada-kde-pars=\"BINS_X,BINS_Y,BINS_Z,WIDTH_X,WIDTH_Y,WIDTH_Z\" parameters for adaptive KDE\n");
+                printf("-b, --bin-kde-pars=\"BINS_X,BINS_Y,BINS_Z,WIDTH_X,WIDTH_Y,WIDTH_Z\" parameters for binned KDE\n");
+                printf("-f, --efficiency-file=FILE_NAME  filename to which to save KDE efficiency map\n");
                 printf("-e, --efficiency-model=MODEL_NUM efficiency model to use\n");
-                printf(
-                    "-m, --mirror-margin=MARGIN       fraction of phasespace to mirror to each "
-                    "side in each dimension\n");
+                printf("-m, --mirror-margin=MARGIN       fraction of phasespace to mirror to each side in each dimension\n");
+                printf("-r, --random=NUMBER              create NUMBER randomized efficiency models\n");
                 printf("-h, --help                       display this text and exit\n");
                 printf("-v, --version                    print program version and exit\n");
                 exit(0);

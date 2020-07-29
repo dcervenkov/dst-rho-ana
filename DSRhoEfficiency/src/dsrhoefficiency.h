@@ -17,6 +17,7 @@ struct fitter_options {
     const char* ada_kde_pars;
     const char* bin_kde_pars;
     int efficiency_model;
+    int random_models;
     const char* efficiency_file;
     double mirror_margin;
 };

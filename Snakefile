@@ -71,6 +71,18 @@ def create_stream_config(old_stream, old_file, new_stream, new_file):
     with open(new_file, "w") as f:
         f.write(new_config)
 
+def create_rnd_eff_config(old_file, new_file, number):
+    new_config = ""
+    with open(old_file, "r") as f:
+        for line in f:
+            if "efficiencyFile" in line:
+                new_config += line.replace(f"eff_", f"efficiencies/randomized/eff_"
+                    ).replace(f".root", f"_rnd_{number}.root")
+            else:
+                new_config += line
+    with open(new_file, "w") as f:
+        f.write(new_config)
+
 rule all:
     input:
         yield_jobs = (
@@ -138,7 +150,11 @@ rule all:
                 group=["correct_phi3"]),
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
                 channel=["Kpi"], type=["ti", "td"], components=["all"], stream=range(6),
-                group=["correct_phi3"])
+                group=["correct_phi3"]),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
+                group=["randomized_eff"], configno=range(100))
             )
 
 rule yield_jobs:
@@ -317,6 +333,9 @@ rule cpfit_configs:
         template = "DSRhoCPFit/configs/{group}/templates/{config}.template.json"
     output:
         "DSRhoCPFit/configs/{group}/{config}.json"
+    wildcard_constraints:
+        group = "[a-zA-Z0-9_]*",
+        config = "[a-zA-Z0-9_]*"
     shell:
         "./tools/config_from_template.py {input.template} > {output}"
 
@@ -330,6 +349,16 @@ rule cpfit_stream_configs:
     run:
         create_stream_config(0, input[0], int(wildcards.stream), output[0])
 
+rule cpfit_systematics_configs_randomized_eff:
+    input:
+        "DSRhoCPFit/configs/{group}/config_data_{bkg}.json"
+    output:
+        "DSRhoCPFit/configs/{group}/numbered/config_data_{bkg}_{configno}.json"
+    wildcard_constraints:
+        bkg = "[a-zA-Z0-9]*",
+        configno = "\d+"
+    run:
+        create_rnd_eff_config(input[0], output[0], wildcards.configno)
 
 rule cpfit_mc:
     input:
@@ -383,6 +412,8 @@ rule cpfit_data_plot:
         plotdir = directory("DSRhoCPFit/plots/{group}/{channel}_{type}_data_{bkg}")
     log:
         "DSRhoCPFit/logs/{group}/{channel}_{type}_data_{bkg}.log"
+    wildcard_constraints:
+        bkg = "[a-zA-z0-9_]*"
     params:
         "--MC=0",
         "--cpus=1",
@@ -395,3 +426,23 @@ rule cpfit_data_plot:
     shell:
         "./DSRhoCPFit/DSRhoCPFit {params} --config={input.config} --plot-dir={output.plotdir} "
         "--output={output.result} &> {log}"
+
+rule cpfit_data_systematics:
+    input:
+        config = "DSRhoCPFit/configs/{group}/numbered/config_data_{bkg}_{configno}.json",
+    output:
+        result = "DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+    log:
+        "DSRhoCPFit/logs/{group}/{channel}_{type}_data_{bkg}/{configno}.log"
+    params:
+        "--MC=0",
+        "--cpus=1",
+        "--log",
+        "--components=all",
+        lambda wildcards:
+            "--time-independent" if wildcards.type == "ti" else "",
+        lambda wildcards:
+            get_excluded_channels(wildcards)
+    shell:
+        "./DSRhoCPFit/DSRhoCPFit {params} --config={input.config} --output={output.result} &> {log}"
+

@@ -59,7 +59,7 @@
                 ]
             },
             "efficiencyModel": 6,
-            "efficiencyFile": "DSRhoCPFit/eff_Kpi_200618.root",
+            "efficiencyFile": "DSRhoCPFit/efficiencies/eff_Kpi_200729.root",
             "scfHisto": "DSRhoCPFit/scf_Kpi_200619.root",
             "inputFiles": {
                 "signalMC": [
@@ -119,7 +119,7 @@
                 ]
             },
             "efficiencyModel": 6,
-            "efficiencyFile": "DSRhoCPFit/eff_Kpipi0_200618.root",
+            "efficiencyFile": "DSRhoCPFit/efficiencies/eff_Kpipi0_200729.root",
             "scfHisto": "DSRhoCPFit/scf_Kpipi0_200619.root",
             "inputFiles": {
                 "signalMC": [
@@ -179,7 +179,7 @@
                 ]
             },
             "efficiencyModel": 6,
-            "efficiencyFile": "DSRhoCPFit/eff_K3pi_200618.root",
+            "efficiencyFile": "DSRhoCPFit/efficiencies/eff_K3pi_200729.root",
             "scfHisto": "DSRhoCPFit/scf_K3pi_200619.root",
             "inputFiles": {
                 "signalMC": [

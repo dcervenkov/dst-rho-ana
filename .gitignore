@@ -74,6 +74,8 @@ printTree/Makefile
 # Executable files
 DSRhoCPFit/DSRhoCPFit
 DSRhoCPFit/configs/*/streams/*
+DSRhoCPFit/configs/*/numbered/*
+DSRhoCPFit/efficiencies/randomized
 DSRhoBackground/DSRhoBackground
 DSRhoEfficiency/DSRhoEfficiency
 DSRhoFit/DSRhoFit

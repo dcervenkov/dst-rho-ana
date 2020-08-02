@@ -55,7 +55,7 @@ class FitterBKG {
     void ReadInFile(std::vector<const char*> file_names, const int& num_events = 0);
     void SetPlotDir(const char* output_dir);
     void Fit(RooAbsPdf* pdf, RooDataSet* data);
-    void CreateHistoPDF(RooDataSet* data, const std::string results_file);
+    void CreateHistoPDF(RooDataSet* data, const std::string results_file, const bool randomize);
     AdaptiveKernelDensity CreateKDEPDF(RooDataSet* data, const std::string results_file);
     void PrintResultsJSON() const;
 

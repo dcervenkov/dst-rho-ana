@@ -38,6 +38,7 @@
 #include "TList.h"
 #include "TMath.h"
 #include "TPaveStats.h"
+#include "TRandom3.h"
 #include "TStyle.h"
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
@@ -1134,5 +1135,48 @@ void RemoveSubstring(std::string& main, const std::string& sub) {
         main.erase(pos, sub.length());
     }
 }
+
+/**
+ * Randomize each cell in a histogram using the Poisson distribution
+ *
+ * Each cell's content is replaced by a random value sampled from a Poisson
+ * distribution.
+ *
+ * @param hist The histogram to randomize
+ */
+RooDataHist* RandomizeDataHist(const RooDataHist& hist) {
+    RooDataHist* rnd_hist = dynamic_cast<RooDataHist*>(hist.Clone("rnd_hist"));
+    int changed_bins = 0;
+    int empty_bins = 0;
+    int one_bins = 0;
+    TRandom3 rnd(0);
+    Log::LogLine(Log::debug) << "Rnd seed: " << rnd.GetSeed();
+    for (int i = 0; i < hist.numEntries(); i++) {
+        const double weight = rnd_hist->weight(*rnd_hist->get(i), 0);
+
+        double new_weight = rnd.Poisson(weight);
+        new_weight = weight > 1 ? new_weight : weight;
+
+        rnd_hist->set(*rnd_hist->get(i), new_weight);
+
+        if (weight > 1) {
+            // Log::LogLine(Log::debug) << weight << " -> " << new_weight;
+            changed_bins++;
+        } else if (weight == 0) {
+            empty_bins++;
+        } else if (weight == 1) {
+            one_bins++;
+        }
+    }
+    Log::print(Log::info, "Randomized %i (%.1f\%) bins\n", changed_bins,
+               (double) 100 * changed_bins / rnd_hist->numEntries());
+    Log::print(Log::info, "%i (%.1f\%) bins were empty\n", empty_bins,
+               (double) 100 * empty_bins / rnd_hist->numEntries());
+    Log::print(Log::info, "%i (%.1f\%) bins had one event\n", one_bins,
+               (double) 100 * one_bins / rnd_hist->numEntries());
+
+    return rnd_hist;
+}
+
 
 }  // namespace tools

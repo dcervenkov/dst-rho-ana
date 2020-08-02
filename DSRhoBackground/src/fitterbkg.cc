@@ -16,7 +16,6 @@
 #include <string>
 
 // ROOT includes
-#include "RooHistPdf.h"
 #include "RooArgSet.h"
 #include "RooCategory.h"
 #include "RooDataHist.h"
@@ -24,6 +23,7 @@
 #include "RooFitResult.h"
 #include "RooGenericPdf.h"
 #include "RooHist.h"
+#include "RooHistPdf.h"
 #include "RooPlot.h"
 #include "RooRealVar.h"
 #include "RooTreeDataStore.h"
@@ -32,10 +32,10 @@
 #include "TChain.h"
 #include "TEnv.h"
 #include "TFile.h"
-#include "TMath.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3F.h"
+#include "TMath.h"
 #include "TPaveText.h"
 #include "TStyle.h"
 #include "TTree.h"
@@ -48,8 +48,8 @@
 #include "FormulaDensity.hh"
 #include "KernelDensity.hh"
 #include "OneDimPhaseSpace.hh"
-#include "UniformDensity.hh"
 #include "RooMeerkatPdf.hh"
+#include "UniformDensity.hh"
 
 // Local includes
 #include "constants.h"
@@ -161,9 +161,8 @@ FitterBKG::FitterBKG() {
     num_CPUs_ = 1;
 
     physics_dt_model_ =
-        new DtBKG("physics_dt_model", "physics_dt_model", dt_, *vrerr6_, *vterr6_,
-                  dt_tau_, dt_f_delta_, dt_mu_delta_, dt_mu_lifetime_,
-                  dt_f_tail_, dt_S_main_, dt_S_tail_);
+        new DtBKG("physics_dt_model", "physics_dt_model", dt_, *vrerr6_, *vterr6_, dt_tau_,
+                  dt_f_delta_, dt_mu_delta_, dt_mu_lifetime_, dt_f_tail_, dt_S_main_, dt_S_tail_);
 }
 
 FitterBKG::~FitterBKG() {
@@ -298,20 +297,44 @@ void FitterBKG::SetPlotDir(const char* plot_dir) {
  * All the variables are already defined in the PDF.
  */
 void FitterBKG::Fit(RooAbsPdf* pdf, RooDataSet* data) {
-    result_ = pdf->fitTo(*data, RooFit::Save(), RooFit::Minimizer("Minuit2"), RooFit::NumCPU(num_CPUs_));
+    result_ =
+        pdf->fitTo(*data, RooFit::Save(), RooFit::Minimizer("Minuit2"), RooFit::NumCPU(num_CPUs_));
 }
 
-void FitterBKG::CreateHistoPDF(RooDataSet* data, const std::string results_file) {
+void FitterBKG::CreateHistoPDF(RooDataSet* data, const std::string results_file,
+                               const bool randomize) {
+    thetat_.setBins(50);
+    thetab_.setBins(50);
+    phit_.setBins(50);
     RooDataHist data_hist("data_hist", "data_hist", RooArgSet(thetat_, thetab_, phit_), *data);
-    RooHistPdf* scf_hist_pdf = new RooHistPdf("scf_hist_pdf", "scf_hist_pdf",
-                                              RooArgSet(thetat_, thetab_, phit_), data_hist);
+    RooDataHist* rnd_hist = 0;
+    if (randomize) {
+        rnd_hist = tools::RandomizeDataHist(data_hist);
+    }
+    RooHistPdf* scf_hist_pdf =
+        new RooHistPdf("scf_hist_pdf", "scf_hist_pdf", RooArgSet(thetat_, thetab_, phit_),
+                       randomize ? *rnd_hist : data_hist);
 
     tools::CreateDirsIfNecessary(results_file);
     TFile f(results_file.c_str(), "RECREATE");
     scf_hist_pdf->Write();
     f.Close();
+    delete scf_hist_pdf;
+    if (rnd_hist) delete rnd_hist;
 }
 
+/**
+ * Replace bins not in (low,high) range by average of neighbours
+ *
+ * The neighbourhood taken for averaging increases from nearest neighbours
+ * until the average is in the (low,high) range.
+ *
+ * @param pdf The histogram PDF to modify
+ * @param low Low edge of the required range
+ * @param high High edge of the required range
+ *
+ * @return TH3F* Modified histogram PDF with all bins in the (low,high) range
+ */
 TH3F* FitterBKG::NormalizePDF(const TH3F* pdf, const double low, const double high) {
     int total_bins = 0;
     int fixed_bins = 0;
@@ -328,17 +351,32 @@ TH3F* FitterBKG::NormalizePDF(const TH3F* pdf, const double low, const double hi
                     do {
                         interpolation = Interpolate(pdf, x, y, z, size++);
                     } while (interpolation < 0 || interpolation > 1);
-                    // printf("bin %i: value = %f, interpolation = %f\n", bin, pdf->GetBinContent(bin), interpolation);
+                    // printf("bin %i: value = %f, interpolation = %f\n", bin,
+                    // pdf->GetBinContent(bin), interpolation);
                     normalized_pdf->SetBinContent(bin, interpolation);
                 }
             }
         }
     }
 
-    Log::print(Log::info, "Fixed %i/%i (%.2f%%) bins.\n", fixed_bins, total_bins, (double)fixed_bins/total_bins * 100);
+    Log::print(Log::info, "Fixed %i/%i (%.2f%%) bins.\n", fixed_bins, total_bins,
+               (double)fixed_bins / total_bins * 100);
     return normalized_pdf;
 }
 
+/**
+ * @brief Get average value of a group of neighboring cells in a histogram
+ *
+ * The central cell is not excluded from the calculation.
+ *
+ * @param histo Histogram to process
+ * @param x_org Number of the cell around which the neighbors are chosen (x-axis)
+ * @param y_org Number of the cell around which the neighbors are chosen (y-axis)
+ * @param z_org Number of the cell around which the neighbors are chosen (z-axis)
+ * @param size How many neighbours are to be chosen to each side on each axis
+ *
+ * @return double The average values of the neighbor group
+ */
 double FitterBKG::Interpolate(const TH3F* histo, int x_org, int y_org, int z_org, int size) {
     double new_value = 0;
     int points = 0;
@@ -362,16 +400,18 @@ double FitterBKG::Interpolate(const TH3F* histo, int x_org, int y_org, int z_org
         }
     }
     if (points == 0) return 0;
-    return new_value/points;
+    return new_value / points;
 }
 
-
 AdaptiveKernelDensity FitterBKG::CreateKDEPDF(RooDataSet* data, const std::string results_file) {
-    OneDimPhaseSpace* phasespace_thetat = new OneDimPhaseSpace("phasespace_thetat", thetat_.getMin(), thetat_.getMax());
-    OneDimPhaseSpace* phasespace_thetab = new OneDimPhaseSpace("phasespace_thetab", thetab_.getMin(), thetab_.getMax());
-    OneDimPhaseSpace* phasespace_phit = new OneDimPhaseSpace("phasespace_phit", phit_.getMin(), phit_.getMax());
-    CombinedPhaseSpace* phasespace = new CombinedPhaseSpace("phasespace", phasespace_thetat, phasespace_thetab,
-                                  phasespace_phit);
+    OneDimPhaseSpace* phasespace_thetat =
+        new OneDimPhaseSpace("phasespace_thetat", thetat_.getMin(), thetat_.getMax());
+    OneDimPhaseSpace* phasespace_thetab =
+        new OneDimPhaseSpace("phasespace_thetab", thetab_.getMin(), thetab_.getMax());
+    OneDimPhaseSpace* phasespace_phit =
+        new OneDimPhaseSpace("phasespace_phit", phit_.getMin(), phit_.getMax());
+    CombinedPhaseSpace* phasespace =
+        new CombinedPhaseSpace("phasespace", phasespace_thetat, phasespace_thetab, phasespace_phit);
     // UniformDensity uniform_density("Uniform Density", &phasespace);
     // FormulaDensity formula_density("Formula Density", &phasespace,
     //                                "(x - 1.57)^2 * (y - 1.57)^2 * (z)^2");
@@ -400,18 +440,18 @@ AdaptiveKernelDensity FitterBKG::CreateKDEPDF(RooDataSet* data, const std::strin
 
     // BinnedKernelDensity bin_kde("BinKernelPDF", phasespace, eff_tree, "thetat", "thetab", "phit",
     //                             bin_kde_pars[0], bin_kde_pars[1], bin_kde_pars[2],
-    //                             bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5], &formula_density);
+    //                             bin_kde_pars[3], bin_kde_pars[4], bin_kde_pars[5],
+    //                             &formula_density);
 
     AdaptiveKernelDensity kde("KernelPDF", phasespace, eff_tree, "thetat", "thetab", "phit",
-                              ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2],
-                              ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &formula_density);
-                            //   ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
+                              ada_kde_pars[0], ada_kde_pars[1], ada_kde_pars[2], ada_kde_pars[3],
+                              ada_kde_pars[4], ada_kde_pars[5], &formula_density);
+    //   ada_kde_pars[3], ada_kde_pars[4], ada_kde_pars[5], &bin_kde);
 
     tools::CreateDirsIfNecessary(results_file);
     kde.writeToTextFile(results_file.c_str());
 
     return kde;
-
 }
 
 TH3F* FitterBKG::ConvertDensityToHisto(AdaptiveKernelDensity pdf) const {
@@ -470,16 +510,18 @@ TH3F* FitterBKG::Create3DHisto(const RooDataSet* dataset) const {
 void FitterBKG::PlotKDE(AdaptiveKernelDensity kde) const {
     TH3F* model = ConvertDensityToHisto(kde);
     TH3F* data = Create3DHisto(dataset_);
-    const double scale = data->GetEntries()/model->GetEntries();
+    const double scale = data->GetEntries() / model->GetEntries();
 
-    RooDataHist roo_model("roo_model", "roo_model", RooArgList(thetat_, thetab_, phit_), model, scale);
+    RooDataHist roo_model("roo_model", "roo_model", RooArgList(thetat_, thetab_, phit_), model,
+                          scale);
     RooDataHist roo_data("roo_data", "roo_data", RooArgList(thetat_, thetab_, phit_), data);
 
     RooRealVar vars[] = {thetat_, thetab_, phit_};
 
     RooArgList list(thetat_, thetab_, phit_);
     RooMeerkatPdf meerkat_pdf("meerkat_pdf", "meerkat_pdf", list, &kde);
-    RooHistPdf meerkat_histpdf("meerkat_histpdf", "meerkat_histpdf", RooArgSet(thetat_, thetab_, phit_), roo_model);
+    RooHistPdf meerkat_histpdf("meerkat_histpdf", "meerkat_histpdf",
+                               RooArgSet(thetat_, thetab_, phit_), roo_model);
     for (auto var : vars) {
         // PlotWithPull(var, *dataset_, meerkat_pdf);
         tools::PlotWithPull(var, conditional_vars_argset_, *dataset_, meerkat_histpdf,
@@ -493,7 +535,6 @@ void FitterBKG::PlotKDE(AdaptiveKernelDensity kde) const {
             tools::PlotPull2D(vars[i], vars[j], roo_model, roo_data);
         }
     }
-
 }
 
 /**
@@ -529,8 +570,7 @@ nlohmann::json FitterBKG::FitDt(RooAbsPdf* model, std::string prefix, bool plot)
     Fit(model, dataset_);
 
     nlohmann::json json_results;
-    json_results[prefix + "dt_model"] =
-        tools::GetResultsJSON(model, RooArgSet(dt_), "bkg_");
+    json_results[prefix + "dt_model"] = tools::GetResultsJSON(model, RooArgSet(dt_), "bkg_");
     if (plot) {
         PlotWithPull(dt_, *dataset_, *model);
     }
@@ -590,8 +630,7 @@ nlohmann::json FitterBKG::FitAngular(bool plot) {
         PlotWithPull(thetab_, *dataset_, thetab_model_);
     }
 
-    std::vector<const RooAbsPdf*> angular_pdfs = {&thetab_model_, &thetat_model_,
-                                                  &phit_model_};
+    std::vector<const RooAbsPdf*> angular_pdfs = {&thetab_model_, &thetat_model_, &phit_model_};
     nlohmann::json json_results;
     json_results["angular_pdf"] =
         tools::GetResultsJSON(angular_pdfs, RooArgSet(thetat_, thetab_, phit_), "bkg_");
@@ -601,31 +640,22 @@ nlohmann::json FitterBKG::FitAngular(bool plot) {
         thetab_.setBins(50);
         phit_.setBins(50);
 
-        RooProdPdf* bkg_pdf = new RooProdPdf(
-            "bkg_pdf", "bkg_pdf",
-            RooArgList(thetat_model_, thetab_model_, phit_model_));
+        RooProdPdf* bkg_pdf = new RooProdPdf("bkg_pdf", "bkg_pdf",
+                                             RooArgList(thetat_model_, thetab_model_, phit_model_));
 
-        RooDataHist* pdf_hist =
-            bkg_pdf->generateBinned(RooArgSet(thetat_, thetab_, phit_),
-                                    dataset_->numEntries(), true);
+        RooDataHist* pdf_hist = bkg_pdf->generateBinned(RooArgSet(thetat_, thetab_, phit_),
+                                                        dataset_->numEntries(), true);
 
-        RooDataHist data_hist("data_hist", "data_hist",
-                              RooArgSet(thetat_, thetab_, phit_),
+        RooDataHist data_hist("data_hist", "data_hist", RooArgSet(thetat_, thetab_, phit_),
                               *dataset_);
 
-        tools::PlotVars2D(thetat_, thetab_, data_hist, *pdf_hist, "",
-                          constants::format);
-        tools::PlotVars2D(thetat_, phit_, data_hist, *pdf_hist, "",
-                          constants::format);
-        tools::PlotVars2D(thetab_, phit_, data_hist, *pdf_hist, "",
-                          constants::format);
+        tools::PlotVars2D(thetat_, thetab_, data_hist, *pdf_hist, "", constants::format);
+        tools::PlotVars2D(thetat_, phit_, data_hist, *pdf_hist, "", constants::format);
+        tools::PlotVars2D(thetab_, phit_, data_hist, *pdf_hist, "", constants::format);
 
-        tools::PlotPull2D(thetat_, thetab_, data_hist, *pdf_hist, "",
-                          constants::format, true);
-        tools::PlotPull2D(thetat_, phit_, data_hist, *pdf_hist, "", constants::format,
-                          true);
-        tools::PlotPull2D(thetab_, phit_, data_hist, *pdf_hist, "", constants::format,
-                          true);
+        tools::PlotPull2D(thetat_, thetab_, data_hist, *pdf_hist, "", constants::format, true);
+        tools::PlotPull2D(thetat_, phit_, data_hist, *pdf_hist, "", constants::format, true);
+        tools::PlotPull2D(thetab_, phit_, data_hist, *pdf_hist, "", constants::format, true);
     }
     return json_results;
 }

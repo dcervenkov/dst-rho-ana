@@ -83,7 +83,18 @@ int main(int argc, char* argv[]) {
         fitter.PlotKDE(kde);
     }
     if (options.histo) {
-        fitter.CreateHistoPDF(fitter.dataset_, results_file);
+        if (options.random_models_set) {
+            for (int i = 0; i < options.random_models; i++) {
+                std::string rnd_filename = results_file;
+                tools::RemoveSubstring(results_file, ".root");
+                rnd_filename += "_rnd_";
+                rnd_filename += std::to_string(i);
+                rnd_filename += ".root";
+                fitter.CreateHistoPDF(fitter.dataset_, rnd_filename, true);
+            }
+        } else {
+            fitter.CreateHistoPDF(fitter.dataset_, results_file, false);
+        }
     }
     if (options.physics) {
         if (options.notail) {
@@ -140,6 +151,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"angular", no_argument, 0, 'a'},
                                     {"empirical", no_argument, 0, 'e'},
                                     {"plot-dir", required_argument, 0, 'p'},
+                                    {"randomize", required_argument, 0, 'r'},
                                     {"physics", no_argument, 0, 'y'},
                                     {"nodelta", no_argument, 0, 'd'},
                                     {"notail", no_argument, 0, 't'},
@@ -147,7 +159,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:p:kaesydtvh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:p:r:kaesydtvh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -167,6 +179,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'p':
                 options.plot_dir = optarg;
                 options.plot_dir_set = true;
+                break;
+            case 'r':
+                options.random_models = atoi(optarg);
+                options.random_models_set = true;
                 break;
             case 'a':
                 options.angular = true;

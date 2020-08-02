@@ -22,6 +22,8 @@ struct fitter_options {
     bool num_CPUs_set;
     char* plot_dir;
     bool plot_dir_set;
+    int random_models;
+    bool random_models_set;
 };
 
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,

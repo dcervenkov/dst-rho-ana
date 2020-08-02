@@ -76,6 +76,7 @@ DSRhoCPFit/DSRhoCPFit
 DSRhoCPFit/configs/*/streams/*
 DSRhoCPFit/configs/*/numbered/*
 DSRhoCPFit/efficiencies/randomized
+DSRhoCPFit/scfmodels/randomized
 DSRhoBackground/DSRhoBackground
 DSRhoEfficiency/DSRhoEfficiency
 DSRhoFit/DSRhoFit

@@ -71,13 +71,13 @@ def create_stream_config(old_stream, old_file, new_stream, new_file):
     with open(new_file, "w") as f:
         f.write(new_config)
 
-def create_rnd_eff_config(old_file, new_file, number):
+def create_rnd_config(old_file, new_file, number, line_tag, prefix):
     new_config = ""
     with open(old_file, "r") as f:
         for line in f:
-            if "efficiencyFile" in line:
-                new_config += line.replace(f"eff_", f"efficiencies/randomized/eff_"
-                    ).replace(f".root", f"_rnd_{number}.root")
+            if line_tag in line:
+                new_config += line.replace(prefix, "randomized/" + prefix
+                    ).replace(".root", f"_rnd_{number}.root")
             else:
                 new_config += line
     with open(new_file, "w") as f:
@@ -154,7 +154,11 @@ rule all:
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
-                group=["randomized_eff"], configno=range(100))
+                group=["randomized_eff"], configno=range(100)),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
+                group=["randomized_scf"], configno=range(99)),
             )
 
 rule yield_jobs:
@@ -247,9 +251,11 @@ rule lifetime_configs:
         expand(rules.background.output, channel=CHANNELS_AND_TOGETHER, mc="mc", bkg_type=BKG_TYPES),
         expand(rules.background.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
         rules.yield_summary.output,
-        template = "DSRhoLifetime/configs/templates/{config}.template.json"
+        template = "DSRhoLifetime/configs/{group}/templates/{config}.template.json"
     output:
-        "DSRhoLifetime/configs/{config}.json"
+        "DSRhoLifetime/configs/{group}/{config}.json"
+    wildcard_constraints:
+        group = "[a-zA-Z0-9_]*"
     shell:
         "./tools/config_from_template.py {input.template} > {output}"
 
@@ -349,16 +355,22 @@ rule cpfit_stream_configs:
     run:
         create_stream_config(0, input[0], int(wildcards.stream), output[0])
 
-rule cpfit_systematics_configs_randomized_eff:
+rule cpfit_systematics_configs_randomized:
     input:
         "DSRhoCPFit/configs/{group}/config_data_{bkg}.json"
     output:
         "DSRhoCPFit/configs/{group}/numbered/config_data_{bkg}_{configno}.json"
     wildcard_constraints:
+        group = "[a-zA-Z0-9_]*",
         bkg = "[a-zA-Z0-9]*",
         configno = "\d+"
     run:
-        create_rnd_eff_config(input[0], output[0], wildcards.configno)
+        if wildcards.group == "randomized_eff":
+            create_rnd_config(input[0], output[0], wildcards.configno, "efficiencyFile", "eff_")
+        elif wildcards.group == "randomized_scf":
+            create_rnd_config(input[0], output[0], wildcards.configno, "scfHisto", "scf_")
+        else:
+            assert (0 == 1),"No known way to create randomized configs!"
 
 rule cpfit_mc:
     input:

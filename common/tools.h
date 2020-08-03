@@ -64,9 +64,9 @@ void ChangeModelParameters(RooAbsPdf* pdf, const nlohmann::json& config,
 std::string FormatResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables);
 std::string FormatResultsJSON(const RooAbsPdf* model, const RooArgSet& observables);
 nlohmann::json GetResultsJSON(const RooAbsPdf* model, const RooArgSet& observables,
-                              std::string prefix);
+                              std::string prefix, bool randomize);
 nlohmann::json GetResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables,
-                              std::string prefix);
+                              std::string prefix, bool randomize);
 void CreateDirsIfNecessary(const std::string file);
 RooLinkedList VecToCmdList(std::vector<RooCmdArg>& commands);
 TH2* ArrangeCorrelationMatrix(const TH2* matrix, std::vector<std::string> ordered_labels);

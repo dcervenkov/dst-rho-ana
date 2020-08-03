@@ -59,8 +59,8 @@ class FitterBKG {
     AdaptiveKernelDensity CreateKDEPDF(RooDataSet* data, const std::string results_file);
     void PrintResultsJSON() const;
 
-    nlohmann::json FitDt(RooAbsPdf* model, std::string prefix, bool plot);
-    nlohmann::json FitAngular(bool plot);
+    nlohmann::json FitDt(RooAbsPdf* model, std::string prefix, bool plot, bool randomize);
+    nlohmann::json FitAngular(bool plot, bool randomize);
 
     RooRealVar dt_{"dt", "#Deltat [ps]", constants::cuts::dt_low, constants::cuts::dt_high};
     RooRealVar thetat_{"thetat", "#theta_{t} [rad]", constants::cuts::thetat_low, constants::cuts::thetat_high};

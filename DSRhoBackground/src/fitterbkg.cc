@@ -566,11 +566,12 @@ void FitterBKG::SetNoTailPDF() {
  *
  * @return nlohmann::json Fitted parameters and values
  */
-nlohmann::json FitterBKG::FitDt(RooAbsPdf* model, std::string prefix, bool plot) {
+nlohmann::json FitterBKG::FitDt(RooAbsPdf* model, std::string prefix, bool plot, bool randomize) {
     Fit(model, dataset_);
 
     nlohmann::json json_results;
-    json_results[prefix + "dt_model"] = tools::GetResultsJSON(model, RooArgSet(dt_), "bkg_");
+    json_results[prefix + "dt_model"] =
+        tools::GetResultsJSON(model, RooArgSet(dt_), "bkg_", randomize);
     if (plot) {
         PlotWithPull(dt_, *dataset_, *model);
     }
@@ -582,7 +583,7 @@ nlohmann::json FitterBKG::FitDt(RooAbsPdf* model, std::string prefix, bool plot)
         dataset_cf->append(*dataset_FA_);
         Fit(model, dataset_cf);
         json_results[prefix + "dt_cf_model"] =
-            tools::GetResultsJSON(model, RooArgSet(dt_), "bkg_cf_");
+            tools::GetResultsJSON(model, RooArgSet(dt_), "bkg_cf_", randomize);
         if (plot) {
             PlotWithPull(dt_, *dataset_cf, *model);
         }
@@ -596,7 +597,7 @@ nlohmann::json FitterBKG::FitDt(RooAbsPdf* model, std::string prefix, bool plot)
         dataset_dcs->append(*dataset_SA_);
         Fit(model, dataset_dcs);
         json_results[prefix + "dt_dcs_model"] =
-            tools::GetResultsJSON(model, RooArgSet(dt_), "bkg_dcs_");
+            tools::GetResultsJSON(model, RooArgSet(dt_), "bkg_dcs_", randomize);
         if (plot) {
             PlotWithPull(dt_, *dataset_dcs, *model);
         }
@@ -612,7 +613,7 @@ nlohmann::json FitterBKG::FitDt(RooAbsPdf* model, std::string prefix, bool plot)
  *
  * @return nlohmann::json Fitted parameters and values
  */
-nlohmann::json FitterBKG::FitAngular(bool plot) {
+nlohmann::json FitterBKG::FitAngular(bool plot, bool randomize) {
     // We must plot after each fit otherwise the results printed on the plot
     // would be of the last fit
     Fit(&phit_model_, dataset_);
@@ -633,7 +634,7 @@ nlohmann::json FitterBKG::FitAngular(bool plot) {
     std::vector<const RooAbsPdf*> angular_pdfs = {&thetab_model_, &thetat_model_, &phit_model_};
     nlohmann::json json_results;
     json_results["angular_pdf"] =
-        tools::GetResultsJSON(angular_pdfs, RooArgSet(thetat_, thetab_, phit_), "bkg_");
+        tools::GetResultsJSON(angular_pdfs, RooArgSet(thetat_, thetab_, phit_), "bkg_", randomize);
 
     if (plot) {
         thetat_.setBins(50);

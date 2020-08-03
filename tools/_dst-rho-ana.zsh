@@ -65,6 +65,7 @@ _dsrhobackground_complete()
 	'--physics[fit a physics-based dt PDF]' \
 	'--histo[create a histogram PDF]' \
 	'--plot-dir=[create lifetime/mixing plots]:directory:_files' \
+    '--randomize=[create randomized histos/json files]' \
 	'*:input files:_files'
 }
 

@@ -938,15 +938,21 @@ double RoundToDecimals(double number, int decimals) {
  * @return nlohmann::json The resultant JSON object
  */
 nlohmann::json GetResultsJSON(const RooAbsPdf* model, const RooArgSet& observables,
-                              std::string prefix) {
+                              std::string prefix, bool randomize) {
     nlohmann::json json;
 
     RooArgSet* vars = model->getVariables();
     vars->remove(observables);
     std::vector<RooRealVar*> vector_of_vars = ToVector<RooRealVar*>(*vars);
+    TRandom3 rnd(0);
+
     for (auto& var : vector_of_vars) {
         std::string name = prefix + var->GetName();
-        json[name] = RoundToDecimals(var->getVal(), 4);
+        double value = var->getVal();
+        if (randomize && !var->isConstant()) {
+            value = rnd.Gaus(var->getVal(), var->getError());
+        }
+        json[name] = RoundToDecimals(value, 4);
     }
 
     return json;
@@ -961,10 +967,10 @@ nlohmann::json GetResultsJSON(const RooAbsPdf* model, const RooArgSet& observabl
  * @return nlohmann::json The resultant JSON object
  */
 nlohmann::json GetResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables,
-                              std::string prefix) {
+                              std::string prefix, bool randomize) {
     nlohmann::json json;
     for (auto& model : models) {
-        nlohmann::json model_json = GetResultsJSON(model, observables, prefix);
+        nlohmann::json model_json = GetResultsJSON(model, observables, prefix, randomize);
         json = MergeJSON(json, model_json);
     }
     return json;

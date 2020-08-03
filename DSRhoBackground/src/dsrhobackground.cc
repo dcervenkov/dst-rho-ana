@@ -96,33 +96,46 @@ int main(int argc, char* argv[]) {
             fitter.CreateHistoPDF(fitter.dataset_, results_file, false);
         }
     }
-    if (options.physics) {
-        if (options.notail) {
-            fitter.SetNoTailPDF();
-        }
-        if (options.nodelta) {
-            fitter.SetNoDeltaPDF();
-        }
-        nlohmann::json local_results =
-            fitter.FitDt(fitter.physics_dt_model_, "phys_", options.plot_dir_set);
-        json_results = tools::MergeJSON(json_results, local_results);
-    }
-    if (options.empirical) {
-        nlohmann::json local_results =
-            fitter.FitDt(&fitter.dt_model_, "emp_", options.plot_dir_set);
-        json_results = tools::MergeJSON(json_results, local_results);
-    }
-    if (options.angular) {
-        nlohmann::json local_results = fitter.FitAngular(options.plot_dir_set);
-        json_results = tools::MergeJSON(json_results, local_results);
-    }
 
-    // Save formatted results to file
-    if (json_results.size()) {
-        std::cout << json_results.dump(2) << std::endl;
-        std::ofstream ofs(results_file);
-        ofs << std::setw(2) << json_results << std::endl;
-    }
+    int i = 0;
+    do {
+        if (options.physics) {
+            if (options.notail) {
+                fitter.SetNoTailPDF();
+            }
+            if (options.nodelta) {
+                fitter.SetNoDeltaPDF();
+            }
+            nlohmann::json local_results = fitter.FitDt(
+                fitter.physics_dt_model_, "phys_", options.plot_dir_set, options.random_models_set);
+            json_results = tools::MergeJSON(json_results, local_results);
+        }
+        if (options.empirical) {
+            nlohmann::json local_results = fitter.FitDt(
+                &fitter.dt_model_, "emp_", options.plot_dir_set, options.random_models_set);
+            json_results = tools::MergeJSON(json_results, local_results);
+        }
+        if (options.angular) {
+            nlohmann::json local_results =
+                fitter.FitAngular(options.plot_dir_set, options.random_models_set);
+            json_results = tools::MergeJSON(json_results, local_results);
+        }
+
+        // Save formatted results to file
+        if (json_results.size()) {
+            std::cout << json_results.dump(2) << std::endl;
+
+            std::string random_results_file = results_file;
+            tools::RemoveSubstring(random_results_file, ".json");
+            random_results_file += "_rnd_";
+            random_results_file += std::to_string(i);
+            random_results_file += ".json";
+
+            std::ofstream ofs(options.random_models_set ? random_results_file : results_file);
+            ofs << std::setw(2) << json_results << std::endl;
+            Log::LogLine(Log::info) << "Saving results to " << (options.random_models_set ? random_results_file : results_file);
+        }
+    } while (i++ < options.random_models);
 
     return 0;
 }

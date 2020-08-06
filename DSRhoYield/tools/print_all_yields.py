@@ -371,6 +371,9 @@ args = decode_arguments()
 channels = ["Kpi", "Kpipi0", "K3pi"]
 streams = range(0, 6)
 
+if not os.path.exists(args.directory):
+    os.mkdir(args.directory)
+
 process_MC(channels, args.directory, streams)
 process_data(channels, args.directory)
 

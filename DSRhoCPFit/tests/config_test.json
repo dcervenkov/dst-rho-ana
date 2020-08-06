@@ -78,7 +78,7 @@
             },
             "efficiencyModel": 6,
             "efficiencyFile": "efficiencies/eff_Kpi_190531.root",
-            "scfHisto": "scf_Kpi_190531.root",
+            "scfHisto": "scfmodels/scf_Kpi_190531.root",
             "inputFiles": {
                 "signalMC": [
                     "tests/data/signalMC.root"
@@ -110,7 +110,7 @@
             },
             "efficiencyModel": 6,
             "efficiencyFile": "efficiencies/eff_Kpipi0_190603.root",
-            "scfHisto": "scf_Kpipi0_190603.root",
+            "scfHisto": "scfmodels/scf_Kpipi0_190603.root",
             "inputFiles": {
                 "signalMC": [
                     "tests/data/signalMC_Kpipi0.root"

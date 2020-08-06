@@ -90,9 +90,6 @@ protected:
     RooRealProxy vtistagl ;
 
     Double_t evaluate() const;
-    int GetRBin(double r) const;
-    double GetWTag(int expno, int rbin, bool mc) const;
-    double GetDeltaWTag(int expno, int rbin, bool mc) const;
 
     bool mixing;
     bool CKM_favored;

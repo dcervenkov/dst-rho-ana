@@ -113,11 +113,8 @@ protected:
 
     Double_t evaluate() const;
     bool IsTimeIntegrated(int code) const;
-    int GetRBin(double r) const;
-    double GetWTag(int expno, int rbin, bool mc) const;
-    double GetDeltaWTag(int expno, int rbin, bool mc) const;
     void CalculateAmplitudeTerms(double& Ap2, double& A02, double& At2,
-                                 const double& constant, const double& cos, 
+                                 const double& constant, const double& cos,
                                  const double& sin) const;
 
     bool mixing;

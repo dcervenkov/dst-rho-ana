@@ -510,8 +510,7 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     const int num_floating_pars = results.getSize();
     const int ndof = var.getBinning().numBins() - num_floating_pars;
     const double chi2 = plot->chiSquare(num_floating_pars) * ndof;
-    TPaveText* stat_box =
-        CreateStatBox(chi2, ndof, results, true, true);
+    TPaveText* stat_box = CreateStatBox(chi2, ndof, results, true, true);
     if (stat_box) {
         stat_box->Draw();
     }
@@ -886,8 +885,7 @@ void ChangeModelParameters(RooAbsPdf* pdf, const nlohmann::json& model_parameter
  *
  * @return std::string JSON formatted string
  */
-std::string FormatResultsJSON(std::vector<const RooAbsPdf*> models,
-                              const RooArgSet& observables) {
+std::string FormatResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables) {
     std::string formatted_result = "{\n";
     const std::size_t buf_size = 1024;
     char buffer[buf_size];
@@ -896,7 +894,8 @@ std::string FormatResultsJSON(std::vector<const RooAbsPdf*> models,
         vars->remove(observables);
         std::vector<RooRealVar*> vector_of_vars = ToVector<RooRealVar*>(*vars);
         for (auto& var : vector_of_vars) {
-            int ret = snprintf(buffer, buf_size, "  \"%s\": %.4f,\n", var->GetName(), var->getVal());
+            int ret =
+                snprintf(buffer, buf_size, "  \"%s\": %.4f,\n", var->GetName(), var->getVal());
             assert(ret >= 0);
             formatted_result.append(buffer);
         }
@@ -926,7 +925,7 @@ std::string FormatResultsJSON(const RooAbsPdf* model, const RooArgSet& observabl
  */
 double RoundToDecimals(double number, int decimals) {
     const double factor = std::pow(10, decimals);
-    return std::round(number * factor)/factor;
+    return std::round(number * factor) / factor;
 }
 
 /**
@@ -979,7 +978,7 @@ nlohmann::json GetResultsJSON(std::vector<const RooAbsPdf*> models, const RooArg
 /**
  * Merge two JSON arrays and return the result
  */
-nlohmann::json MergeJSON (const nlohmann::json& json1, const nlohmann::json& json2) {
+nlohmann::json MergeJSON(const nlohmann::json& json1, const nlohmann::json& json2) {
     nlohmann::json result = json1.flatten();
     nlohmann::json tmp = json2.flatten();
 
@@ -1034,8 +1033,10 @@ TH2* ArrangeCorrelationMatrix(const TH2* matrix, std::vector<std::string> ordere
         std::string label_y = matrix->GetXaxis()->GetBinLabel(num_bins - old_bin);
         for (uint new_bin = 0; new_bin < ordered_labels.size(); new_bin++) {
             // Switch the labels themselves
-            ordered_corr_matrix->GetXaxis()->SetBinLabel(new_bin + 1, ordered_labels[new_bin].c_str());
-            ordered_corr_matrix->GetYaxis()->SetBinLabel(num_bins - new_bin, ordered_labels[new_bin].c_str());
+            ordered_corr_matrix->GetXaxis()->SetBinLabel(new_bin + 1,
+                                                         ordered_labels[new_bin].c_str());
+            ordered_corr_matrix->GetYaxis()->SetBinLabel(num_bins - new_bin,
+                                                         ordered_labels[new_bin].c_str());
 
             // Fill in the address book
             if (ordered_labels[new_bin] == label_x) {
@@ -1048,11 +1049,12 @@ TH2* ArrangeCorrelationMatrix(const TH2* matrix, std::vector<std::string> ordere
     }
 
     // Migrate the contents, keeping in mind the different counting for Y axis
-    for(uint x = 1; x <= num_bins; x++) {
-        for(uint y = 1; y <= num_bins; y++) {
+    for (uint x = 1; x <= num_bins; x++) {
+        for (uint y = 1; y <= num_bins; y++) {
             int old_bin = matrix->GetBin(x, y);
             double content = matrix->GetBinContent(old_bin);
-            int new_bin = ordered_corr_matrix->GetBin(new_addr_x[x - 1], num_bins - new_addr_y[y - 1] + 1);
+            int new_bin =
+                ordered_corr_matrix->GetBin(new_addr_x[x - 1], num_bins - new_addr_y[y - 1] + 1);
             ordered_corr_matrix->SetBinContent(new_bin, content);
         }
     }
@@ -1175,14 +1177,78 @@ RooDataHist* RandomizeDataHist(const RooDataHist& hist) {
         }
     }
     Log::print(Log::info, "Randomized %i (%.1f\%) bins\n", changed_bins,
-               (double) 100 * changed_bins / rnd_hist->numEntries());
+               (double)100 * changed_bins / rnd_hist->numEntries());
     Log::print(Log::info, "%i (%.1f\%) bins were empty\n", empty_bins,
-               (double) 100 * empty_bins / rnd_hist->numEntries());
+               (double)100 * empty_bins / rnd_hist->numEntries());
     Log::print(Log::info, "%i (%.1f\%) bins had one event\n", one_bins,
-               (double) 100 * one_bins / rnd_hist->numEntries());
+               (double)100 * one_bins / rnd_hist->numEntries());
 
     return rnd_hist;
 }
 
+int GetRBin(double r) {
+    if (0.000 <= r && r <= 0.100)
+        return 0;
+    else if (0.100 < r && r <= 0.250)
+        return 1;
+    else if (0.250 < r && r <= 0.500)
+        return 2;
+    else if (0.500 < r && r <= 0.625)
+        return 3;
+    else if (0.625 < r && r <= 0.750)
+        return 4;
+    else if (0.750 < r && r <= 0.875)
+        return 5;
+    else if (0.875 < r && r <= 1.000)
+        return 6;
+    else
+        return 7;
+}
+
+double GetWTag(int expno, int rbin, bool mc) {
+    double w_svd1_data[7] = {0.5, 0.418852, 0.329879, 0.233898, 0.170608, 0.099791, 0.0228501};
+    double w_svd2_data[7] = {0.5, 0.418826, 0.319303, 0.222948, 0.163191, 0.104085, 0.0251454};
+    double w_svd1_mc[7] = {0.5, 0.420827, 0.300296, 0.219317, 0.154636, 0.0916131, 0.0228891};
+    double w_svd2_mc[7] = {0.5, 0.412222, 0.307838, 0.212765, 0.149933, 0.0913264, 0.0218754};
+
+    if (mc) {
+        if (expno < 30) {
+            return w_svd1_mc[rbin];
+        } else {
+            return w_svd2_mc[rbin];
+        }
+    } else {
+        if (expno < 30) {
+            return w_svd1_data[rbin];
+        } else {
+            return w_svd2_data[rbin];
+        }
+    }
+}
+
+double GetDeltaWTag(int expno, int rbin, bool mc) {
+    double dw_svd1_data[7] = {0.,           0.0569661,  0.0126192, -0.0147724,
+                              -0.000550289, 0.00887704, 0.00465683};
+    double dw_svd2_data[7] = {0.,         -0.00877001, 0.0103515, -0.0109253,
+                              -0.0186365, 0.00168037,  -0.0036441};
+    double dw_svd1_mc[7] = {0.,         0.0583019,  0.00573998, -0.0392635,
+                            0.00474508, -0.0118737, -0.00585326};
+    double dw_svd2_mc[7] = {0.,         0.00408778, 0.010326,  -0.00479522,
+                            0.00151989, 0.0143633,  0.00189979};
+
+    if (mc) {
+        if (expno < 30) {
+            return dw_svd1_mc[rbin];
+        } else {
+            return dw_svd2_mc[rbin];
+        }
+    } else {
+        if (expno < 30) {
+            return dw_svd1_data[rbin];
+        } else {
+            return dw_svd2_data[rbin];
+        }
+    }
+}
 
 }  // namespace tools

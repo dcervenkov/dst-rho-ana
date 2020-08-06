@@ -79,6 +79,10 @@ RooHistPdf* CreatePdfFromHistos(const char* name, const char* title,
 void RemoveSubstring(std::string& main, const std::string& sub);
 RooDataHist* RandomizeDataHist(const RooDataHist& hist);
 
+int GetRBin(double r);
+double GetWTag(int expno, int rbin, bool mc);
+double GetDeltaWTag(int expno, int rbin, bool mc);
+
 /**
  * Return a concatenation of two std::vectors
  */

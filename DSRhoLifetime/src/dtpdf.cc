@@ -15,6 +15,7 @@
 
 // Local includes
 #include "constants.h"
+#include "tools.h"
 
 //ClassImp(DSRhoPDF)
 
@@ -172,8 +173,8 @@ Double_t DtPDF::evaluate() const {
                 vtistagl, dtres_param ) * 0.5/tau;
 
         double r = 1 - 2 * wtag;
-        int r_bin = GetRBin(r);
-        double wtag_binned = GetWTag(expno, r_bin, mc);
+        int r_bin = tools::GetRBin(r);
+        double wtag_binned = tools::GetWTag(expno, r_bin, mc);
         double r_binned = 1 - 2 * wtag_binned;
         double sign = -1 + 2*CKM_favored;
 
@@ -222,61 +223,4 @@ Double_t DtPDF::analyticalIntegral(Int_t code, const char* rangeName) const {
         return 0;
     }
 
-}
-
-int DtPDF::GetRBin(double r) const {
-    return (0. <= r && r <= 0.1 ? 0 :
-    0.1 < r && r <= 0.25 ? 1 :
-    0.25 < r && r <= 0.5 ? 2 :
-    0.5 < r && r <= 0.625 ? 3 :
-    0.625 < r && r <= 0.75 ? 4 :
-    0.75 < r && r <= 0.875 ? 5 :
-    0.875 < r && r <= 1.0 ? 6 : 7);
-}
-
-double DtPDF::GetWTag(int expno, int rbin, bool mc) const {
-    double w_svd1_data[7] = {0.5, 0.418852, 0.329879, 0.233898, 0.170608, 0.099791, 0.0228501};
-
-    double w_svd2_data[7] = {0.5, 0.418826, 0.319303, 0.222948, 0.163191, 0.104085, 0.0251454};
-
-    double w_svd1_mc[7] = {0.5, 0.420827, 0.300296, 0.219317, 0.154636, 0.0916131, 0.0228891};
-
-    double w_svd2_mc[7] = {0.5, 0.412222, 0.307838, 0.212765, 0.149933, 0.0913264, 0.0218754};
-
-    if (mc) {
-        if (expno < 30) {
-            return w_svd1_mc[rbin];
-        } else  {
-            return w_svd2_mc[rbin];
-        }
-    } else {
-        if (expno < 30) {
-            return w_svd1_data[rbin];
-        } else {
-            return w_svd2_data[rbin];
-        }
-    }
-}
-
-double DtPDF::GetDeltaWTag(int expno, int rbin, bool mc) const {
-    double dw_svd1_data[7] = {0., 0.0569661, 0.0126192, -0.0147724, -0.000550289, 0.00887704, 0.00465683};
-
-    double dw_svd2_data[7] = {0., -0.00877001, 0.0103515, -0.0109253, -0.0186365, 0.00168037, -0.0036441};
-
-    double dw_svd1_mc[7] = {0., 0.0583019, 0.00573998, -0.0392635, 0.00474508, -0.0118737, -0.00585326};
-
-    double dw_svd2_mc[7] = {0., 0.00408778, 0.010326, -0.00479522, 0.00151989, 0.0143633, 0.00189979};
-    if (mc) {
-        if (expno < 30) {
-            return dw_svd1_mc[rbin];
-        } else {
-            return dw_svd2_mc[rbin];
-        }
-    } else {
-        if (expno < 30) {
-            return dw_svd1_data[rbin];
-        } else {
-            return dw_svd2_data[rbin];
-        }
-    }
 }

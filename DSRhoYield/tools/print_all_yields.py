@@ -1,13 +1,35 @@
 #!/usr/bin/env python3
 """Module to extract, average, and pretty-print DSRhoYield results."""
 
+import argparse
 from math import sqrt
 import json
 import os
+import numpy as np
 import sys
 import ROOT
 from contextlib import contextmanager
 from markdowntable import MarkdownTable
+
+
+def decode_arguments():
+    """Decode CLI arguments"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-d",
+        "--directory",
+        default="results",
+        help="basename of directory where to save results"
+    )
+    parser.add_argument(
+        "-r",
+        "--randomize",
+        type=int,
+        default=0,
+        help="number of randomized results to be generated",
+    )
+    args = parser.parse_args()
+    return args
 
 
 def print_line_bold(string):
@@ -111,7 +133,7 @@ def calculate_fractions(sig_yield, scf_yield, bkg_yield):
     return (cr_crscf, cr, scf, bkg)
 
 
-def process_MC(channels, streams):
+def process_MC(channels, directory, streams):
     """Read, process, and pretty-print MC."""
     for channel in channels:
         print_line_bold(channel)
@@ -205,10 +227,10 @@ def process_MC(channels, streams):
             "scf_f": round(sum(scf_fractions) / len(scf_fractions), 4),
         }
 
-        save_to_json(data, os.path.join("results", channel + "_mc_fractions.json"))
+        save_to_json(data, os.path.join(directory, channel + "_mc_fractions.json"))
 
 
-def process_data(channels):
+def process_data(channels, directory, randomize=False):
     """Read, process, and pretty-print data."""
     print_line_bold("Data")
     header = ["Channel", "Yield", "Err", "CR/CR+SCF", "CR/all", "SCF/all", "BKG/all"]
@@ -234,6 +256,12 @@ def process_data(channels):
             bkg_yield,
             bkg_yield_error,
         ) = recover_yield("plots/" + channel + "/fit_results.root")
+
+        if randomize:
+            rng = np.random.default_rng()
+            sig_yield = rng.normal(sig_yield, sig_yield_error)
+            scf_yield = rng.normal(scf_yield, scf_yield_error)
+            bkg_yield = rng.normal(bkg_yield, bkg_yield_error)
 
         (
             cr_crscf_fraction,
@@ -268,7 +296,7 @@ def process_data(channels):
             "scf_f": round(scf_fraction, 4),
         }
 
-        save_to_json(data, os.path.join("results", channel + "_data_fractions.json"))
+        save_to_json(data, os.path.join(directory, channel + "_data_fractions.json"))
 
     table.add_row(
         [
@@ -290,7 +318,7 @@ def process_data(channels):
         "scf_f": round(weighted_mean(scf_fractions, yields), 4)
     }
 
-    save_to_json(data, os.path.join("results", "avg_data_fractions.json"))
+    save_to_json(data, os.path.join(directory, "avg_data_fractions.json"))
 
 
 def save_to_json(data, filename):
@@ -339,8 +367,16 @@ with stdout_redirected():
     # Just to init RooFit to make it print its loading line now
     r = ROOT.RooRealVar()
 
+args = decode_arguments()
 channels = ["Kpi", "Kpipi0", "K3pi"]
 streams = range(0, 6)
 
-process_MC(channels, streams)
-process_data(channels)
+process_MC(channels, args.directory, streams)
+process_data(channels, args.directory)
+
+for i in range(args.randomize):
+    print(f"Generating random config {i}")
+    rnd_directory = os.path.join(args.directory, "rnd_" + str(i))
+    if not os.path.exists(rnd_directory):
+        os.mkdir(rnd_directory)
+    process_data(channels, rnd_directory, True)

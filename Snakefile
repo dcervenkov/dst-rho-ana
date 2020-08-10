@@ -375,23 +375,6 @@ rule cpfit_stream_configs:
     run:
         create_stream_config(0, input[0], int(wildcards.stream), output[0])
 
-rule cpfit_systematics_configs_randomized:
-    input:
-        "DSRhoCPFit/configs/{group}/config_data_{bkg}.json"
-    output:
-        "DSRhoCPFit/configs/{group}/numbered/config_data_{bkg}_{configno}.json"
-    wildcard_constraints:
-        group = "[a-zA-Z0-9_]*",
-        bkg = "[a-zA-Z0-9]*",
-        configno = "\d+"
-    run:
-        if wildcards.group == "randomized_eff":
-            create_rnd_config(input[0], output[0], wildcards.configno, "efficiencyFile", "eff_")
-        elif wildcards.group == "randomized_scf":
-            create_rnd_config(input[0], output[0], wildcards.configno, "scfHisto", "scf_")
-        else:
-            assert (0 == 1),"No known way to create randomized configs!"
-
 rule cpfit_mc:
     input:
         config = "DSRhoCPFit/configs/{group}/streams/config_mc_{stream}.json",

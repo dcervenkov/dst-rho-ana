@@ -252,6 +252,7 @@
     "bkg_dcs_dt_mu_delta": 0.0789,
     "bkg_dcs_dt_mu_lifetime": -0.1451,
     "bkg_dcs_dt_tau": 1.7832,
+    "dm": 0.5065,
     "scf_cf_dt_S_main": 105.9837,
     "scf_cf_dt_S_tail": 0.0,
     "scf_cf_dt_f_delta": 0.0,
@@ -265,7 +266,8 @@
     "scf_dcs_dt_f_tail": 0.0,
     "scf_dcs_dt_mu_delta": 0.0,
     "scf_dcs_dt_mu_lifetime": -0.2237,
-    "scf_dcs_dt_tau": 1.9678
+    "scf_dcs_dt_tau": 1.9678,
+    "tau": 1.519
   },
   "physicsDtSCFBKG": true
 }

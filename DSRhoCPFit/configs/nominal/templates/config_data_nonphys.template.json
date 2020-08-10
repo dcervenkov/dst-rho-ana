@@ -42,7 +42,9 @@
                 "file": "../../../../DSRhoBackground/results/nonphys_together_data_sidebands.json",
                 "include": ["emp_dt_cf_model", "emp_dt_dcs_model"]
             }
-        ]
+        ],
+        "tau": 1.519,
+        "dm": 0.5065
     },
     "physicsDtSCFBKG": false,
     "channels": {

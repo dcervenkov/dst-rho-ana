@@ -58,6 +58,7 @@ logs
 old
 plots
 results
+results_randomized
 
 # Temp file used to add git commit hash to the binary
 gitversion.cc

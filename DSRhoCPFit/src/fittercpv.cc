@@ -2145,6 +2145,15 @@ RooSimultaneous* FitterCPV::CreateChannelPDF(const std::string channel_name,
     if (common_config.contains("modelParameters")) {
         tools::ChangeModelParameters(channel_pdf, common_config["modelParameters"],
                                      channel_name + "_");
+
+        nlohmann::json global_parameters;
+        if (common_config["modelParameters"].contains("tau")) {
+            global_parameters["tau"] = common_config["modelParameters"]["tau"];
+        }
+        if (common_config["modelParameters"].contains("dm")) {
+            global_parameters["dm"] = common_config["modelParameters"]["dm"];
+        }
+        tools::ChangeModelParameters(channel_pdf, global_parameters);
     }
     if (channel_config.contains("modelParameters")) {
         tools::ChangeModelParameters(channel_pdf, channel_config["modelParameters"],

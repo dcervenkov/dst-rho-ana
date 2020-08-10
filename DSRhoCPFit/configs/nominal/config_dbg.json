@@ -1,7 +1,7 @@
 {
   "channels": {
     "K3pi": {
-      "efficiencyFile": "eff_K3pi_190603.root",
+      "efficiencyFile": "efficiencies/eff_K3pi_190603.root",
       "efficiencyModel": 6,
       "inputFiles": {
         "data": [
@@ -66,10 +66,10 @@
         "cr_scf_f": 0.8786,
         "scf_f": 0.0949
       },
-      "scfHisto": "scf_K3pi_190603.root"
+      "scfHisto": "scfmodels/scf_K3pi_190603.root"
     },
     "Kpi": {
-      "efficiencyFile": "eff_Kpi_190531.root",
+      "efficiencyFile": "efficiencies/eff_Kpi_190531.root",
       "efficiencyModel": 6,
       "inputFiles": {
         "data": [
@@ -134,10 +134,10 @@
         "cr_scf_f": 0.89,
         "scf_f": 0.0896
       },
-      "scfHisto": "scf_Kpi_190531.root"
+      "scfHisto": "scfmodels/scf_Kpi_190531.root"
     },
     "Kpipi0": {
-      "efficiencyFile": "eff_Kpipi0_190603.root",
+      "efficiencyFile": "efficiencies/eff_Kpipi0_190603.root",
       "efficiencyModel": 6,
       "inputFiles": {
         "data": [
@@ -202,7 +202,7 @@
         "cr_scf_f": 0.8319,
         "scf_f": 0.1247
       },
-      "scfHisto": "scf_Kpipi0_190603.root"
+      "scfHisto": "scfmodels/scf_Kpipi0_190603.root"
     }
   },
   "fitRanges": {

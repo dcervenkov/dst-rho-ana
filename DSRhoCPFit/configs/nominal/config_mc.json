@@ -66,7 +66,7 @@
         "cr_scf_f": 0.9,
         "scf_f": 0.0811
       },
-      "scfHisto": "DSRhoCPFit/scf_K3pi_200619.root"
+      "scfHisto": "DSRhoCPFit/scfmodels/scf_K3pi_200619.root"
     },
     "Kpi": {
       "efficiencyFile": "DSRhoCPFit/efficiencies/eff_Kpi_200729.root",
@@ -134,7 +134,7 @@
         "cr_scf_f": 0.9,
         "scf_f": 0.0848
       },
-      "scfHisto": "DSRhoCPFit/scf_Kpi_200619.root"
+      "scfHisto": "DSRhoCPFit/scfmodels/scf_Kpi_200619.root"
     },
     "Kpipi0": {
       "efficiencyFile": "DSRhoCPFit/efficiencies/eff_Kpipi0_200729.root",
@@ -202,7 +202,7 @@
         "cr_scf_f": 0.8683,
         "scf_f": 0.1011
       },
-      "scfHisto": "DSRhoCPFit/scf_Kpipi0_200619.root"
+      "scfHisto": "DSRhoCPFit/scfmodels/scf_Kpipi0_200619.root"
     }
   },
   "fitRanges": {

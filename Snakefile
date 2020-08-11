@@ -178,6 +178,10 @@ rule all:
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
+                group=["randomized_yield_corr"], configno=range(99)),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
                 group=["randomized_all"], configno=range(99)),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",

@@ -222,6 +222,8 @@ void Fitter::WriteFitResults() {
     macro.AddLine(line);
 
     macro.Write();
+
+    fit_result_->Write();
 }
 
 /**

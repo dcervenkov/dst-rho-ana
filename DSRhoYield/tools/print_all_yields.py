@@ -19,7 +19,7 @@ def decode_arguments():
         "-d",
         "--directory",
         default="results",
-        help="basename of directory where to save results"
+        help="basename of directory where to save results",
     )
     parser.add_argument(
         "-r",
@@ -28,15 +28,21 @@ def decode_arguments():
         default=0,
         help="number of randomized results to be generated",
     )
+    parser.add_argument(
+        "-c",
+        "--correlations",
+        action="store_true",
+        help="account for the correlations when randomizing",
+    )
     args = parser.parse_args()
     return args
 
 
 def print_line_bold(string):
     """Print a line in bold using terminal ANSI codes."""
-    print(u"\u001b[1m", end="")
+    print("\u001b[1m", end="")
     print(string)
-    print(u"\u001b[0m", end="")
+    print("\u001b[0m", end="")
 
 
 def recover_yield(filename):
@@ -66,6 +72,39 @@ def recover_yield(filename):
     bkg_error = float(str(file.Get("all;1").GetLineWith("n_bkg")).split()[3])
 
     return sig, sig_error, scf, scf_error, bkg, bkg_error
+
+
+def recover_covariance_matrix(filename):
+    """Extract the covariance matrix from a file.
+
+    The covariance matrix for the final "all" fit without the width parameter
+    is returned.
+    """
+    file = ROOT.TFile(filename)
+    result = file.Get("fitresult_model_data_set")
+    root_cov = result.covarianceMatrix()
+    cov = np.zeros((2, 2))
+    cov[0][0] = root_cov[0][0]
+    cov[0][1] = root_cov[0][1]
+    cov[1][0] = root_cov[1][0]
+    cov[1][1] = root_cov[1][1]
+    return cov
+
+
+def recover_cr_scf_fraction(filename):
+    """Extract the fraction of CR/SCF including uncertainty."""
+    file = ROOT.TFile(filename)
+    f_sig_cf = float(
+        str(
+            file.Get("signal_plus_crossfeed;1").GetLineWith("signal_plus_cross_f")
+        ).split()[1]
+    )
+    f_sig_cf_error = float(
+        str(
+            file.Get("signal_plus_crossfeed;1").GetLineWith("signal_plus_cross_f")
+        ).split()[3]
+    )
+    return f_sig_cf, f_sig_cf_error
 
 
 def recover_count(dir):
@@ -230,7 +269,7 @@ def process_MC(channels, directory, streams):
         save_to_json(data, os.path.join(directory, channel + "_mc_fractions.json"))
 
 
-def process_data(channels, directory, randomize=False):
+def process_data(channels, directory, randomize=False, correlations=False):
     """Read, process, and pretty-print data."""
     print_line_bold("Data")
     header = ["Channel", "Yield", "Err", "CR/CR+SCF", "CR/all", "SCF/all", "BKG/all"]
@@ -259,9 +298,26 @@ def process_data(channels, directory, randomize=False):
 
         if randomize:
             rng = np.random.default_rng()
-            sig_yield = rng.normal(sig_yield, sig_yield_error)
-            scf_yield = rng.normal(scf_yield, scf_yield_error)
-            bkg_yield = rng.normal(bkg_yield, bkg_yield_error)
+            if correlations:
+                print("Randomizing with correlations")
+                cov = recover_covariance_matrix(
+                    "plots/" + channel + "/fit_results.root"
+                )
+                f_cr_scf, f_cr_scf_error = recover_cr_scf_fraction(
+                    "plots/" + channel + "/fit_results.root"
+                )
+                sig_scf_yield, bkg_yield = rng.multivariate_normal(
+                    [sig_yield + scf_yield, bkg_yield], cov
+                )
+                f_cr_scf = rng.normal(f_cr_scf, f_cr_scf_error)
+
+                sig_yield = sig_scf_yield * f_cr_scf
+                scf_yield = sig_scf_yield * (1 - f_cr_scf)
+            else:
+                print("Randomizing without correlations")
+                sig_yield = rng.normal(sig_yield, sig_yield_error)
+                scf_yield = rng.normal(scf_yield, scf_yield_error)
+                bkg_yield = rng.normal(bkg_yield, bkg_yield_error)
 
         (
             cr_crscf_fraction,
@@ -315,7 +371,7 @@ def process_data(channels, directory, randomize=False):
     data = {
         "cr_scf_f": round(weighted_mean(cr_crscf_fractions, yields), 4),
         "cr_f": round(weighted_mean(cr_fractions, yields), 4),
-        "scf_f": round(weighted_mean(scf_fractions, yields), 4)
+        "scf_f": round(weighted_mean(scf_fractions, yields), 4),
     }
 
     save_to_json(data, os.path.join(directory, "avg_data_fractions.json"))
@@ -382,4 +438,4 @@ for i in range(args.randomize):
     rnd_directory = os.path.join(args.directory, "rnd_" + str(i))
     if not os.path.exists(rnd_directory):
         os.mkdir(rnd_directory)
-    process_data(channels, rnd_directory, True)
+    process_data(channels, rnd_directory, True, args.correlations)

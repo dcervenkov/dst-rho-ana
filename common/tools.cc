@@ -27,6 +27,7 @@
 #include "RooFitResult.h"
 #include "RooHist.h"
 #include "RooHistPdf.h"
+#include "RooMultiVarGaussian.h"
 #include "RooPlot.h"
 #include "RooRealVar.h"
 #include "TCanvas.h"
@@ -933,6 +934,8 @@ double RoundToDecimals(double number, int decimals) {
  *
  * @param model Model whose parameters are to be extracted
  * @param observables Vars that are observables and should not be extracted as pars
+ * @param prefix Prefix each key in the JSON with this
+ * @param randomize Randomize each result without accounting for correlations
  *
  * @return nlohmann::json The resultant JSON object
  */
@@ -962,6 +965,8 @@ nlohmann::json GetResultsJSON(const RooAbsPdf* model, const RooArgSet& observabl
  *
  * @param models Models whose parameters are to be extracted
  * @param observables Vars that are observables and should not be extracted as pars
+ * @param prefix Prefix each key in the JSON with this
+ * @param randomize Randomize each result without accounting for correlations
  *
  * @return nlohmann::json The resultant JSON object
  */
@@ -971,6 +976,50 @@ nlohmann::json GetResultsJSON(std::vector<const RooAbsPdf*> models, const RooArg
     for (auto& model : models) {
         nlohmann::json model_json = GetResultsJSON(model, observables, prefix, randomize);
         json = MergeJSON(json, model_json);
+    }
+    return json;
+}
+
+/**
+ * Extract parameters from a RooFitResults object and return them as a JSON object
+ *
+ * @param result The result holding the parameters
+ * @param prefix Prefix each key in the JSON with this
+ * @param randomize Randomize each result accounting for correlations
+ *
+ * @return nlohmann::json The resultant JSON object
+ */
+nlohmann::json GetResultsJSON(const RooFitResult* result, std::string prefix, bool randomize) {
+    std::vector<RooRealVar*> vector_of_results;
+    if (randomize) {
+        RooArgList mu_vec = result->floatParsFinal();
+        TMatrixDSym cov = result->covarianceMatrix();
+        RooArgList x_vec;
+        RooRealVar* x;
+        for (int i = 0; i < mu_vec.getSize(); i++) {
+            TString name = "x_";
+            name += mu_vec[i].GetName();
+            // double min = ((RooRealVar*) &x_vec[0])->getMin();
+            // double max = ((RooRealVar*) &x_vec[0])->getMax();
+            double min = -1000;
+            double max = 1000;
+            x = new RooRealVar(name, name, 0, min, max);
+            x_vec.add(*x);
+        }
+
+        RooMultiVarGaussian multi_gauss("multi_gauss", "multi_gauss", x_vec, mu_vec, cov);
+        RooDataSet* data = multi_gauss.generate(x_vec, 1);
+        vector_of_results = ToVector<RooRealVar*>(*data->get());
+    } else {
+        vector_of_results = ToVector<RooRealVar*>(result->floatParsFinal());
+    }
+
+    nlohmann::json json;
+    for (auto& var : vector_of_results) {
+        std::string name = prefix + var->GetName();
+        tools::RemoveSubstring(name, "_x");
+        double value = var->getVal();
+        json[name] = RoundToDecimals(value, 4);
     }
     return json;
 }

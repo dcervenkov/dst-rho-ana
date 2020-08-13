@@ -165,12 +165,24 @@ rule all:
                 group=["randomized_scf_dt"], configno=range(99)),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+                channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
+                group=["randomized_scf_dt_corr"], configno=range(99)),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
                 group=["randomized_bkg"], configno=range(99)),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
+                group=["randomized_bkg_corr"], configno=range(99)),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
                 group=["randomized_bkg_dt"], configno=range(99)),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+                channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
+                group=["randomized_bkg_dt_corr"], configno=range(99)),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
@@ -183,6 +195,10 @@ rule all:
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
                 group=["randomized_all"], configno=range(99)),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
+                group=["randomized_all_corr"], configno=range(99)),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],

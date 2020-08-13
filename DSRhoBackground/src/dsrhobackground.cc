@@ -131,6 +131,8 @@ int main(int argc, char* argv[]) {
             random_results_file += std::to_string(i);
             random_results_file += ".json";
 
+            tools::CreateDirsIfNecessary(random_results_file);
+
             std::ofstream ofs(options.random_models_set ? random_results_file : results_file);
             ofs << std::setw(2) << json_results << std::endl;
             Log::LogLine(Log::info) << "Saving results to " << (options.random_models_set ? random_results_file : results_file);

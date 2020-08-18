@@ -18,6 +18,8 @@ struct fitter_options {
     bool physics;
     bool nodelta;
     bool notail;
+    bool wtag;
+    bool mixing;
     int num_CPUs;
     bool num_CPUs_set;
     char* plot_dir;

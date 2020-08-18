@@ -53,6 +53,8 @@
 
 // Local includes
 #include "constants.h"
+#include "dtbkg.h"
+#include "dtbkgwtag.h"
 #include "log.h"
 #include "tools.h"
 
@@ -163,6 +165,24 @@ FitterBKG::FitterBKG() {
     physics_dt_model_ =
         new DtBKG("physics_dt_model", "physics_dt_model", dt_, *vrerr6_, *vterr6_, dt_tau_,
                   dt_f_delta_, dt_mu_delta_, dt_mu_lifetime_, dt_f_tail_, dt_S_main_, dt_S_tail_);
+
+    physics_dt_wtag_mixing_cf_model_ =
+        new DtBKGWtag("physics_dt_wtag_mixing_cf_model", "physics_dt_wtag_mixing_cf_model", true,
+                      true, dt_, *expmc_, *expno_, *vrerr6_, *vterr6_, dt_tau_, dt_dm_, *tagwtag_,
+                      dt_mu_main_, dt_mu_tail_, dt_S_main_, dt_S_tail_, dt_f_tail_);
+    physics_dt_wtag_mixing_dcs_model_ =
+        new DtBKGWtag("physics_dt_wtag_mixing_dcs_model", "physics_dt_wtag_mixing_dcs_model", false,
+                      true, dt_, *expmc_, *expno_, *vrerr6_, *vterr6_, dt_tau_, dt_dm_, *tagwtag_,
+                      dt_mu_main_, dt_mu_tail_, dt_S_main_, dt_S_tail_, dt_f_tail_);
+
+    physics_dt_wtag_cf_model_ =
+        new DtBKGWtag("physics_dt_wtag_cf_model", "physics_dt_wtag_cf_model", true,
+                      false, dt_, *expmc_, *expno_, *vrerr6_, *vterr6_, dt_tau_, dt_dm_, *tagwtag_,
+                      dt_mu_main_, dt_mu_tail_, dt_S_main_, dt_S_tail_, dt_f_tail_);
+    physics_dt_wtag_dcs_model_ =
+        new DtBKGWtag("physics_dt_wtag_dcs_model", "physics_dt_wtag_dcs_model", false,
+                      false, dt_, *expmc_, *expno_, *vrerr6_, *vterr6_, dt_tau_, dt_dm_, *tagwtag_,
+                      dt_mu_main_, dt_mu_tail_, dt_S_main_, dt_S_tail_, dt_f_tail_);
 }
 
 FitterBKG::~FitterBKG() {
@@ -555,6 +575,8 @@ void FitterBKG::SetNoTailPDF() {
     dt_f_tail_.setConstant();
     dt_S_tail_ = 0;
     dt_S_tail_.setConstant();
+    dt_mu_tail_ = 0;
+    dt_mu_tail_.setConstant();
 }
 
 /**
@@ -600,6 +622,57 @@ nlohmann::json FitterBKG::FitDt(RooAbsPdf* model, std::string prefix, bool plot,
             tools::GetResultsJSON(result_, "bkg_dcs_", randomize);
         if (plot) {
             PlotWithPull(dt_, *dataset_dcs, *model);
+        }
+        delete dataset_dcs;
+    }
+    return json_results;
+}
+
+/**
+ * Fit (and plot) a Delta t model (wtag edition)
+ *
+ * @param nodelta Don't include delta function term in PDF
+ * @param notail Don't include resolution tail term in PDF
+ * @param plot Create plots
+ *
+ * @return nlohmann::json Fitted parameters and values
+ */
+nlohmann::json FitterBKG::FitDtWtag(std::string prefix, bool mixing, bool plot, bool randomize) {
+    nlohmann::json json_results;
+
+    DtBKGWtag* pdf_cf = mixing ? physics_dt_wtag_mixing_cf_model_ : physics_dt_wtag_cf_model_;
+    DtBKGWtag* pdf_dcs = mixing ? physics_dt_wtag_mixing_dcs_model_ : physics_dt_wtag_dcs_model_;
+    {
+        RooDataSet* dataset_cf =
+            static_cast<RooDataSet*>(dataset_->emptyClone("dataset_cf", "dataset_cf"));
+        dataset_cf->append(*dataset_FB_);
+        dataset_cf->append(*dataset_FA_);
+
+        result_ = pdf_cf->fitTo(
+            *dataset_cf,
+            RooFit::ConditionalObservables(
+                RooArgSet(*expmc_, *expno_, *vrerr6_, *vterr6_, *tagwtag_)),
+            RooFit::Save(), RooFit::Minimizer("Minuit2"), RooFit::NumCPU(num_CPUs_));
+
+        // Fit(physics_dt_wtag_cf_model_, dataset_cf);
+        json_results[prefix + "dt_cf_model"] =
+            tools::GetResultsJSON(result_, "bkg_cf_", randomize);
+        if (plot) {
+            PlotWithPull(dt_, *dataset_cf, *pdf_cf);
+        }
+        delete dataset_cf;
+    }
+
+    {
+        RooDataSet* dataset_dcs =
+            static_cast<RooDataSet*>(dataset_->emptyClone("dataset_dcs", "dataset_dcs"));
+        dataset_dcs->append(*dataset_SB_);
+        dataset_dcs->append(*dataset_SA_);
+        Fit(pdf_dcs, dataset_dcs);
+        json_results[prefix + "dt_dcs_model"] =
+            tools::GetResultsJSON(result_, "bkg_dcs_", randomize);
+        if (plot) {
+            PlotWithPull(dt_, *dataset_dcs, *pdf_dcs);
         }
         delete dataset_dcs;
     }

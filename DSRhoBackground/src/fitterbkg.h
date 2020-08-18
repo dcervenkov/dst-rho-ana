@@ -36,6 +36,7 @@
 // Local includes
 #include "constants.h"
 #include "dtbkg.h"
+#include "dtbkgwtag.h"
 #include "nlohmann/json.hpp"
 
 class FitterBKG {
@@ -60,6 +61,7 @@ class FitterBKG {
     void PrintResultsJSON() const;
 
     nlohmann::json FitDt(RooAbsPdf* model, std::string prefix, bool plot, bool randomize);
+    nlohmann::json FitDtWtag(std::string prefix, bool mixing, bool plot, bool randomize);
     nlohmann::json FitAngular(bool plot, bool randomize);
 
     RooRealVar dt_{"dt", "#Deltat [ps]", constants::cuts::dt_low, constants::cuts::dt_high};
@@ -131,13 +133,19 @@ class FitterBKG {
     TTree* data_tree = nullptr;
 
     // Physics-based background dt model
-    RooRealVar dt_tau_{"dt_tau", "#tau", 1.5, 0.1, 10};
+    RooRealVar dt_tau_{"dt_tau", "#tau", 1.525};
+    /* RooRealVar dt_tau_{"dt_tau", "#tau", 1.525, 1, 3}; */
     RooRealVar dt_f_delta_{"dt_f_delta", "f_{d}", 0.1, 0, 1};
     RooRealVar dt_mu_delta_{"dt_mu_delta", "#mu_{d}", 0, -1, 1};
     RooRealVar dt_mu_lifetime_{"dt_mu_lifetime", "#mu_{l}", 0, -1, 1};
     RooRealVar dt_f_tail_{"dt_f_tail", "f_{t}", 0.1, 0, 1};
     RooRealVar dt_S_main_{"dt_S_main", "S_{m}", 1, 0, 1000};
     RooRealVar dt_S_tail_{"dt_S_tail", "S_{t}", 1, 0, 1000};
+
+    RooRealVar dt_dm_{"dt_dm", "#Delta m", 0.507};
+    /* RooRealVar dt_dm_{"dt_dm", "#Delta m", 0.507, 0.1, 1}; */
+    RooRealVar dt_mu_main_{"dt_mu_main", "#mu_{m}", 0, -1, 1};
+    RooRealVar dt_mu_tail_{"dt_mu_tail", "#mu_{t}", 0, -1, 1};
 
     // Background dt model
     RooRealVar dt_voigt_mu_{"dt_voigt_mu", "v_{#mu}", -0.303, -1, 1};
@@ -197,6 +205,10 @@ class FitterBKG {
     RooProdPdf model_{"model", "model", RooArgList(phit_model_, thetab_model_, thetat_model_)};
 
     DtBKG* physics_dt_model_;
+    DtBKGWtag* physics_dt_wtag_mixing_cf_model_;
+    DtBKGWtag* physics_dt_wtag_mixing_dcs_model_;
+    DtBKGWtag* physics_dt_wtag_cf_model_;
+    DtBKGWtag* physics_dt_wtag_dcs_model_;
 }
 
 ;

@@ -99,16 +99,23 @@ int main(int argc, char* argv[]) {
 
     int i = 0;
     do {
-        if (options.physics) {
+        if (options.physics || options.wtag) {
             if (options.notail) {
                 fitter.SetNoTailPDF();
             }
             if (options.nodelta) {
                 fitter.SetNoDeltaPDF();
             }
-            nlohmann::json local_results = fitter.FitDt(
-                fitter.physics_dt_model_, "phys_", options.plot_dir_set, options.random_models_set);
-            json_results = tools::MergeJSON(json_results, local_results);
+            if (options.physics) {
+                nlohmann::json local_results = fitter.FitDt(
+                    fitter.physics_dt_model_, "phys_", options.plot_dir_set, options.random_models_set);
+                json_results = tools::MergeJSON(json_results, local_results);
+            }
+            if (options.wtag) {
+                nlohmann::json local_results = fitter.FitDtWtag(
+                    "phys_wtag_", options.mixing, options.plot_dir_set, options.random_models_set);
+                json_results = tools::MergeJSON(json_results, local_results);
+            }
         }
         if (options.empirical) {
             nlohmann::json local_results = fitter.FitDt(
@@ -165,12 +172,14 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"histo", no_argument, 0, 's'},
                                     {"angular", no_argument, 0, 'a'},
                                     {"empirical", no_argument, 0, 'e'},
+                                    {"mixing", no_argument, 0, 'm'},
                                     {"plot-dir", required_argument, 0, 'p'},
                                     {"randomize", required_argument, 0, 'r'},
                                     {"physics", no_argument, 0, 'y'},
                                     {"nodelta", no_argument, 0, 'd'},
                                     {"notail", no_argument, 0, 't'},
                                     {"version", no_argument, 0, 'v'},
+                                    {"wtag", no_argument, 0, 'w'},
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
@@ -214,6 +223,12 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 't':
                 options.notail = true;
                 break;
+            case 'w':
+                options.wtag = true;
+                break;
+            case 'm':
+                options.mixing = true;
+                break;
             case 'v':
                 printf("Version: %s\n", gitversion);
                 exit(0);
@@ -227,11 +242,13 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-a, --angular             fit angular PDFs\n");
                 printf("-e, --empirical           fit empirical dt PDFs\n");
                 printf("-y, --physics             fit physics-based dt PDF\n");
+                printf("-m, --mixing              use mixing in the r-binned wtag dt PDF\n");
                 printf("-d, --nodelta             disable certain parts of physics-based PDF\n");
                 printf("-t, --notail              disable certain parts of physics-based PDF\n");
                 printf("-h, --help                display this text and exit\n");
                 printf("-p, --plot-dir=PLOT_DIR   create lifetime/mixing plots\n");
                 printf("-v, --version             print program version and exit\n");
+                printf("-w, --wtag                use the r-binned wtag dt PDF\n");
                 exit(0);
                 break;
             default:

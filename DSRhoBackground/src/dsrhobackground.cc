@@ -183,7 +183,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:p:r:kaesydtvh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:p:r:kmaesydtvwh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);

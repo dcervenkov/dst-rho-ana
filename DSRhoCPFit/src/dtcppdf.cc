@@ -266,17 +266,30 @@ Double_t DtCPPDF::evaluate() const {
         Double_t A0ti = 0;
         Double_t Apti = 0;
 
+        const Double_t sintht = sin(tht);
+        const Double_t sinthb = sin(thb);
+        const Double_t sinphit = sin(phit);
+
+        const Double_t costht = cos(tht);
+        const Double_t costhb = cos(thb);
+        const Double_t cosphit = cos(phit);
+
+        const Double_t sin2tht = sin(2 * tht);
+        const Double_t sin2thb = sin(2 * thb);
+        const Double_t sin2phit = sin(2 * phit);
+
+        const Double_t sqrt2 = sqrt(2);
+
         CalculateAmplitudeTerms(Ap2, A02, At2, Ap0r, A0ti, Apti, pdf_const,
                                 pdf_cos, pdf_sin);
 
-
-        // TODO: Make this faster by precomputing sin() and cos() like in angularpdf.cc
-        Double_t value = Ap2*2*sin(tht)*sin(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit)*sin(phit)+\
-                         At2*2*cos(tht)*cos(tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)+\
-                         A02*4*sin(tht)*sin(tht)*sin(tht)*cos(thb)*cos(thb)*sin(thb)*cos(phit)*cos(phit)+\
-                         sqrt(2)*Ap0r*sin(tht)*sin(tht)*sin(tht)*sin(2*thb)*sin(thb)*sin(2*phit)-\
-                         sqrt(2)*A0ti*sin(2*tht)*sin(tht)*sin(2*thb)*sin(thb)*cos(phit)-\
-                         2*Apti*sin(2*tht)*sin(tht)*sin(thb)*sin(thb)*sin(thb)*sin(phit);
+        Double_t value =
+            Ap2 * 2 * sintht * sintht * sintht * sinthb * sinthb * sinthb * sinphit * sinphit +
+            At2 * 2 * costht * costht * sintht * sinthb * sinthb * sinthb +
+            A02 * 4 * sintht * sintht * sintht * costhb * costhb * sinthb * cosphit * cosphit +
+            sqrt2 * Ap0r * sintht * sintht * sintht * sin2thb * sinthb * sin2phit -
+            sqrt2 * A0ti * sin2tht * sintht * sin2thb * sinthb * cosphit -
+            2 * Apti * sin2tht * sintht * sinthb * sinthb * sinthb * sinphit;
 
         pdf = value * eff.GetEfficiency(tht, thb, phit, efficiency_model);
 

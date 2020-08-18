@@ -104,19 +104,19 @@ Double_t AngularPDF::evaluate() const {
         apti = -apti;
     }
 
-    Double_t sintht = sin(tht);
-    Double_t sinthb = sin(thb);
-    Double_t sinphit = sin(phit);
+    const Double_t sintht = sin(tht);
+    const Double_t sinthb = sin(thb);
+    const Double_t sinphit = sin(phit);
 
-    Double_t costht = cos(tht);
-    Double_t costhb = cos(thb);
-    Double_t cosphit = cos(phit);
+    const Double_t costht = cos(tht);
+    const Double_t costhb = cos(thb);
+    const Double_t cosphit = cos(phit);
 
-    Double_t sin2tht = sin(2 * tht);
-    Double_t sin2thb = sin(2 * thb);
-    Double_t sin2phit = sin(2 * phit);
+    const Double_t sin2tht = sin(2 * tht);
+    const Double_t sin2thb = sin(2 * thb);
+    const Double_t sin2phit = sin(2 * phit);
 
-    Double_t sqrt2 = sqrt(2);
+    const Double_t sqrt2 = sqrt(2);
 
     Double_t value = ap * ap * 2 * sintht * sintht * sintht * sinthb * sinthb * sinthb * sinphit * sinphit+\
                      at * at * 2 * costht * costht * sintht * sinthb * sinthb * sinthb+\

@@ -217,10 +217,19 @@ void FitterLifetime::ProcessMixing() {
     mixing_pdfs_S.add(*cr_mixing_pdf_S);
 
     if (scf_) {
-        RooAbsPdf* scf_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_cf_dt")
-                                                     : CreateVoigtGaussDtPdf("scf_cf_dt"));
-        RooAbsPdf* scf_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dcs_dt")
-                                                     : CreateVoigtGaussDtPdf("scf_dcs_dt"));
+        DtPDF* scf_dt_pdf_F =
+            new DtPDF("scf_dt_pdf_F", "SCF", true, perfect_tagging_, *tagwtag_, *dt_, *tau_, *dm_,
+                      *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_,
+                      *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
+
+        DtPDF* scf_dt_pdf_S =
+            new DtPDF("scf_dt_pdf_S", "SCF", false, perfect_tagging_, *tagwtag_, *dt_, *tau_,
+                      *dm_, *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrerr6_,
+                      *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
+        // RooAbsPdf* scf_dt_pdf_F = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_cf_dt")
+        //                                              : CreateVoigtGaussDtPdf("scf_cf_dt"));
+        // RooAbsPdf* scf_dt_pdf_S = (use_physical_pdf_ ? CreatePhysicsBkgDtPdf("scf_dcs_dt")
+        //                                              : CreateVoigtGaussDtPdf("scf_dcs_dt"));
         mixing_pdfs_F.add(*scf_dt_pdf_F);
         mixing_pdfs_S.add(*scf_dt_pdf_S);
     }
@@ -493,8 +502,12 @@ RooAbsPdf* FitterLifetime::CreateLifetimePDF(std::vector<RooAbsPdf*>& components
     lifetime_pdfs.add(*lifetime_cp_pdf);
 
     if (scf) {
-        RooAbsPdf* lifetime_scf_pdf =
-            (physical_pdf ? CreatePhysicsBkgDtPdf("scf_dt") : CreateVoigtGaussDtPdf("scf_dt"));
+        DtPDF* lifetime_scf_pdf =
+            new DtPDF("lifetime_scf_pdf", "SCF", *dt_, *tau_, *expmc_, *expno_, *shcosthb_, *benergy_,
+                      *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_, *vtntrk_, *vterr6_, *vtchi2_,
+                      *vtndf_, *vtistagl_);
+        // RooAbsPdf* lifetime_scf_pdf =
+        //     (physical_pdf ? CreatePhysicsBkgDtPdf("scf_dt") : CreateVoigtGaussDtPdf("scf_dt"));
         lifetime_pdfs.add(*lifetime_scf_pdf);
     }
 

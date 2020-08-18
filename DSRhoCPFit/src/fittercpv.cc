@@ -416,26 +416,36 @@ void FitterCPV::CreateTDSCForBKGPDFs(RooProdPdf*& pdf_FB, RooProdPdf*& pdf_FA, R
                                      bool physics_dt) {
     Log::print(Log::debug, "Creating SCF dt PDF\n");
 
-    RooAbsPdf* angular_pdf;
-    if (scf) {
-        angular_pdf = CreateSCFPDF(channel_name, channel_config);
-    } else {
-        angular_pdf = CreateAngularSCFBKGPDF(channel_name + "_bkg_");
-    }
-
     const std::string type = scf ? "scf_" : "bkg_";
 
     RooAbsPdf* dt_cf_pdf;
     RooAbsPdf* dt_dcs_pdf;
-    if (physics_dt) {
-        Log::print(Log::info, "Using physics-based dt PDF for SCF and BKG\n");
-        dt_cf_pdf = CreatePhysicsBkgDtPdf(channel_name + "_" + type + "cf_dt");
-        dt_dcs_pdf = CreatePhysicsBkgDtPdf(channel_name + "_" + type + "dcs_dt");
+
+    RooAbsPdf* angular_pdf;
+    if (scf) {
+        angular_pdf = CreateSCFPDF(channel_name, channel_config);
+        dt_cf_pdf = new DtPDF((channel_name + "_" + type + "cf_dt").c_str(), "SCF", true,
+                              perfect_tagging_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
+                              *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_,
+                              *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
+
+        dt_dcs_pdf = new DtPDF((channel_name + "_" + type + "dcs_dt").c_str(), "SCF", false,
+                               perfect_tagging_, *tagwtag_, *dt_, *tau_, *dm_, *expmc_, *expno_,
+                               *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_,
+                               *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
     } else {
-        Log::print(Log::info, "Using empirical dt PDF for SCF and BKG\n");
-        dt_cf_pdf = CreateVoigtGaussDtPdf(channel_name + "_" + type + "cf_dt");
-        dt_dcs_pdf = CreateVoigtGaussDtPdf(channel_name + "_" + type + "dcs_dt");
+        angular_pdf = CreateAngularSCFBKGPDF(channel_name + "_bkg_");
+        if (physics_dt) {
+            Log::print(Log::info, "Using physics-based dt PDF for SCF and BKG\n");
+            dt_cf_pdf = CreatePhysicsBkgDtPdf(channel_name + "_" + type + "cf_dt");
+            dt_dcs_pdf = CreatePhysicsBkgDtPdf(channel_name + "_" + type + "dcs_dt");
+        } else {
+            Log::print(Log::info, "Using empirical dt PDF for SCF and BKG\n");
+            dt_cf_pdf = CreateVoigtGaussDtPdf(channel_name + "_" + type + "cf_dt");
+            dt_dcs_pdf = CreateVoigtGaussDtPdf(channel_name + "_" + type + "dcs_dt");
+        }
     }
+
 
     TString pfx = channel_name;
     pfx += "_";

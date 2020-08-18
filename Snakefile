@@ -203,6 +203,14 @@ rule all:
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
                 group=["sigma_tau_dm"], configno=range(5)),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+                channel=["Kpipi0"], type=["ti", "td"], bkg=["mcbkg"],
+                group=["measured_scf"], configno=range(1)),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+                channel=["Kpi", "Kpipi0"], type=["ti", "td"], bkg=["mcbkg"],
+                group=["scf_swap"], configno=range(1)),
             )
 
 rule yield_jobs:

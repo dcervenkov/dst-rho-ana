@@ -639,6 +639,7 @@ nlohmann::json FitterBKG::FitDt(RooAbsPdf* model, std::string prefix, bool plot,
  */
 nlohmann::json FitterBKG::FitDtWtag(std::string prefix, bool mixing, bool plot, bool randomize) {
     nlohmann::json json_results;
+    dt_tau_.setConstant();
 
     DtBKGWtag* pdf_cf = mixing ? physics_dt_wtag_mixing_cf_model_ : physics_dt_wtag_cf_model_;
     DtBKGWtag* pdf_dcs = mixing ? physics_dt_wtag_mixing_dcs_model_ : physics_dt_wtag_dcs_model_;

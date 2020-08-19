@@ -133,8 +133,7 @@ class FitterBKG {
     TTree* data_tree = nullptr;
 
     // Physics-based background dt model
-    RooRealVar dt_tau_{"dt_tau", "#tau", 1.525};
-    /* RooRealVar dt_tau_{"dt_tau", "#tau", 1.525, 1, 3}; */
+    RooRealVar dt_tau_{"dt_tau", "#tau", 1.525, 1, 3};
     RooRealVar dt_f_delta_{"dt_f_delta", "f_{d}", 0.1, 0, 1};
     RooRealVar dt_mu_delta_{"dt_mu_delta", "#mu_{d}", 0, -1, 1};
     RooRealVar dt_mu_lifetime_{"dt_mu_lifetime", "#mu_{l}", 0, -1, 1};

@@ -1011,11 +1011,15 @@ void FitterCPV::PlotDtChannel(const nlohmann::json common_config,
     mixing_pdfs_S.add(*cr_mixing_pdf_S);
 
     if (scf) {
-        RooAbsPdf* scf_dt_pdf_F = (physics_dt ? CreatePhysicsBkgDtPdf(channel_name + "_scf_cf_dt")
-                                              : CreateVoigtGaussDtPdf(channel_name + "_scf_cf_dt"));
-        RooAbsPdf* scf_dt_pdf_S =
-            (physics_dt ? CreatePhysicsBkgDtPdf(channel_name + "_scf_dcs_dt")
-                        : CreateVoigtGaussDtPdf(channel_name + "_scf_dcs_dt"));
+        DtPDF* scf_dt_pdf_F = new DtPDF(
+            prefix + "scf_cf_dt", "SCF", true, perfect_tagging_, *tagwtag_, *dt_, *tau_, *dm_,
+            *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_,
+            *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
+
+        DtPDF* scf_dt_pdf_S = new DtPDF(
+            prefix + "scf_dcs_dt", "SCF", false, perfect_tagging_, *tagwtag_, *dt_, *tau_, *dm_,
+            *expmc_, *expno_, *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_,
+            *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
         mixing_pdfs_F.add(*scf_dt_pdf_F);
         mixing_pdfs_S.add(*scf_dt_pdf_S);
     }
@@ -1030,16 +1034,24 @@ void FitterCPV::PlotDtChannel(const nlohmann::json common_config,
         mixing_pdfs_S.add(*bkg_dt_pdf_S);
     }
 
+    TString suffix;
+    if (common_config.contains("rbin")) {
+        // Turns out the rbin 4 fractions are very good approximations of the
+        // overall fractions
+        suffix = "_rbin4_f";
+    } else {
+        suffix = "_f";
+    }
     RooArgList fractions;
     if (scf && !bkg) {
-        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf_f", "f_{cr}",
+        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf" + suffix, "f_{cr}",
                                                constants::fraction_cr_of_crscf, 0.80, 0.99);
         cr_scf_f_->setConstant();
         fractions.add(*cr_scf_f_);
     } else if (scf && bkg) {
-        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}",
+        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr" + suffix, "f_{cr}",
                                            constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
-        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}",
+        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf" + suffix, "f_{scf}",
                                             constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
         cr_f_->setConstant();
         scf_f_->setConstant();

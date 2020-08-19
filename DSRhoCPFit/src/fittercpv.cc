@@ -206,6 +206,11 @@ void FitterCPV::InitVars(std::array<double, 16> par_input, const int var_bins) {
     decaytype_->defineType("SB", 3);
     decaytype_->defineType("SA", 4);
 
+    rbin_ = new RooCategory("rbin", "rbin");
+    for (int i = 0; i < 7; i++) {
+        rbin_->defineType(std::to_string(i).c_str(), i);
+    }
+
     channel_cat_ = new RooCategory("channel_cat", "channel_cat");
 
     // Make a copy of the input parameters for saving results, etc.
@@ -2282,6 +2287,15 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
         common_cuts += "&&evmcflag==1";
     }
 
+    // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
+    // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
+    std::string dataset_name = channel_name;
+    dataset_name += "_dataset";
+    RooDataSet* temp_dataset =
+        new RooDataSet(dataset_name.c_str(), dataset_name.c_str(), tree == nullptr ? chain : tree,
+                       dataset_vars_argset_, common_cuts);
+    Log::print(Log::debug, "Num events passing common cuts: %i\n", temp_dataset->numEntries());
+
     TString FB_cuts;
     TString FA_cuts;
     TString SB_cuts;
@@ -2303,15 +2317,20 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
         SA_cuts = "brecflav==-1&&tagqr<0";
     }
 
-    // A temporary RooDataSet is created from the whole tree and then we apply cuts to get
-    // the 4 different B and f flavor datasets, as that is faster then reading the tree 4 times
-    std::string dataset_name = channel_name;
-    dataset_name += "_dataset";
-    RooDataSet* temp_dataset =
-        new RooDataSet(dataset_name.c_str(), dataset_name.c_str(), tree == nullptr ? chain : tree,
-                       dataset_vars_argset_, common_cuts);
-    Log::print(Log::debug, "Num events passing common cuts: %i\n", temp_dataset->numEntries());
+    RooDataSet* dataset_w_decaytype =
+        AddDecayTypeLabels(temp_dataset, FB_cuts, FA_cuts, SB_cuts, SA_cuts);
+    delete temp_dataset;
+    RooDataSet* dataset = AddRBinLabels(dataset_w_decaytype);
+    dataset_w_decaytype->Print();
+    dataset->Print();
+    delete dataset_w_decaytype;
 
+    Log::print(Log::info, "Num events passing all initial cuts: %i\n", dataset->numEntries());
+    return dataset;
+}
+
+RooDataSet* FitterCPV::AddDecayTypeLabels(RooDataSet* temp_dataset, TString FB_cuts,
+                                          TString FA_cuts, TString SB_cuts, TString SA_cuts) const {
     // We add an identifying label to each of the 4 categories and then combine it into a single
     // dataset for RooSimultaneous fitting
     RooDataSet* dataset_FB = static_cast<RooDataSet*>(temp_dataset->reduce(FB_cuts));
@@ -2330,8 +2349,6 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
     decaytype_->setLabel("SA");
     dataset_SA->addColumn(*decaytype_);
 
-    delete temp_dataset;
-
     RooDataSet* dataset = static_cast<RooDataSet*>(dataset_FB->Clone());
     delete dataset_FB;
     dataset->append(*dataset_FA);
@@ -2341,7 +2358,24 @@ RooDataSet* FitterCPV::GetChannelData(const std::string channel_name,
     dataset->append(*dataset_SA);
     delete dataset_SA;
 
-    Log::print(Log::info, "Num events passing all initial cuts: %i\n", dataset->numEntries());
+    return dataset;
+}
+
+RooDataSet* FitterCPV::AddRBinLabels(RooDataSet* temp_dataset) const {
+    RooDataSet* datasets[7];
+    RooDataSet* dataset = nullptr;
+
+    for (int i = 0; i < 7; i++) {
+        datasets[i] = static_cast<RooDataSet*>(temp_dataset->reduce(tools::GetRBinCutString(i).c_str()));
+        rbin_->setIndex(i);
+        datasets[i]->addColumn(*rbin_);
+        if (dataset == nullptr) {
+            dataset = static_cast<RooDataSet*>(datasets[i]->Clone());
+        } else {
+            dataset->append(*datasets[i]);
+        }
+        delete datasets[i];
+    }
 
     return dataset;
 }

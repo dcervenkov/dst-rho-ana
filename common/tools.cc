@@ -1301,6 +1301,7 @@ double GetDeltaWTag(int expno, int rbin, bool mc) {
 }
 
 std::string GetRBinCutString(int rbin) {
+    assert(rbin >= 0 && rbin <=6);
     switch (rbin)
     {
     case 0:
@@ -1328,10 +1329,11 @@ std::string GetRBinCutString(int rbin) {
         break;
 
     case 6:
-        return "(tagwtag>0.0&&tagwtag<=0.0625)";
+        return "(tagwtag>=0.0&&tagwtag<=0.0625)";
         break;
 
     default:
+        return "";
         break;
     }
 }

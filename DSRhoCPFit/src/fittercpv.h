@@ -80,6 +80,9 @@ class FitterCPV {
     std::string ApplyJSONConfig(const nlohmann::json& config);
     void CreatePlots(const nlohmann::json config) const;
     void PlotCorrelationMatrix() const;
+    RooDataSet* AddDecayTypeLabels(RooDataSet* temp_dataset, TString FB_cuts, TString FA_cuts,
+                                   TString SB_cuts, TString SA_cuts) const;
+    RooDataSet* AddRBinLabels(RooDataSet* temp_dataset) const;
 
     const void LogResults();
 
@@ -156,6 +159,7 @@ class FitterCPV {
     RooRealVar* nocand_;
 
     RooCategory* decaytype_;
+    RooCategory* rbin_;
 
    private:
     void InitVars(std::array<double, 16> par_input, const int var_bins);

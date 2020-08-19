@@ -90,7 +90,7 @@ void Fitter::CloseOutput() {
  *
  * @param chain Chain of files containing data to be fitted
  */
-void Fitter::FitTo(TChain* chain) {
+void Fitter::FitTo(TTree* chain) {
     if (data_set_) delete data_set_;
     data_set_ = new RooDataSet("data_set", "data_set", chain, dataset_vars_, data_cut_);
     Log::print(Log::info, "Fitting %i events\n", data_set_->numEntries());

@@ -1300,4 +1300,40 @@ double GetDeltaWTag(int expno, int rbin, bool mc) {
     }
 }
 
+std::string GetRBinCutString(int rbin) {
+    switch (rbin)
+    {
+    case 0:
+        return "(tagwtag>0.45&&tagwtag<=0.5)";
+        break;
+
+    case 1:
+        return "(tagwtag>0.375&&tagwtag<=0.45)";
+        break;
+
+    case 2:
+        return "(tagwtag>0.25&&tagwtag<=0.375)";
+        break;
+
+    case 3:
+        return "(tagwtag>0.1875&&tagwtag<=0.25)";
+        break;
+
+    case 4:
+        return "(tagwtag>0.125&&tagwtag<=0.1875)";
+        break;
+
+    case 5:
+        return "(tagwtag>0.0625&&tagwtag<=0.125)";
+        break;
+
+    case 6:
+        return "(tagwtag>0.0&&tagwtag<=0.0625)";
+        break;
+
+    default:
+        break;
+    }
+}
+
 }  // namespace tools

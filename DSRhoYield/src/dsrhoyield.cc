@@ -47,7 +47,13 @@ int main(int argc, char* argv[]) {
     colors::setColors();
 
     // The various parameters are first fixed from training data (6 MC streams)
-    TChain* training_data = tools::ReadDataFromDir(trainingDir);
+    TChain* training_data_chain = tools::ReadDataFromDir(trainingDir);
+    TTree* training_data = (TTree*)training_data_chain->CopyTree("");
+    TTree* training_data_rbin = nullptr;
+    if (options.rbin_set) {
+        training_data_rbin =
+            (TTree*)training_data_chain->CopyTree(tools::GetRBinCutString(options.rbin).c_str());
+    }
     Fitter fitter(outputDir);
     fitter.SetNumCPUs(options.cpus);
     fitter.SetMC(options.mc);
@@ -65,7 +71,7 @@ int main(int argc, char* argv[]) {
     fitter.Plot();
 
     fitter.Setup(Components::signal_plus_crossfeed);
-    fitter.FitTo(training_data);
+    fitter.FitTo(options.rbin_set ? training_data_rbin : training_data);
     fitter.FixShape(Components::signal_plus_crossfeed);
     fitter.WriteFitResults();
     fitter.Plot();
@@ -77,7 +83,14 @@ int main(int argc, char* argv[]) {
     fitter.Plot();
 
     // The final fit is done on a different dataset
-    TChain* data = tools::ReadDataFromDir(dataDir);
+    TChain* data_chain = tools::ReadDataFromDir(dataDir);
+    TTree* data = nullptr;
+    if (options.rbin_set) {
+        data =
+            (TTree*)data_chain->CopyTree(tools::GetRBinCutString(options.rbin).c_str());
+    } else {
+        data = (TTree*)data_chain->CopyTree("");
+    }
     fitter.Setup(Components::all);
     fitter.FitTo(data);
     fitter.WriteFitResults();
@@ -122,11 +135,12 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
     int c;
     struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
                                     {"MC", no_argument, 0, 'm'},
+                                    {"rbin", required_argument, 0, 'r'},
                                     {"version", no_argument, 0, 'v'},
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:mvh", long_options,
+    while ((c = getopt_long(argc, argv, "c:r:mvh", long_options,
                             &option_index)) != -1) {
         switch (c) {
             case 0:
@@ -140,6 +154,10 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'm':
                 options.mc = true;
                 break;
+            case 'r':
+                options.rbin = atoi(optarg);
+                options.rbin_set = true;
+                break;
             case 'v':
                 printf("Version: %s\n", gitversion);
                 exit(0);
@@ -151,6 +169,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-m, --MC                         final fit is on MC (default: data)\n");
                 printf("-o, --output                     basename of the output files\n");
                 printf("-p, --plot-dir=PLOT-DIR          directory for plots\n");
+                printf("-r, --rbin=BIN                   limit fit to a specific r-bin\n");
                 printf("-v, --version                	 display version and exit\n");
                 exit(0);
                 break;

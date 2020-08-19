@@ -83,6 +83,7 @@ RooDataHist* RandomizeDataHist(const RooDataHist& hist);
 int GetRBin(double r);
 double GetWTag(int expno, int rbin, bool mc);
 double GetDeltaWTag(int expno, int rbin, bool mc);
+std::string GetRBinCutString(int rbin);
 
 /**
  * Return a concatenation of two std::vectors

@@ -12,6 +12,8 @@
 struct fit_options {
     bool mc = false;
     int cpus = 1;
+    int rbin;
+    bool rbin_set;
 };
 
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,

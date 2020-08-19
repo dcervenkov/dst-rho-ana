@@ -38,7 +38,7 @@ class Fitter {
 
     void Setup(Components component);
     void FixShape(Components component);
-    void FitTo(TChain* chain);
+    void FitTo(TTree* chain);
     void Plot();
     TPaveText* CreateStatBox(double chi2);
     void WriteFitResults();
@@ -119,11 +119,11 @@ class Fitter {
 
     // Cross-feed Gaussian
     RooRealVar cross_gaus_mean_{"cross_gaus_mean", "#mu_{Gauss}", -0.1, 0.1};
-    RooRealVar cross_gaus_sigma_{"cross_gaus_sigma", "#sigma_{Gauss}", 0.01, 0.1};
+    RooRealVar cross_gaus_sigma_{"cross_gaus_sigma", "#sigma_{Gauss}", 0.01, 1};
     RooGaussian cross_gaus_{"cross_gaus", "cross_gaus", de_, cross_gaus_mean_, cross_gaus_sigma_};
 
     // Cross-feed exponential
-    RooRealVar cross_tau_{"cross_tau", "#tau_{exp}", -8, -1};
+    RooRealVar cross_tau_{"cross_tau", "#tau_{exp}", -8, 10};
     RooExponential cross_exponential_{"cross_exponential", "cross_exponential", de_, cross_tau_};
 
     // Cross-feed model
@@ -132,10 +132,10 @@ class Fitter {
                            cross_exponential_, cross_f_};
 
     // Signal + cross-feed model
-    RooRealVar signal_plus_cross_f_{"signal_plus_cross_f", "f_{sig/cf}", 0.1, 0.9};
+    RooRealVar signal_plus_cross_f_{"signal_plus_cross_f", "f_{sig/cf}", 0.1, 0.99};
     RooAddPdf signal_plus_cross_model_{"signal_plus_cross_model", "signal_model + cross_model",
                                        signal_model_, cross_model_, signal_plus_cross_f_};
-    RooRealVar n_signal_plus_cross_model_{"n_signal_plus_cross_model", "n_{sig+cf}", 20000, 10000,
+    RooRealVar n_signal_plus_cross_model_{"n_signal_plus_cross_model", "n_{sig+cf}", 20000, 100,
                                           1000000};
     RooExtendPdf signal_plus_cross_model_e_{"signal_plus_cross_model_e",
                                             "signal_plus_cross_model_e", signal_plus_cross_model_,
@@ -145,7 +145,7 @@ class Fitter {
     RooRealVar bkg_poly_p1_{"bkg_poly_p1", "p_{1}", -100, 100};
     RooRealVar bkg_poly_p2_{"bkg_poly_p2", "p_{2}", -100, 100};
     RooChebychev bkg_model_{"bkg_model", "bkg_model", de_, RooArgList(bkg_poly_p1_, bkg_poly_p2_)};
-    RooRealVar n_bkg_{"n_bkg", "n_{bkg}", 20000, 1000, 1000000};
+    RooRealVar n_bkg_{"n_bkg", "n_{bkg}", 20000, 10, 1000000};
     RooExtendPdf bkg_model_e_{"bkg_model_e", "bkg_model_e", bkg_model_, n_bkg_};
 
     // Whole model

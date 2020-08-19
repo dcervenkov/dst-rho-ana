@@ -34,6 +34,13 @@ def decode_arguments():
         action="store_true",
         help="account for the correlations when randomizing",
     )
+    parser.add_argument(
+        "-b",
+        "--rbin",
+        type=int,
+        default=None,
+        help="extract the results for a particular rbin",
+    )
     args = parser.parse_args()
     return args
 
@@ -107,16 +114,18 @@ def recover_cr_scf_fraction(filename):
     return f_sig_cf, f_sig_cf_error
 
 
-def recover_count(dir):
+def recover_count(dir, rbin):
     """Extract the MC truth based number of signal events from a directory.
 
     All ROOT files in the directory are read and summed.
     """
     chain = ROOT.TChain("h2000")
     chain.Add(dir + "/*.root")
-    count = chain.Draw(
-        "de", common_cuts() + "&&(evmcflag==1||evmcflag==7||evmcflag==8)", "goff"
-    )
+    cuts = common_cuts()
+    cuts += "&&(evmcflag==1||evmcflag==7||evmcflag==8)"
+    if rbin is not None:
+        cuts += f"&&{get_rbin_cut_string(rbin)}"
+    count = chain.Draw("de", cuts, "goff")
     return count
 
 
@@ -135,6 +144,29 @@ def common_cuts():
         "(thetab>0.65 && thetab<2.95)&&"
         "nocand<=2"
     )
+
+
+def get_rbin_cut_string(rbin):
+    if rbin == 0:
+        return "(tagwtag>0.45&&tagwtag<=0.5)"
+
+    elif rbin == 1:
+        return "(tagwtag>0.375&&tagwtag<=0.45)"
+
+    elif rbin == 2:
+        return "(tagwtag>0.25&&tagwtag<=0.375)"
+
+    elif rbin == 3:
+        return "(tagwtag>0.1875&&tagwtag<=0.25)"
+
+    elif rbin == 4:
+        return "(tagwtag>0.125&&tagwtag<=0.1875)"
+
+    elif rbin == 5:
+        return "(tagwtag>0.0625&&tagwtag<=0.125)"
+
+    elif rbin == 6:
+        return "(tagwtag>0.0&&tagwtag<=0.0625)"
 
 
 def weighted_mean(number_list, weights):
@@ -172,7 +204,7 @@ def calculate_fractions(sig_yield, scf_yield, bkg_yield):
     return (cr_crscf, cr, scf, bkg)
 
 
-def process_MC(channels, directory, streams):
+def process_MC(channels, directory, streams, rbin):
     """Read, process, and pretty-print MC."""
     for channel in channels:
         print_line_bold(channel)
@@ -202,6 +234,10 @@ def process_MC(channels, directory, streams):
         bkg_fractions = []
 
         for stream_no, stream in enumerate(streams):
+            results_file = f"plots/{channel}_stream{stream}"
+            if (rbin is not None):
+                results_file += f"_rbin{rbin}"
+            results_file += "/fit_results.root"
             (
                 sig_yield,
                 sig_yield_error,
@@ -209,12 +245,9 @@ def process_MC(channels, directory, streams):
                 scf_yield_error,
                 bkg_yield,
                 bkg_yield_error,
-            ) = recover_yield(
-                "plots/" + channel + "_stream" + str(stream) + "/fit_results.root"
-            )
-            sig_count = recover_count(
-                "../data/" + channel + "/realistic_mc/stream" + str(stream)
-            )
+            ) = recover_yield(results_file)
+
+            sig_count = recover_count(f"../data/{channel}/realistic_mc/stream{stream}", rbin)
 
             cr_crscf, cr, scf, bkg = calculate_fractions(
                 sig_yield, scf_yield, bkg_yield
@@ -269,7 +302,7 @@ def process_MC(channels, directory, streams):
         save_to_json(data, os.path.join(directory, channel + "_mc_fractions.json"))
 
 
-def process_data(channels, directory, randomize=False, correlations=False):
+def process_data(channels, directory, rbin, randomize=False, correlations=False):
     """Read, process, and pretty-print data."""
     print_line_bold("Data")
     header = ["Channel", "Yield", "Err", "CR/CR+SCF", "CR/all", "SCF/all", "BKG/all"]
@@ -287,6 +320,10 @@ def process_data(channels, directory, randomize=False, correlations=False):
     bkg_fractions = []
 
     for channel in channels:
+        results_file = f"plots/{channel}"
+        if (rbin is not None):
+            results_file += f"_rbin{rbin}"
+        results_file += "/fit_results.root"
         (
             sig_yield,
             sig_yield_error,
@@ -294,18 +331,14 @@ def process_data(channels, directory, randomize=False, correlations=False):
             scf_yield_error,
             bkg_yield,
             bkg_yield_error,
-        ) = recover_yield("plots/" + channel + "/fit_results.root")
+        ) = recover_yield(results_file)
 
         if randomize:
             rng = np.random.default_rng()
             if correlations:
                 print("Randomizing with correlations")
-                cov = recover_covariance_matrix(
-                    "plots/" + channel + "/fit_results.root"
-                )
-                f_cr_scf, f_cr_scf_error = recover_cr_scf_fraction(
-                    "plots/" + channel + "/fit_results.root"
-                )
+                cov = recover_covariance_matrix(results_file)
+                f_cr_scf, f_cr_scf_error = recover_cr_scf_fraction(results_file)
                 sig_scf_yield, bkg_yield = rng.multivariate_normal(
                     [sig_yield + scf_yield, bkg_yield], cov
                 )
@@ -430,12 +463,12 @@ streams = range(0, 6)
 if not os.path.exists(args.directory):
     os.mkdir(args.directory)
 
-process_MC(channels, args.directory, streams)
-process_data(channels, args.directory)
+process_MC(channels, args.directory, streams, args.rbin)
+process_data(channels, args.directory, args.rbin)
 
 for i in range(args.randomize):
     print(f"Generating random config {i}")
     rnd_directory = os.path.join(args.directory, "rnd_" + str(i))
     if not os.path.exists(rnd_directory):
         os.mkdir(rnd_directory)
-    process_data(channels, rnd_directory, True, args.correlations)
+    process_data(channels, rnd_directory, args.rbin, True, args.correlations)

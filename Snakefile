@@ -1,6 +1,7 @@
 import glob
 
 STREAMS = range(0, 6)
+RBINS = range(0, 7)
 CHANNELS = ["Kpi", "Kpipi0", "K3pi"]
 CHANNELS_AND_TOGETHER = ["Kpi", "Kpipi0", "K3pi", "together"]
 SVDS = [1, 2]
@@ -88,7 +89,11 @@ rule all:
         yield_jobs = (
             expand("DSRhoYield/plots/{channel}_stream{stream}/fit_results.root",
                    channel=CHANNELS, stream=STREAMS),
-            expand("DSRhoYield/plots/{channel}/fit_results.root", channel=CHANNELS)
+            expand("DSRhoYield/plots/{channel}/fit_results.root", channel=CHANNELS),
+
+            expand("DSRhoYield/plots/{channel}_stream{stream}_rbin{rbin}/fit_results.root",
+                   channel=CHANNELS, stream=STREAMS, rbin=RBINS),
+            expand("DSRhoYield/plots/{channel}_rbin{rbin}/fit_results.root", channel=CHANNELS, rbin=RBINS)
             ),
 
         background_jobs = (
@@ -239,6 +244,7 @@ rule yield_mc:
     log:
         "DSRhoYield/logs/{channel}_stream{stream}"
     wildcard_constraints:
+        channel = "Kpi|Kpipi0|K3pi|together",
         stream = "\d+"
     run:
         shell("./DSRhoYield/DSRhoYield --MC {input} " + os.path.dirname(output[0]) + " &> {log}")
@@ -256,6 +262,35 @@ rule yield_data:
     run:
         shell("./DSRhoYield/DSRhoYield {input} " + os.path.dirname(output[0]) + " &> {log}")
 
+rule yield_mc_rbin:
+    input:
+        "data/{channel}/realistic_mc",
+        "data/{channel}/realistic_mc/stream{stream}"
+    output:
+        "DSRhoYield/plots/{channel}_stream{stream}_rbin{rbin}/fit_results.root"
+    log:
+        "DSRhoYield/logs/{channel}_stream{stream}_rbin{rbin}"
+    wildcard_constraints:
+        channel = "Kpi|Kpipi0|K3pi|together",
+        stream = "\d+",
+        rbin = "\d+"
+    run:
+        shell("./DSRhoYield/DSRhoYield --MC --rbin {wildcards.rbin} {input} " + os.path.dirname(output[0]) + " &> {log}")
+
+rule yield_data_rbin:
+    input:
+        "data/{channel}/realistic_mc",
+        "data/{channel}"
+    output:
+        "DSRhoYield/plots/{channel}_rbin{rbin}/fit_results.root"
+    log:
+        "DSRhoYield/logs/{channel}_rbin{rbin}"
+    wildcard_constraints:
+        channel = "Kpi|Kpipi0|K3pi|together",
+        rbin = "\d+"
+    run:
+        shell("./DSRhoYield/DSRhoYield --rbin {wildcards.rbin} {input} " + os.path.dirname(output[0]) + " &> {log}")
+
 rule yield_summary:
     input:
         expand("DSRhoYield/plots/{channel}_stream{stream}/fit_results.root",
@@ -265,8 +300,28 @@ rule yield_summary:
     output:
         expand("DSRhoYield/results/{channel}_{type}_fractions.json", channel=CHANNELS, type=["mc", "data"]),
         "DSRhoYield/results/avg_data_fractions.json"
+    wildcard_constraints:
+        channel = "Kpi|Kpipi0|K3pi|together",
+        stream = "\d+",
     shell:
         "cd DSRhoYield && ./tools/print_all_yields.py &> yield.log"
+
+rule yield_summary_rbin:
+    input:
+        expand("DSRhoYield/plots/{channel}_stream{stream}_rbin{{rbin}}/fit_results.root",
+               channel=CHANNELS, stream=STREAMS),
+        expand("DSRhoYield/plots/{channel}_rbin{{rbin}}/fit_results.root",
+               channel=CHANNELS)
+    output:
+        expand("DSRhoYield/results/rbin{{rbin}}/{channel}_{type}_fractions.json",
+               channel=CHANNELS, type=["mc", "data"]),
+        "DSRhoYield/results/rbin{rbin}/avg_data_fractions.json"
+    wildcard_constraints:
+        channel = "Kpi|Kpipi0|K3pi|together",
+        stream = "\d+",
+        rbin = "\d+"
+    shell:
+        "cd DSRhoYield && ./tools/print_all_yields.py --directory results/rbin{wildcards.rbin} --rbin {wildcards.rbin} &> yield_rbin{wildcards.rbin}.log"
 
 rule background:
     input:

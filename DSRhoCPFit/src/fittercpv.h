@@ -194,6 +194,9 @@ class FitterCPV {
     RooSimultaneous* CreateTimeDependentPDF(const std::string channel_name,
                                             const nlohmann::json common_config,
                                             const nlohmann::json channel_config);
+    RooSimultaneous* CreateTimeDependentPDFRbin(const std::string channel_name,
+                                                const nlohmann::json common_config,
+                                                const nlohmann::json channel_config);
 
     RooAddPdf* CreateVoigtGaussDtPdf(const std::string prefix) const;
     RooAbsPdf* CreatePhysicsBkgDtPdf(const std::string prefix) const;

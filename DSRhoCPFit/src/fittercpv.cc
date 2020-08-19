@@ -544,8 +544,6 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
 /**
  * Create a time-dependent PDF with the requested components
  *
- * @param scf Whether to add self-crossfeed component
- * @param bkg Whether to add background component
  * @return RooSimultaneous* The complete PDF
  */
 RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const std::string channel_name,
@@ -639,6 +637,138 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const std::string channel_nam
 }
 
 /**
+ * Create a time-dependent PDF with the requested components for a single r-bin
+ *
+ * @return RooSimultaneous* The complete PDF for a single r-bin
+ */
+RooSimultaneous* FitterCPV::CreateTimeDependentPDFRbin(const std::string channel_name,
+                                                       const nlohmann::json common_config,
+                                                       const nlohmann::json channel_config) {
+    RooArgList FB_pdfs;
+    RooArgList FA_pdfs;
+    RooArgList SB_pdfs;
+    RooArgList SA_pdfs;
+
+    bool scf = false;
+    bool bkg = false;
+    if (common_config["components"] == "CRSCF") {
+        scf = true;
+    } else if (common_config["components"] == "all") {
+        scf = true;
+        bkg = true;
+    }
+    bool physics_dt = common_config["physicsDtSCFBKG"] ? true : false;
+
+    DtCPPDF* cr_pdf_FB = 0;
+    DtCPPDF* cr_pdf_FA = 0;
+    DtCPPDF* cr_pdf_SB = 0;
+    DtCPPDF* cr_pdf_SA = 0;
+    CreateDtCPPDFs(cr_pdf_FB, cr_pdf_FA, cr_pdf_SB, cr_pdf_SA, channel_name, common_config,
+                   channel_config);
+    FB_pdfs.add(*cr_pdf_FB);
+    FA_pdfs.add(*cr_pdf_FA);
+    SB_pdfs.add(*cr_pdf_SB);
+    SA_pdfs.add(*cr_pdf_SA);
+
+    RooProdPdf* scf_pdf_FB = 0;
+    RooProdPdf* scf_pdf_FA = 0;
+    RooProdPdf* scf_pdf_SB = 0;
+    RooProdPdf* scf_pdf_SA = 0;
+    if (scf) {
+        CreateTDSCForBKGPDFs(scf_pdf_FB, scf_pdf_FA, scf_pdf_SB, scf_pdf_SA, channel_name,
+                             channel_config, true, physics_dt);
+        FB_pdfs.add(*scf_pdf_FB);
+        FA_pdfs.add(*scf_pdf_FA);
+        SB_pdfs.add(*scf_pdf_SB);
+        SA_pdfs.add(*scf_pdf_SA);
+    }
+
+    RooProdPdf* bkg_pdf_FB = 0;
+    RooProdPdf* bkg_pdf_FA = 0;
+    RooProdPdf* bkg_pdf_SB = 0;
+    RooProdPdf* bkg_pdf_SA = 0;
+    if (bkg) {
+        CreateTDSCForBKGPDFs(bkg_pdf_FB, bkg_pdf_FA, bkg_pdf_SB, bkg_pdf_SA, channel_name,
+                             channel_config, false, physics_dt);
+        FB_pdfs.add(*bkg_pdf_FB);
+        FA_pdfs.add(*bkg_pdf_FA);
+        SB_pdfs.add(*bkg_pdf_SB);
+        SA_pdfs.add(*bkg_pdf_SA);
+    }
+
+    TString prefix = channel_name.c_str();
+    prefix += "_";
+    RooSimultaneous* rbin_pdfs[7];
+
+    for (int i = 0; i < 7; i++) {
+        RooArgList fractions;
+        TString suffix = "_rbin";
+        suffix += i;
+        suffix += "_f";
+        if (scf && !bkg) {
+            RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf" + suffix, "f_{cr}",
+                                                   constants::fraction_cr_of_crscf, 0.10, 0.99);
+            cr_scf_f_->setConstant();
+            fractions.add(*cr_scf_f_);
+        } else if (scf && bkg) {
+            RooRealVar* cr_f_ = new RooRealVar(prefix + "cr" + suffix, "f_{cr}",
+                                               constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+            RooRealVar* scf_f_ = new RooRealVar(prefix + "scf" + suffix, "f_{scf}",
+                                                constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+            cr_f_->setConstant();
+            scf_f_->setConstant();
+            fractions.add(*cr_f_);
+            fractions.add(*scf_f_);
+        }
+
+        TString pdf_name = prefix;
+        pdf_name += "rbin";
+        pdf_name += i;
+        pdf_name += "_pdf";
+
+        RooAddPdf* pdf_FB = new RooAddPdf(pdf_name + "_FB", pdf_name + "_FB", FB_pdfs, fractions);
+        RooAddPdf* pdf_FA = new RooAddPdf(pdf_name + "_FA", pdf_name + "_FA", FA_pdfs, fractions);
+        RooAddPdf* pdf_SB = new RooAddPdf(pdf_name + "_SB", pdf_name + "_SB", SB_pdfs, fractions);
+        RooAddPdf* pdf_SA = new RooAddPdf(pdf_name + "_SA", pdf_name + "_SA", SA_pdfs, fractions);
+
+        rbin_pdfs[i] = new RooSimultaneous(pdf_name, pdf_name, *decaytype_);
+        rbin_pdfs[i]->addPdf(*pdf_FB, "FB");
+        rbin_pdfs[i]->addPdf(*pdf_FA, "FA");
+        rbin_pdfs[i]->addPdf(*pdf_SB, "SB");
+        rbin_pdfs[i]->addPdf(*pdf_SA, "SA");
+    }
+
+
+    // // std::map<std::string, RooAbsPdf*> pdf_map;
+    // for (auto& chan : config["channels"].items()) {
+    //     std::string channel_name = chan.key();
+    //     auto channel_config = chan.value();
+    //     Log::LogLine(Log::debug) << "Creating PDF for channel " << channel_name;
+
+    //     auto common_config = config;
+    //     common_config.erase("channels");
+
+    //     RooSimultaneous* channel_pdf =
+    //         CreateChannelPDF(channel_name, channel_config, common_config);
+    //     pdf_map[channel_name] = channel_pdf;
+    // }
+    // RooSimultaneous* pdf = new RooSimultaneous("pdf", "pdf", pdf_map, *channel_cat_);
+
+    std::map<std::string, RooAbsPdf*> pdf_map;
+    for (int i = 0; i < 7; i++) {
+        pdf_map[std::to_string(i)] = rbin_pdfs[i];
+    }
+    RooSimultaneous* sim_pdf = new RooSimultaneous(prefix + "sim_pdf", prefix + "sim_pdf", pdf_map, *rbin_);
+
+    // RooSimultaneous* sim_pdf = new RooSimultaneous(prefix + "sim_pdf", prefix + "sim_pdf", *rbin_);
+    // for (int i = 0; i < 7; i++) {
+    //     sim_pdf->addPdf(*rbin_pdfs[i], std::to_string(i).c_str());
+    // }
+
+    return sim_pdf;
+}
+
+/**
  * Fit specified PDF, print the results and global correlations
  *
  * @param timedep Whether a time-dependent fit should be carried out
@@ -725,14 +855,22 @@ void FitterCPV::PlotAngularChannel(const nlohmann::json common_config,
     RooDataHist* bkg_hist;
     bool scf = false;
     bool bkg = false;
+    TString suffix;
+    if (common_config.contains("rbin")) {
+        // Turns out the rbin 4 fractions are very good approximations of the
+        // overall fractions
+        suffix = "_rbin4_f";
+    } else {
+        suffix = "_f";
+    }
     if (common_config["components"] == "CRSCF") {
         scf = true;
-        fractions.add(*pdf_->getVariables()->find(chan_name + "_cr_scf_f"));
+        fractions.add(*pdf_->getVariables()->find(chan_name + "_cr_scf" + suffix));
     } else if (common_config["components"] == "all") {
         scf = true;
         bkg = true;
-        fractions.add(*pdf_->getVariables()->find(chan_name + "_cr_f"));
-        fractions.add(*pdf_->getVariables()->find(chan_name + "_scf_f"));
+        fractions.add(*pdf_->getVariables()->find(chan_name + "_cr" + suffix));
+        fractions.add(*pdf_->getVariables()->find(chan_name + "_scf" + suffix));
     }
 
     if (scf) {
@@ -956,6 +1094,11 @@ RooDataHist* FitterCPV::GenerateAngularAsimovHisto(const std::string channel_nam
 
     RooAddPdf* top_pdf =
         dynamic_cast<RooAddPdf*>(pdf_->getPdf("{" + chan_name + ";" + dec_types_str[type] + "}"));
+    if (top_pdf == nullptr) {
+        // If using r-binned PDF, look for a different name
+        top_pdf = dynamic_cast<RooAddPdf*>(
+            pdf_->getPdf("{" + chan_name + ";" + dec_types_str[type] + ";0}"));
+    }
     assert(top_pdf != nullptr);
 
     RooArgSet* observables = pdf_->getObservables(data_);
@@ -963,26 +1106,25 @@ RooDataHist* FitterCPV::GenerateAngularAsimovHisto(const std::string channel_nam
     const bool time_dep = observables->find("dt") ? true : false;
     observables->remove(*dt_, false, true);
     TString pdf_name = chan_name;
-    switch (component)
-    {
-    case CR:
-        pdf_name += "_cr_pdf";
-        if (!time_dep) {
-            if (type == FB || type == SB) {
-                pdf_name += "_B";
-            } else {
-                pdf_name += "_B_bar";
+    switch (component) {
+        case CR:
+            pdf_name += "_cr_pdf";
+            if (!time_dep) {
+                if (type == FB || type == SB) {
+                    pdf_name += "_B";
+                } else {
+                    pdf_name += "_B_bar";
+                }
             }
-        }
-        break;
-    case SCF:
-        pdf_name += "_scf_pdf";
-        break;
-    case BKG:
-        pdf_name += "_bkg_pdf";
-        break;
-    default:
-        break;
+            break;
+        case SCF:
+            pdf_name += "_scf_pdf";
+            break;
+        case BKG:
+            pdf_name += "_bkg_pdf";
+            break;
+        default:
+            break;
     }
 
     if (time_dep) {
@@ -990,13 +1132,13 @@ RooDataHist* FitterCPV::GenerateAngularAsimovHisto(const std::string channel_nam
         pdf_name += dec_types_str[type];
     }
 
-    RooAbsPdf* component_pdf =
-        dynamic_cast<RooAbsPdf*>(top_pdf->pdfList().find(pdf_name));
+    RooAbsPdf* component_pdf = dynamic_cast<RooAbsPdf*>(top_pdf->pdfList().find(pdf_name));
     assert(component_pdf != nullptr);
 
     Log::LogLine(Log::debug) << "Generating angular Asimov histo from " << pdf_name;
 
-    RooDataHist* hist = component_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
+    RooDataHist* hist =
+        component_pdf->generateBinned(*observables, 1000, RooFit::ExpectedData(true));
     return hist;
 }
 
@@ -2152,10 +2294,17 @@ RooSimultaneous* FitterCPV::CreateChannelPDF(const std::string channel_name,
         scf = true;
         bkg = true;
     }
-    RooSimultaneous* channel_pdf =
-        common_config.contains("timeIndependent")
-            ? CreateAngularPDF(channel_name, scf, bkg, channel_config)
-            : CreateTimeDependentPDF(channel_name, common_config, channel_config);
+
+    RooSimultaneous* channel_pdf;
+    if (common_config.contains("timeIndependent")) {
+        channel_pdf = CreateAngularPDF(channel_name, scf, bkg, channel_config);
+    } else {
+        if (common_config.contains("rbin")) {
+            channel_pdf = CreateTimeDependentPDFRbin(channel_name, common_config, channel_config);
+        } else {
+            channel_pdf = CreateTimeDependentPDF(channel_name, common_config, channel_config);
+        }
+    }
 
     if (common_config.contains("modelParameters")) {
         tools::ChangeModelParameters(channel_pdf, common_config["modelParameters"],

@@ -142,27 +142,28 @@ int main(int argc, char* argv[]) {
 int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless_argv,
                           nlohmann::json& config) {
     int c;
-    struct option long_options[] = {{"cpus", required_argument, 0, 'c'},
-                                    {"config", required_argument, 0, 'g'},
-                                    {"components", required_argument, 0, 'e'},
-                                    {"correlation-plot", no_argument, 0, 'a'},
+    struct option long_options[] = {{"MC", required_argument, 0, 'm'},
                                     {"blind", no_argument, 0, 'd'},
+                                    {"components", required_argument, 0, 'e'},
+                                    {"config", required_argument, 0, 'g'},
+                                    {"correlation-plot", no_argument, 0, 'a'},
+                                    {"cpus", required_argument, 0, 'c'},
                                     {"events", required_argument, 0, 'n'},
                                     {"exclude-channels", required_argument, 0, 'x'},
-                                    {"MC", required_argument, 0, 'm'},
                                     {"fix", required_argument, 0, 'f'},
+                                    {"generator-level", no_argument, 0, 'r'},
+                                    {"help", no_argument, 0, 'h'},
+                                    {"log", no_argument, 0, 'l'},
+                                    {"output", required_argument, 0, 'o'},
+                                    {"perfect-tag", no_argument, 0, 't'},
                                     {"plot-bins", required_argument, 0, 'b'},
                                     {"plot-dir", required_argument, 0, 'p'},
-                                    {"output", required_argument, 0, 'o'},
-                                    {"log", no_argument, 0, 'l'},
+                                    {"rbin", no_argument, 0, 's'},
                                     {"time-independent", no_argument, 0, 'i'},
-                                    {"perfect-tag", no_argument, 0, 't'},
-                                    {"generator-level", no_argument, 0, 'r'},
                                     {"version", no_argument, 0, 'v'},
-                                    {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:e:n:x:m:f:b:p:o:litrvhad", long_options,
+    while ((c = getopt_long(argc, argv, "c:g:e:n:x:m:f:b:p:o:litrsvhad", long_options,
                             &option_index)) != -1) {
         switch (c) {
             case 0:
@@ -218,6 +219,9 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'r':
                 config["generatorLevel"] = true;
                 break;
+            case 's':
+                config["rbin"] = true;
+                break;
             case 'v':
                 printf("Version: %s\n", gitversion);
                 exit(0);
@@ -240,6 +244,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-p, --plot-dir=PLOT-DIR          create lifetime/mixing plots\n");
                 printf("-b, --plot-bins=NUM              number of bins in plots\n");
                 printf("-r, --generator-level            do a generator level fit\n");
+                printf("-s, --rbin                       use the r-bin separated versions of dt PDFs\n");
                 printf("-t, --perfect-tag                use MC info to get perfect tagging\n");
                 printf("-v, --version                	 display version and exit\n");
                 printf("-x, --exclude-channels=CHANNELs  exclude channels from fit\n");

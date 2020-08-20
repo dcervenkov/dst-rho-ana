@@ -856,7 +856,7 @@ void FitterCPV::PlotAngularChannel(const nlohmann::json common_config,
     bool scf = false;
     bool bkg = false;
     TString suffix;
-    if (common_config.contains("rbin")) {
+    if (common_config.contains("rbin") && !common_config.contains("timeIndependent")) {
         // Turns out the rbin 4 fractions are very good approximations of the
         // overall fractions
         suffix = "_rbin4_f";

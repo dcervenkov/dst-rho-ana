@@ -166,7 +166,7 @@ def get_rbin_cut_string(rbin):
         return "(tagwtag>0.0625&&tagwtag<=0.125)"
 
     elif rbin == 6:
-        return "(tagwtag>0.0&&tagwtag<=0.0625)"
+        return "(tagwtag>=0.0&&tagwtag<=0.0625)"
 
 
 def weighted_mean(number_list, weights):

@@ -855,22 +855,23 @@ void FitterCPV::PlotAngularChannel(const nlohmann::json common_config,
     RooDataHist* bkg_hist;
     bool scf = false;
     bool bkg = false;
-    TString suffix;
-    if (common_config.contains("rbin") && !common_config.contains("timeIndependent")) {
-        // Turns out the rbin 4 fractions are very good approximations of the
-        // overall fractions
-        suffix = "_rbin4_f";
-    } else {
-        suffix = "_f";
-    }
     if (common_config["components"] == "CRSCF") {
         scf = true;
-        fractions.add(*pdf_->getVariables()->find(chan_name + "_cr_scf" + suffix));
+        RooRealVar* f_cr_scf =
+            new RooRealVar(chan_name + "_cr_scf_f", chan_name + "_cr_scf_f",
+                           channel_config["modelParameters"]["cr_scf_f"].get<double>());
+        fractions.add(*f_cr_scf);
     } else if (common_config["components"] == "all") {
         scf = true;
         bkg = true;
-        fractions.add(*pdf_->getVariables()->find(chan_name + "_cr" + suffix));
-        fractions.add(*pdf_->getVariables()->find(chan_name + "_scf" + suffix));
+        RooRealVar* f_cr =
+            new RooRealVar(chan_name + "_cr_f", chan_name + "_cr_f",
+                           channel_config["modelParameters"]["cr_f"].get<double>());
+        RooRealVar* f_scf =
+            new RooRealVar(chan_name + "_scf_f", chan_name + "_scf_f",
+                           channel_config["modelParameters"]["scf_f"].get<double>());
+        fractions.add(*f_cr);
+        fractions.add(*f_scf);
     }
 
     if (scf) {
@@ -1034,29 +1035,25 @@ void FitterCPV::PlotDtChannel(const nlohmann::json common_config,
         mixing_pdfs_S.add(*bkg_dt_pdf_S);
     }
 
-    TString suffix;
-    if (common_config.contains("rbin")) {
-        // Turns out the rbin 4 fractions are very good approximations of the
-        // overall fractions
-        suffix = "_rbin4_f";
-    } else {
-        suffix = "_f";
-    }
     RooArgList fractions;
-    if (scf && !bkg) {
-        RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf" + suffix, "f_{cr}",
-                                               constants::fraction_cr_of_crscf, 0.80, 0.99);
-        cr_scf_f_->setConstant();
-        fractions.add(*cr_scf_f_);
-    } else if (scf && bkg) {
-        RooRealVar* cr_f_ = new RooRealVar(prefix + "cr" + suffix, "f_{cr}",
-                                           constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
-        RooRealVar* scf_f_ = new RooRealVar(prefix + "scf" + suffix, "f_{scf}",
-                                            constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
-        cr_f_->setConstant();
-        scf_f_->setConstant();
-        fractions.add(*cr_f_);
-        fractions.add(*scf_f_);
+    TString chan_name = channel_name.c_str();
+    if (common_config["components"] == "CRSCF") {
+        scf = true;
+        RooRealVar* f_cr_scf =
+            new RooRealVar(chan_name + "_cr_scf_f", chan_name + "_cr_scf_f",
+                           channel_config["modelParameters"]["cr_scf_f"].get<double>());
+        fractions.add(*f_cr_scf);
+    } else if (common_config["components"] == "all") {
+        scf = true;
+        bkg = true;
+        RooRealVar* f_cr =
+            new RooRealVar(chan_name + "_cr_f", chan_name + "_cr_f",
+                           channel_config["modelParameters"]["cr_f"].get<double>());
+        RooRealVar* f_scf =
+            new RooRealVar(chan_name + "_scf_f", chan_name + "_scf_f",
+                           channel_config["modelParameters"]["scf_f"].get<double>());
+        fractions.add(*f_cr);
+        fractions.add(*f_scf);
     }
 
     RooAddPdf* mixing_pdf_F =

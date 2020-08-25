@@ -50,7 +50,7 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../../DSRhoBackground/results/nonphys_Kpi_mc_bkg.json",
+                        "file": "../../../../DSRhoBackground/results/Kpi_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {
@@ -110,7 +110,7 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../../DSRhoBackground/results/nonphys_Kpipi0_mc_bkg.json",
+                        "file": "../../../../DSRhoBackground/results/Kpipi0_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {
@@ -170,7 +170,7 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../../DSRhoBackground/results/nonphys_K3pi_mc_bkg.json",
+                        "file": "../../../../DSRhoBackground/results/K3pi_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {

@@ -112,7 +112,7 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../../DSRhoBackground/results/nonphys_Kpipi0_data_sidebands.json",
+                        "file": "../../../../DSRhoBackground/results/Kpipi0_data_sidebands.json",
                         "include": ["angular_pdf"]
                     },
                     {
@@ -172,7 +172,7 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../../DSRhoBackground/results/nonphys_K3pi_data_sidebands.json",
+                        "file": "../../../../DSRhoBackground/results/K3pi_data_sidebands.json",
                         "include": ["angular_pdf"]
                     },
                     {

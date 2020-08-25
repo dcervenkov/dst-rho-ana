@@ -1,4 +1,5 @@
 {
+    "rbin": true,
     "initialPars": {
         "ap": 0.269,
         "apa": 0.56,
@@ -34,11 +35,6 @@
     "modelParameters": {
         "substitute": [
             {
-                "file": "../../../../DSRhoBackground/results/together_mc_scf.json",
-                "include": ["phys_dt_cf_model", "phys_dt_dcs_model"],
-                "replace": ["bkg", "scf"]
-            },
-            {
                 "file": "../../../../DSRhoBackground/results/together_data_sidebands.json",
                 "include": ["phys_dt_cf_model", "phys_dt_dcs_model"]
             }
@@ -52,11 +48,39 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../../DSRhoBackground/results/nonphys_Kpi_mc_bkg.json",
+                        "file": "../../../../DSRhoBackground/results/Kpi_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {
                         "file": "../../../../DSRhoYield/results/Kpi_data_fractions.json"
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin0/Kpi_data_fractions.json",
+                        "replace": ["_f", "_rbin0_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin1/Kpi_data_fractions.json",
+                        "replace": ["_f", "_rbin1_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin2/Kpi_data_fractions.json",
+                        "replace": ["_f", "_rbin2_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin3/Kpi_data_fractions.json",
+                        "replace": ["_f", "_rbin3_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin4/Kpi_data_fractions.json",
+                        "replace": ["_f", "_rbin4_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin5/Kpi_data_fractions.json",
+                        "replace": ["_f", "_rbin5_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin6/Kpi_data_fractions.json",
+                        "replace": ["_f", "_rbin6_f"]
                     }
                 ]
             },
@@ -112,11 +136,39 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../../DSRhoBackground/results/nonphys_Kpipi0_mc_bkg.json",
+                        "file": "../../../../DSRhoBackground/results/Kpipi0_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {
                         "file": "../../../../DSRhoYield/results/Kpipi0_data_fractions.json"
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin0/Kpipi0_data_fractions.json",
+                        "replace": ["_f", "_rbin0_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin1/Kpipi0_data_fractions.json",
+                        "replace": ["_f", "_rbin1_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin2/Kpipi0_data_fractions.json",
+                        "replace": ["_f", "_rbin2_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin3/Kpipi0_data_fractions.json",
+                        "replace": ["_f", "_rbin3_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin4/Kpipi0_data_fractions.json",
+                        "replace": ["_f", "_rbin4_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin5/Kpipi0_data_fractions.json",
+                        "replace": ["_f", "_rbin5_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin6/Kpipi0_data_fractions.json",
+                        "replace": ["_f", "_rbin6_f"]
                     }
                 ]
             },
@@ -172,11 +224,39 @@
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../../DSRhoBackground/results/nonphys_K3pi_mc_bkg.json",
+                        "file": "../../../../DSRhoBackground/results/K3pi_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {
                         "file": "../../../../DSRhoYield/results/K3pi_data_fractions.json"
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin0/K3pi_data_fractions.json",
+                        "replace": ["_f", "_rbin0_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin1/K3pi_data_fractions.json",
+                        "replace": ["_f", "_rbin1_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin2/K3pi_data_fractions.json",
+                        "replace": ["_f", "_rbin2_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin3/K3pi_data_fractions.json",
+                        "replace": ["_f", "_rbin3_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin4/K3pi_data_fractions.json",
+                        "replace": ["_f", "_rbin4_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin5/K3pi_data_fractions.json",
+                        "replace": ["_f", "_rbin5_f"]
+                    },
+                    {
+                        "file": "../../../../DSRhoYield/results/rbin6/K3pi_data_fractions.json",
+                        "replace": ["_f", "_rbin6_f"]
                     }
                 ]
             },

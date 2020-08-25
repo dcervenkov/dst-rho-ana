@@ -34,10 +34,19 @@ def get_data_for_background(wildcards):
                 return (MC_SIGNAL_6_STREAMS["Kpi"] +
                         MC_SIGNAL_6_STREAMS["Kpipi0"] +
                         MC_SIGNAL_6_STREAMS["K3pi"])
-            else:
+            elif bkg_type == "bkg":
                 return (MC_WO_SIGNAL["Kpi"] +
                         MC_WO_SIGNAL["Kpipi0"] +
                         MC_WO_SIGNAL["K3pi"])
+            elif bkg_type == "mixed":
+                return glob.glob("data/K*/mc_wo_signal/*mixed*.root")
+            elif bkg_type == "charged":
+                return glob.glob("data/K*/mc_wo_signal/*charged*.root")
+            elif bkg_type == "charmuds":
+                files = glob.glob("data/K*/mc_wo_signal/*charm*.root")
+                files.extend(glob.glob("data/K*/mc_wo_signal/*uds*.root"))
+                return files
+
         else:
             return (DATA_SIDEBANDS["Kpi"] +
                     DATA_SIDEBANDS["Kpipi0"] +
@@ -50,6 +59,23 @@ def get_data_for_background(wildcards):
                 return MC_WO_SIGNAL[channel]
         else:
             return DATA_SIDEBANDS[channel]
+
+
+def get_params_for_background(wildcards):
+    bkg_type = wildcards.bkg_type
+    if bkg_type == "scf":
+        return "--notail --nodelta --physics"
+    elif bkg_type == "bkg":
+        return "--notail --physics"
+    elif bkg_type == "sidebands":
+        return "--notail --physics"
+    elif bkg_type == "mixed":
+        return "--notail --wtag --mixing"
+    elif bkg_type == "charged":
+        return "--notail --wtag"
+    elif bkg_type == "charmuds":
+        return "--physics"
+
 
 def get_excluded_channels(wildcards):
     if wildcards.channel == "together":
@@ -98,6 +124,9 @@ rule all:
 
         background_jobs = (
             expand("DSRhoBackground/results/{channel}_mc_{bkg_type}.json",
+                   channel=["together"], bkg_type=["mixed", "charged", "charmuds"]),
+
+            expand("DSRhoBackground/results/{channel}_mc_{bkg_type}.json",
                    channel=CHANNELS_AND_TOGETHER, bkg_type=BKG_TYPES),
             expand("DSRhoBackground/results/{channel}_data_sidebands.json",
                    channel=CHANNELS_AND_TOGETHER),
@@ -128,34 +157,52 @@ rule all:
                    channel=CHANNELS_AND_TOGETHER, component=["all"], type=["lifetime", "mixing"])
             ),
         cpfit_jobs = (
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
+            #     stream=range(99), group=["nominal"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
+            #     stream=range(6), group=["nominal"]),
+
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["CR", "CRSCF"],
+            #     stream=range(1), group=["nominal"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["all"],
+            #     stream=range(1), group=["nominal"]),
+
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
+            #     group=["nominal"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
+            #     channel=["Kpi-K3pi"], type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
+            #     group=["nominal"])
+
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
-                stream=range(99), group=["nominal"]),
+                stream=range(99), group=["nominal_rbin"]),
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
-                stream=range(6), group=["nominal"]),
+                stream=range(6), group=["nominal_rbin"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["CR", "CRSCF"],
-                stream=range(1), group=["nominal"]),
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
+                stream=range(1), group=["nominal_rbin"]),
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["all"],
-                stream=range(1), group=["nominal"]),
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
+                stream=range(1), group=["nominal_rbin"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
-                group=["nominal"]),
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
-                channel=["Kpi-K3pi"], type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
-                group=["nominal"])
+                group=["nominal_rbin"]),
             ),
         cpfit_extra_jobs = (
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-                channel=["Kpi"], type=["ti", "td"], components=["CR", "CRSCF"], stream=range(8),
-                group=["correct_phi3"]),
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-                channel=["Kpi"], type=["ti", "td"], components=["all"], stream=range(6),
-                group=["correct_phi3"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+            #     channel=["Kpi"], type=["ti", "td"], components=["CR", "CRSCF"], stream=range(8),
+            #     group=["correct_phi3"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+            #     channel=["Kpi"], type=["ti", "td"], components=["all"], stream=range(6),
+            #     group=["correct_phi3"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
@@ -165,13 +212,13 @@ rule all:
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
                 group=["randomized_scf"], configno=range(99)),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
-                channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
-                group=["randomized_scf_dt"], configno=range(99)),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
+            #     group=["randomized_scf_dt"], configno=range(99)),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
-                channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
-                group=["randomized_scf_dt_corr"], configno=range(99)),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
+            #     group=["randomized_scf_dt_corr"], configno=range(99)),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
@@ -332,11 +379,10 @@ rule background:
     log:
         "DSRhoBackground/logs/{channel}_{mc}_{bkg_type}"
     params:
-        lambda wildcards:
-            "--notail --nodelta --physics" if wildcards.bkg_type == "scf" else
-            "--notail --physics"
+        get_params_for_background
     wildcard_constraints:
-        channel = "Kpi|Kpipi0|K3pi|together"
+        channel = "Kpi|Kpipi0|K3pi|together",
+        mc = "mc|data"
     shell:
         "./DSRhoBackground/DSRhoBackground"
         " {params} --angular --plot-dir={output.plotdir} {output.result} {input} &> {log}"
@@ -443,6 +489,7 @@ rule cpfit_configs:
         expand(rules.background.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
         expand(rules.background_nonphys.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
         rules.yield_summary.output,
+        expand(rules.yield_summary_rbin.output, rbin=RBINS),
         template = "DSRhoCPFit/configs/{group}/templates/{config}.template.json"
     output:
         "DSRhoCPFit/configs/{group}/{config}.json"

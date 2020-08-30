@@ -499,7 +499,7 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     plot->Draw();
 
     TLegend* legend = nullptr;
-    if (components.size() > 1) {
+    if (components.size() > 1 && components.size() < 7) {
         legend = CreateLegendBox(components);
         legend->Draw();
     }

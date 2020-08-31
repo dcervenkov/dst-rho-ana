@@ -148,13 +148,16 @@ TPaveText* CreateStatBox(double chi2, int ndof, const RooArgList& results, bool 
                          bool position_left) {
     double x_left, x_right, y_bottom, y_top;
     const double line_height = 0.06;
+    const int max_results = 6;
+
+    const int num_results = results.getSize() > max_results ? 0 : results.getSize();
 
     if (position_top) {
         y_top = 0.9;
-        y_bottom = y_top - (results.getSize() + 2) * line_height;
+        y_bottom = y_top - (num_results + 2) * line_height;
     } else {
         y_bottom = 0.023;
-        y_top = y_bottom + (results.getSize() + 2) * line_height;
+        y_top = y_bottom + (num_results + 2) * line_height;
     }
 
     if (position_left) {
@@ -174,11 +177,13 @@ TPaveText* CreateStatBox(double chi2, int ndof, const RooArgList& results, bool 
     stat_box->SetY1NDC(0.1);
 
     char line[1000];
-    for (int i = 0; i < results.getSize(); i++) {
-        snprintf(line, 1000, "%s = %.3f +- %.3f", results[i].GetTitle(),
-                 static_cast<RooRealVar*>(results.at(i))->getVal(),
-                 static_cast<RooRealVar*>(results.at(i))->getError());
-        stat_box->AddText(line);
+    if (results.getSize() <= max_results) {
+        for (int i = 0; i < results.getSize(); i++) {
+            snprintf(line, 1000, "%s = %.3f +- %.3f", results[i].GetTitle(),
+                     static_cast<RooRealVar*>(results.at(i))->getVal(),
+                     static_cast<RooRealVar*>(results.at(i))->getError());
+            stat_box->AddText(line);
+        }
     }
     snprintf(line, 1000, "#chi^{2}/ndof = %.2f (%.1f/%i)\n", chi2 / ndof, chi2, ndof);
     stat_box->AddText(line);
@@ -512,7 +517,7 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     const int ndof = var.getBinning().numBins() - num_floating_pars;
     const double chi2 = plot->chiSquare(num_floating_pars) * ndof;
     TPaveText* stat_box = CreateStatBox(chi2, ndof, results, true, true);
-    if (stat_box && num_floating_pars < 7) {
+    if (stat_box) {
         stat_box->Draw();
     }
 

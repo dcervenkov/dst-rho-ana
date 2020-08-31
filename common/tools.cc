@@ -499,7 +499,7 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     plot->Draw();
 
     TLegend* legend = nullptr;
-    if (components.size() > 1 && components.size() < 7) {
+    if (components.size() > 1) {
         legend = CreateLegendBox(components);
         legend->Draw();
     }
@@ -512,7 +512,7 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     const int ndof = var.getBinning().numBins() - num_floating_pars;
     const double chi2 = plot->chiSquare(num_floating_pars) * ndof;
     TPaveText* stat_box = CreateStatBox(chi2, ndof, results, true, true);
-    if (stat_box) {
+    if (stat_box && num_floating_pars < 7) {
         stat_box->Draw();
     }
 

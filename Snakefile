@@ -207,6 +207,17 @@ rule all:
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
                 group=["randomized_eff"], configno=range(100)),
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"], stream=range(6),
+                group=["nonres"]),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"], stream=range(6),
+                group=["nonres_mcflag7"]),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"], stream=range(6),
+                group=["nonres_0.3_mcflag7"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],

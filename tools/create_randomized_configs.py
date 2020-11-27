@@ -44,7 +44,7 @@ def get_replacement_line(line, to_replace, replace_by, number):
     start = line.find(to_replace)
     if start != -1:
         new_line = (
-            line[:start] + replace_by.format(number) + line[start + len(to_replace) :]
+            line[:start] + replace_by.format(number) + line[start + len(to_replace):]
         )
         return new_line
     else:

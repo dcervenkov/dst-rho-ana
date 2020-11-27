@@ -1,4 +1,5 @@
 import glob
+import shutil
 
 STREAMS = range(0, 6)
 RBINS = range(0, 7)
@@ -22,6 +23,9 @@ DATA_SIDEBANDS = {
     "Kpipi0": glob.glob("data/Kpipi0/sidebands/*.root"),
     "K3pi": glob.glob("data/K3pi/sidebands/*.root")
 }
+
+wildcard_constraints:
+    randomization = "[a-zA-Z0-9_]*"
 
 
 def get_data_for_background(wildcards):
@@ -380,6 +384,54 @@ rule yield_summary_rbin:
         rbin = "\d+"
     shell:
         "cd DSRhoYield && ./tools/print_all_yields.py --directory results/rbin{wildcards.rbin} --rbin {wildcards.rbin} &> yield_rbin{wildcards.rbin}.log"
+
+rule yield_summary_rbin_randomized:
+    input:
+        expand("DSRhoYield/plots/{channel}_rbin{{rbin}}/fit_results.root",
+               channel=CHANNELS)
+    output:
+        expand("DSRhoYield/results_{{randomization}}/rbin{{rbin}}/{channel}_{type}_fractions.json",
+               channel=CHANNELS, type=["data"]),
+        "DSRhoYield/results_{randomization}/rbin{rbin}/avg_data_fractions.json",
+        expand("DSRhoYield/results_{{randomization}}/rbin{{rbin}}/rnd_{rnd}/{channel}_{type}_fractions.json",
+               channel=CHANNELS, type=["data"], rnd=range(100)),
+        expand("DSRhoYield/results_{{randomization}}/rbin{{rbin}}/rnd_{rnd}/avg_data_fractions.json",
+               rnd=range(100))
+    log:
+        "logs/yield_{randomization}_rbin{rbin}.log"
+    params:
+        "--randomize 100",
+        lambda wildcards:
+            "--correlations" if "corr" in wildcards.randomization else "",
+    wildcard_constraints:
+        channel = "Kpi|Kpipi0|K3pi|together",
+        rbin = "\d+"
+    shell:
+        "cd DSRhoYield && ./tools/print_all_yields.py --directory results_{wildcards.randomization}/rbin{wildcards.rbin} {params} --rbin {wildcards.rbin} &> {log}"
+
+rule yield_rearrange_randomized:
+    input:
+        expand("DSRhoYield/results_{{randomization}}/rbin{rbin}/rnd_{rnd}/{channel}_{type}_fractions.json",
+               channel=CHANNELS, type=["data"], rbin=range(7), rnd=range(100)),
+        expand("DSRhoYield/results_{{randomization}}/rbin{rbin}/rnd_{rnd}/avg_data_fractions.json",
+               rbin=range(7), rnd=range(100)),
+        expand("DSRhoYield/results/{channel}_{type}_fractions.json", channel=CHANNELS, type=["data"]),
+        "DSRhoYield/results/avg_data_fractions.json"
+    output:
+        expand("DSRhoYield/results_{{randomization}}/rnd_{rnd}/rbin{rbin}/{channel}_{type}_fractions.json",
+               channel=CHANNELS, type=["data"], rbin=range(7), rnd=range(100)),
+        expand("DSRhoYield/results_{{randomization}}/rnd_{rnd}/rbin{rbin}/avg_data_fractions.json",
+               rbin=range(7), rnd=range(100))
+    run:
+        for channel in [*CHANNELS, "avg"]:
+            for rnd in range(100):
+                for rbin in range(7):
+                    shutil.move(f"DSRhoYield/results_{wildcards.randomization}/rbin{rbin}/rnd_{rnd}/{channel}_data_fractions.json",
+                        f"DSRhoYield/results_{wildcards.randomization}/rnd_{rnd}/rbin{rbin}")
+                shutil.copy(f"DSRhoYield/results/{channel}_data_fractions.json",
+                    f"DSRhoYield/results_{wildcards.randomization}/rnd_{rnd}")
+        for rbin in range(7):
+            shutil.rmtree(f"DSRhoYield/results_{wildcards.randomization}/rbin{rbin}")
 
 rule background:
     input:

@@ -517,9 +517,9 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
         fractions.add(*cr_scf_f_);
     } else if (scf && bkg) {
         RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}",
-                                           constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+                                           constants::fraction_cr_of_crscfbkg, 0.01, 0.99);
         RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}",
-                                            constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+                                            constants::fraction_scf_of_crscfbkg, 0.01, 0.99);
         cr_f_->setConstant();
         scf_f_->setConstant();
         fractions.add(*cr_f_);
@@ -612,9 +612,9 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDF(const std::string channel_nam
         fractions.add(*cr_scf_f_);
     } else if (scf && bkg) {
         RooRealVar* cr_f_ = new RooRealVar(prefix + "cr_f", "f_{cr}",
-                                           constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+                                           constants::fraction_cr_of_crscfbkg, 0.01, 0.99);
         RooRealVar* scf_f_ = new RooRealVar(prefix + "scf_f", "f_{scf}",
-                                            constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+                                            constants::fraction_scf_of_crscfbkg, 0.01, 0.99);
         cr_f_->setConstant();
         scf_f_->setConstant();
         fractions.add(*cr_f_);
@@ -707,14 +707,14 @@ RooSimultaneous* FitterCPV::CreateTimeDependentPDFRbin(const std::string channel
         suffix += "_f";
         if (scf && !bkg) {
             RooRealVar* cr_scf_f_ = new RooRealVar(prefix + "cr_scf" + suffix, "f_{cr}",
-                                                   constants::fraction_cr_of_crscf, 0.10, 0.99);
+                                                   constants::fraction_cr_of_crscf, 0.01, 0.99);
             cr_scf_f_->setConstant();
             fractions.add(*cr_scf_f_);
         } else if (scf && bkg) {
             RooRealVar* cr_f_ = new RooRealVar(prefix + "cr" + suffix, "f_{cr}",
-                                               constants::fraction_cr_of_crscfbkg, 0.10, 0.99);
+                                               constants::fraction_cr_of_crscfbkg, 0.01, 0.99);
             RooRealVar* scf_f_ = new RooRealVar(prefix + "scf" + suffix, "f_{scf}",
-                                                constants::fraction_scf_of_crscfbkg, 0.10, 0.99);
+                                                constants::fraction_scf_of_crscfbkg, 0.01, 0.99);
             cr_f_->setConstant();
             scf_f_->setConstant();
             fractions.add(*cr_f_);

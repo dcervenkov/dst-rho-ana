@@ -7,92 +7,76 @@ object and store the text in its title member.)
 """
 
 import argparse
-import os
-from rootpy.io import root_open
 import sys
-from contextlib import contextmanager
+
+import uproot
 
 
 def decode_arguments():
     """Decode CLI arguments"""
     parser = argparse.ArgumentParser()
-    parser.add_argument('files', metavar='FILE', nargs='+')
-    parser.add_argument("-n", "--name", type=str, action='append',
-                        help="name of the object whose title to print (can be used multiple times)")
+    parser.add_argument("files", metavar="FILE", nargs="+")
+    parser.add_argument(
+        "-n",
+        "--name",
+        type=str,
+        action="append",
+        help="name of the object whose title to print (can be used multiple times)",
+        default=["pull_table"],
+    )
+    parser.add_argument(
+        "-l", "--list", help="list objects in file", action="store_true", default=False
+    )
     args = parser.parse_args()
-
-    if not args.name:
-        args.name = ['pull_table']
-
-    return args.files, args.name
+    return args.files, args.name, args.list
 
 
-def root_print(filename, names):
-    with root_open(filename, 'r') as root_file:
-        for name in names:
-            if name in root_file:
-                value = root_file[name].GetTitle()
-            else:
-                print("ERROR: '" + name + "' not present in file '" +
-                      filename + "'", file=sys.stderr)
-                print("The following objects are present in the file:\n" +
-                      "\n".join([obj.GetName() for obj in root_file]), file=sys.stderr)
-                sys.exit(1)
-
-            if len(names) > 1:
-                if '\n' in value:
-                    print(name + ':')
-                else:
-                    print(name + ':', end=' ')
-
-            print(value)
-
-
-@contextmanager
-def stdout_redirected(to=os.devnull):
-    '''
-    import os
-
-    with stdout_redirected(to=filename):
-        print("from Python")
-        os.system("echo non-Python applications are also supported")
-    '''
-    fd = sys.stdout.fileno()
-
-    # assert that Python and C stdio write using the same file descriptor
-    # assert libc.fileno(ctypes.c_void_p.in_dll(libc, "stdout")) == fd == 1
-
-    def _redirect_stdout(to):
-        sys.stdout.close()  # + implicit flush()
-        os.dup2(to.fileno(), fd)  # fd writes to 'to' file
-        sys.stdout = os.fdopen(fd, 'w')  # Python writes to fd
-
-    with os.fdopen(os.dup(fd), 'w') as old_stdout:
-        with open(to, 'w') as file:
-            _redirect_stdout(to=file)
+def print_titles(filename, names):
+    for name in names:
+        value = None
         try:
-            yield  # allow code to be run with the redirected stdout
-        finally:
-            _redirect_stdout(to=old_stdout)  # restore stdout.
-            # buffering and flags such as
-            # CLOEXEC may be different
+            with uproot.open(filename) as root_file:
+                value = root_file[name]._fTitle.decode()
+        except KeyError:
+            print(f"ERROR: '{name}' not present in file '{filename}'", file=sys.stderr)
+            print_objects(filename)
+            sys.exit(1)
+
+        if len(names) > 1:
+            if "\n" in value:
+                print(name + ":")
+            else:
+                print(name + ":", end=" ")
+
+        print(value)
+
+
+def print_objects(filename):
+    print("The following objects are present in the file:\n")
+    with uproot.open(filename) as root_file:
+        objects = [(name.decode(), classname) for name, classname in root_file.classnames()]
+
+    longest_name = len(max(objects, key=lambda obj: len(obj[0]))[0])
+    longest_class = len(max(objects, key=lambda obj: len(obj[0]))[1])
+
+    print(f"{'Name':{longest_name+1}}Class")
+    print("-" * (longest_name + longest_class + 1))
+    for name, classname in objects:
+        print(f"{name:{longest_name+1}}{classname}")
 
 
 def main():
-    filenames, names = decode_arguments()
-
-    # This crazy thing is in here to prevent RooFit from printing its intro
-    # message, which can't be disabled (?!).
-    with stdout_redirected():
-        # Couldn't figure anything simpler to try to init RooFit. without other
-        # side-effects as in the case of rootpy.ROOT.RooRealVar, etc.
-        root_print(filenames[0], names)
+    filenames, names, showlist = decode_arguments()
 
     for filename in filenames:
         if len(filenames) > 1:
             print("=" * 40)
             print(filename)
-        root_print(filename, names)
+            print("=" * 40)
+        if showlist:
+            print_objects(filename)
+        else:
+            print_titles(filename, names)
 
 
 main()

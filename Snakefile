@@ -161,44 +161,62 @@ rule all:
                    channel=CHANNELS_AND_TOGETHER, component=["all"], type=["lifetime", "mixing"])
             ),
         cpfit_jobs = (
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
-            #     stream=range(99), group=["nominal"]),
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
-            #     stream=range(6), group=["nominal"]),
-
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
-            #     channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["CR", "CRSCF"],
-            #     stream=range(1), group=["nominal"]),
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
-            #     channel=CHANNELS_AND_TOGETHER, type=["ti"], components=["all"],
-            #     stream=range(1), group=["nominal"]),
-
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
-            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
-            #     group=["nominal"]),
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
-            #     channel=["Kpi-K3pi"], type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
-            #     group=["nominal"])
-
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
-                stream=range(99), group=["nominal_rbin"]),
+                stream=range(99), group=["nominal"]),
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
-                stream=range(6), group=["nominal_rbin"]),
+                stream=range(6), group=["nominal"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
-                stream=range(1), group=["nominal_rbin"]),
+                stream=range(1), group=["nominal"]),
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
-                stream=range(1), group=["nominal_rbin"]),
+                stream=range(1), group=["nominal"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
+                group=["nominal"]),
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
+                channel=["Kpi-K3pi"], type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
+                group=["nominal"]),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["CR", "CRSCF"],
+                stream=range(99), group=["nominal_rbin"]),
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["all"],
+                stream=range(6), group=["nominal_rbin"]),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["CR", "CRSCF"],
+                stream=range(1), group=["nominal_rbin"]),
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["all"],
+                stream=range(1), group=["nominal_rbin"]),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
+                channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg", "sidebkg"],
                 group=["nominal_rbin"]),
+
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["CR", "CRSCF"],
+                stream=range(99), group=["nominal_rbin_new"]),
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["all"],
+                stream=range(6), group=["nominal_rbin_new"]),
+
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["td"], components=["CR", "CRSCF"],
+            #     stream=range(1), group=["nominal_rbin_new"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["td"], components=["all"],
+            #     stream=range(1), group=["nominal_rbin_new"]),
+
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg", "sidebkg"],
+            #     group=["nominal_rbin_new"]),
             ),
         cpfit_extra_jobs = (
             # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
@@ -235,37 +253,41 @@ rule all:
             #     channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
             #     group=["randomized_scf_dt_corr"], configno=range(99)),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
-                group=["randomized_bkg"], configno=range(99)),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
+            #     group=["randomized_bkg"], configno=range(99)),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
                 group=["randomized_bkg_corr"], configno=range(99)),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
-                channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
-                group=["randomized_bkg_dt"], configno=range(99)),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
+            #     group=["randomized_bkg_dt"], configno=range(99)),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
                 group=["randomized_bkg_dt_corr"], configno=range(99)),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
-                group=["randomized_yield"], configno=range(99)),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
+            #     group=["randomized_yield"], configno=range(99)),
+
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
+            #     group=["randomized_yield_corr"], configno=range(99)),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
-                group=["randomized_yield_corr"], configno=range(99)),
+                group=["randomized_yield_rbin_new_corr"], configno=range(99)),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
-                group=["randomized_all"], configno=range(99)),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
+            #     group=["randomized_all"], configno=range(99)),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
-                group=["randomized_all_corr"], configno=range(99)),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
+            #     group=["randomized_all_corr"], configno=range(99)),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
@@ -295,6 +317,9 @@ rule lifetime_jobs:
 rule cpfit_jobs:
     input:
         rules.all.input.cpfit_jobs,
+
+rule cpfit_extra_jobs:
+    input:
         rules.all.input.cpfit_extra_jobs
 
 rule yield_mc:

@@ -568,6 +568,17 @@ rule cpfit_stream_configs:
     run:
         create_stream_config(0, input[0], int(wildcards.stream), output[0])
 
+rule cpfit_numbered_configs:
+    input:
+        expand("DSRhoCPFit/configs/{group}/templates/config_data_mcbkg.template.json", group=["randomized_eff", "randomized_scf", "randomized_bkg_corr", "randomized_bkg_dt_corr", "sigma_tau_dm", "measured_scf", "scf_swap"])
+    output:
+        expand("DSRhoCPFit/configs/{group}/numbered/config_data_mcbkg_{number}.json", group=["randomized_eff", "randomized_scf", "randomized_bkg_corr", "randomized_bkg_dt_corr"], number=range(100)),
+        expand("DSRhoCPFit/configs/{group}/numbered/config_data_mcbkg_{number}.json", group=["sigma_tau_dm"], number=range(5)),
+        expand("DSRhoCPFit/configs/{group}/numbered/config_data_mcbkg_{number}.json", group=["measured_scf"], number=range(2)),
+        expand("DSRhoCPFit/configs/{group}/numbered/config_data_mcbkg_{number}.json", group=["scf_swap"], number=range(1))
+    shell:
+        "tools/create_all_numbered_configs.sh"
+
 rule cpfit_mc:
     input:
         config = "DSRhoCPFit/configs/{group}/streams/config_mc_{stream}.json",

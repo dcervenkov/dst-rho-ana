@@ -161,26 +161,26 @@ rule all:
                    channel=CHANNELS_AND_TOGETHER, component=["all"], type=["lifetime", "mixing"])
             ),
         cpfit_jobs = (
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
-                stream=range(99), group=["nominal"]),
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
-                stream=range(6), group=["nominal"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
+            #     stream=range(99), group=["nominal"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
+            #     stream=range(6), group=["nominal"]),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
-                stream=range(1), group=["nominal"]),
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
-                stream=range(1), group=["nominal"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
+            #     stream=range(1), group=["nominal"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
+            #     stream=range(1), group=["nominal"]),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
-                group=["nominal"]),
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
-                channel=["Kpi-K3pi"], type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
-                group=["nominal"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
+            #     group=["nominal"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
+            #     channel=["Kpi-K3pi"], type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
+            #     group=["nominal"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
                 channel=CHANNELS_AND_TOGETHER, type=["td"], components=["CR", "CRSCF"],
@@ -199,24 +199,6 @@ rule all:
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
                 channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg", "sidebkg"],
                 group=["nominal_rbin"]),
-
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["CR", "CRSCF"],
-                stream=range(99), group=["nominal_rbin_new"]),
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["all"],
-                stream=range(6), group=["nominal_rbin_new"]),
-
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
-            #     channel=CHANNELS_AND_TOGETHER, type=["td"], components=["CR", "CRSCF"],
-            #     stream=range(1), group=["nominal_rbin_new"]),
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
-            #     channel=CHANNELS_AND_TOGETHER, type=["td"], components=["all"],
-            #     stream=range(1), group=["nominal_rbin_new"]),
-
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
-            #     channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg", "sidebkg"],
-            #     group=["nominal_rbin_new"]),
             ),
         cpfit_extra_jobs = (
             # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
@@ -229,29 +211,22 @@ rule all:
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
                 group=["randomized_eff"], configno=range(100)),
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"], stream=range(6),
-                group=["nonres"]),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"], stream=range(6),
-                group=["nonres_mcflag7"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"], stream=range(6),
+            #     group=["nonres"]),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"], stream=range(6),
-                group=["nonres_0.3_mcflag7"]),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"], stream=range(6),
+            #     group=["nonres_mcflag7"]),
+
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"], stream=range(6),
+            #     group=["nonres_0.3_mcflag7"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
                 group=["randomized_scf"], configno=range(99)),
-
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
-            #     channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
-            #     group=["randomized_scf_dt"], configno=range(99)),
-
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
-            #     channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
-            #     group=["randomized_scf_dt_corr"], configno=range(99)),
 
             # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
             #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
@@ -277,9 +252,9 @@ rule all:
             #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
             #     group=["randomized_yield_corr"], configno=range(99)),
 
-            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
-                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
-                group=["randomized_yield_rbin_new_corr"], configno=range(99)),
+            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
+            #     group=["randomized_yield_rbin_new_corr"], configno=range(99)),
 
             # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
             #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
@@ -295,7 +270,7 @@ rule all:
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=["Kpipi0"], type=["ti", "td"], bkg=["mcbkg"],
-                group=["measured_scf"], configno=range(1)),
+                group=["measured_scf"], configno=range(2)),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
                 channel=["Kpi", "Kpipi0"], type=["ti", "td"], bkg=["mcbkg"],
@@ -385,45 +360,41 @@ rule yield_summary:
         expand("DSRhoYield/plots/{channel}/fit_results.root",
                channel=CHANNELS)
     output:
-        expand("DSRhoYield/results/{channel}_{type}_fractions.json", channel=CHANNELS, type=["mc", "data"]),
-        "DSRhoYield/results/avg_data_fractions.json"
+        expand("DSRhoYield/results_rbinavg/{channel}_{type}_fractions.json", channel=CHANNELS, type=["mc", "data"]),
+        "DSRhoYield/results_rbinavg/avg_data_fractions.json"
     wildcard_constraints:
         channel = "Kpi|Kpipi0|K3pi|together",
         stream = "\d+",
     shell:
-        "cd DSRhoYield && ./tools/print_all_yields.py &> yield.log"
+        "cd DSRhoYield && ./tools/print_all_yields.py --directory results_rbinavg &> yield.log"
 
 rule yield_summary_rbin:
     input:
-        expand("DSRhoYield/plots/{channel}_stream{stream}_rbin{{rbin}}/fit_results.root",
+        expand("DSRhoYield/plots/{channel}_stream{stream}/fit_results.root",
                channel=CHANNELS, stream=STREAMS),
-        expand("DSRhoYield/plots/{channel}_rbin{{rbin}}/fit_results.root",
+        expand("DSRhoYield/plots/{channel}/fit_results.root",
                channel=CHANNELS)
     output:
-        expand("DSRhoYield/results/rbin{{rbin}}/{channel}_{type}_fractions.json",
-               channel=CHANNELS, type=["mc", "data"]),
-        "DSRhoYield/results/rbin{rbin}/avg_data_fractions.json"
+        expand("DSRhoYield/results/{channel}_{type}_fractions.json",
+               channel=CHANNELS, type=["mc", "data"])
     wildcard_constraints:
         channel = "Kpi|Kpipi0|K3pi|together",
         stream = "\d+",
         rbin = "\d+"
     shell:
-        "cd DSRhoYield && ./tools/print_all_yields.py --directory results/rbin{wildcards.rbin} --rbin {wildcards.rbin} &> yield_rbin{wildcards.rbin}.log"
+        "cd DSRhoYield && ./tools/print_all_yields_newrbin.py --directory results &> yield.log"
 
 rule yield_summary_rbin_randomized:
     input:
-        expand("DSRhoYield/plots/{channel}_rbin{{rbin}}/fit_results.root",
+        expand("DSRhoYield/plots/{channel}/fit_results.root",
                channel=CHANNELS)
     output:
-        expand("DSRhoYield/results_{{randomization}}/rbin{{rbin}}/{channel}_{type}_fractions.json",
+        expand("DSRhoYield/results_{{randomization}}/{channel}_{type}_fractions.json",
                channel=CHANNELS, type=["data"]),
-        "DSRhoYield/results_{randomization}/rbin{rbin}/avg_data_fractions.json",
-        expand("DSRhoYield/results_{{randomization}}/rbin{{rbin}}/rnd_{rnd}/{channel}_{type}_fractions.json",
-               channel=CHANNELS, type=["data"], rnd=range(100)),
-        expand("DSRhoYield/results_{{randomization}}/rbin{{rbin}}/rnd_{rnd}/avg_data_fractions.json",
-               rnd=range(100))
+        expand("DSRhoYield/results_{{randomization}}/rnd_{rnd}/{channel}_{type}_fractions.json",
+               channel=CHANNELS, type=["data"], rnd=range(100))
     log:
-        "logs/yield_{randomization}_rbin{rbin}.log"
+        "logs/yield_{randomization}.log"
     params:
         "--randomize 100",
         lambda wildcards:
@@ -432,31 +403,31 @@ rule yield_summary_rbin_randomized:
         channel = "Kpi|Kpipi0|K3pi|together",
         rbin = "\d+"
     shell:
-        "cd DSRhoYield && ./tools/print_all_yields.py --directory results_{wildcards.randomization}/rbin{wildcards.rbin} {params} --rbin {wildcards.rbin} &> {log}"
+        "cd DSRhoYield && ./tools/print_all_yields_newrbin.py --directory results_{wildcards.randomization} {params} &> {log}"
 
-rule yield_rearrange_randomized:
-    input:
-        expand("DSRhoYield/results_{{randomization}}/rbin{rbin}/rnd_{rnd}/{channel}_{type}_fractions.json",
-               channel=CHANNELS, type=["data"], rbin=range(7), rnd=range(100)),
-        expand("DSRhoYield/results_{{randomization}}/rbin{rbin}/rnd_{rnd}/avg_data_fractions.json",
-               rbin=range(7), rnd=range(100)),
-        expand("DSRhoYield/results/{channel}_{type}_fractions.json", channel=CHANNELS, type=["data"]),
-        "DSRhoYield/results/avg_data_fractions.json"
-    output:
-        expand("DSRhoYield/results_{{randomization}}/rnd_{rnd}/rbin{rbin}/{channel}_{type}_fractions.json",
-               channel=CHANNELS, type=["data"], rbin=range(7), rnd=range(100)),
-        expand("DSRhoYield/results_{{randomization}}/rnd_{rnd}/rbin{rbin}/avg_data_fractions.json",
-               rbin=range(7), rnd=range(100))
-    run:
-        for channel in [*CHANNELS, "avg"]:
-            for rnd in range(100):
-                for rbin in range(7):
-                    shutil.move(f"DSRhoYield/results_{wildcards.randomization}/rbin{rbin}/rnd_{rnd}/{channel}_data_fractions.json",
-                        f"DSRhoYield/results_{wildcards.randomization}/rnd_{rnd}/rbin{rbin}")
-                shutil.copy(f"DSRhoYield/results/{channel}_data_fractions.json",
-                    f"DSRhoYield/results_{wildcards.randomization}/rnd_{rnd}")
-        for rbin in range(7):
-            shutil.rmtree(f"DSRhoYield/results_{wildcards.randomization}/rbin{rbin}")
+# rule yield_rearrange_randomized:
+#     input:
+#         expand("DSRhoYield/results_{{randomization}}/rbin{rbin}/rnd_{rnd}/{channel}_{type}_fractions.json",
+#                channel=CHANNELS, type=["data"], rbin=range(7), rnd=range(100)),
+#         expand("DSRhoYield/results_{{randomization}}/rbin{rbin}/rnd_{rnd}/avg_data_fractions.json",
+#                rbin=range(7), rnd=range(100)),
+#         expand("DSRhoYield/results/{channel}_{type}_fractions.json", channel=CHANNELS, type=["data"]),
+#         "DSRhoYield/results/avg_data_fractions.json"
+#     output:
+#         expand("DSRhoYield/results_{{randomization}}/rnd_{rnd}/rbin{rbin}/{channel}_{type}_fractions.json",
+#                channel=CHANNELS, type=["data"], rbin=range(7), rnd=range(100)),
+#         expand("DSRhoYield/results_{{randomization}}/rnd_{rnd}/rbin{rbin}/avg_data_fractions.json",
+#                rbin=range(7), rnd=range(100))
+#     run:
+#         for channel in [*CHANNELS, "avg"]:
+#             for rnd in range(100):
+#                 for rbin in range(7):
+#                     shutil.move(f"DSRhoYield/results_{wildcards.randomization}/rbin{rbin}/rnd_{rnd}/{channel}_data_fractions.json",
+#                         f"DSRhoYield/results_{wildcards.randomization}/rnd_{rnd}/rbin{rbin}")
+#                 shutil.copy(f"DSRhoYield/results/{channel}_data_fractions.json",
+#                     f"DSRhoYield/results_{wildcards.randomization}/rnd_{rnd}")
+#         for rbin in range(7):
+#             shutil.rmtree(f"DSRhoYield/results_{wildcards.randomization}/rbin{rbin}")
 
 rule background:
     input:
@@ -577,7 +548,7 @@ rule cpfit_configs:
         expand(rules.background.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
         expand(rules.background_nonphys.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
         rules.yield_summary.output,
-        expand(rules.yield_summary_rbin.output, rbin=RBINS),
+        rules.yield_summary_rbin.output,
         template = "DSRhoCPFit/configs/{group}/templates/{config}.template.json"
     output:
         "DSRhoCPFit/configs/{group}/{config}.json"

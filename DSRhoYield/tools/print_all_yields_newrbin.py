@@ -200,6 +200,22 @@ def calculate_fractions(sig_yield, scf_yield, bkg_yield):
 
 def process_MC(channels, directory, streams):
     """Read, process, and pretty-print MC."""
+    f_sig = {}
+    f_scf = {}
+    f_bkg = {}
+
+    f_sig["Kpi"] = [0.216, 0.151, 0.174, 0.116, 0.100, 0.090, 0.153]
+    f_scf["Kpi"] = [0.222, 0.171, 0.189, 0.125, 0.099, 0.081, 0.113]
+    f_bkg["Kpi"] = [0.254, 0.170, 0.181, 0.121, 0.102, 0.083, 0.090]
+
+    f_sig["Kpipi0"] = [0.216, 0.145, 0.174, 0.114, 0.101, 0.092, 0.158]
+    f_scf["Kpipi0"] = [0.228, 0.170, 0.187, 0.117, 0.103, 0.084, 0.112]
+    f_bkg["Kpipi0"] = [0.262, 0.175, 0.182, 0.124, 0.103, 0.079, 0.074]
+
+    f_sig["K3pi"] = [0.216, 0.148, 0.171, 0.114, 0.102, 0.092, 0.156]
+    f_scf["K3pi"] = [0.233, 0.164, 0.187, 0.122, 0.101, 0.084, 0.110]
+    f_bkg["K3pi"] = [0.264, 0.171, 0.187, 0.125, 0.101, 0.075, 0.078]
+
     for channel in channels:
 
         cr_crscf_fractions = [[] for _ in range(7)]
@@ -236,14 +252,11 @@ def process_MC(channels, directory, streams):
                 bkg_yield_error,
             ) = recover_yield(results_file)
 
-            f_sig = [0.218, 0.147, 0.174, 0.115, 0.102, 0.090, 0.154]
-            f_scf = [0.232, 0.167, 0.186, 0.122, 0.101, 0.082, 0.109]
-            f_bkg = [0.254, 0.170, 0.181, 0.121, 0.102, 0.083, 0.090]
             for rbin in range(7):
                 cr_crscf, cr, scf, bkg = calculate_fractions(
-                    sig_yield * f_sig[rbin],
-                    scf_yield * f_scf[rbin],
-                    bkg_yield * f_bkg[rbin],
+                    sig_yield * f_sig[channel][rbin],
+                    scf_yield * f_scf[channel][rbin],
+                    bkg_yield * f_bkg[channel][rbin],
                 )
                 sig_count = recover_count(
                     f"../data/{channel}/realistic_mc/stream{stream}", rbin
@@ -252,10 +265,10 @@ def process_MC(channels, directory, streams):
                     [
                         stream_no,
                         rbin,
-                        sig_yield * f_sig[rbin],
-                        sig_yield_error * f_sig[rbin],
+                        sig_yield * f_sig[channel][rbin],
+                        sig_yield_error * f_sig[channel][rbin],
                         sig_count,
-                        sig_yield * f_sig[rbin] - sig_count,
+                        sig_yield * f_sig[channel][rbin] - sig_count,
                         cr_crscf,
                         cr,
                         scf,
@@ -331,8 +344,24 @@ def process_MC(channels, directory, streams):
 
 def process_data(channels, directory, randomize=False, correlations=False):
     """Read, process, and pretty-print data."""
-    print_line_bold("Data")
+    f_sig = {}
+    f_scf = {}
+    f_bkg = {}
 
+    # BKG fractions are from data sidebands
+    f_sig["Kpi"] = [0.216, 0.151, 0.174, 0.116, 0.100, 0.090, 0.153]
+    f_scf["Kpi"] = [0.222, 0.171, 0.189, 0.125, 0.099, 0.081, 0.113]
+    f_bkg["Kpi"] = [0.268, 0.171, 0.180, 0.108, 0.105, 0.077, 0.091]
+
+    f_sig["Kpipi0"] = [0.216, 0.145, 0.174, 0.114, 0.101, 0.092, 0.158]
+    f_scf["Kpipi0"] = [0.228, 0.170, 0.187, 0.117, 0.103, 0.084, 0.112]
+    f_bkg["Kpipi0"] = [0.265, 0.172, 0.189, 0.123, 0.098, 0.071, 0.082]
+
+    f_sig["K3pi"] = [0.216, 0.148, 0.171, 0.114, 0.102, 0.092, 0.156]
+    f_scf["K3pi"] = [0.233, 0.164, 0.187, 0.122, 0.101, 0.084, 0.110]
+    f_bkg["K3pi"] = [0.267, 0.188, 0.162, 0.118, 0.093, 0.080, 0.092]
+
+    print_line_bold("Data")
     for channel in channels:
         print()
         print_line_bold(channel)
@@ -389,23 +418,18 @@ def process_data(channels, directory, randomize=False, correlations=False):
                 scf_yield = rng.normal(scf_yield, scf_yield_error)
                 bkg_yield = rng.normal(bkg_yield, bkg_yield_error)
 
-        f_sig = [0.218, 0.147, 0.174, 0.115, 0.102, 0.090, 0.154]
-        f_scf = [0.232, 0.167, 0.186, 0.122, 0.101, 0.082, 0.109]
-        # TODO: Uses MC fractions, must get these from sidebands
-        f_bkg = [0.254, 0.170, 0.181, 0.121, 0.102, 0.083, 0.090]
-
         for rbin in range(7):
             cr_crscf, cr, scf, bkg = calculate_fractions(
-                sig_yield * f_sig[rbin],
-                scf_yield * f_scf[rbin],
-                bkg_yield * f_bkg[rbin],
+                sig_yield * f_sig[channel][rbin],
+                scf_yield * f_scf[channel][rbin],
+                bkg_yield * f_bkg[channel][rbin],
             )
 
             table.add_row(
                 [
                     rbin,
-                    sig_yield * f_sig[rbin],
-                    sig_yield_error * f_sig[rbin],
+                    sig_yield * f_sig[channel][rbin],
+                    sig_yield_error * f_sig[channel][rbin],
                     cr_crscf,
                     cr,
                     scf,

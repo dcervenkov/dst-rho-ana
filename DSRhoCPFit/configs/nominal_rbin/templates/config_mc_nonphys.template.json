@@ -49,32 +49,10 @@
                         "include": ["angular_pdf"]
                     },
                     {
-                        "file": "../../../../DSRhoYield/results/rbin0/Kpi_mc_fractions.json",
-                        "replace": ["_f", "_rbin0_f"]
+                        "file": "../../../../DSRhoYield/results/Kpi_mc_fractions.json"
                     },
                     {
-                        "file": "../../../../DSRhoYield/results/rbin1/Kpi_mc_fractions.json",
-                        "replace": ["_f", "_rbin1_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin2/Kpi_mc_fractions.json",
-                        "replace": ["_f", "_rbin2_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin3/Kpi_mc_fractions.json",
-                        "replace": ["_f", "_rbin3_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin4/Kpi_mc_fractions.json",
-                        "replace": ["_f", "_rbin4_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin5/Kpi_mc_fractions.json",
-                        "replace": ["_f", "_rbin5_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin6/Kpi_mc_fractions.json",
-                        "replace": ["_f", "_rbin6_f"]
+                        "file": "../../../../DSRhoYield/results_rbinavg/Kpi_mc_fractions.json"
                     }
                 ]
             },
@@ -134,32 +112,10 @@
                         "include": ["angular_pdf"]
                     },
                     {
-                        "file": "../../../../DSRhoYield/results/rbin0/Kpipi0_mc_fractions.json",
-                        "replace": ["_f", "_rbin0_f"]
+                        "file": "../../../../DSRhoYield/results/Kpipi0_mc_fractions.json"
                     },
                     {
-                        "file": "../../../../DSRhoYield/results/rbin1/Kpipi0_mc_fractions.json",
-                        "replace": ["_f", "_rbin1_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin2/Kpipi0_mc_fractions.json",
-                        "replace": ["_f", "_rbin2_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin3/Kpipi0_mc_fractions.json",
-                        "replace": ["_f", "_rbin3_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin4/Kpipi0_mc_fractions.json",
-                        "replace": ["_f", "_rbin4_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin5/Kpipi0_mc_fractions.json",
-                        "replace": ["_f", "_rbin5_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin6/Kpipi0_mc_fractions.json",
-                        "replace": ["_f", "_rbin6_f"]
+                        "file": "../../../../DSRhoYield/results_rbinavg/Kpipi0_mc_fractions.json"
                     }
                 ]
             },
@@ -219,32 +175,10 @@
                         "include": ["angular_pdf"]
                     },
                     {
-                        "file": "../../../../DSRhoYield/results/rbin0/K3pi_mc_fractions.json",
-                        "replace": ["_f", "_rbin0_f"]
+                        "file": "../../../../DSRhoYield/results/K3pi_mc_fractions.json"
                     },
                     {
-                        "file": "../../../../DSRhoYield/results/rbin1/K3pi_mc_fractions.json",
-                        "replace": ["_f", "_rbin1_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin2/K3pi_mc_fractions.json",
-                        "replace": ["_f", "_rbin2_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin3/K3pi_mc_fractions.json",
-                        "replace": ["_f", "_rbin3_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin4/K3pi_mc_fractions.json",
-                        "replace": ["_f", "_rbin4_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin5/K3pi_mc_fractions.json",
-                        "replace": ["_f", "_rbin5_f"]
-                    },
-                    {
-                        "file": "../../../../DSRhoYield/results/rbin6/K3pi_mc_fractions.json",
-                        "replace": ["_f", "_rbin6_f"]
+                        "file": "../../../../DSRhoYield/results_rbinavg/K3pi_mc_fractions.json"
                     }
                 ]
             },

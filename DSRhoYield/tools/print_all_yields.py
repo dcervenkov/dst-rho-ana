@@ -452,23 +452,29 @@ def stdout_redirected(to=os.devnull):
             # CLOEXEC may be different
 
 
-with stdout_redirected():
-    # Just to init RooFit to make it print its loading line now
-    r = ROOT.RooRealVar()
+def main():
+    args = decode_arguments()
 
-args = decode_arguments()
-channels = ["Kpi", "Kpipi0", "K3pi"]
-streams = range(0, 6)
+    with stdout_redirected():
+        # Just to init RooFit to make it print its loading line now
+        ROOT.RooRealVar()
 
-if not os.path.exists(args.directory):
-    os.mkdir(args.directory)
+    channels = ["Kpi", "Kpipi0", "K3pi"]
+    streams = range(0, 6)
 
-process_MC(channels, args.directory, streams, args.rbin)
-process_data(channels, args.directory, args.rbin)
+    if not os.path.exists(args.directory):
+        os.mkdir(args.directory)
 
-for i in range(args.randomize):
-    print(f"Generating random config {i}")
-    rnd_directory = os.path.join(args.directory, "rnd_" + str(i))
-    if not os.path.exists(rnd_directory):
-        os.mkdir(rnd_directory)
-    process_data(channels, rnd_directory, args.rbin, True, args.correlations)
+    process_MC(channels, args.directory, streams, args.rbin)
+    process_data(channels, args.directory, args.rbin)
+
+    for i in range(args.randomize):
+        print(f"Generating random config {i}")
+        rnd_directory = os.path.join(args.directory, "rnd_" + str(i))
+        if not os.path.exists(rnd_directory):
+            os.mkdir(rnd_directory)
+        process_data(channels, rnd_directory, args.rbin, True, args.correlations)
+
+
+if __name__ == "__main__":
+    main()

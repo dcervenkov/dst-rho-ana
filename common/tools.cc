@@ -1028,6 +1028,9 @@ nlohmann::json GetResultsJSON(const RooFitResult* result, std::string prefix, bo
         json[name] = RoundToDecimals(value, 4);
     }
 
+    return json;
+}
+
 /*
  * Extract function parameters and return them as a JSON object
  *

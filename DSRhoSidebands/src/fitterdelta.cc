@@ -59,9 +59,9 @@ FitterDelta::FitterDelta(nlohmann::json config) {
     histo->Fit("pol3");
     fit_function_ = histo->GetFunction("pol3");
 
-    TCanvas canvas("canvas", "canvas", 500, 500);
+    TCanvas canvas("correction", "correction", 500, 500);
     histo->Draw("e1");
-    canvas.SaveAs("test.png");
+    canvas.SaveAs(constants::format);
 }
 
 FitterDelta::~FitterDelta() {
@@ -120,11 +120,11 @@ void FitterDelta::FillSubtractionHisto(TH1D* histo, TString branch, TTree* tree1
     TH1D* temp_histo = static_cast<TH1D*>(histo->Clone("temp_histo"));
     temp_histo->Reset();
     tree2->Draw(branch + ">>temp_histo", "", "goff");
-    TCanvas canvas("canvas", "canvas", 500, 500);
+    TCanvas canvas("sig_vs_side", "sig_vs_side", 500, 500);
     temp_histo->SetLineColor(kRed);
     temp_histo->Draw();
     histo->Draw("same");
-    canvas.SaveAs("sig_vs_side.png");
+    canvas.SaveAs(constants::format);
     histo->Add(temp_histo, -1);
 }
 

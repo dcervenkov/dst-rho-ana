@@ -59,6 +59,10 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
+    if (config.json.contains("plotDir")) {
+        tools::SetPlotDir(config.json["plotDir"].get<std::string>().c_str());
+    }
+
     FitterDelta fitter(config.json);
 
 

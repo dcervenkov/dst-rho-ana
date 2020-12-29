@@ -36,7 +36,7 @@ def print_titles(filename, names):
         value = None
         try:
             with uproot.open(filename) as root_file:
-                value = root_file[name]._fTitle.decode()
+                value = root_file[name].member("fTitle")
         except KeyError:
             print(f"ERROR: '{name}' not present in file '{filename}'", file=sys.stderr)
             print_objects(filename)
@@ -54,7 +54,10 @@ def print_titles(filename, names):
 def print_objects(filename):
     print("The following objects are present in the file:\n")
     with uproot.open(filename) as root_file:
-        objects = [(name.decode(), classname) for name, classname in root_file.classnames()]
+        objects = [
+            (name, classname)
+            for name, classname in root_file.classnames().items()
+        ]
 
     longest_name = len(max(objects, key=lambda obj: len(obj[0]))[0])
     longest_class = len(max(objects, key=lambda obj: len(obj[0]))[1])

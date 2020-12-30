@@ -22,12 +22,15 @@ def decode_arguments():
         type=str,
         action="append",
         help="name of the object whose title to print (can be used multiple times)",
-        default=["pull_table"],
     )
     parser.add_argument(
         "-l", "--list", help="list objects in file", action="store_true", default=False
     )
     args = parser.parse_args()
+
+    if args.name is None:
+        args.name = ["pull_table"]
+
     return args.files, args.name, args.list
 
 

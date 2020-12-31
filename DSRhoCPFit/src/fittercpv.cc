@@ -2145,10 +2145,10 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix, const nlo
     RooExponential* thetab_exp =
         new RooExponential(pfx + "thetab_exp", "thetab_exp", *thetab_, *thetab_exp_alpha);
 
-    RooRealVar* thetab_p0 = new RooRealVar(pfx + "thetab_p0", "p_{0}", -2752);
-    RooRealVar* thetab_p1 = new RooRealVar(pfx + "thetab_p1", "p_{1}", 5114);
-    RooRealVar* thetab_p2 = new RooRealVar(pfx + "thetab_p2", "p_{2}", -2602);
-    RooRealVar* thetab_p3 = new RooRealVar(pfx + "thetab_p3", "p_{3}", 393);
+    RooRealVar* thetab_p0 = new RooRealVar(pfx + "thetab_corr_p0", "p_{0}", -2752);
+    RooRealVar* thetab_p1 = new RooRealVar(pfx + "thetab_corr_p1", "p_{1}", 5114);
+    RooRealVar* thetab_p2 = new RooRealVar(pfx + "thetab_corr_p2", "p_{2}", -2602);
+    RooRealVar* thetab_p3 = new RooRealVar(pfx + "thetab_corr_p3", "p_{3}", 393);
     RooPolyVar* thetab_correction = new RooPolyVar(
         pfx + "thetab_correction", "thetab_correction", *thetab_,
         RooArgList(*thetab_p0, *thetab_p1, *thetab_p2, *thetab_p3));
@@ -2182,13 +2182,23 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix, const nlo
 
     std::string type_name(prefix);
     tools::RemoveSubstring(type_name, channel_name);
-    const double thetab_corr_f =
+    const double thetab_corr_f_val =
         config.contains(type_name + "thetab_correction_f")
             ? config[type_name + "thetab_correction_f"].get<double>()
             : 0;
-    const double thetab_f = config[type_name + "thetab_f"].get<double>();
-    RooRealVar* thetab_f1 = new RooRealVar(pfx + "thetab_f1", "f1", thetab_f * (1.0 - thetab_corr_f));
-    RooRealVar* thetab_f2 = new RooRealVar(pfx + "thetab_f2", "f2", (1.0 - thetab_f) * (1 - thetab_corr_f));
+    Log::LogLine(Log::debug) << type_name << "thetab_correction_f = " << thetab_corr_f_val;
+    RooRealVar* thetab_corr_f =
+        new RooRealVar(pfx + "thetab_corr_f", "thetab_corr_f", thetab_corr_f_val);
+    RooRealVar* thetab_f =
+        new RooRealVar(pfx + "thetab_f", "thetab_f", config[type_name + "thetab_f"].get<double>());
+
+    RooFormulaVar* thetab_f1 = new RooFormulaVar(
+        pfx + "thetab_f1", "thetab_f1", pfx + "thetab_f * (1.0 - " + pfx + "thetab_corr_f)",
+        RooArgSet(*thetab_f, *thetab_corr_f));
+    RooFormulaVar* thetab_f2 =
+        new RooFormulaVar(pfx + "thetab_f2", "thetab_f2",
+                          "(1.0 - " + pfx + "thetab_f) * (1.0 - " + pfx + "thetab_corr_f)",
+                          RooArgSet(*thetab_f, *thetab_corr_f));
 
     RooRealSumPdf* thetab_model =
         new RooRealSumPdf(pfx + "thetab_model", "thetab_model",

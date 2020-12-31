@@ -56,6 +56,10 @@
                     },
                     {
                         "file": "../../../../DSRhoYield/results_rbinavg/Kpi_data_fractions.json"
+                    },
+                    {
+                        "file": "../../../../DSRhoSidebands/results/Kpi",
+                        "replace": ["thetab", "bkg_thetab"]
                     }
                 ]
             },
@@ -119,6 +123,10 @@
                     },
                     {
                         "file": "../../../../DSRhoYield/results_rbinavg/Kpipi0_data_fractions.json"
+                    },
+                    {
+                        "file": "../../../../DSRhoSidebands/results/Kpipi0",
+                        "replace": ["thetab", "bkg_thetab"]
                     }
                 ]
             },
@@ -182,6 +190,10 @@
                     },
                     {
                         "file": "../../../../DSRhoYield/results_rbinavg/K3pi_data_fractions.json"
+                    },
+                    {
+                        "file": "../../../../DSRhoSidebands/results/K3pi",
+                        "replace": ["thetab", "bkg_thetab"]
                     }
                 ]
             },

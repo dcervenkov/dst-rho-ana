@@ -366,7 +366,7 @@ rule yield_summary:
         channel = "Kpi|Kpipi0|K3pi|together",
         stream = "\d+",
     shell:
-        "cd DSRhoYield && ./tools/print_all_yields.py --directory results_rbinavg &> yield.log"
+        "cd DSRhoYield && ./tools/print_all_yields.py --directory results_rbinavg &> yield_rbinavg.log"
 
 rule yield_summary_rbin:
     input:

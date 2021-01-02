@@ -4,6 +4,7 @@ DSRhoBackground/results/**
 DSRhoYield/logs/**
 DSRhoYield/plots/**
 DSRhoYield/results/**
+DSRhoYield/results_rbinavg/**
 DSRhoLifetime/configs/**
 DSRhoLifetime/logs/**
 DSRhoLifetime/plots/**

@@ -183,21 +183,21 @@ rule all:
             #     group=["nominal"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["CR", "CRSCF"],
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
                 stream=range(99), group=["nominal_rbin"]),
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["all"],
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
                 stream=range(6), group=["nominal_rbin"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["CR", "CRSCF"],
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["CR", "CRSCF"],
                 stream=range(1), group=["nominal_rbin"]),
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_{components}_plot/stream{stream}",
-                channel=CHANNELS_AND_TOGETHER, type=["td"], components=["all"],
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], components=["all"],
                 stream=range(1), group=["nominal_rbin"]),
 
             expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}",
-                channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg", "sidebkg"],
+                channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg", "sidebkg"],
                 group=["nominal_rbin"]),
             ),
         cpfit_extra_jobs = (
@@ -252,9 +252,9 @@ rule all:
             #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
             #     group=["randomized_yield_corr"], configno=range(99)),
 
-            # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
-            #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
-            #     group=["randomized_yield_rbin_new_corr"], configno=range(99)),
+            expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
+                channel=CHANNELS_AND_TOGETHER, type=["td"], bkg=["mcbkg"],
+                group=["randomized_yield_rbin_corr"], configno=range(99)),
 
             # expand("DSRhoCPFit/results/{group}/{channel}_{type}_data_{bkg}/{configno}",
             #     channel=CHANNELS_AND_TOGETHER, type=["ti", "td"], bkg=["mcbkg"],
@@ -568,7 +568,7 @@ rule cpfit_stream_configs:
     run:
         create_stream_config(0, input[0], int(wildcards.stream), output[0])
 
-rule cpfit_numbered_configs:
+rule cpfit_numbered_configs1:
     input:
         expand("DSRhoCPFit/configs/{group}/templates/config_data_mcbkg.template.json", group=["randomized_eff", "randomized_scf", "randomized_bkg_corr", "randomized_bkg_dt_corr", "sigma_tau_dm", "measured_scf", "scf_swap"])
     output:
@@ -577,7 +577,16 @@ rule cpfit_numbered_configs:
         expand("DSRhoCPFit/configs/{group}/numbered/config_data_mcbkg_{number}.json", group=["measured_scf"], number=range(2)),
         expand("DSRhoCPFit/configs/{group}/numbered/config_data_mcbkg_{number}.json", group=["scf_swap"], number=range(1))
     shell:
-        "tools/create_all_numbered_configs.sh"
+        "tools/create_numbered_configs1.sh"
+
+rule cpfit_numbered_configs2:
+    input:
+        expand("DSRhoYield/results_{group}/rnd_{number}/{channel}_data_fractions.json", group=["randomized_rbin_corr"], number=range(100), channel=CHANNELS),
+        expand("DSRhoCPFit/configs/{group}/templates/config_data_mcbkg.template.json", group=["randomized_yield_rbin_corr"])
+    output:
+        expand("DSRhoCPFit/configs/{group}/numbered/config_data_mcbkg_{number}.json", group=["randomized_yield_rbin_corr"], number=range(100))
+    shell:
+        "tools/create_numbered_configs2.sh"
 
 rule cpfit_mc:
     input:

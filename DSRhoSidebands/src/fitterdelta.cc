@@ -54,13 +54,18 @@ FitterDelta::FitterDelta(nlohmann::json config) {
     const double max = config["fitRanges"]["thetab"]["max"].get<double>();
     TH1D* histo = new TH1D("histo", "histo", 20, min, max);
 
-    FillSubtractionHisto(histo, "thetab", signal_data, sidebands_data);
+    // FillSubtractionHisto(histo, "thetab", signal_data, sidebands_data);
+    FillRatioHisto(histo, "thetab", signal_data, sidebands_data);
 
     histo->Fit("pol3");
     fit_function_ = histo->GetFunction("pol3");
+    fit_function_->SetLineColor(5);
 
     TCanvas canvas("correction", "correction", 500, 500);
     histo->Draw("e1");
+    histo->GetXaxis()->SetTitle("#theta_{b} [rad]");
+    histo->GetYaxis()->SetTitle("Ratio");
+    histo->GetYaxis()->SetRangeUser(0.35, 1.6);
     canvas.SaveAs(constants::format);
 }
 
@@ -73,8 +78,7 @@ FitterDelta::~FitterDelta() {
 /**
  * Reads in data from ROOT file(s).
  *
- * @param file_names Vector of paths to the ROOT files
- * @param num_events [optional] Maximum number of events to use (0 to read all)
+ * @param data_files JSON list of data files to read.
  */
 TTree* FitterDelta::ReadInFile(const nlohmann::json data_files) const {
     TChain* chain = new TChain("h2000");
@@ -124,8 +128,46 @@ void FitterDelta::FillSubtractionHisto(TH1D* histo, TString branch, TTree* tree1
     temp_histo->SetLineColor(kRed);
     temp_histo->Draw();
     histo->Draw("same");
+
     canvas.SaveAs(constants::format);
     histo->Add(temp_histo, -1);
+}
+
+/**
+ * @brief Fill the supplied histo with tree1 / tree2
+ *
+ * Stupid ROOT doesn't permit the TTrees to be const as Draw() is not a const function.
+ *
+ * @param histo Histo to be filled
+ * @param branch Name of the tree branch to be used
+ * @param tree1 First tree
+ * @param tree2 Second tree
+ */
+void FitterDelta::FillRatioHisto(TH1D* histo, TString branch, TTree* tree1, TTree* tree2) const {
+    TString name = histo->GetName();
+    tree1->Draw(branch + ">>" + name, "", "goff");
+    TH1D* temp_histo = static_cast<TH1D*>(histo->Clone("temp_histo"));
+    temp_histo->Reset();
+    tree2->Draw(branch + ">>temp_histo", "", "goff");
+    gStyle->SetPadLeftMargin(0.125);
+    TCanvas canvas("sig_vs_side", "sig_vs_side", 500, 500);
+
+    printf("histo: %f\n", histo->Integral());
+    printf("temp_histo: %f\n", temp_histo->Integral());
+    histo->Scale(1.0 / histo->Integral());
+    temp_histo->Scale(1.0 / temp_histo->Integral());
+
+    histo->Draw();
+    histo->GetXaxis()->SetTitle("#theta_{b} [rad]");
+    histo->GetYaxis()->SetTitle("Events [a.u.]");
+    temp_histo->SetLineColor(kRed);
+    temp_histo->Draw("same");
+
+    canvas.SaveAs(constants::format);
+    gStyle->SetPadLeftMargin(0.105);
+
+    temp_histo->Sumw2();
+    histo->Divide(temp_histo);
 }
 
 nlohmann::json FitterDelta::GetJSONResults() const {

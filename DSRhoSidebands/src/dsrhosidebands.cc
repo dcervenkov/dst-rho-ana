@@ -63,6 +63,9 @@ int main(int argc, char* argv[]) {
         tools::SetPlotDir(config.json["plotDir"].get<std::string>().c_str());
     }
 
+    tools::SetupPlotStyle();
+    colors::setColors();
+
     FitterDelta fitter(config.json);
 
 
@@ -70,8 +73,6 @@ int main(int argc, char* argv[]) {
         Log::print(Log::warning, "Using version from dirty Git worktree\n");
     }
 
-    tools::SetupPlotStyle();
-    colors::setColors();
 
     std::string output_filename = config.GetOutputFilename();
     // output_filename += ".root";

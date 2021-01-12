@@ -121,6 +121,7 @@ void SetupPlotStyle() {
     gStyle->SetPadLeftMargin(0.105);
     gStyle->SetPadBottomMargin(0.1);
     gStyle->SetOptStat(0);
+    gStyle->SetOptTitle(0);
 }
 
 /**

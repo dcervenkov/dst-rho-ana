@@ -36,6 +36,7 @@ class FitterDelta {
 
    private:
     void FillSubtractionHisto(TH1D* histo, TString branch, TTree* tree1, TTree* tree2) const;
+    void FillRatioHisto(TH1D* histo, TString branch, TTree* tree1, TTree* tree2) const;
 
     TFile* output_file_ = nullptr;
     TF1* fit_function_ = nullptr;

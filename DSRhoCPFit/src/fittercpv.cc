@@ -31,6 +31,7 @@
 #include "RooConstVar.h"
 #include "RooDataHist.h"
 #include "RooDataSet.h"
+#include "RooEffProd.h"
 #include "RooExponential.h"
 #include "RooExtendPdf.h"
 #include "RooFitResult.h"
@@ -443,7 +444,7 @@ void FitterCPV::CreateTDSCForBKGPDFs(RooProdPdf*& pdf_FB, RooProdPdf*& pdf_FA, R
                                *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_,
                                *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
     } else {
-        angular_pdf = CreateAngularSCFBKGPDF(channel_name + "_bkg_", channel_config["modelParameters"]);
+        angular_pdf = CreateAngularSCFBKGPDF(channel_name + "_bkg_");
         if (physics_dt) {
             Log::print(Log::info, "Using physics-based dt PDF for SCF and BKG\n");
             dt_cf_pdf = CreatePhysicsBkgDtPdf(channel_name + "_" + type + "cf_dt");
@@ -509,7 +510,7 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
 
     if (bkg) {
         RooAbsPdf* bkg_angular_pdf =
-            CreateAngularSCFBKGPDF(name_prefix + "_bkg_", channel_config["modelParameters"]);
+            CreateAngularSCFBKGPDF(name_prefix + "_bkg_");
         B_pdfs.add(*bkg_angular_pdf);
         B_bar_pdfs.add(*bkg_angular_pdf);
     }
@@ -2104,7 +2105,7 @@ const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const 
 /**
  * Create a functional model of the background angular distribution.
  */
-RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix, const nlohmann::json config) const {
+RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix) const {
     TString pfx = prefix;
 
     // Background phit model
@@ -2145,65 +2146,24 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix, const nlo
     RooExponential* thetab_exp =
         new RooExponential(pfx + "thetab_exp", "thetab_exp", *thetab_, *thetab_exp_alpha);
 
-    RooRealVar* thetab_p0 = new RooRealVar(pfx + "thetab_corr_p0", "p_{0}", -2752);
-    RooRealVar* thetab_p1 = new RooRealVar(pfx + "thetab_corr_p1", "p_{1}", 5114);
-    RooRealVar* thetab_p2 = new RooRealVar(pfx + "thetab_corr_p2", "p_{2}", -2602);
-    RooRealVar* thetab_p3 = new RooRealVar(pfx + "thetab_corr_p3", "p_{3}", 393);
+    RooRealVar* thetab_f =
+        new RooRealVar(pfx + "thetab_f", "thetab_f", 0.5);
+
+    RooAddPdf* thetab_model_pure =
+        new RooAddPdf(pfx + "thetab_model_pure", "thetab_model_pure", RooArgList(*thetab_exp, *thetab_gaus),
+                      RooArgList(*thetab_f));
+
+    RooRealVar* thetab_p0 = new RooRealVar(pfx + "thetab_corr_p0", "p_{0}", -0.518);
+    RooRealVar* thetab_p1 = new RooRealVar(pfx + "thetab_corr_p1", "p_{1}", 6.164);
+    RooRealVar* thetab_p2 = new RooRealVar(pfx + "thetab_corr_p2", "p_{2}", -7.992);
+    RooRealVar* thetab_p3 = new RooRealVar(pfx + "thetab_corr_p3", "p_{3}", 3.858);
+    RooRealVar* thetab_p4 = new RooRealVar(pfx + "thetab_corr_p4", "p_{4}", -0.612);
     RooPolyVar* thetab_correction = new RooPolyVar(
         pfx + "thetab_correction", "thetab_correction", *thetab_,
-        RooArgList(*thetab_p0, *thetab_p1, *thetab_p2, *thetab_p3));
+        RooArgList(*thetab_p0, *thetab_p1, *thetab_p2, *thetab_p3, *thetab_p4));
 
-    // RooAddPdf* thetab_model_pure =
-    //     new RooAddPdf(pfx + "thetab_model_pure", "thetab_model_pure", RooArgList(*thetab_exp, *thetab_gaus),
-    //                   RooArgList(*thetab_f));
+    RooEffProd* thetab_model = new RooEffProd("thetab_model", "thetab_model", *thetab_model_pure, *thetab_correction);
 
-
-    // TODO: Add explanation of the normalization tricks necessary because of the RooFit bug
-    std::string channel_name(prefix);
-    tools::RemoveSubstring(channel_name, "bkg_");
-    tools::RemoveSubstring(channel_name, "scf_");
-
-    tools::ChangeModelParameters(thetab_gaus, config, channel_name);
-    tools::ChangeModelParameters(thetab_exp, config, channel_name);
-
-    const double thetab_gaus_norm = thetab_gaus->getNorm(*thetab_);
-    const double thetab_exp_norm = thetab_exp->getNorm(*thetab_);
-    RooConstVar* thetab_gaus_normalizer = new RooConstVar(
-        "thetab_gaus_normalizer", "thetab_gaus_normalizer", 1. / thetab_gaus_norm);
-    RooProduct* thetab_gaus_scaled =
-        new RooProduct(pfx + "thetab_gaus_scaled", pfx + "thetab_gaus_scaled",
-                       RooArgList(*thetab_gaus, *thetab_gaus_normalizer));
-
-    RooConstVar* thetab_exp_normalizer = new RooConstVar(
-        "thetab_exp_normalizer", "thetab_exp_normalizer", 1. / thetab_exp_norm);
-    RooProduct* thetab_exp_scaled =
-        new RooProduct(pfx + "thetab_exp_scaled", pfx + "thetab_exp_scaled",
-                       RooArgList(*thetab_exp, *thetab_exp_normalizer));
-
-    std::string type_name(prefix);
-    tools::RemoveSubstring(type_name, channel_name);
-    const double thetab_corr_f_val =
-        config.contains(type_name + "thetab_correction_f")
-            ? config[type_name + "thetab_correction_f"].get<double>()
-            : 0;
-    Log::LogLine(Log::debug) << type_name << "thetab_correction_f = " << thetab_corr_f_val;
-    RooRealVar* thetab_corr_f =
-        new RooRealVar(pfx + "thetab_corr_f", "thetab_corr_f", thetab_corr_f_val);
-    RooRealVar* thetab_f =
-        new RooRealVar(pfx + "thetab_f", "thetab_f", config[type_name + "thetab_f"].get<double>());
-
-    RooFormulaVar* thetab_f1 = new RooFormulaVar(
-        pfx + "thetab_f1", "thetab_f1", pfx + "thetab_f * (1.0 - " + pfx + "thetab_corr_f)",
-        RooArgSet(*thetab_f, *thetab_corr_f));
-    RooFormulaVar* thetab_f2 =
-        new RooFormulaVar(pfx + "thetab_f2", "thetab_f2",
-                          "(1.0 - " + pfx + "thetab_f) * (1.0 - " + pfx + "thetab_corr_f)",
-                          RooArgSet(*thetab_f, *thetab_corr_f));
-
-    RooRealSumPdf* thetab_model =
-        new RooRealSumPdf(pfx + "thetab_model", "thetab_model",
-                          RooArgList(*thetab_exp_scaled, *thetab_gaus_scaled, *thetab_correction),
-                          RooArgList(*thetab_f1, *thetab_f2));
 
     RooProdPdf* pdf = new RooProdPdf(pfx + "pdf", pfx + "pdf",
                                      RooArgList(*thetat_model, *thetab_model, *phit_model));
@@ -2610,7 +2570,7 @@ RooAbsPdf* FitterCPV::CreateSCFPDF(const std::string channel_name,
     } else {
         std::string name = channel_name;
         name += "_scf_";
-        return CreateAngularSCFBKGPDF(name, channel_config["modelParameters"]);
+        return CreateAngularSCFBKGPDF(name);
     }
 }
 

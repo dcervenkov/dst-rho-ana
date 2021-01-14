@@ -184,7 +184,7 @@ class FitterCPV {
     int CloseToEdge(const std::vector<Double_t> vals, const double margin) const;
 
     // RooAbsPdf* CreateAngularSCFPDF(const std::string channel_name);
-    RooAbsPdf* CreateAngularSCFBKGPDF(const std::string prefix, const nlohmann::json config) const;
+    RooAbsPdf* CreateAngularSCFBKGPDF(const std::string prefix) const;
 
     RooAbsPdf* CreateSCFPDF(const std::string channel_name,
                             const nlohmann::json channel_config) const;

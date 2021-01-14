@@ -52,21 +52,16 @@ FitterDelta::FitterDelta(nlohmann::json config) {
 
     const double min = config["fitRanges"]["thetab"]["min"].get<double>();
     const double max = config["fitRanges"]["thetab"]["max"].get<double>();
-    TH1D* histo = new TH1D("histo", "histo", 20, min, max);
+    TH1D* histo = new TH1D("correction", "correction", 20, min, max);
 
     // FillSubtractionHisto(histo, "thetab", signal_data, sidebands_data);
     FillRatioHisto(histo, "thetab", signal_data, sidebands_data);
 
-    histo->Fit("pol3");
-    fit_function_ = histo->GetFunction("pol3");
+    histo->Fit("pol4");
+    fit_function_ = histo->GetFunction("pol4");
     fit_function_->SetLineColor(5);
 
-    TCanvas canvas("correction", "correction", 500, 500);
-    histo->Draw("e1");
-    histo->GetXaxis()->SetTitle("#theta_{b} [rad]");
-    histo->GetYaxis()->SetTitle("Ratio");
-    histo->GetYaxis()->SetRangeUser(0.35, 1.6);
-    canvas.SaveAs(constants::format);
+    tools::PlotWithPull(histo, fit_function_, "", "#theta_{b} [rad]", "Ratio");
 }
 
 FitterDelta::~FitterDelta() {

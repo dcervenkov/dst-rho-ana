@@ -80,13 +80,34 @@ int main(int argc, char* argv[]) {
     // TFile* output_file = new TFile(output_filename.c_str(), "RECREATE");
     // fitter.SetOutputFile(output_file);
 
-    nlohmann::json json_results = fitter.GetJSONResults();
+    nlohmann::json json_results;
+    if (config.json.contains("randomize")) {
+        Log::LogLine(Log::debug) << "Generating randomized results";
+        fitter.PrintCovarianceMatrix();
+        for (int i = 0; i < config.json["randomize"].get<int>(); i++) {
+            json_results = fitter.GetJSONResults("bkg_thetab_corr_", true);
 
-    // Save formatted results to file
-    if (json_results.size()) {
-        std::cout << json_results.dump(2) << std::endl;
-        std::ofstream ofs(output_filename);
-        ofs << std::setw(2) << json_results << std::endl;
+            // Save formatted results to file
+            if (json_results.size()) {
+                std::string output_filename_rand = output_filename;
+                tools::RemoveSubstring(output_filename_rand, ".json");
+                output_filename_rand += "_rnd_";
+                output_filename_rand += std::to_string(i);
+                output_filename_rand += ".json";
+                std::cout << json_results.dump(2) << std::endl;
+                std::ofstream ofs(output_filename_rand);
+                ofs << std::setw(2) << json_results << std::endl;
+            }
+        }
+    } else {
+        json_results = fitter.GetJSONResults("bkg_thetab_corr_", false);
+
+        // Save formatted results to file
+        if (json_results.size()) {
+            std::cout << json_results.dump(2) << std::endl;
+            std::ofstream ofs(output_filename);
+            ofs << std::setw(2) << json_results << std::endl;
+        }
     }
 
     // if (config.ShouldSaveLog()) {
@@ -123,11 +144,12 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"plot-dir", required_argument, 0, 'p'},
                                     {"output", required_argument, 0, 'o'},
                                     {"log", no_argument, 0, 'l'},
+                                    {"randomize", required_argument, 0, 'r'},
                                     {"version", no_argument, 0, 'v'},
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:g:p:o:vlh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:g:p:o:r:vlh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -149,6 +171,9 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
             case 'p':
                 config["plotDir"] = optarg;
                 break;
+            case 'r':
+                config["randomize"] = atoi(optarg);
+                break;
             case 'v':
                 printf("Version: %s\n", gitversion);
                 exit(0);
@@ -162,6 +187,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("-l, --log                 save copy of log to results file\n");
                 printf("-o, --output=BASENAME     basename of the output files\n");
                 printf("-p, --plot-dir=PLOT_DIR   create lifetime/mixing plots\n");
+                printf("-r, --randomize=NUMBER    generate NUMBER randomized results\n");
                 printf("-v, --version             print program version and exit\n");
                 exit(0);
                 break;

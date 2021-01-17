@@ -15,6 +15,7 @@
 // ROOT includes
 #include "TCanvas.h"
 #include "TChain.h"
+#include "TFitResultPtr.h"
 #include "TH1D.h"
 #include "TString.h"
 
@@ -32,12 +33,15 @@ class FitterDelta {
     void SetPlotDir(const char* output_dir);
     void PrintResultsJSON() const;
     void SetOutputFile(TFile* file) { output_file_ = file; };
-    nlohmann::json GetJSONResults() const;
+    nlohmann::json GetJSONResults(std::string prefix, bool randomize = false);
+    void PrintCovarianceMatrix() const;
 
    private:
+    nlohmann::json Fit(TH1D* histo, bool randomize);
     void FillSubtractionHisto(TH1D* histo, TString branch, TTree* tree1, TTree* tree2) const;
     void FillRatioHisto(TH1D* histo, TString branch, TTree* tree1, TTree* tree2) const;
 
     TFile* output_file_ = nullptr;
     TF1* fit_function_ = nullptr;
+    TFitResultPtr result_;
 };

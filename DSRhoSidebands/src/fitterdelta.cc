@@ -24,6 +24,7 @@
 #include "RooGenericPdf.h"
 #include "RooHist.h"
 #include "RooHistPdf.h"
+#include "RooMultiVarGaussian.h"
 #include "RooPlot.h"
 #include "RooRealVar.h"
 #include "RooTreeDataStore.h"
@@ -33,6 +34,8 @@
 #include "TEnv.h"
 #include "TF1.h"
 #include "TFile.h"
+#include "TFitResult.h"
+#include "TFitResultPtr.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3F.h"
@@ -57,17 +60,61 @@ FitterDelta::FitterDelta(nlohmann::json config) {
     // FillSubtractionHisto(histo, "thetab", signal_data, sidebands_data);
     FillRatioHisto(histo, "thetab", signal_data, sidebands_data);
 
-    histo->Fit("pol4");
-    fit_function_ = histo->GetFunction("pol4");
-    fit_function_->SetLineColor(5);
+    result_ = histo->Fit("pol4", "SF");
 
-    tools::PlotWithPull(histo, fit_function_, "", "#theta_{b} [rad]", "Ratio");
+    if (config.contains("plot-dir")) {
+        fit_function_ = histo->GetFunction("pol4");
+        fit_function_->SetLineColor(5);
+        tools::PlotWithPull(histo, fit_function_, "", "#theta_{b} [rad]", "Ratio");
+    }
+
 }
 
 FitterDelta::~FitterDelta() {
     if (output_file_) {
         output_file_->Close();
     }
+}
+
+// TODO: Try to make function and pars const
+nlohmann::json FitterDelta::GetJSONResults(std::string prefix, bool randomize) {
+    const double* mu_vec_double = result_->GetParams();
+    RooArgList mu_vec;
+    RooRealVar* mu;
+    RooArgList x_vec;
+    RooRealVar* x;
+    for (uint i = 0; i < result_->NFreeParameters(); i++) {
+        // printf("mu_vec[%i] = %f\n", i, mu_vec_double[i]);
+        TString name = "p";
+        name += i;
+        double min = -1000;
+        double max = 1000;
+        x = new RooRealVar("x_" + name, "x_" + name, 0, min, max);
+        x_vec.add(*x);
+        mu = new RooRealVar("mu_" + name, "mu_" + name, mu_vec_double[i]);
+        mu_vec.add(*mu);
+    }
+
+    std::vector<RooRealVar*> vector_of_results;
+    if (randomize) {
+        TMatrixDSym cov = result_->GetCovarianceMatrix();
+        RooMultiVarGaussian multi_gauss("multi_gauss", "multi_gauss", x_vec, mu_vec, cov);
+        RooDataSet* data = multi_gauss.generate(x_vec, 1);
+        vector_of_results = tools::ToVector<RooRealVar*>(*data->get());
+    } else {
+        vector_of_results = tools::ToVector<RooRealVar*>(mu_vec);
+    }
+
+    nlohmann::json json;
+    for (auto& var : vector_of_results) {
+        std::string name = prefix + var->GetName();
+        tools::RemoveSubstring(name, "_x");
+        tools::RemoveSubstring(name, "_mu");
+        double value = var->getVal();
+        json[name] = tools::RoundToDecimals(value, 4);
+    }
+
+    return json;
 }
 
 /**
@@ -113,7 +160,8 @@ TTree* FitterDelta::ReadInFile(const nlohmann::json data_files) const {
  * @param tree1 First tree
  * @param tree2 Second tree
  */
-void FitterDelta::FillSubtractionHisto(TH1D* histo, TString branch, TTree* tree1, TTree* tree2) const {
+void FitterDelta::FillSubtractionHisto(TH1D* histo, TString branch, TTree* tree1,
+                                       TTree* tree2) const {
     TString name = histo->GetName();
     tree1->Draw(branch + ">>" + name, "", "goff");
     TH1D* temp_histo = static_cast<TH1D*>(histo->Clone("temp_histo"));
@@ -165,9 +213,7 @@ void FitterDelta::FillRatioHisto(TH1D* histo, TString branch, TTree* tree1, TTre
     histo->Divide(temp_histo);
 }
 
-nlohmann::json FitterDelta::GetJSONResults() const {
-    nlohmann::json results = tools::GetResultsJSON(*fit_function_, "thetab_corr_");
-    // RooFit's Chebyshev doesn't use the constant term
-    /* results.erase("thetab_corr_p0"); */
-    return results;
-};
+void FitterDelta::PrintCovarianceMatrix() const {
+    TMatrixDSym cov = result_->GetCovarianceMatrix();
+    cov.Print();
+}

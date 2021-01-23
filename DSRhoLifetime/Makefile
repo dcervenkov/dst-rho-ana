@@ -9,8 +9,8 @@ CXX := g++
 CXX_FLAGS := -std=c++11 -g -Wall -Wno-non-virtual-dtor
 ROOT_FLAGS := $(shell root-config --cflags)
 ROOT_LIBS := $(shell root-config --libs) -lRooFitCore -lRooFit
-LD_LIBS := -lboost_system -lboost_filesystem
-INCS := -Isrc
+LD_LIBS := -lboost_system -lboost_filesystem -L$(HOME)/programs/boost_1_74_0/stage/lib
+INCS := -Isrc -I$(HOME)/programs/boost_1_74_0
 
 BELLE_LIB_DIR ?= /belle
 BELLE_INCS := -isystem $(BELLE_LIB_DIR)/belle/b20091203_2126/include

@@ -10,8 +10,8 @@ CXX_FLAGS := -std=c++11 -g -Wall -Wno-non-virtual-dtor
 #BOOST_INC_DIR := /usr/local/include/boost-1_37
 ROOT_FLAGS := $(shell root-config --cflags)
 ROOT_LIBS := $(shell root-config --libs) -lRooFitCore -lRooFit -lRooStats
-LD_LIBS := -lboost_system -lboost_filesystem
-INCS := -Isrc
+LD_LIBS := -lboost_system -lboost_filesystem -L$(HOME)/programs/boost_1_74_0/stage/lib
+INCS := -Isrc -I$(HOME)/programs/boost_1_74_0
 
 .PHONY: all clean tests
 

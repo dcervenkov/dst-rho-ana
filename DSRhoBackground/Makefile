@@ -7,10 +7,10 @@ DEP_FILES := $(OBJ_FILES:.o=.d)
 CXX := g++
 LD_FLAGS := -Wl,-rpath $(HOME)/bin/belle/packages/Meerkat/lib
 CXX_FLAGS := -std=c++11 -g -Wall -Wno-non-virtual-dtor
-LD_LIBS := -lboost_system -lboost_filesystem -L$(HOME)/bin/belle/packages/Meerkat/lib -lMeerkat
+LD_LIBS := -lboost_system -lboost_filesystem -L$(HOME)/bin/belle/packages/Meerkat/lib -lMeerkat -L$(HOME)/programs/boost_1_74_0/stage/lib
 ROOT_FLAGS := $(shell root-config --cflags)
 ROOT_LIBS := $(shell root-config --libs) -lRooFitCore -lRooFit
-INCS := -Isrc -I$(HOME)/bin/belle/packages/Meerkat/inc
+INCS := -Isrc -I$(HOME)/bin/belle/packages/Meerkat/inc -I$(HOME)/programs/boost_1_74_0
 
 BELLE_LIB_DIR ?= /belle
 BELLE_INCS := -isystem $(BELLE_LIB_DIR)/belle/b20091203_2126/include

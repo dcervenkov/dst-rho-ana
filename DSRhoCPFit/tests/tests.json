@@ -110,6 +110,14 @@
             "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
             "--output=tests/current_result",
             "--MC=1"
+        ],
+        "td_all_corr": [
+            "--config=tests/config_test_corr.json",
+            "--components=all",
+            "--fix=apa,a0,ata,x0,xt,yp,y0,yt,xpb,x0b,xtb,ypb,y0b,ytb",
+            "--output=tests/current_result",
+            "--exclude-channels=Kpipi0",
+            "--MC=1"
         ]
     }
 }

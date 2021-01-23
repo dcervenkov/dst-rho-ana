@@ -33,6 +33,7 @@
 #include "TCanvas.h"
 #include "TChain.h"
 #include "TEnv.h"
+#include "TF1.h"
 #include "TFile.h"
 #include "TH2D.h"
 #include "TLegend.h"
@@ -120,6 +121,7 @@ void SetupPlotStyle() {
     gStyle->SetPadLeftMargin(0.105);
     gStyle->SetPadBottomMargin(0.1);
     gStyle->SetOptStat(0);
+    gStyle->SetOptTitle(0);
 }
 
 /**
@@ -553,6 +555,79 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     plot_pull_->GetYaxis()->SetRangeUser(-5, 5);
     plot_pull_->GetYaxis()->SetNdivisions(505);
     plot_pull_->Draw();
+
+    canvas.Write();
+    canvas.SaveAs(constants::format);
+}
+
+/**
+ * Make a plot of a variable with both data points and pdf projection and display a pull plot
+ * beneath it. Then save to a file.
+ *
+ * @param histo Histogram to be plotted
+ * @param function Function used for pull calculation
+ * @param prefix Prefix to prepend to the histo name when saving to file
+ * @param xtitle [optional] Title for the x-axis
+ * @param ytitle [optional] Title for the y-axis
+ */
+void PlotWithPull(TH1* histo, TF1* function, std::string prefix, std::string xtitle,
+                  std::string ytitle) {
+    TString name;
+    if (prefix.size()) {
+        name += prefix.c_str();
+        name += "_";
+    }
+    name += histo->GetName();
+    TCanvas canvas(name, name, 500, 500);
+
+    TPad* pad_var;
+    TPad* pad_pull;
+    pad_var = new TPad("pad_var", "pad_var", 0, 0.25, 1, 1);
+    pad_pull = new TPad("pad_pull", "pad_pull", 0, 0, 1, 0.25);
+    pad_var->Draw();
+    pad_pull->Draw();
+
+    pad_var->cd();
+    pad_var->SetBottomMargin(0.0);
+    pad_var->SetLeftMargin(0.12);
+
+    histo->GetXaxis()->SetTitle("");
+    histo->GetXaxis()->SetLabelSize(0);
+
+    // This line makes sure the 0 is not drawn as it would overlap with the
+    // lower pad; it also makes more space for a legend and stat box
+    histo->GetYaxis()->SetRangeUser(0.001, histo->GetMaximum() * 1.3);
+    histo->SetTitle("");
+    histo->GetYaxis()->SetTitle(ytitle.c_str());
+    histo->GetYaxis()->SetTitleOffset(1.60);
+    histo->Draw("e1");
+
+    pad_pull->cd();
+    pad_pull->SetTopMargin(0.0);
+    pad_pull->SetBottomMargin(0.35);
+    pad_pull->SetLeftMargin(0.12);
+
+    TH1D* pull_histo = (TH1D*)histo->Clone("pull_histo");
+    pull_histo->Reset();
+    // Create a new frame to draw the pull distribution and add the distribution to the frame
+    for (int i = 1; i <= histo->GetXaxis()->GetNbins(); i++) {
+        Double_t pull = (histo->GetBinContent(i) - function->Eval(histo->GetBinCenter(i))) /
+                        histo->GetBinError(i);
+        pull_histo->SetBinContent(i, pull);
+    }
+
+    pull_histo->GetXaxis()->SetTickLength(0.03 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
+    pull_histo->GetXaxis()->SetTitle(xtitle.c_str());
+    pull_histo->GetXaxis()->SetTitleOffset(4.0);
+    pull_histo->GetXaxis()->SetLabelOffset(0.01 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
+    pull_histo->GetYaxis()->SetRangeUser(-5, 5);
+    pull_histo->GetYaxis()->SetNdivisions(505);
+    pull_histo->GetYaxis()->SetTitle("Pull");
+    pull_histo->GetYaxis()->CenterTitle();
+    pull_histo->GetXaxis()->SetLabelSize(18);
+    pull_histo->SetLineColor(6);
+    pull_histo->SetFillColor(6);
+    pull_histo->Draw("B E1");
 
     canvas.Write();
     canvas.SaveAs(constants::format);
@@ -1026,6 +1101,25 @@ nlohmann::json GetResultsJSON(const RooFitResult* result, std::string prefix, bo
         double value = var->getVal();
         json[name] = RoundToDecimals(value, 4);
     }
+
+    return json;
+}
+
+/*
+ * Extract function parameters and return them as a JSON object
+ *
+ * @param func Function from which parameters are to be extracted
+ *
+ * @return nlohmann::json The resultant JSON object
+ */
+nlohmann::json GetResultsJSON(const TF1& func, std::string prefix) {
+    nlohmann::json json;
+    for (int i = 0; i < func.GetNumberFreeParameters(); i++) {
+        std::string name = prefix + func.GetParName(i);
+        Log::LogLine(Log::debug) << name << " = " << func.GetParameter(i);
+        json[name] = RoundToDecimals(func.GetParameter(i), 4);
+    }
+
     return json;
 }
 
@@ -1324,40 +1418,39 @@ double GetDeltaWTag(int expno, int rbin, bool mc) {
 }
 
 std::string GetRBinCutString(int rbin) {
-    assert(rbin >= 0 && rbin <=6);
-    switch (rbin)
-    {
-    case 0:
-        return "(tagwtag>0.45&&tagwtag<=0.5)";
-        break;
+    assert(rbin >= 0 && rbin <= 6);
+    switch (rbin) {
+        case 0:
+            return "(tagwtag>0.45&&tagwtag<=0.5)";
+            break;
 
-    case 1:
-        return "(tagwtag>0.375&&tagwtag<=0.45)";
-        break;
+        case 1:
+            return "(tagwtag>0.375&&tagwtag<=0.45)";
+            break;
 
-    case 2:
-        return "(tagwtag>0.25&&tagwtag<=0.375)";
-        break;
+        case 2:
+            return "(tagwtag>0.25&&tagwtag<=0.375)";
+            break;
 
-    case 3:
-        return "(tagwtag>0.1875&&tagwtag<=0.25)";
-        break;
+        case 3:
+            return "(tagwtag>0.1875&&tagwtag<=0.25)";
+            break;
 
-    case 4:
-        return "(tagwtag>0.125&&tagwtag<=0.1875)";
-        break;
+        case 4:
+            return "(tagwtag>0.125&&tagwtag<=0.1875)";
+            break;
 
-    case 5:
-        return "(tagwtag>0.0625&&tagwtag<=0.125)";
-        break;
+        case 5:
+            return "(tagwtag>0.0625&&tagwtag<=0.125)";
+            break;
 
-    case 6:
-        return "(tagwtag>=0.0&&tagwtag<=0.0625)";
-        break;
+        case 6:
+            return "(tagwtag>=0.0&&tagwtag<=0.0625)";
+            break;
 
-    default:
-        return "";
-        break;
+        default:
+            return "";
+            break;
     }
 }
 

@@ -1,0 +1,15 @@
+{
+    "command": "./DSRhoSidebands",
+    "comparison_file": "current_result",
+    "temporary_paths": [
+        "correction.pdf",
+        "sig_vs_side.pdf"
+    ],
+    "tests": {
+        "sidebands": [
+            "--config=tests/config_test.json",
+            "--plot-dir=tests",
+            "--output=tests/current_result"
+        ]
+    }
+}

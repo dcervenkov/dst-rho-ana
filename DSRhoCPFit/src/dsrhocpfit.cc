@@ -230,6 +230,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 printf("Mandatory arguments to long options are mandatory for short options too.\n");
                 printf("-c, --cpus=NUM_CPUS              number of CPU cores to use for fitting and plotting\n");
                 printf("-e, --components=CR|CRSCF|all    do a specified fit type\n");
+                printf("-g, --config=FILE                specify a file from which to read config\n");
                 printf("-a, --correlation-plot           create a plot of the correlation matrix\n");
                 printf("-d, --blind                      blind results in plots by adding deterministic random numbers\n");
                 printf("-n, --events=NUM                 limit the number of read-in events\n");

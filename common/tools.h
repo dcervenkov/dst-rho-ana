@@ -28,8 +28,8 @@ std::vector<TString> GetListOfFiles(const char* dir, const char* ext);
 TChain* ReadDataFromDir(const char* dir);
 void SetupPlotStyle();
 void SetPlotDir(const char* plot_dir);
-TPaveText* CreateStatBox(double chi2, int ndof, const RooArgList& results,
-                         bool position_top = true, bool position_left = true);
+TPaveText* CreateStatBox(double chi2, int ndof, const RooArgList& results, bool position_top = true,
+                         bool position_left = true);
 void PlotVar(const RooRealVar& var, const RooAbsData& data);
 void PlotVar(const RooRealVar& var, const RooAbsPdf&);
 void PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist& data2,
@@ -39,6 +39,8 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
                   const std::vector<RooAbsPdf*> components = std::vector<RooAbsPdf*>(),
                   int numCPUs = 1, std::string prefix = "", std::string title = "",
                   std::vector<RooCmdArg> options = std::vector<RooCmdArg>());
+void PlotWithPull(TH1* histo, TF1* function, std::string prefix, std::string xtitle = "",
+                  std::string ytitle = "");
 void PlotVars2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData& data1,
                 const RooAbsData& data2, const std::string prefix = "",
                 const char* format = ".pdf");
@@ -50,7 +52,6 @@ void PlotPull2D(const RooRealVar& var1, const RooRealVar& var2, const RooAbsData
 TString GetCommonCutsString();
 void SaveTextToFile(const std::string filename, const std::string text);
 RooArgList BlindResults(const RooArgList& orig_results, double range);
-
 
 void LogEnvironmentMetadata(TFile* file);
 void LogCLIArguments(TFile* file, int argc, char* argv[]);
@@ -68,12 +69,13 @@ nlohmann::json GetResultsJSON(const RooAbsPdf* model, const RooArgSet& observabl
 nlohmann::json GetResultsJSON(std::vector<const RooAbsPdf*> models, const RooArgSet& observables,
                               std::string prefix, bool randomize = false);
 nlohmann::json GetResultsJSON(const RooFitResult* result, std::string prefix, bool randomize);
+nlohmann::json GetResultsJSON(const TF1& func, std::string prefix);
 void CreateDirsIfNecessary(const std::string file);
 RooLinkedList VecToCmdList(std::vector<RooCmdArg>& commands);
 TH2* ArrangeCorrelationMatrix(const TH2* matrix, std::vector<std::string> ordered_labels);
 void PlotCorrelationMatrix(const RooFitResult& result, std::vector<std::string> ordered_labels);
 
-nlohmann::json MergeJSON (const nlohmann::json& json1, const nlohmann::json& json2);
+nlohmann::json MergeJSON(const nlohmann::json& json1, const nlohmann::json& json2);
 double RoundToDecimals(double number, int decimals);
 RooHistPdf* CreatePdfFromHistos(const char* name, const char* title,
                                 std::vector<RooDataHist*> histos, RooArgSet observables);

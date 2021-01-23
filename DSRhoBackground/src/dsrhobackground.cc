@@ -10,6 +10,7 @@
 #include "dsrhobackground.h"
 
 // Standard includes
+#include <fstream>
 #include <getopt.h>
 #include <stdio.h>
 #include <vector>

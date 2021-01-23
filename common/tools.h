@@ -78,6 +78,7 @@ double RoundToDecimals(double number, int decimals);
 RooHistPdf* CreatePdfFromHistos(const char* name, const char* title,
                                 std::vector<RooDataHist*> histos, RooArgSet observables);
 void RemoveSubstring(std::string& main, const std::string& sub);
+size_t ReplaceSubstring(std::string& main, const std::string& oldstr, const std::string& newstr);
 RooDataHist* RandomizeDataHist(const RooDataHist& hist);
 
 int GetRBin(double r);

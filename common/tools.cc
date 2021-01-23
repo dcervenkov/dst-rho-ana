@@ -416,7 +416,7 @@ void PlotVar(const RooRealVar& var, const RooDataHist& data1, const RooDataHist&
     delete plot;
 
     delete pad_var;
-    if (draw_pull) {
+    if (pad_pull) {
         delete pad_pull;
     }
 }
@@ -1196,6 +1196,24 @@ void RemoveSubstring(std::string& main, const std::string& sub) {
     if (pos != std::string::npos) {
         main.erase(pos, sub.length());
     }
+}
+
+/**
+ * Substitute all occurrences of a substring with a new string
+ *
+ * @param main The string in which to change the substring
+ * @param oldstr The substring which to replace
+ * @param newstr The substring which to be used as replacement
+ */
+size_t ReplaceSubstring(std::string& main, const std::string& oldstr, const std::string& newstr) {
+    size_t replacements = 0;
+    size_t pos = main.find(oldstr);
+    while (pos != std::string::npos) {
+        replacements++;
+        main.replace(pos, oldstr.length(), newstr);
+        pos = main.find(oldstr, pos + newstr.length());
+    }
+    return replacements;
 }
 
 /**

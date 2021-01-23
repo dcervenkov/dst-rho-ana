@@ -785,7 +785,7 @@ void FitterCPV::Fit(const nlohmann::json config) {
     dm_->setConstant(true);
 
     result_ = pdf_->fitTo(*data_, RooFit::ConditionalObservables(conditional_vars_argset_),
-                          RooFit::Hesse(false), RooFit::Minos(false), RooFit::Minimizer("Minuit2"),
+                          RooFit::Hesse(true), RooFit::Minos(true), RooFit::Minimizer("Minuit2"),
                           RooFit::Save(true), RooFit::NumCPU(config["numCPUs"]));
 
     if (result_) {

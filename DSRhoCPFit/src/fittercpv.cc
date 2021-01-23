@@ -444,7 +444,11 @@ void FitterCPV::CreateTDSCForBKGPDFs(RooProdPdf*& pdf_FB, RooProdPdf*& pdf_FA, R
                                *shcosthb_, *benergy_, *mbc_, *vrntrk_, *vrerr6_, *vrchi2_, *vrndf_,
                                *vtntrk_, *vterr6_, *vtchi2_, *vtndf_, *vtistagl_);
     } else {
-        angular_pdf = CreateAngularSCFBKGPDF(channel_name + "_bkg_");
+        bool add_correction = channel_config.contains("addDataBKGCorrection") &&
+                                      channel_config["addDataBKGCorrection"]
+                                  ? true
+                                  : false;
+        angular_pdf = CreateAngularSCFBKGPDF(channel_name + "_bkg_", add_correction);
         if (physics_dt) {
             Log::print(Log::info, "Using physics-based dt PDF for SCF and BKG\n");
             dt_cf_pdf = CreatePhysicsBkgDtPdf(channel_name + "_" + type + "cf_dt");
@@ -509,8 +513,12 @@ RooSimultaneous* FitterCPV::CreateAngularPDF(const std::string name_prefix, cons
     }
 
     if (bkg) {
+        bool add_correction = channel_config.contains("addDataBKGCorrection") &&
+                                      channel_config["addDataBKGCorrection"]
+                                  ? true
+                                  : false;
         RooAbsPdf* bkg_angular_pdf =
-            CreateAngularSCFBKGPDF(name_prefix + "_bkg_");
+            CreateAngularSCFBKGPDF(name_prefix + "_bkg_", add_correction);
         B_pdfs.add(*bkg_angular_pdf);
         B_bar_pdfs.add(*bkg_angular_pdf);
     }
@@ -2105,7 +2113,7 @@ const void FitterCPV::SaveChi2Scan(RooSimultaneous& pdf, RooRealVar* var, const 
 /**
  * Create a functional model of the background angular distribution.
  */
-RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix) const {
+RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix, bool add_correction) const {
     TString pfx = prefix;
 
     // Background phit model
@@ -2164,9 +2172,13 @@ RooAbsPdf* FitterCPV::CreateAngularSCFBKGPDF(const std::string prefix) const {
 
     RooEffProd* thetab_model = new RooEffProd("thetab_model", "thetab_model", *thetab_model_pure, *thetab_correction);
 
+    RooProdPdf* pdf = nullptr;
+    if (add_correction) {
+        pdf = new RooProdPdf(pfx + "pdf", pfx + "pdf", RooArgList(*thetat_model, *thetab_model, *phit_model));
+    } else {
+        pdf = new RooProdPdf(pfx + "pdf", pfx + "pdf", RooArgList(*thetat_model, *thetab_model_pure, *phit_model));
+    }
 
-    RooProdPdf* pdf = new RooProdPdf(pfx + "pdf", pfx + "pdf",
-                                     RooArgList(*thetat_model, *thetab_model, *phit_model));
 
     return pdf;
 }
@@ -2570,7 +2582,7 @@ RooAbsPdf* FitterCPV::CreateSCFPDF(const std::string channel_name,
     } else {
         std::string name = channel_name;
         name += "_scf_";
-        return CreateAngularSCFBKGPDF(name);
+        return CreateAngularSCFBKGPDF(name, false);
     }
 }
 

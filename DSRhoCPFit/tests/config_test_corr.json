@@ -1,0 +1,128 @@
+{
+    "initialPars": {
+        "ap": 0.269,
+        "apa": 0.56,
+        "a0": 0.941,
+        "ata": 3.11,
+        "xp": 0.00817,
+        "x0": 0.00533,
+        "xt": 0.00826,
+        "yp": -0.00661,
+        "y0": -0.00846,
+        "yt": 0.00372,
+        "xpb": -0.01022,
+        "x0b": -0.00846,
+        "xtb": -0.00584,
+        "ypb": 0.00244,
+        "y0b": 0.00533,
+        "ytb": -0.00692
+    },
+    "fitRanges": {
+        "dt": {
+            "min": -10,
+            "max": 10
+        },
+        "thetat": {
+            "min": 0,
+            "max": 3.1415
+        },
+        "thetab": {
+            "min": 0.5,
+            "max": 2.95
+        }
+    },
+    "modelParameters": {
+        "scf_cf_dt_voigt_mu": -0.249,
+        "scf_cf_dt_voigt_sigma": 1.910,
+        "scf_cf_dt_voigt_width": 0.684,
+        "scf_cf_dt_gaus_mu": -0.105,
+        "scf_cf_dt_gaus_sigma": 0.881,
+        "scf_cf_dt_f": 0.720,
+        "scf_dcs_dt_voigt_mu": -0.303,
+        "scf_dcs_dt_voigt_sigma": 2.739,
+        "scf_dcs_dt_voigt_width": 0.712,
+        "scf_dcs_dt_gaus_mu": -0.177,
+        "scf_dcs_dt_gaus_sigma": 1.156,
+        "scf_dcs_dt_f": 0.712,
+        "bkg_cf_dt_voigt_mu": -0.159,
+        "bkg_cf_dt_voigt_sigma": 1.644,
+        "bkg_cf_dt_voigt_width": 0.874,
+        "bkg_cf_dt_gaus_mu": -0.026,
+        "bkg_cf_dt_gaus_sigma": 0.613,
+        "bkg_cf_dt_f": 0.632,
+        "bkg_dcs_dt_voigt_mu": -0.234,
+        "bkg_dcs_dt_voigt_sigma": 2.210,
+        "bkg_dcs_dt_voigt_width": 1.143,
+        "bkg_dcs_dt_gaus_mu": -0.020,
+        "bkg_dcs_dt_gaus_sigma": 0.639,
+        "bkg_dcs_dt_f": 0.632
+    },
+    "physicsDtSCFBKG": false,
+    "channels": {
+        "Kpi": {
+            "addDataBKGCorrection": true,
+            "modelParameters": {
+                "bkg_phit_poly_p2": 0.018434,
+                "bkg_phit_f": 0.767169,
+                "bkg_phit_offset": 0.162006,
+                "bkg_thetat_p2": -1.174277,
+                "bkg_thetat_p4": 0.217126,
+                "bkg_thetat_p6": -0.041400,
+                "bkg_thetab_gaus_mu": 2.503266,
+                "bkg_thetab_gaus_sigma_l": 0.676618,
+                "bkg_thetab_gaus_sigma_r": 0.337725,
+                "bkg_thetab_exp_alpha": -2.137619,
+                "bkg_thetab_f": 0.732885,
+                "cr_scf_f": 0.8759,
+                "cr_f": 0.8142,
+                "scf_f": 0.1153
+            },
+            "efficiencyModel": 6,
+            "efficiencyFile": "efficiencies/eff_Kpi_190531.root",
+            "scfHisto": "scfmodels/scf_Kpi_190531.root",
+            "inputFiles": {
+                "signalMC": [
+                    "tests/data/signalMC.root"
+                ],
+                "genericMC": [
+                    "tests/data/chargedMC.root",
+                    "tests/data/charmMC.root",
+                    "tests/data/mixedMC.root",
+                    "tests/data/udsMC.root"
+                ]
+            }
+        },
+        "Kpipi0": {
+            "modelParameters": {
+                "bkg_phit_poly_p2": 0.030929,
+                "bkg_phit_f": 0.774544,
+                "bkg_phit_offset": 0.114373,
+                "bkg_thetat_p2": -1.169959,
+                "bkg_thetat_p4": 0.212095,
+                "bkg_thetat_p6": -0.036496,
+                "bkg_thetab_gaus_mu": 2.409229,
+                "bkg_thetab_gaus_sigma_l": 0.465934,
+                "bkg_thetab_gaus_sigma_r": 0.447927,
+                "bkg_thetab_exp_alpha": -1.841936,
+                "bkg_thetab_f": 0.758031,
+                "cr_scf_f": 0.8263,
+                "cr_f": 0.5386,
+                "scf_f": 0.1132
+            },
+            "efficiencyModel": 6,
+            "efficiencyFile": "efficiencies/eff_Kpipi0_190603.root",
+            "scfHisto": "scfmodels/scf_Kpipi0_190603.root",
+            "inputFiles": {
+                "signalMC": [
+                    "tests/data/signalMC_Kpipi0.root"
+                ],
+                "genericMC": [
+                    "tests/data/chargedMC.root",
+                    "tests/data/charmMC.root",
+                    "tests/data/mixedMC.root",
+                    "tests/data/udsMC.root"
+                ]
+            }
+        }
+    }
+}

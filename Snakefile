@@ -23,6 +23,11 @@ DATA_SIDEBANDS = {
     "Kpipi0": glob.glob("data/Kpipi0/sidebands/*.root"),
     "K3pi": glob.glob("data/K3pi/sidebands/*.root")
 }
+MC_SIDEBANDS = {
+    "Kpi": glob.glob("data/Kpi/sidebands/mc/*.root"),
+    "Kpipi0": glob.glob("data/Kpipi0/sidebands/mc/*.root"),
+    "K3pi": glob.glob("data/K3pi/sidebands/mc/*.root")
+}
 
 wildcard_constraints:
     randomization = "[a-zA-Z0-9_]*"
@@ -139,6 +144,9 @@ rule all:
                    channel=CHANNELS_AND_TOGETHER, bkg_type=BKG_TYPES),
             expand("DSRhoBackground/results/nonphys_{channel}_data_sidebands.json",
                    channel=CHANNELS_AND_TOGETHER)
+            ),
+        sidebands_jobs = (
+            expand("DSRhoSidebands/results/{channel}_correction.json", channel=CHANNELS_AND_TOGETHER)
             ),
         lifetime_jobs = (
             expand("DSRhoLifetime/results/{channel}/{component}_{type}_{stream}",
@@ -284,6 +292,10 @@ rule yield_jobs:
 rule background_jobs:
     input:
         rules.all.input.background_jobs
+
+rule sidebands_jobs:
+    input:
+        rules.all.input.sidebands_jobs
 
 rule lifetime_jobs:
     input:
@@ -458,6 +470,35 @@ rule background_nonphys:
         "./DSRhoBackground/DSRhoBackground"
         " --plot-dir={output.plotdir} --angular --empirical {output.result} {input} &> {log}"
 
+rule sidebands:
+    input:
+        data = [*DATA_SIDEBANDS["Kpi"], *DATA_SIDEBANDS["Kpipi0"], *DATA_SIDEBANDS["K3pi"],
+                *MC_SIDEBANDS["Kpi"], *MC_SIDEBANDS["Kpipi0"], *MC_SIDEBANDS["K3pi"]],
+        config = "DSRhoSidebands/configs/config_{channel}_sidebands.json"
+    output:
+        result = "DSRhoSidebands/results/{channel}_correction.json",
+        plotdir = directory("DSRhoSidebands/plots/{channel}")
+    log:
+        "DSRhoSidebands/logs/{channel}_correction.log",
+    shell:
+        "./DSRhoSidebands/DSRhoSidebands --config={input.config}"
+        " --plot-dir={output.plotdir} --output={output.result} &> {log}"
+
+rule sidebands_randomized:
+    input:
+        data = [*DATA_SIDEBANDS, *MC_SIDEBANDS],
+        config = "DSRhoSidebands/configs/config_{channel}_sidebands.json"
+    output:
+        result = expand("DSRhoSidebands/results/randomized/{{channel}}_correction_rnd_{number}.json",
+                        number=range(100))
+    log:
+        "DSRhoSidebands/logs/{channel}_correction_randomized.log",
+    params:
+        "DSRhoSidebands/results/randomized/{{channel}}_correction.json",
+    shell:
+        "./DSRhoSidebands/DSRhoSidebands --config={input.config}"
+        " --randomize=100 --output={params} &> {log}"
+
 rule lifetime_configs:
     input:
         expand(rules.background.output, channel=CHANNELS_AND_TOGETHER, mc="mc", bkg_type=BKG_TYPES),
@@ -547,6 +588,7 @@ rule cpfit_configs:
         expand(rules.background_nonphys.output, channel=CHANNELS_AND_TOGETHER, mc="mc", bkg_type=BKG_TYPES),
         expand(rules.background.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
         expand(rules.background_nonphys.output, channel=CHANNELS_AND_TOGETHER, mc="data", bkg_type="sidebands"),
+        expand(rules.sidebands.output, channel=CHANNELS_AND_TOGETHER),
         rules.yield_summary.output,
         rules.yield_summary_rbin.output,
         template = "DSRhoCPFit/configs/{group}/templates/{config}.template.json"

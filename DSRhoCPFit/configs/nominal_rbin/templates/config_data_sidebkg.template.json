@@ -45,10 +45,11 @@
     "physicsDtSCFBKG": true,
     "channels": {
         "Kpi": {
+            "addDataBKGCorrection": true,
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../../DSRhoBackground/results/Kpi_data_sidebands.json",
+                        "file": "../../../../DSRhoBackground/results/Kpi_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {
@@ -58,7 +59,7 @@
                         "file": "../../../../DSRhoYield/results_rbinavg/Kpi_data_fractions.json"
                     },
                     {
-                        "file": "../../../../DSRhoSidebands/results/Kpi",
+                        "file": "../../../../DSRhoSidebands/results/together_correction.json",
                         "replace": ["thetab", "bkg_thetab"]
                     }
                 ]
@@ -112,10 +113,11 @@
             }
         },
         "Kpipi0": {
+            "addDataBKGCorrection": true,
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../../DSRhoBackground/results/Kpipi0_data_sidebands.json",
+                        "file": "../../../../DSRhoBackground/results/Kpipi0_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {
@@ -125,7 +127,7 @@
                         "file": "../../../../DSRhoYield/results_rbinavg/Kpipi0_data_fractions.json"
                     },
                     {
-                        "file": "../../../../DSRhoSidebands/results/Kpipi0",
+                        "file": "../../../../DSRhoSidebands/results/together_correction.json",
                         "replace": ["thetab", "bkg_thetab"]
                     }
                 ]
@@ -179,10 +181,11 @@
             }
         },
         "K3pi": {
+            "addDataBKGCorrection": true,
             "modelParameters": {
                 "substitute": [
                     {
-                        "file": "../../../../DSRhoBackground/results/K3pi_data_sidebands.json",
+                        "file": "../../../../DSRhoBackground/results/K3pi_mc_bkg.json",
                         "include": ["angular_pdf"]
                     },
                     {
@@ -192,7 +195,7 @@
                         "file": "../../../../DSRhoYield/results_rbinavg/K3pi_data_fractions.json"
                     },
                     {
-                        "file": "../../../../DSRhoSidebands/results/K3pi",
+                        "file": "../../../../DSRhoSidebands/results/together_correction.json",
                         "replace": ["thetab", "bkg_thetab"]
                     }
                 ]

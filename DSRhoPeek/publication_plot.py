@@ -133,6 +133,9 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
         if i == 0:
             same_opt = "colz"
 
+        if "plotOpts" in plot_data:
+            same_opt += plot_data["plotOpts"]
+
         if "files" not in element and "files" not in plot_data:
             raise Exception(
                 "No 'files' array in '{}' plot or element data".format(
@@ -151,6 +154,10 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
         set_optimal_histogram_yrange(histograms)
         legend = create_legend(plot_data, canvas)
         legend.Draw()
+
+    if "normalize" in plot_data and plot_data["normalize"] is True:
+        for histogram in histograms:
+            histogram.Scale(1 / histogram.Integral())
 
     histo = canvas.GetPrimitive("htemp")
     set_histogram_titles(histo, plot_data)

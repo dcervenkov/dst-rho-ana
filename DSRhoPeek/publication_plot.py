@@ -159,6 +159,10 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
         for histogram in histograms:
             histogram.Scale(1 / histogram.Integral())
 
+    if "rebin" in plot_data:
+        for histogram in histograms:
+            histogram.Rebin(plot_data["rebin"])
+
     histo = canvas.GetPrimitive("htemp")
     set_histogram_titles(histo, plot_data)
 

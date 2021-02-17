@@ -38,33 +38,33 @@ def create_legend(plot_data, canvas):
     # Default legend placement is top right
     x_min = 0.75
     x_max = 0.85
-    y_min = 0.9 - 0.04 * len(plot_data['elements'])
+    y_min = 0.9 - 0.04 * len(plot_data["elements"])
     y_max = 0.9
 
-    if 'legendPosition' in plot_data:
-        if plot_data['legendPosition'] == "top left":
+    if "legendPosition" in plot_data:
+        if plot_data["legendPosition"] == "top left":
             x_min = 0.15
             x_max = 0.25
-            y_min = 0.9 - 0.04 * len(plot_data['elements'])
+            y_min = 0.9 - 0.04 * len(plot_data["elements"])
             y_max = 0.9
 
-        elif plot_data['legendPosition'] == "top right":
+        elif plot_data["legendPosition"] == "top right":
             x_min = 0.75
             x_max = 0.85
-            y_min = 0.9 - 0.04 * len(plot_data['elements'])
+            y_min = 0.9 - 0.04 * len(plot_data["elements"])
             y_max = 0.9
 
-        elif plot_data['legendPosition'] == "bottom right":
+        elif plot_data["legendPosition"] == "bottom right":
             x_min = 0.75
             x_max = 0.85
             y_min = 0.12
-            y_max = 0.12 + 0.04 * len(plot_data['elements'])
+            y_max = 0.12 + 0.04 * len(plot_data["elements"])
 
-        elif plot_data['legendPosition'] == "bottom left":
+        elif plot_data["legendPosition"] == "bottom left":
             x_min = 0.15
             x_max = 0.25
             y_min = 0.12
-            y_max = 0.12 + 0.04 * len(plot_data['elements'])
+            y_max = 0.12 + 0.04 * len(plot_data["elements"])
 
     legend = ROOT.TLegend(x_min, y_min, x_max, y_max)
 
@@ -77,12 +77,15 @@ def create_legend(plot_data, canvas):
     num_histos_found = 0
     for i in range(len(canvas.GetListOfPrimitives())):
         # Not all objects in the list are the ones we are looking for
-        if canvas.GetListOfPrimitives().At(i).GetName() == 'htemp':
+        if canvas.GetListOfPrimitives().At(i).GetName() == "htemp":
             # This allows plot elements without labels. Useful when plotting a
             # single element.
-            if 'label' in plot_data['elements'][num_histos_found]:
-                legend.AddEntry(canvas.GetListOfPrimitives().At(i),
-                                plot_data['elements'][num_histos_found]['label'], "L")
+            if "label" in plot_data["elements"][num_histos_found]:
+                legend.AddEntry(
+                    canvas.GetListOfPrimitives().At(i),
+                    plot_data["elements"][num_histos_found]["label"],
+                    "L",
+                )
             num_histos_found += 1
 
     return legend
@@ -90,16 +93,15 @@ def create_legend(plot_data, canvas):
 
 def make_publication_plots(json_file, image_format, plot_dir, plots):
     """Make publication quality plots"""
-    with open(json_file, 'r') as f:
-        plots_data = json.loads(f.read())['plots']
+    with open(json_file, "r") as f:
+        plots_data = json.loads(f.read())["plots"]
 
         setup_plot_style()
 
         if not os.path.exists(plot_dir):
             os.makedirs(plot_dir)
 
-        output_file = ROOT.TFile(os.path.join(
-            plot_dir, "plots.root"), "RECREATE")
+        output_file = ROOT.TFile(os.path.join(plot_dir, "plots.root"), "RECREATE")
 
         for plot_data in plots_data:
             if plots and plot_data["fileName"] not in plots:
@@ -111,9 +113,9 @@ def make_publication_plots(json_file, image_format, plot_dir, plots):
 
 def make_plot(plot_data, image_format, plot_dir, output_file):
     """Make a single plot, save it as a file and into the ROOT output file"""
-    tree = ROOT.TChain(plot_data['treeName'])
-    if 'files' in plot_data:
-        tree = read_in_files(plot_data['files'], plot_data['treeName'])
+    tree = ROOT.TChain(plot_data["treeName"])
+    if "files" in plot_data:
+        tree = read_in_files(plot_data["files"], plot_data["treeName"])
 
     canvas_width = 500
     canvas_height = 500
@@ -121,19 +123,22 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
     canvas.cd()
 
     # 2D plots must have a larger margin to accomodate z legend
-    if ':' in plot_data['formula']:
+    if ":" in plot_data["formula"]:
         canvas.SetRightMargin(0.14)
 
-    for i, element in enumerate(plot_data['elements']):
+    for i, element in enumerate(plot_data["elements"]):
         # First element in a plot must be drawn without "same" or all
         # the plots would get piled together
         same_opt = "same colz"
         if i == 0:
             same_opt = "colz"
 
-        if 'files' not in element and 'files' not in plot_data:
-            raise Exception("No 'files' array in '{}' plot or element data".format(
-                plot_data['fileName']))
+        if "files" not in element and "files" not in plot_data:
+            raise Exception(
+                "No 'files' array in '{}' plot or element data".format(
+                    plot_data["fileName"]
+                )
+            )
 
         draw_element(tree, element, plot_data, same_opt)
 
@@ -141,7 +146,7 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
 
     # 2D plots don't need legends as there is only a single element and it
     # would look bad
-    if ':' not in plot_data['formula']:
+    if ":" not in plot_data["formula"]:
         change_line_colors(plot_data, histograms)
         set_optimal_histogram_yrange(histograms)
         legend = create_legend(plot_data, canvas)
@@ -154,7 +159,7 @@ def make_plot(plot_data, image_format, plot_dir, output_file):
     histo.Write()
     canvas.SetTickx()
     canvas.SetTicky()
-    canvas.SaveAs(os.path.join(plot_dir, plot_data['fileName'] + image_format))
+    canvas.SaveAs(os.path.join(plot_dir, plot_data["fileName"] + image_format))
     canvas.IsA().Destructor(canvas)
 
 
@@ -162,7 +167,7 @@ def change_line_colors(plot_data, histograms):
     """Change line colors in a plot according to plot_data info"""
     # Color changes must be done after Draw() because of ROOT
     for i, histo in enumerate(histograms):
-        histo.SetLineColor(plot_data['elements'][i]['color'])
+        histo.SetLineColor(plot_data["elements"][i]["color"])
 
 
 def set_optimal_histogram_yrange(histograms):
@@ -177,7 +182,7 @@ def get_histograms(canvas):
     histograms = []
     for i in range(canvas.GetListOfPrimitives().GetEntries()):
         # There are other things than histos in the list
-        if canvas.GetListOfPrimitives().At(i).GetName() == 'htemp':
+        if canvas.GetListOfPrimitives().At(i).GetName() == "htemp":
             histograms.append(canvas.GetListOfPrimitives().At(i))
 
     return histograms
@@ -185,67 +190,78 @@ def get_histograms(canvas):
 
 def set_histogram_titles(histo, plot_data):
     """Set various titles in the histogram according to plot_data"""
-    histo.SetName(plot_data['fileName'])
+    histo.SetName(plot_data["fileName"])
     histo.SetTitle("")
-    if 'xAxisTitle' in plot_data:
-        histo.GetXaxis().SetTitle(plot_data['xAxisTitle'])
-    if 'yAxisTitle' in plot_data:
-        histo.GetYaxis().SetTitle(plot_data['yAxisTitle'])
+    if "xAxisTitle" in plot_data:
+        histo.GetXaxis().SetTitle(plot_data["xAxisTitle"])
+    if "yAxisTitle" in plot_data:
+        histo.GetYaxis().SetTitle(plot_data["yAxisTitle"])
 
 
 def draw_element(tree, element, plot_data, same_opt):
     """Draw a single element of a plot, e.g., a histogram"""
     # If this element has it's own 'file' key defined, it
     # superseeds the plot's 'file'
-    if 'files' in element:
-        tree = read_in_files(element['files'], plot_data['treeName'])
+    if "files" in element:
+        tree = read_in_files(element["files"], plot_data["treeName"])
 
     if tree is None:
-        print("WARNING: Skipping element '{}' in plot '{}'".format(
-            element['label'], plot_data['fileName']))
+        print(
+            "WARNING: Skipping element '{}' in plot '{}'".format(
+                element["label"], plot_data["fileName"]
+            )
+        )
         return
 
     cuts = get_cut_string(plot_data, element)
 
-    formula = plot_data['formula']
-    if 'formula' in element:
-        formula = element['formula']
+    formula = plot_data["formula"]
+    if "formula" in element:
+        formula = element["formula"]
 
     num_passing = tree.Draw(formula, cuts, same_opt)
     if num_passing == 0:
-        print("WARNING: In plot '" + plot_data['fileName'] +
-              "' No events are passing the following cut: " + cuts)
+        print(
+            "WARNING: In plot '"
+            + plot_data["fileName"]
+            + "' No events are passing the following cut: "
+            + cuts
+        )
 
 
 def get_cut_string(plot_data, element):
     """Return a string with all the relevant cuts"""
     cuts = []
-    if 'cut' in plot_data:
-        cuts.append(plot_data['cut'])
-    if 'cut' in element:
-        cuts.append(element['cut'])
-    if 'min' in plot_data:
-        assert ':' not in plot_data['formula'], "'min' can't be used in 2D plots; use 'xmin' or 'ymin'"
-        cuts.append(plot_data['formula'] + '>' + str(plot_data['min']))
-    if 'max' in plot_data:
-        assert ':' not in plot_data['formula'], "'max' can't be used in 2D plots; use 'xmax' or 'ymax'"
-        cuts.append(plot_data['formula'] + '<' + str(plot_data['max']))
-    if 'xmin' in plot_data:
-        assert ':' in plot_data['formula'], "'xmin' can't be used in 1D plots; use 'min'"
-        cuts.append(plot_data['formula'].split(':')[1] +
-                    '>' + str(plot_data['xmin']))
-    if 'xmax' in plot_data:
-        assert ':' in plot_data['formula'], "'xmax' can't be used in 1D plots; use 'max'"
-        cuts.append(plot_data['formula'].split(':')[1] +
-                    '<' + str(plot_data['xmax']))
-    if 'ymin' in plot_data:
-        assert ':' in plot_data['formula'], "'ymin' can't be used in 1D plots"
-        cuts.append(plot_data['formula'].split(':')[0] +
-                    '>' + str(plot_data['ymin']))
-    if 'ymax' in plot_data:
-        assert ':' in plot_data['formula'], "'ymax' can't be used in 1D plots"
-        cuts.append(plot_data['formula'].split(':')[0] +
-                    '<' + str(plot_data['ymax']))
+    if "cut" in plot_data:
+        cuts.append(plot_data["cut"])
+    if "cut" in element:
+        cuts.append(element["cut"])
+    if "min" in plot_data:
+        assert (
+            ":" not in plot_data["formula"]
+        ), "'min' can't be used in 2D plots; use 'xmin' or 'ymin'"
+        cuts.append(plot_data["formula"] + ">" + str(plot_data["min"]))
+    if "max" in plot_data:
+        assert (
+            ":" not in plot_data["formula"]
+        ), "'max' can't be used in 2D plots; use 'xmax' or 'ymax'"
+        cuts.append(plot_data["formula"] + "<" + str(plot_data["max"]))
+    if "xmin" in plot_data:
+        assert (
+            ":" in plot_data["formula"]
+        ), "'xmin' can't be used in 1D plots; use 'min'"
+        cuts.append(plot_data["formula"].split(":")[1] + ">" + str(plot_data["xmin"]))
+    if "xmax" in plot_data:
+        assert (
+            ":" in plot_data["formula"]
+        ), "'xmax' can't be used in 1D plots; use 'max'"
+        cuts.append(plot_data["formula"].split(":")[1] + "<" + str(plot_data["xmax"]))
+    if "ymin" in plot_data:
+        assert ":" in plot_data["formula"], "'ymin' can't be used in 1D plots"
+        cuts.append(plot_data["formula"].split(":")[0] + ">" + str(plot_data["ymin"]))
+    if "ymax" in plot_data:
+        assert ":" in plot_data["formula"], "'ymax' can't be used in 1D plots"
+        cuts.append(plot_data["formula"].split(":")[0] + "<" + str(plot_data["ymax"]))
 
     return "&&".join(cuts)
 
@@ -272,17 +288,25 @@ def decode_arguments():
     """Decode CLI arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument("json_file")
-    parser.add_argument("-f", "--format", type=str,
-                        help="image format to generate (.pdf, .png, ..., defaults to '.png')")
-    parser.add_argument("-d", "--dir", type=str,
-                        help="directory for generated plots (defaults to 'plots')")
-    parser.add_argument("-p", "--plots", type=str, nargs='+')
+    parser.add_argument(
+        "-f",
+        "--format",
+        type=str,
+        help="image format to generate (.pdf, .png, ..., defaults to '.png')",
+    )
+    parser.add_argument(
+        "-d",
+        "--dir",
+        type=str,
+        help="directory for generated plots (defaults to 'plots')",
+    )
+    parser.add_argument("-p", "--plots", type=str, nargs="+")
     args = parser.parse_args()
 
     if not args.format:
-        args.format = '.png'
+        args.format = ".png"
     if not args.dir:
-        args.dir = 'plots'
+        args.dir = "plots"
 
     return args.json_file, args.format, args.dir, args.plots
 

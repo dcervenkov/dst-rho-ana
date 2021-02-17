@@ -1738,6 +1738,35 @@
             ]
         },
         {
+            "fileName": "dt_bkg_mc",
+            "formula": "dt",
+            "xAxisTitle": "#Delta t [ps]",
+            "cut": "vrusable==1&&vtusable==1&&((vrchi2/vrndf)<50||vrntrk==1)&&((vtchi2/vtndf)<50||vtntrk==1)&&((sqrt(vrerr6)<0.02&&vrntrk>1)||(sqrt(vrerr6)<0.05&&vrntrk==1))&&((sqrt(vterr6)<0.02&&vtntrk>1)||(sqrt(vterr6)<0.05&&vtntrk==1))&&csbdtg>-0.6&&(de>-0.14&&de<0.068)&&(dt>-10&&dt<10)&&thetab>0.65&&nocand<3",
+            "treeName": "h2000",
+            "min": -10,
+            "max": 10,
+            "normalize": true,
+            "plotOpts": "hist E",
+            "rebin": 2,
+            "elements": [
+                {
+                    "label": "MC bkg.",
+                    "color": 2,
+                    "cut": "evmcflag!=1&&candsel<2",
+                    "files": [
+                        "../data/Kpi/mc/*0.root"
+                    ]
+                },
+                {
+                    "label": "MC sideb.",
+                    "color": 9,
+                    "files": [
+                        "../data/Kpi/sidebands/mc/*0.root"
+                    ]
+                }
+            ]
+        },
+        {
             "fileName": "dt_bkg",
             "formula": "dt",
             "xAxisTitle": "#Delta t [ps]",
@@ -1745,6 +1774,9 @@
             "treeName": "h2000",
             "min": -10,
             "max": 10,
+            "normalize": true,
+            "plotOpts": "hist E",
+            "rebin": 2,
             "elements": [
                 {
                     "label": "MC bkg.",

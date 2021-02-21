@@ -127,8 +127,14 @@ def delete_paths(paths):
 
 def print_results_table(results):
     """Print a summary of the results in a table."""
+    summary_name = "Total Failed & Time"
+    max_len = len(max([result[1] for result in results], key=len))
+    max_len = max(len(summary_name), max_len)
+    line_len = (14 + max_len)
+
     print("\nSummary")
-    print("-" * 34)
+    print("-" * line_len)
+
 
     num_failed = 0
     for result in test_results:
@@ -146,12 +152,10 @@ def print_results_table(results):
             num_failed += 1
 
         # The padding is 13 because python counts the ANSI escape sequences as chars
-        print("{:<20} | {:>13} | {:>4.1f}".format(
-            result[1], result_str, result[2]))
+        print(f"{result[1]:<{max_len}} | {result_str:>13} | {result[2]:>4.1f}")
 
-    print("-" * 34)
-    print("{:<20} | {:>4} | {:>4.1f}".format(
-        "Total Failed & Time", num_failed, sum([x[2] for x in results])))
+    print("-" * line_len)
+    print(f"{summary_name:<{max_len}} | {num_failed:>4} | {sum([x[2] for x in results]):>4.1f}")
 
 
 def load_tests_to_run(config_files, tests_to_run):

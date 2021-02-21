@@ -67,15 +67,23 @@ def run_test(config):
     name = config['name']
     test_config = config['config']
 
-    print("Running " + name)
+    print("Running " + name, end=" ")
+    # Print the partial line now
+    sys.stdout.flush()
     test_config.insert(0, config['command'])
+    output = b""
+    return_code = 0
     start = time.time()
-    return_code = subprocess.call(test_config, cwd="../.")
-    elapsed = (time.time() - start)
+    try:
+        output = subprocess.check_output(test_config, cwd="../.", stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as err:
+        return_code = err.returncode
 
     if 'post_commands' in config:
         for post_command in config['post_commands']:
-            subprocess.call(post_command)
+            output += subprocess.check_output(post_command, stderr=subprocess.STDOUT)
+
+    elapsed = (time.time() - start)
 
     if 'temporary_paths' not in config:
         config['temporary_paths'] = []
@@ -86,6 +94,9 @@ def run_test(config):
     if not os.path.exists(config['comparison_file']):
         print(RED_CODE + "Test failed to create comparison file!" + RESET_CODE)
         delete_paths(config['temporary_paths'])
+        print(output.decode("utf-8"))
+        print("The failed command is:")
+        print(" ".join(test_config))
         return 3, name, elapsed
 
     if os.path.exists("references/" + name + ".reference"):
@@ -112,6 +123,7 @@ def run_test(config):
         print(RED_CODE + "Result does NOT match reference result!" + RESET_CODE)
         os.rename(config['comparison_file'], name + ".result")
         delete_paths(config['temporary_paths'])
+        print(output.decode("utf-8"))
         return 1, name, elapsed
 
 

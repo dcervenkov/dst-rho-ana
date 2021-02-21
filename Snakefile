@@ -665,6 +665,7 @@ rule cpfit_mc_plot:
         "--MC=1",
         "--cpus=1",
         "--log",
+        "--correlation-plot",
         "--components={components}",
         lambda wildcards:
             "--time-independent" if wildcards.type == "ti" else "",
@@ -688,6 +689,7 @@ rule cpfit_data_plot:
         "--MC=0",
         "--cpus=1",
         "--log",
+        "--correlation-plot",
         "--components=all",
         lambda wildcards:
             "--time-independent" if wildcards.type == "ti" else "",

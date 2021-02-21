@@ -17,6 +17,7 @@ struct fitter_options {
     bool empirical;
     bool physics;
     bool nodelta;
+    bool nooutlier;
     bool notail;
     bool wtag;
     bool mixing;

@@ -1,0 +1,111 @@
+{
+    "fitRanges": {
+        "dt": {
+            "min": -10,
+            "max": 10
+        },
+        "thetat": {
+            "min": 0,
+            "max": 3.1415
+        },
+        "thetab": {
+            "min": 0.5,
+            "max": 2.95
+        }
+    },
+    "modelParameters": {
+        "bkg_dt_S_main": 99.2262,
+        "bkg_dt_S_tail": 0.281797,
+        "bkg_dt_f_delta": 0.222605,
+        "bkg_dt_f_tail": 0.00494,
+        "bkg_dt_mu_delta": 0.0191497,
+        "bkg_dt_mu_lifetime": -0.166077,
+        "bkg_dt_tau": 1.56112,
+        "bkg_dt_S_outlier": 0.90,
+        "bkg_dt_f_outlier": 0.10,
+
+        "bkg_cf_dt_S_main": 99.8414,
+        "bkg_cf_dt_S_tail": 0.0,
+        "bkg_cf_dt_f_delta": 0.2324,
+        "bkg_cf_dt_f_tail": 0.0,
+        "bkg_cf_dt_mu_delta": 0.0304,
+        "bkg_cf_dt_mu_lifetime": -0.1626,
+        "bkg_cf_dt_tau": 1.3996,
+        "bkg_cf_dt_S_outlier": 0.90,
+        "bkg_cf_dt_f_outlier": 0.10,
+        "bkg_dcs_dt_S_main": 85.7688,
+        "bkg_dcs_dt_S_tail": 0.0,
+        "bkg_dcs_dt_f_delta": 0.1954,
+        "bkg_dcs_dt_f_tail": 0.0,
+        "bkg_dcs_dt_mu_delta": 0.0178,
+        "bkg_dcs_dt_mu_lifetime": -0.1708,
+        "bkg_dcs_dt_tau": 1.8515,
+        "bkg_dcs_dt_S_outlier": 0.90,
+        "bkg_dcs_dt_f_outlier": 0.10,
+
+        "scf_dt_voigt_mu": -0.294,
+        "scf_dt_voigt_sigma_": 2.233,
+        "scf_dt_voigt_width_": 1.109,
+        "scf_dt_gaus_mu": -0.164,
+        "scf_dt_gaus_sigma_": 1.133,
+        "scf_dt_f": 0.617,
+
+        "bkg_dt_voigt_mu": -0.205,
+        "bkg_dt_voigt_sigma_": 1.986,
+        "bkg_dt_voigt_width_": 1.037,
+        "bkg_dt_gaus_mu": -0.025,
+        "bkg_dt_gaus_sigma_": 0.716,
+        "bkg_dt_f": 0.610,
+
+        "scf_cf_dt_voigt_mu": -0.306,
+        "scf_cf_dt_voigt_sigma_": 1.984,
+        "scf_cf_dt_voigt_width_": 0.877,
+        "scf_cf_dt_gaus_mu": -0.147,
+        "scf_cf_dt_gaus_sigma_": 1.058,
+        "scf_cf_dt_f": 0.626,
+
+        "scf_dcs_dt_voigt_mu": -0.302,
+        "scf_dcs_dt_voigt_sigma_": 2.787,
+        "scf_dcs_dt_voigt_width_": 0.687,
+        "scf_dcs_dt_gaus_mu": -0.193,
+        "scf_dcs_dt_gaus_sigma_": 1.151,
+        "scf_dcs_dt_f": 0.732,
+
+        "bkg_cf_dt_voigt_mu": -0.173,
+        "bkg_cf_dt_voigt_sigma_": 1.720,
+        "bkg_cf_dt_voigt_width_": 0.984,
+        "bkg_cf_dt_gaus_mu": -0.029,
+        "bkg_cf_dt_gaus_sigma_": 0.688,
+        "bkg_cf_dt_f": 0.618,
+
+        "bkg_dcs_dt_voigt_mu": -0.217,
+        "bkg_dcs_dt_voigt_sigma_": 2.258,
+        "bkg_dcs_dt_voigt_width_": 1.156,
+        "bkg_dcs_dt_gaus_mu": -0.019,
+        "bkg_dcs_dt_gaus_sigma_": 0.673,
+        "bkg_dcs_dt_f": 0.661
+    },
+    "channels": {
+        "Kpi": {
+            "modelParameters": {
+                "cr_scf_f": 0.890,
+                "cr_f": 0.764,
+                "scf_f": 0.094
+            }
+        },
+        "Kpipi0": {
+            "modelParameters": {
+                "cr_scf_f": 0.832,
+                "cr_f": 0.653,
+                "scf_f": 0.132
+            }
+        },
+        "K3pi": {
+            "modelParameters": {
+                "cr_scf_f": 0.879,
+                "cr_f": 0.728,
+                "scf_f": 0.101
+            }
+        }
+    }
+}

@@ -114,12 +114,12 @@
     "bkg_dcs_dt_mu_delta": 0.0034,
     "bkg_dcs_dt_mu_lifetime": -0.1649,
     "bkg_dcs_dt_tau": 1.8448,
-    "bkg_dt_S_main": 97.8717,
-    "bkg_dt_S_tail": 0.0,
-    "bkg_dt_f_delta": 0.2729,
-    "bkg_dt_f_tail": 0.0,
-    "bkg_dt_mu_delta": 0.0167,
-    "bkg_dt_mu_lifetime": -0.1739,
-    "bkg_dt_tau": 1.5752
+    "bkg_dt_S_main": 100.782,
+    "bkg_dt_S_outlier": 0.9658,
+    "bkg_dt_f_delta": 0.2758,
+    "bkg_dt_f_outlier": 0.1197,
+    "bkg_dt_mu_delta": 0.0107,
+    "bkg_dt_mu_lifetime": -0.2054,
+    "bkg_dt_tau": 1.6934
   }
 }

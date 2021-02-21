@@ -164,7 +164,7 @@ FitterBKG::FitterBKG() {
 
     physics_dt_model_ =
         new DtBKG("physics_dt_model", "physics_dt_model", dt_, *vrerr6_, *vterr6_, dt_tau_,
-                  dt_f_delta_, dt_mu_delta_, dt_mu_lifetime_, dt_f_tail_, dt_S_main_, dt_S_tail_);
+                  dt_f_delta_, dt_mu_delta_, dt_mu_lifetime_, dt_f_tail_, dt_S_main_, dt_S_tail_, dt_f_outlier_, dt_S_outlier_);
 
     physics_dt_wtag_mixing_cf_model_ =
         new DtBKGWtag("physics_dt_wtag_mixing_cf_model", "physics_dt_wtag_mixing_cf_model", true,
@@ -565,6 +565,16 @@ void FitterBKG::SetNoDeltaPDF() {
     dt_f_delta_.setConstant();
     dt_mu_delta_ = 0;
     dt_mu_delta_.setConstant();
+}
+
+/**
+ * Disable certain parts of the physics-based PDF
+ */
+void FitterBKG::SetNoOutlierPDF() {
+    dt_f_outlier_ = 0;
+    dt_f_outlier_.setConstant();
+    dt_S_outlier_ = 0;
+    dt_S_outlier_.setConstant();
 }
 
 /**

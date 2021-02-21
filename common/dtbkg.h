@@ -28,7 +28,9 @@ public:
             RooAbsReal& _mu_lifetime,
             RooAbsReal& _f_tail,
             RooAbsReal& _S_main,
-            RooAbsReal& _S_tail
+            RooAbsReal& _S_tail,
+            RooAbsReal& _f_outlier,
+            RooAbsReal& _S_outlier
          );
 
     DtBKG(const DtBKG& other, const char* name=0) ;
@@ -50,6 +52,8 @@ protected:
     RooRealProxy f_tail ;
     RooRealProxy S_main ;
     RooRealProxy S_tail ;
+    RooRealProxy f_outlier ;
+    RooRealProxy S_outlier ;
 
     Double_t evaluate() const;
 

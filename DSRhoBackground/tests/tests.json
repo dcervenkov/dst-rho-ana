@@ -14,11 +14,18 @@
         ],
         "physics_fit": [
             "--physics",
+            "--nooutlier",
             "tests/current_result",
             "tests/data/signalMC.root"
         ],
         "angular_physics_fit": [
             "--angular",
+            "--physics",
+            "--nooutlier",
+            "tests/current_result",
+            "tests/data/signalMC.root"
+        ],
+        "physics_outlier_fit": [
             "--physics",
             "tests/current_result",
             "tests/data/signalMC.root"

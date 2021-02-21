@@ -1,0 +1,35 @@
+{
+  "phys_dt_cf_model": {
+    "bkg_cf_dt_S_main": 0.0002,
+    "bkg_cf_dt_S_outlier": 76.5324,
+    "bkg_cf_dt_S_tail": 34.0331,
+    "bkg_cf_dt_f_delta": 0.061,
+    "bkg_cf_dt_f_outlier": 0.3729,
+    "bkg_cf_dt_f_tail": 0.042,
+    "bkg_cf_dt_mu_delta": 0.5336,
+    "bkg_cf_dt_mu_lifetime": -0.6929,
+    "bkg_cf_dt_tau": 1.265
+  },
+  "phys_dt_dcs_model": {
+    "bkg_dcs_dt_S_main": 445.0758,
+    "bkg_dcs_dt_S_outlier": 66.0728,
+    "bkg_dcs_dt_S_tail": 6.3635,
+    "bkg_dcs_dt_f_delta": 0.177,
+    "bkg_dcs_dt_f_outlier": 0.0,
+    "bkg_dcs_dt_f_tail": 0.4411,
+    "bkg_dcs_dt_mu_delta": 0.6831,
+    "bkg_dcs_dt_mu_lifetime": -0.1704,
+    "bkg_dcs_dt_tau": 1.1106
+  },
+  "phys_dt_model": {
+    "bkg_dt_S_main": 0.0,
+    "bkg_dt_S_outlier": 1.9933,
+    "bkg_dt_S_tail": 17.2188,
+    "bkg_dt_f_delta": 0.0456,
+    "bkg_dt_f_outlier": 0.0167,
+    "bkg_dt_f_tail": 0.0458,
+    "bkg_dt_mu_delta": 0.0084,
+    "bkg_dt_mu_lifetime": -0.6174,
+    "bkg_dt_tau": 1.9233
+  }
+}

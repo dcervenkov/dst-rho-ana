@@ -47,6 +47,7 @@ class FitterBKG {
     void SetNumCPUs(const int& numCPUs) { num_CPUs_ = numCPUs; };
     int GetNumCPUs() { return num_CPUs_; };
     void SetNoDeltaPDF();
+    void SetNoOutlierPDF();
     void SetNoTailPDF();
 
     void PlotVar(RooRealVar& var, const RooDataSet* data) const;
@@ -140,6 +141,8 @@ class FitterBKG {
     RooRealVar dt_f_tail_{"dt_f_tail", "f_{t}", 0.1, 0, 1};
     RooRealVar dt_S_main_{"dt_S_main", "S_{m}", 1, 0, 1000};
     RooRealVar dt_S_tail_{"dt_S_tail", "S_{t}", 1, 0, 1000};
+    RooRealVar dt_f_outlier_{"dt_f_outlier", "f_{o}", 0.1, 0, 1};
+    RooRealVar dt_S_outlier_{"dt_S_outlier", "S_{o}", 1, 0, 1000};
 
     RooRealVar dt_dm_{"dt_dm", "#Delta m", 0.507};
     /* RooRealVar dt_dm_{"dt_dm", "#Delta m", 0.507, 0.1, 1}; */

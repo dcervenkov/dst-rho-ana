@@ -2646,6 +2646,8 @@ RooAbsPdf* FitterCPV::CreatePhysicsBkgDtPdf(const std::string prefix) const {
     RooRealVar* f_tail = new RooRealVar(pre + "_f_tail", "f_{t}", 0);
     RooRealVar* S_main = new RooRealVar(pre + "_S_main", "S_{m}", 1);
     RooRealVar* S_tail = new RooRealVar(pre + "_S_tail", "S_{t}", 1);
+    RooRealVar* f_outlier = new RooRealVar(pre + "_f_outlier", "f_{o}", 0);
+    RooRealVar* S_outlier = new RooRealVar(pre + "_S_outlier", "S_{o}", 1);
 
     TString title;
     if (prefix.find("scf") != std::string::npos) {
@@ -2657,7 +2659,7 @@ RooAbsPdf* FitterCPV::CreatePhysicsBkgDtPdf(const std::string prefix) const {
     }
 
     DtBKG* model = new DtBKG(pre + "model", title, *dt_, *vrerr6_, *vterr6_, *tau, *f_delta,
-                             *mu_delta, *mu_lifetime, *f_tail, *S_main, *S_tail);
+                             *mu_delta, *mu_lifetime, *f_tail, *S_main, *S_tail, *f_outlier, *S_outlier);
 
     return model;
 }

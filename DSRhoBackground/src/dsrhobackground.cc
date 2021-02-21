@@ -104,6 +104,9 @@ int main(int argc, char* argv[]) {
             if (options.notail) {
                 fitter.SetNoTailPDF();
             }
+            if (options.nooutlier) {
+                fitter.SetNoOutlierPDF();
+            }
             if (options.nodelta) {
                 fitter.SetNoDeltaPDF();
             }
@@ -178,13 +181,14 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                                     {"randomize", required_argument, 0, 'r'},
                                     {"physics", no_argument, 0, 'y'},
                                     {"nodelta", no_argument, 0, 'd'},
+                                    {"nooutlier", no_argument, 0, 'o'},
                                     {"notail", no_argument, 0, 't'},
                                     {"version", no_argument, 0, 'v'},
                                     {"wtag", no_argument, 0, 'w'},
                                     {"help", no_argument, 0, 'h'},
                                     {nullptr, no_argument, nullptr, 0}};
     int option_index = 0;
-    while ((c = getopt_long(argc, argv, "c:p:r:kmaesydtvwh", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "c:p:r:kmaesydotvwh", long_options, &option_index)) != -1) {
         switch (c) {
             case 0:
                 printf("option %s", long_options[option_index].name);
@@ -220,6 +224,9 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 break;
             case 'd':
                 options.nodelta = true;
+                break;
+            case 'o':
+                options.nooutlier = true;
                 break;
             case 't':
                 options.notail = true;

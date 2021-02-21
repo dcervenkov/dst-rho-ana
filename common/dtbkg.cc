@@ -33,7 +33,9 @@ DtBKG::DtBKG(const char *name, const char *title,
              RooAbsReal& _mu_lifetime,
              RooAbsReal& _f_tail,
              RooAbsReal& _S_main,
-             RooAbsReal& _S_tail
+             RooAbsReal& _S_tail,
+             RooAbsReal& _f_outlier,
+             RooAbsReal& _S_outlier
             ) :
                 RooAbsPdf(name,title),
                 dt("dt","dt",this,_dt),
@@ -45,7 +47,9 @@ DtBKG::DtBKG(const char *name, const char *title,
                 mu_lifetime("mu_lifetime","mu_lifetime",this,_mu_lifetime),
                 f_tail("f_tail","f_tail",this,_f_tail),
                 S_main("S_main","S_main",this,_S_main),
-                S_tail("S_tail","S_tail",this,_S_tail)
+                S_tail("S_tail","S_tail",this,_S_tail),
+                f_outlier("f_outlier","f_outlier",this,_f_outlier),
+                S_outlier("S_outlier","S_outlier",this,_S_outlier)
 {
 }
 
@@ -61,7 +65,9 @@ DtBKG::DtBKG(const DtBKG& other, const char* name) :
             mu_lifetime("mu_lifetime",this,other.mu_lifetime),
             f_tail("f_tail",this,other.f_tail),
             S_main("S_main",this,other.S_main),
-            S_tail("S_tail",this,other.S_tail)
+            S_tail("S_tail",this,other.S_tail),
+            f_outlier("f_outlier",this,other.f_outlier),
+            S_outlier("S_outlier",this,other.S_outlier)
 {
 }
 
@@ -78,6 +84,9 @@ Double_t DtBKG::evaluate() const {
     double norm_delta_conv_tail = 0;
     double lifetime_conv_tail = 0;
     double norm_lifetime_conv_tail = 0;
+
+    double outlier = 0;
+    double norm_outlier = 0;
 
     // *zerr is actually zerr**2 (we are passing *err6)
     double sigma_main = S_main * sqrt(vrerr6 + vterr6);
@@ -99,15 +108,19 @@ Double_t DtBKG::evaluate() const {
     norm_lifetime_conv_tail = Belle::norm_Ef_conv_gauss(
         constants::cuts::dt_low, constants::cuts::dt_high, tau, mu_lifetime, sigma_tail);
 
-    pdf = f_delta * (1 - f_tail) * delta_conv_main +\
+    outlier = Belle::gaussian(dt, mu_delta, S_outlier);
+    norm_outlier =
+        Belle::norm_gaussian(constants::cuts::dt_low, constants::cuts::dt_high, mu_delta, S_outlier);
+
+    pdf = (1 - f_outlier) * (f_delta * (1 - f_tail) * delta_conv_main +\
           (1 - f_delta) * (1 - f_tail) * lifetime_conv_main +\
           f_delta * f_tail * delta_conv_tail +\
-          (1 - f_delta) * f_tail * lifetime_conv_tail;
+          (1 - f_delta) * f_tail * lifetime_conv_tail) + f_outlier * outlier;
 
-    norm = f_delta * (1 - f_tail) * norm_delta_conv_main +\
+    norm = (1 - f_outlier) * (f_delta * (1 - f_tail) * norm_delta_conv_main +\
            (1 - f_delta) * (1 - f_tail) * norm_lifetime_conv_main +\
            f_delta * f_tail * norm_delta_conv_tail +\
-           (1 - f_delta) * f_tail * norm_lifetime_conv_tail;
+           (1 - f_delta) * f_tail * norm_lifetime_conv_tail) + f_outlier * norm_outlier;
 
     return pdf/norm;
 

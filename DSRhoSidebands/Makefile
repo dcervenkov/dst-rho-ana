@@ -6,10 +6,10 @@ DEP_FILES := $(OBJ_FILES:.o=.d)
 
 CXX := g++
 CXX_FLAGS := -std=c++11 -g -Wall -Wno-non-virtual-dtor
-LD_LIBS := -lboost_system -lboost_filesystem
+LD_LIBS := -lboost_system -lboost_filesystem -L$(HOME)/programs/boost_1_74_0/stage/lib
 ROOT_FLAGS := $(shell root-config --cflags)
 ROOT_LIBS := $(shell root-config --libs) -lRooFitCore -lRooFit
-INCS := -Isrc
+INCS := -Isrc -I$(HOME)/programs/boost_1_74_0
 
 .PHONY: all clean tests
 

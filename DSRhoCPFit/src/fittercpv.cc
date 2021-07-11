@@ -13,11 +13,12 @@
 #include <unistd.h>
 
 #include <array>
-#include <boost/filesystem.hpp>
 #include <ctime>
 #include <fstream>
 #include <regex>
 #include <string>
+
+#include <boost/filesystem.hpp>
 
 // Belle includes
 #include "tatami/tatami.h"

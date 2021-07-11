@@ -17,6 +17,7 @@
 #include <cstring>
 #include <ostream>
 #include <sstream>
+#include <string>
 
 // Boost includes
 #include <boost/algorithm/string/predicate.hpp>
@@ -103,15 +104,17 @@ int main(int argc, char* argv[]) {
         tools::LogText(output_file, "latex_pull_table_asym",
                        fitter.CreateLatexPullTableString(true).c_str());
         tools::SaveTextToFile(config.GetOutputFilename(), fitter.CreateResultsString());
-        if (config.json.contains("correlationPlot") && config.json["correlationPlot"].get<bool>() == true) {
-            Log::print(Log::info, "Saving a correlation plot");
-            fitter.PlotCorrelationMatrix();
-        }
     }
 
     if (config.json.contains("plotDir")) {
         tools::SetPlotDir(config.json["plotDir"].get<std::string>().c_str());
         fitter.CreatePlots(config.json);
+
+        if (config.json.contains("correlationPlot") &&
+            config.json["correlationPlot"].get<bool>() == true) {
+            Log::print(Log::info, "Saving a correlation plot");
+            fitter.PlotCorrelationMatrix();
+        }
     }
 
     if (config.ShouldSaveLog()) {
@@ -194,7 +197,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 config["excludeChannels"] = optarg;
                 break;
             case 'm':
-                config["MC"] = bool(atoi(optarg));
+                config["MC"] = static_cast<bool>((atoi(optarg)));
                 break;
             case 'f':
                 config["fixedParameters"] = optarg;

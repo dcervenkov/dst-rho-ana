@@ -265,7 +265,7 @@ void PlotVar(const RooRealVar& var, const RooAbsPdf& pdf, const RooArgSet& norm_
     // over intended variables in this case, otherwise they are only slices.
     plot->updateNormVars(norm_vars);
 
-    pdf.plotOn(plot);
+    pdf.plotOn(plot, RooFit::LineWidth(5));
     plot->Draw();
 
     plot->SetTitle("");
@@ -474,6 +474,7 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
         int i = 0;
         for (auto component : components) {
             std::vector<RooCmdArg> component_options;
+            component_options.push_back(RooFit::LineWidth(4));
             component_options.push_back(RooFit::LineColor(colors[i]));
             component_options.push_back(RooFit::FillColor(colors[i]));
             component_options.push_back(RooFit::FillStyle(styles[i]));
@@ -491,6 +492,7 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
         }
     }
 
+    options.push_back(RooFit::LineWidth(5));
     RooLinkedList roo_options = VecToCmdList(options);
     pdf.plotOn(plot, roo_options);
 

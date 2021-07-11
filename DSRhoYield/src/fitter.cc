@@ -233,7 +233,7 @@ void Fitter::WriteFitResults() {
 void Fitter::Plot() {
     RooPlot* frame_de = de_.frame();
     data_set_->plotOn(frame_de, RooFit::XErrorSize(0.001));
-    active_model_->plotOn(frame_de);
+    active_model_->plotOn(frame_de, RooFit::LineWidth(5));
     const double chi2 = frame_de->chiSquare();
     Log::print(Log::info, "chi^2 = %f\n", chi2);
 
@@ -262,23 +262,23 @@ void Fitter::Plot() {
     switch (active_component_) {
         case Components::signal:
             active_model_->plotOn(frame_de, RooFit::Components(sig_cb_), RooFit::LineColor(29),
-                                  RooFit::LineStyle(kDashed));
+                                  RooFit::LineStyle(kDashed), RooFit::LineWidth(4));
             active_model_->plotOn(frame_de, RooFit::Components(sig_gaus_), RooFit::LineColor(32),
-                                  RooFit::LineStyle(kDashed));
+                                  RooFit::LineStyle(kDashed), RooFit::LineWidth(4));
             break;
 
         case Components::crossfeed:
             active_model_->plotOn(frame_de, RooFit::Components(cross_exponential_),
                                   RooFit::LineColor(40), RooFit::LineStyle(kDashed));
             active_model_->plotOn(frame_de, RooFit::Components(cross_gaus_), RooFit::LineColor(49),
-                                  RooFit::LineStyle(kDashed));
+                                  RooFit::LineStyle(kDashed), RooFit::LineWidth(4));
             break;
 
         case Components::signal_plus_crossfeed:
             active_model_->plotOn(frame_de, RooFit::Components(signal_model_), RooFit::LineColor(4),
-                                  RooFit::LineStyle(kDashed));
+                                  RooFit::LineStyle(kDashed), RooFit::LineWidth(4));
             active_model_->plotOn(frame_de, RooFit::Components(cross_model_), RooFit::LineColor(7),
-                                  RooFit::LineStyle(kDashed));
+                                  RooFit::LineStyle(kDashed), RooFit::LineWidth(4));
             break;
 
         case Components::background:
@@ -287,13 +287,13 @@ void Fitter::Plot() {
         case Components::all:
             active_model_->plotOn(frame_de, RooFit::Name("signal"),
                                   RooFit::Components(signal_model_), RooFit::LineColor(4),
-                                  RooFit::LineStyle(kDashed));
+                                  RooFit::LineStyle(kDashed), RooFit::LineWidth(4));
             active_model_->plotOn(frame_de, RooFit::Name("crossfeed"),
                                   RooFit::Components(cross_model_), RooFit::LineColor(7),
-                                  RooFit::LineStyle(kDashed));
+                                  RooFit::LineStyle(kDashed), RooFit::LineWidth(4));
             active_model_->plotOn(frame_de, RooFit::Name("background"),
                                   RooFit::Components(bkg_model_), RooFit::LineColor(5),
-                                  RooFit::LineStyle(kDashed));
+                                  RooFit::LineStyle(kDashed), RooFit::LineWidth(4));
 
             legend = new TLegend(0.77, 0.70, 0.92, 0.9);
             legend->SetFillColor(kWhite);
@@ -369,12 +369,12 @@ TPaveText* Fitter::CreateStatBox(double chi2) {
     stat_box->SetY1NDC(0.1);
     char line[1000];
     for (int i = 0; i < results.getSize(); i++) {
-        snprintf(line, 1000, "%s = %.3f +- %.3f", results[i].GetTitle(),
+        snprintf(line, sizeof(line), "%s = %.3f +- %.3f", results[i].GetTitle(),
                  static_cast<RooRealVar&>(results[i]).getVal(),
                  static_cast<RooRealVar&>(results[i]).getError());
         stat_box->AddText(line);
     }
-    snprintf(line, 1000, "#chi^{2} = %.2f\n", chi2);
+    snprintf(line, sizeof(line), "#chi^{2} = %.2f\n", chi2);
     stat_box->AddText(line);
     return stat_box;
 }

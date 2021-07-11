@@ -103,8 +103,9 @@ int main(int argc, char* argv[]) {
         tools::LogText(output_file, "latex_pull_table_asym",
                        fitter.CreateLatexPullTableString(true).c_str());
         tools::SaveTextToFile(config.GetOutputFilename(), fitter.CreateResultsString());
-        if (config.json.contains("correlation-plot") && config.json["correlation-plot"].get<bool>() == true) {
-                fitter.PlotCorrelationMatrix();
+        if (config.json.contains("correlationPlot") && config.json["correlationPlot"].get<bool>() == true) {
+            Log::print(Log::info, "Saving a correlation plot");
+            fitter.PlotCorrelationMatrix();
         }
     }
 
@@ -181,7 +182,7 @@ int ProcessCmdLineOptions(const int argc, char* const argv[], char**& optionless
                 config["components"] = optarg;
                 break;
             case 'a':
-                config["correlation-plot"] = true;
+                config["correlationPlot"] = true;
                 break;
             case 'd':
                 config["blind"] = true;

@@ -86,6 +86,7 @@ int main(int argc, char* argv[]) {
 
     std::string output_filename = config.GetOutputFilename();
     output_filename += ".root";
+    tools::CreateDirsIfNecessary(output_filename);
     TFile* output_file = new TFile(output_filename.c_str(), "RECREATE");
     fitter.SetOutputFile(output_file);
 

@@ -503,7 +503,9 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     // lower pad; it also makes more space for a legend and stat box
     plot->GetYaxis()->SetRangeUser(0.001, plot->GetMaximum() * 1.3);
     plot->SetTitle("");
-    plot->GetYaxis()->SetTitle(title.c_str());
+    if (title != "") {
+        plot->GetYaxis()->SetTitle(title.c_str());
+    }
     plot->GetYaxis()->SetTitleOffset(1.60);
     plot->Draw();
 
@@ -532,7 +534,6 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
 
     // Create a new frame to draw the pull distribution and add the distribution to the frame
     RooPlot* plot_pull_ = var.frame(RooFit::Title("Pull Distribution"));
-    plot_pull_->SetTitle("");
     RooHist* hpull = plot->pullHist();
     hpull->SetFillColor(kGray);
     // The only working way to get rid of error bars; HIST draw option doesn't work with RooPlot
@@ -556,6 +557,9 @@ void PlotWithPull(const RooRealVar& var, const RooArgSet& projection_vars, const
     plot_pull_->GetXaxis()->SetLabelOffset(0.01 * pad_var->GetAbsHNDC() / pad_pull->GetAbsHNDC());
     plot_pull_->GetYaxis()->SetRangeUser(-5, 5);
     plot_pull_->GetYaxis()->SetNdivisions(505);
+    plot_pull_->GetYaxis()->SetTitle("Pull");
+    plot_pull_->GetYaxis()->CenterTitle("Pull");
+    plot_pull_->GetYaxis()->SetTitleOffset(1.6);
     plot_pull_->Draw();
 
     canvas.Write();

@@ -322,13 +322,15 @@ void Fitter::Plot() {
 
     pad_de->cd();
     pad_de->SetBottomMargin(0.0);
+    pad_de->SetLeftMargin(0.12);
 
     frame_de->SetTitle("");
     frame_de->GetXaxis()->SetTitle("");
     frame_de->GetXaxis()->SetLabelSize(0);
+    frame_de->GetXaxis()->SetNdivisions(505);
     // This line makes sure the 0 is not drawn as it would overlap with the lower pad
     frame_de->GetYaxis()->SetRangeUser(0.001, frame_de->GetMaximum());
-    frame_de->GetYaxis()->SetTitle("");
+    frame_de->GetYaxis()->SetTitleOffset(1.6);
     frame_de->Draw();
 
     TPaveText* stat_box = CreateStatBox(chi2);
@@ -341,15 +343,20 @@ void Fitter::Plot() {
     pad_pull->cd();
     pad_pull->SetTopMargin(0.0);
     pad_pull->SetBottomMargin(0.35);
+    pad_pull->SetLeftMargin(0.12);
 
     // This is to make sure the tick length (which is normally proportional to the pad size)
     // is the same length in the lower (residual) plot as in the upper one
     frame_pull->GetXaxis()->SetTickLength(0.03 * pad_de->GetAbsHNDC() / pad_pull->GetAbsHNDC());
     frame_pull->GetXaxis()->SetTitle("#DeltaE [GeV]");
     frame_pull->GetXaxis()->SetTitleOffset(4.3);
+    frame_pull->GetXaxis()->SetNdivisions(505);
     frame_pull->SetLabelOffset(0.01 * pad_de->GetAbsHNDC() / pad_pull->GetAbsHNDC());
     frame_pull->GetYaxis()->SetRangeUser(-5, 5);
-    frame_pull->GetYaxis()->SetNdivisions(505);
+    frame_pull->GetYaxis()->SetNdivisions(5);
+    frame_pull->GetYaxis()->SetTitle("Pull");
+    frame_pull->GetYaxis()->SetTitleOffset(1.6);
+    frame_pull->GetYaxis()->CenterTitle();
     frame_pull->Draw();
 
     canvas->Write();
@@ -581,7 +588,7 @@ double Fitter::GetCorrelation(TChain* chain, const RooRealVar& var1, const RooRe
         stat_box->SetTextSize(14);
         stat_box->SetY1NDC(0.1);
         char line[1000];
-        snprintf(line, 1000, "f_{corr} = %.3f", correlation);
+        snprintf(line, sizeof(line), "f_{corr} = %.3f", correlation);
         stat_box->AddText(line);
 
         correlation_histo->SetTitle("");

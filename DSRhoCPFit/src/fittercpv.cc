@@ -10,13 +10,13 @@
 #include "fittercpv.h"
 
 // Standard includes
-#include <unistd.h>
-
 #include <array>
 #include <ctime>
 #include <fstream>
+#include <iomanip>
 #include <regex>
 #include <string>
+#include <unistd.h>
 
 #include <boost/filesystem.hpp>
 

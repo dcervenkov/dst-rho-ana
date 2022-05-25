@@ -12,6 +12,7 @@
 // Standard includes
 #include <fstream>
 #include <getopt.h>
+#include <iomanip>
 #include <stdio.h>
 #include <ostream>
 #include <vector>

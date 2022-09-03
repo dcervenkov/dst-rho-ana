@@ -36,6 +36,7 @@
 #include "RooExponential.h"
 #include "RooExtendPdf.h"
 #include "RooFitResult.h"
+#include "RooMultiVarGaussian.h"
 #include "RooGenericPdf.h"
 #include "RooHist.h"
 #include "RooHistPdf.h"
@@ -799,9 +800,28 @@ void FitterCPV::Fit(const nlohmann::json config) {
     tau_->setConstant(true);
     dm_->setConstant(true);
 
-    result_ = pdf_->fitTo(*data_, RooFit::ConditionalObservables(conditional_vars_argset_),
-                          RooFit::Hesse(true), RooFit::Minos(true), RooFit::Minimizer("Minuit2"),
-                          RooFit::Save(true), RooFit::NumCPU(config["numCPUs"]));
+    std::vector<RooCmdArg> options = {RooFit::ConditionalObservables(conditional_vars_argset_),
+                                      RooFit::Hesse(true),
+                                      RooFit::Minos(true),
+                                      RooFit::Minimizer("Minuit2"),
+                                      RooFit::Save(true),
+                                      RooFit::NumCPU(config["numCPUs"])};
+
+    if (config.contains("constraints")) {
+        Log::LogLine(Log::info) << "Using constraints from " << config["constraints"];
+        TFile* constraints_file = TFile::Open(config["constraints"].get<std::string>().c_str());
+        auto constraint_result =
+            static_cast<RooFitResult*>(constraints_file->Get("fitresult_pdf_combined_dataset"));
+        RooArgList constrained_params = constraint_result->floatParsFinal();
+            Log::LogLine(Log::info) << "Constraining " << constrained_params;
+        RooMultiVarGaussian* constraints = new RooMultiVarGaussian(
+            "constraints", "constraints", constrained_params, *constraint_result);
+        options.push_back(RooFit::ExternalConstraints(*constraints));
+    }
+
+    RooLinkedList roo_options = tools::VecToCmdList(options);
+
+    result_ = pdf_->fitTo(*data_, roo_options);
 
     if (result_) {
         result_->Print();

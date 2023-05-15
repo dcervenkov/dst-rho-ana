@@ -55,7 +55,7 @@
 #include "TMVA/Tools.h"
 #include "TMVA/TMVAGui.h"
 
-int myTMVAClassification_Kpi( TString myMethodList = "" )
+int myTMVAClassification_Kpi_allData( TString myMethodList = "" )
 {
    // The explicit loading of the shared libTMVA is done in TMVAlogon.C, defined in .rootrc
    // if you use your private .rootrc, or run from a different directory, please copy the
@@ -222,13 +222,13 @@ int myTMVAClassification_Kpi( TString myMethodList = "" )
    /* TString fnameb2 = "./data/D0Kpi/DSRhoSkim_svd2_on_resonance_evtgen-uds_sall.root"; */
 
    TChain* signal_chain = new TChain("h2000");
-   signal_chain->Add("../data/Kpi/signal_mc/*_svd2.root");
+   signal_chain->Add("../../dst-rho-ana.orig/data/Kpi/signal_mc/*_svd2.root");
 
    TChain* background_chain = new TChain("h2000");
-   background_chain->Add("../data/Kpi/mc_wo_signal/DSRhoSkim_svd1_on_resonance_evtgen-charm_s*.root");
-   background_chain->Add("../data/Kpi/mc_wo_signal/DSRhoSkim_svd2_on_resonance_evtgen-charm_s*.root");
-   background_chain->Add("../data/Kpi/mc_wo_signal/DSRhoSkim_svd1_on_resonance_evtgen-uds_s*.root");
-   background_chain->Add("../data/Kpi/mc_wo_signal/DSRhoSkim_svd2_on_resonance_evtgen-uds_s*.root");
+   background_chain->Add("../../dst-rho-ana.orig/data/Kpi/mc_wo_signal/DSRhoSkim_svd1_on_resonance_evtgen-charm_s*.root");
+   background_chain->Add("../../dst-rho-ana.orig/data/Kpi/mc_wo_signal/DSRhoSkim_svd2_on_resonance_evtgen-charm_s*.root");
+   background_chain->Add("../../dst-rho-ana.orig/data/Kpi/mc_wo_signal/DSRhoSkim_svd1_on_resonance_evtgen-uds_s*.root");
+   background_chain->Add("../../dst-rho-ana.orig/data/Kpi/mc_wo_signal/DSRhoSkim_svd2_on_resonance_evtgen-uds_s*.root");
 
    /* TFile *inputs1 = TFile::Open( fnames1 ); */
    /* TFile *inputb1 = TFile::Open( fnameb1 ); */
@@ -255,6 +255,7 @@ int myTMVAClassification_Kpi( TString myMethodList = "" )
    dataloader->AddSignalTree    ( signal_chain,     signalWeight     );
    dataloader->AddBackgroundTree( background_chain, backgroundWeight );
 
+   return 0;
 
    // To give different trees for training and testing, do as follows:
    //    factory->AddSignalTree( signalTrainingTree, signalTrainWeight, "Training" );
@@ -541,5 +542,5 @@ int main( int argc, char** argv )
       if (!methodList.IsNull()) methodList += TString(",");
       methodList += regMethod;
    }
-   return myTMVAClassification_Kpi(methodList);
+   return myTMVAClassification_Kpi_allData(methodList);
 }
